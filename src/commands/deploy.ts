@@ -1,9 +1,10 @@
 import { defineCommand } from 'citty'
 import consola from 'consola'
 import axios from 'axios'
-import userConfig from '../utils/user-config'
+import userConfig from '../utils/userConfig'
 import { createReadStream } from 'node:fs'
 import FormData from 'form-data'
+import zip from '../utils/zip'
 
 export default defineCommand({
   meta: {
@@ -51,8 +52,7 @@ export default defineCommand({
       }
     }
 
-    const isZip = path.endsWith('.zip')
-    if (!isZip) {
+    if (!zip.isZipped(path)) {
       consola.error('Only .zip files are supported')
       return
     }

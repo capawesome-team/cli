@@ -1,7 +1,7 @@
 import { defineCommand } from 'citty'
 import consola from 'consola'
 import axios from 'axios'
-import userConfig from '../utils/user-config'
+import userConfig from '../utils/userConfig'
 
 export default defineCommand({
   meta: {
