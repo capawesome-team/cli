@@ -5,6 +5,7 @@ import userConfig from '../utils/userConfig'
 import { createReadStream } from 'node:fs'
 import FormData from 'form-data'
 import zip from '../utils/zip'
+import { isRunningInGithubActions } from '../utils/ci'
 
 export default defineCommand({
   meta: {
@@ -27,10 +28,19 @@ export default defineCommand({
     if (!path) {
       path = await consola.prompt('Path to deploy:', { type: 'text' })
     }
-    const token = userConfig.read().token
-    if (!token) {
-      consola.error('You need to be logged in to deploy')
-      return
+    let token
+    if (isRunningInGithubActions()) {
+      if (!process.env.CAPAWESOME_TOKEN) {
+        consola.error('You need to provide CAPAWESOME_TOKEN in your environment')
+        return
+      }
+      token = process.env.CAPAWESOME_TOKEN
+    } else {
+      token = userConfig.read().token
+      if (!token) {
+        consola.error('You need to be logged in to deploy')
+        return
+      }
     }
     if (!app) {
       try {
@@ -42,10 +52,11 @@ export default defineCommand({
             Authorization: `Bearer ${token}`
           }
         })
-        app = (await consola.prompt('Which app do you want to deploy:', {
+        // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+        app = await consola.prompt('Which app do you want to deploy:', {
           type: 'select',
           options: appsRes.data.map((app) => ({ label: app.name, value: app.id }))
-        })).value
+        })
       } catch (e) {
         consola.error('Failed to fetch apps')
         return
