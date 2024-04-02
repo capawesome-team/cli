@@ -27,14 +27,14 @@ export default defineCommand({
     if (!password) {
       password = await consola.prompt('Password:', { type: 'text' })
     }
-    const sessionRes = await axios.post<{ sessionId: string }>(`https://cloud-api-worker.shiny-block-d96d.workers.dev/v1/sessions`, {
+    const sessionRes = await axios.post<{ id: string }>(`https://cloud-api-worker.shiny-block-d96d.workers.dev/v1/sessions`, {
       email: username,
       password: password
     })
     consola.start('Logging in...')
     const tokenRes = await axios.post<{ token: string }>(`https://cloud-api-worker.shiny-block-d96d.workers.dev/v1/tokens`,
       { name: 'Capawesome CLI' },
-      { headers: { Authorization: `Bearer ${sessionRes.data.sessionId}` } }
+      { headers: { Authorization: `Bearer ${sessionRes.data.id}` } }
     )
     userConfig.write({
       username,
