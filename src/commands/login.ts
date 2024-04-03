@@ -7,40 +7,24 @@ import { API_URL } from '../config'
 export default defineCommand({
   meta: {
     name: 'login',
-    description: 'Login to Capawesome',
-  },
-  args: {
-    username: {
-      type: 'string',
-      description: 'Your username'
-    },
-    password: {
-      type: 'string',
-      description: 'Your password'
-    }
+    description: 'Sign in to the Capawesome Cloud Console.',
   },
   run: async (ctx) => {
-    let username = ctx.args.username
-    let password = ctx.args.password
-    if (!username) {
-      username = await consola.prompt('Username:', { type: 'text' })
-    }
-    if (!password) {
-      password = await consola.prompt('Password:', { type: 'text' })
-    }
-    const sessionRes = await axios.post<{ id: string }>(`${API_URL}/sessions`, {
-      email: username,
+    const email = await consola.prompt('Email:', { type: 'text' })
+    const password = await consola.prompt('Password:', { type: 'text' })
+    const sessionResponse = await axios.post<{ id: string }>(`${API_URL}/sessions`, {
+      email: email,
       password: password
     })
     consola.start('Logging in...')
-    const tokenRes = await axios.post<{ token: string }>(`${API_URL}/tokens`,
+    const tokenResponse = await axios.post<{ token: string }>(`${API_URL}/tokens`,
       { name: 'Capawesome CLI' },
-      { headers: { Authorization: `Bearer ${sessionRes.data.id}` } }
+      { headers: { Authorization: `Bearer ${sessionResponse.data.id}` } }
     )
     userConfig.write({
-      username,
-      token: tokenRes.data.token
+      username: email,
+      token: tokenResponse.data.token
     })
-    consola.success(`Successfully logged in as ${username}!`)
+    consola.success(`Successfully logged in as ${email}!`)
   },
 })
