@@ -4,6 +4,7 @@ import axios from 'axios'
 import userConfig from '../utils/userConfig'
 import { API_URL } from '../config'
 import { prompt } from '../utils/prompt'
+import { isRunningInCi } from '../utils/ci'
 
 export default defineCommand({
   meta: {
@@ -11,6 +12,10 @@ export default defineCommand({
     description: 'Sign in to the Capawesome Cloud Console.',
   },
   run: async (ctx) => {
+    if (!isRunningInCi()) {
+      consola.error('Sign in is not supported in CI environments. Please use the CAPAWESOME_TOKEN environment variable.')
+      return
+    }
     const email = await prompt('Enter your email:', { type: 'text' })
     console.log(email);
     const password = await prompt('Enter your password:', { type: 'text' })
@@ -34,6 +39,6 @@ export default defineCommand({
       username: email,
       token: tokenResponse.data.token
     })
-    consola.success(`Successfully signed in!`)
+    consola.success(`Successfully signed in.`)
   },
 })

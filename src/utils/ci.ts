@@ -1,3 +1,3 @@
-export const isRunningInGithubActions = (): boolean => {
-  return process.env.GITHUB_ACTIONS === 'true'
+export const isRunningInCi = (): boolean => {
+  return process.env.CI === 'true'
 }
