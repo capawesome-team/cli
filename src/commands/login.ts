@@ -2,6 +2,7 @@ import { defineCommand } from 'citty'
 import consola from 'consola'
 import axios from 'axios'
 import userConfig from '../utils/userConfig'
+import { API_URL } from '../config'
 
 export default defineCommand({
   meta: {
@@ -27,12 +28,12 @@ export default defineCommand({
     if (!password) {
       password = await consola.prompt('Password:', { type: 'text' })
     }
-    const sessionRes = await axios.post<{ id: string }>(`https://cloud-api-worker.shiny-block-d96d.workers.dev/v1/sessions`, {
+    const sessionRes = await axios.post<{ id: string }>(`${API_URL}/sessions`, {
       email: username,
       password: password
     })
     consola.start('Logging in...')
-    const tokenRes = await axios.post<{ token: string }>(`https://cloud-api-worker.shiny-block-d96d.workers.dev/v1/tokens`,
+    const tokenRes = await axios.post<{ token: string }>(`${API_URL}/tokens`,
       { name: 'Capawesome CLI' },
       { headers: { Authorization: `Bearer ${sessionRes.data.id}` } }
     )

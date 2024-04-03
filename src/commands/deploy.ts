@@ -6,6 +6,7 @@ import { createReadStream } from 'node:fs'
 import FormData from 'form-data'
 import zip from '../utils/zip'
 import { isRunningInGithubActions } from '../utils/ci'
+import { API_URL } from '../config'
 
 export default defineCommand({
   meta: {
@@ -47,7 +48,7 @@ export default defineCommand({
         const appsRes = await axios.get<{
           id: string,
           name: string
-        }[]>('https://cloud-api-worker.shiny-block-d96d.workers.dev/v1/apps', {
+        }[]>(`${API_URL}/apps`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -70,7 +71,7 @@ export default defineCommand({
     consola.start('Deploying...')
     const formData = new FormData()
     formData.append('file', createReadStream(path))
-    await axios.post(`https://cloud-api-worker.shiny-block-d96d.workers.dev/v1/apps/${app}/bundles`, formData, {
+    await axios.post(`${API_URL}/apps/${app}/bundles`, formData, {
       headers: {
         Authorization: `Bearer ${token}`,
         ...formData.getHeaders(),
