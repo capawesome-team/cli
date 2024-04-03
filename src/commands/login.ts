@@ -3,6 +3,7 @@ import consola from 'consola'
 import axios from 'axios'
 import userConfig from '../utils/userConfig'
 import { API_URL } from '../config'
+import { prompt } from '../utils/prompt'
 
 export default defineCommand({
   meta: {
@@ -10,8 +11,9 @@ export default defineCommand({
     description: 'Sign in to the Capawesome Cloud Console.',
   },
   run: async (ctx) => {
-    const email = await consola.prompt('Email:', { type: 'text' })
-    const password = await consola.prompt('Password:', { type: 'text' })
+    const email = await prompt('Enter your email:', { type: 'text' })
+    console.log(email);
+    const password = await prompt('Enter your password:', { type: 'text' })
     consola.start('Logging in...')
     let sessionId: string;
     try {
