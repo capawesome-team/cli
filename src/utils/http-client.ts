@@ -11,12 +11,12 @@ interface SuccessHttpResponse<T> {
 interface FailureHttpResponse {
   success: false
   status: number
-  data: null
+  error: any
 }
 
 type HttpResponse<T> = SuccessHttpResponse<T> | FailureHttpResponse
 
-interface HttpClient {
+export interface HttpClient {
   get<T>(url: string, headers?: Record<string, string>): Promise<HttpResponse<T>>
 
   post<T>(url: string, data?: any, headers?: Record<string, string>): Promise<HttpResponse<T>>
@@ -32,13 +32,10 @@ class HttpClientImpl implements HttpClient {
         data: res.data
       }
     } catch (e: any) {
-      if (e.response.status === 401) {
-        consola.error('You are not logged in. Please login first.')
-      }
       return {
         success: false,
         status: e.response.status,
-        data: null
+        error: e
       }
     }
   }
@@ -52,13 +49,10 @@ class HttpClientImpl implements HttpClient {
         data: res.data
       }
     } catch (e: any) {
-      if (e.response.status === 401) {
-        consola.error('You are not logged in. Please login first.')
-      }
       return {
         success: false,
         status: e.response.status,
-        data: null
+        error: e
       }
     }
   }

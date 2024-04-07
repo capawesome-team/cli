@@ -5,7 +5,7 @@ export interface IUserConfig {
   token?: string
 }
 
-interface UserConfig {
+export interface UserConfig {
   read(): IUserConfig
 
   write(config: IUserConfig): void
