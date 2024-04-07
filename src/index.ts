@@ -12,6 +12,7 @@ const main = defineCommand({
     login: import('./commands/login').then((mod) => mod.default),
     logout: import('./commands/logout').then((mod) => mod.default),
     'apps:bundles:create': import('./commands/deploy').then((mod) => mod.default),
+    'apps:list': import('./commands/apps/list').then((mod) => mod.default),
     'apps:create': import('./commands/apps/create').then((mod) => mod.default),
   }
 })
