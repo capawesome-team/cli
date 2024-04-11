@@ -5,7 +5,7 @@ import userConfig from '../utils/userConfig'
 export default defineCommand({
   meta: {
     name: 'logout',
-    description: 'Logout from Capawesome',
+    description: 'Sign out from the Capawesome Cloud Console.',
   },
   args: {},
   run: async () => {
@@ -13,6 +13,6 @@ export default defineCommand({
     delete config.username
     delete config.token
     userConfig.write(config)
-    consola.success('Successfully logged out!')
+    consola.success('Successfully signed out.')
   },
 })

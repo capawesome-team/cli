@@ -68,9 +68,9 @@ export default defineCommand({
       }
       try {
         await appsService.create({appId: appId, formData: formData})
-      } catch (error: any) {
-        if (error instanceof AxiosError && error.response?.data.message) {
-          consola.error(error.response.data.message)
+      } catch (error) {
+        if (error instanceof AxiosError && error.response?.status === 401) {
+          consola.error('Your token is no longer valid. Please sign in again.')
         } else {
           consola.error('Failed to create bundle.')
         }

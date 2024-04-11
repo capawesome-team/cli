@@ -1,1 +1,1 @@
-export const API_URL = 'https://cloud-api-worker.shiny-block-d96d.workers.dev/v1'
+export const API_URL = 'http://api.cloud.capawesome.local/v1'
