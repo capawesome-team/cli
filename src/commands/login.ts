@@ -3,7 +3,7 @@ import consola from "consola";
 import axios from "axios";
 import userConfig from "../utils/userConfig";
 import { API_URL } from "../config";
-import { prompt } from "../utils/prompt";
+import { passwordPrompt, prompt } from "../utils/prompt";
 import { isRunningInCi } from "../utils/ci";
 
 export default defineCommand({
@@ -19,7 +19,7 @@ export default defineCommand({
       return;
     }
     const email = await prompt("Enter your email:", { type: "text" });
-    const password = await prompt("Enter your password:", { type: "text" });
+    const password = await passwordPrompt("Enter your password:");
     consola.start("Logging in...");
     let sessionId: string;
     try {
