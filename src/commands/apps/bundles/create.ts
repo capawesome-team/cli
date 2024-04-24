@@ -10,14 +10,13 @@ import authorizationService from "../../../service/authorization-service";
 
 export default defineCommand({
   meta: {
-    name: "deploy",
     description: "Upload a new app bundle.",
   },
   args: {
     path: {
       type: "string",
       description:
-        "Path to the app bundle to deploy. Must be a folder or .zip file.",
+        "Path to the bundle to upload. Must be a folder or zip file",
     },
     appId: {
       type: "string",
@@ -25,7 +24,7 @@ export default defineCommand({
     },
     channel: {
       type: "string",
-      description: "Channel to deploy to.",
+      description: "Channel to associate the bundle with.",
     },
   },
   run: async (ctx) => {
