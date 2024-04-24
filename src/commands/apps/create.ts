@@ -34,5 +34,6 @@ export default defineCommand({
       return;
     }
     consola.success("App created successfully.");
+    consola.info(`App ID: ${res.data.id}`);
   },
 });
