@@ -40,22 +40,22 @@
     }
   ],
   "dependencies": {
-    "@clack/prompts": "^0.7.0",
-    "archiver": "^7.0.1",
-    "axios": "^1.6.8",
-    "citty": "^0.1.6",
-    "consola": "^3.2.3",
-    "form-data": "^4.0.0",
-    "rc9": "^2.1.1"
+    "@clack/prompts": "0.7.0",
+    "archiver": "7.0.1",
+    "axios": "1.6.8",
+    "citty": "0.1.6",
+    "consola": "3.2.3",
+    "form-data": "4.0.0",
+    "rc9": "2.1.1"
   },
   "devDependencies": {
-    "@ionic/prettier-config": "^4.0.0",
-    "@types/archiver": "^6.0.2",
-    "@types/node": "^20.11.30",
-    "commit-and-tag-version": "^12.4.0",
-    "prettier": "^3.2.5",
-    "rimraf": "^5.0.5",
-    "typescript": "^5.4.3"
+    "@ionic/prettier-config": "4.0.0",
+    "@types/archiver": "6.0.2",
+    "@types/node": "20.11.30",
+    "commit-and-tag-version": "12.4.0",
+    "prettier": "3.2.5",
+    "rimraf": "5.0.5",
+    "typescript": "5.4.3"
   },
   "prettier": "@ionic/prettier-config"
 }
