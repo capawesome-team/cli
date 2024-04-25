@@ -11,9 +11,31 @@
   "bin": {
     "capawesome": "./dist/index.js"
   },
-  "keywords": [],
+  "keywords": [
+    "capawesome",
+    "cli",
+    "capacitor"
+  ],
   "author": "Robin Genz <mail@robingenz.dev>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/capawesome-team/cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/capawesome-team/cli/issues"
+  },
+  "homepage": "https://capawesome.io/",
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/capawesome-team/"
+    },
+    {
+      "type": "opencollective",
+      "url": "https://opencollective.com/capawesome"
+    }
+  ],
   "dependencies": {
     "@clack/prompts": "^0.7.0",
     "archiver": "^7.0.1",
