@@ -1,7 +1,7 @@
 {
   "name": "@capawesome/cli",
   "version": "0.0.1",
-  "description": "",
+  "description": "The Capawesome Cloud Command Line Interface (CLI) to manage Live Updates and more.",
   "scripts": {
     "build": "rimraf ./dist && tsc",
     "start": "node ./dist/index.js"
@@ -10,8 +10,8 @@
     "capawesome": "./dist/index.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Robin Genz <mail@robingenz.dev>",
+  "license": "MIT",
   "dependencies": {
     "@clack/prompts": "^0.7.0",
     "archiver": "^7.0.1",
