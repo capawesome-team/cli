@@ -16,7 +16,7 @@ export default defineCommand({
   args: {
     path: {
       type: 'string',
-      description: 'Path to the bundle to upload. Must be a folder or zip file',
+      description: 'Path to the bundle to upload. Must be a folder (e.g. `www` or `dist`) or a zip file.',
     },
     appId: {
       type: 'string',
