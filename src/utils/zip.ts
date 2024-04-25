@@ -2,7 +2,6 @@ import archiver from 'archiver'
 
 interface Zip {
   zipFolder(sourceFolder: string): Promise<Buffer>
-
   isZipped(path: string): boolean
 }
 

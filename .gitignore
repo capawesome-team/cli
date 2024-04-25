@@ -1,4 +1,4 @@
-# Folders
+.DS_Store
 dist
 node_modules
 .idea
@@ -6,4 +6,5 @@ node_modules
 test-folder
 test-folder.zip
 
+www
 www.zip

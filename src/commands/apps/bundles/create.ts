@@ -64,16 +64,20 @@ export default defineCommand({
       }
     }
 
-    if (!zip.isZipped(path)) {
-      consola.error("Only .zip files are supported"); // TODO
-      return;
+    // Create form data
+    const formData = new FormData();
+    if (zip.isZipped(path)) {
+      formData.append("file", createReadStream(path));
+    } else {
+      consola.start("Zipping folder...");
+      const zipBuffer = await zip.zipFolder(path);
+      formData.append("file", zipBuffer, { filename: "bundle.zip" });
     }
     consola.start("Uploading...");
-    const formData = new FormData();
-    formData.append("file", createReadStream(path));
     if (channelName) {
       formData.append("channelName", channelName);
     }
+    // Upload the bundle
     try {
       await appBundlesService.create({ appId: appId, formData: formData });
       consola.success("Bundle successfully created.");
