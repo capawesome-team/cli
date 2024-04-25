@@ -1,6 +1,6 @@
-import { AppDto, CreateAppDto, DeleteAppDto } from "../types/app";
-import httpClient, { HttpClient } from "../utils/http-client";
-import authorizationService from "./authorization-service";
+import { AppDto, CreateAppDto, DeleteAppDto } from '../types/app';
+import httpClient, { HttpClient } from '../utils/http-client';
+import authorizationService from './authorization-service';
 
 export interface AppsService {
   create(dto: CreateAppDto): Promise<AppDto>;
@@ -39,7 +39,7 @@ class AppsServiceImpl implements AppsService {
   }
 
   async findAll(): Promise<AppDto[]> {
-    const response = await this.httpClient.get<AppDto[]>("/apps", {
+    const response = await this.httpClient.get<AppDto[]>('/apps', {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },

@@ -1,28 +1,28 @@
-import { readUser, writeUser } from 'rc9'
+import { readUser, writeUser } from 'rc9';
 
 export interface IUserConfig {
-  username?: string
-  token?: string
+  username?: string;
+  token?: string;
 }
 
 export interface UserConfig {
-  read(): IUserConfig
+  read(): IUserConfig;
 
-  write(config: IUserConfig): void
+  write(config: IUserConfig): void;
 }
 
 class UserConfigImpl implements UserConfig {
-  private file = '.capawesome'
+  private file = '.capawesome';
 
   read(): IUserConfig {
-    return readUser<IUserConfig>({ name: this.file })
+    return readUser<IUserConfig>({ name: this.file });
   }
 
   write(config: IUserConfig): void {
-    writeUser<IUserConfig>(config, { name: this.file })
+    writeUser<IUserConfig>(config, { name: this.file });
   }
 }
 
-const userConfig: UserConfig = new UserConfigImpl()
+const userConfig: UserConfig = new UserConfigImpl();
 
-export default userConfig
+export default userConfig;

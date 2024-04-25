@@ -1,80 +1,79 @@
-import axios, { AxiosRequestConfig } from 'axios'
-import { API_URL } from '../config'
+import axios, { AxiosRequestConfig } from 'axios';
+import { API_URL } from '../config';
 
 interface SuccessHttpResponse<T> {
-  success: true
-  status: number
-  data: T
+  success: true;
+  status: number;
+  data: T;
 }
 
 interface FailureHttpResponse {
-  success: false
-  status: number
-  error: any
+  success: false;
+  status: number;
+  error: any;
 }
 
-type HttpResponse<T> = SuccessHttpResponse<T> | FailureHttpResponse
+type HttpResponse<T> = SuccessHttpResponse<T> | FailureHttpResponse;
 
 export interface HttpClient {
-  delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>
-  get<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>
-  post<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>
+  delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>;
+  get<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>;
+  post<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>;
 }
 
 class HttpClientImpl implements HttpClient {
   async delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>> {
     try {
-      const res = await axios.delete<T>(API_URL + url, config)
+      const res = await axios.delete<T>(API_URL + url, config);
       return {
         success: true,
         status: res.status,
-        data: res.data
-      }
+        data: res.data,
+      };
     } catch (e: any) {
       return {
         success: false,
         status: e.response.status,
-        error: e
-      }
-    }  
+        error: e,
+      };
+    }
   }
 
   async get<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>> {
     try {
-      const res = await axios.get<T>(API_URL + url, config)
+      const res = await axios.get<T>(API_URL + url, config);
       return {
         success: true,
         status: res.status,
-        data: res.data
-      }
+        data: res.data,
+      };
     } catch (e: any) {
       return {
         success: false,
         status: e.response.status,
-        error: e
-      }
+        error: e,
+      };
     }
   }
 
   async post<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>> {
     try {
-      const res = await axios.post<T>(API_URL + url, data, config)
+      const res = await axios.post<T>(API_URL + url, data, config);
       return {
         success: true,
         status: res.status,
-        data: res.data
-      }
+        data: res.data,
+      };
     } catch (e: any) {
       return {
         success: false,
         status: e.response.status,
-        error: e
-      }
+        error: e,
+      };
     }
   }
-
 }
 
-let httpClient: HttpClient = new HttpClientImpl()
+let httpClient: HttpClient = new HttpClientImpl();
 
-export default httpClient
+export default httpClient;

@@ -1,13 +1,12 @@
 export interface CreateAppDto {
-  name: string
+  name: string;
 }
 
 export interface DeleteAppDto {
-  id: string
+  id: string;
 }
 
 export interface AppDto {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
-

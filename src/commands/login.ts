@@ -1,43 +1,40 @@
-import { defineCommand } from "citty";
-import consola from "consola";
-import axios from "axios";
-import userConfig from "../utils/userConfig";
-import { API_URL } from "../config";
-import { passwordPrompt, prompt } from "../utils/prompt";
-import { isRunningInCi } from "../utils/ci";
+import { defineCommand } from 'citty';
+import consola from 'consola';
+import axios from 'axios';
+import userConfig from '../utils/userConfig';
+import { API_URL } from '../config';
+import { passwordPrompt, prompt } from '../utils/prompt';
+import { isRunningInCi } from '../utils/ci';
 
 export default defineCommand({
   meta: {
-    name: "login",
-    description: "Sign in to the Capawesome Cloud Console.",
+    name: 'login',
+    description: 'Sign in to the Capawesome Cloud Console.',
   },
   run: async (ctx) => {
     if (isRunningInCi()) {
       consola.error(
-        "Sign in is not supported in CI environments. Please use the CAPAWESOME_TOKEN environment variable.",
+        'Sign in is not supported in CI environments. Please use the CAPAWESOME_TOKEN environment variable.',
       );
       return;
     }
-    const email = await prompt("Enter your email:", { type: "text" });
-    const password = await passwordPrompt("Enter your password:");
-    consola.start("Logging in...");
+    const email = await prompt('Enter your email:', { type: 'text' });
+    const password = await passwordPrompt('Enter your password:');
+    consola.start('Logging in...');
     let sessionId: string;
     try {
-      const sessionResponse = await axios.post<{ id: string }>(
-        `${API_URL}/sessions`,
-        {
-          email: email,
-          password: password,
-        },
-      );
+      const sessionResponse = await axios.post<{ id: string }>(`${API_URL}/sessions`, {
+        email: email,
+        password: password,
+      });
       sessionId = sessionResponse.data.id;
     } catch (error) {
-      consola.error("Invalid email or password.");
+      consola.error('Invalid email or password.');
       return;
     }
     const tokenResponse = await axios.post<{ token: string }>(
       `${API_URL}/tokens`,
-      { name: "Capawesome CLI" },
+      { name: 'Capawesome CLI' },
       { headers: { Authorization: `Bearer ${sessionId}` } },
     );
     userConfig.write({

@@ -1,3 +1,3 @@
 export const isRunningInCi = (): boolean => {
-  return process.env.CI === 'true'
-}
+  return process.env.CI === 'true';
+};

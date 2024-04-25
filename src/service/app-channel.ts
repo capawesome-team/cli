@@ -1,6 +1,6 @@
-import { CreateAppChannelDto, DeleteAppChannelDto } from "../types";
-import httpClient, { HttpClient } from "../utils/http-client";
-import authorizationService from "./authorization-service";
+import { CreateAppChannelDto, DeleteAppChannelDto } from '../types';
+import httpClient, { HttpClient } from '../utils/http-client';
+import authorizationService from './authorization-service';
 
 export interface AppChannelsService {
   create(dto: CreateAppChannelDto): Promise<void>;
@@ -40,8 +40,6 @@ class AppChannelsServiceImpl implements AppChannelsService {
   }
 }
 
-const appChannelsService: AppChannelsService = new AppChannelsServiceImpl(
-  httpClient,
-);
+const appChannelsService: AppChannelsService = new AppChannelsServiceImpl(httpClient);
 
 export default appChannelsService;
