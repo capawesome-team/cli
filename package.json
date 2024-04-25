@@ -4,7 +4,8 @@
   "description": "The Capawesome Cloud Command Line Interface (CLI) to manage Live Updates and more.",
   "scripts": {
     "build": "rimraf ./dist && tsc",
-    "start": "node ./dist/index.js"
+    "start": "node ./dist/index.js",
+    "release": "commit-and-tag-version"
   },
   "bin": {
     "capawesome": "./dist/index.js"
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@types/archiver": "^6.0.2",
     "@types/node": "^20.11.30",
+    "commit-and-tag-version": "^12.4.0",
     "rimraf": "^5.0.5",
     "typescript": "^5.4.3"
   }
