@@ -10,13 +10,12 @@ import authorizationService from "../../../service/authorization-service";
 
 export default defineCommand({
   meta: {
-    description: "Upload a new app bundle.",
+    description: "Create a new app bundle.",
   },
   args: {
     path: {
       type: "string",
-      description:
-        "Path to the bundle to upload. Must be a folder or zip file",
+      description: "Path to the bundle to upload. Must be a folder or zip file",
     },
     appId: {
       type: "string",
@@ -62,28 +61,28 @@ export default defineCommand({
           });
         }
       }
-
-      if (!zip.isZipped(path)) {
-        consola.error("Only .zip files are supported");
-        return;
-      }
-      consola.start("Uploading...");
-      const formData = new FormData();
-      formData.append("file", createReadStream(path));
-      if (channelName) {
-        formData.append("channelName", channelName);
-      }
-      try {
-        await appsService.create({ appId: appId, formData: formData });
-      } catch (error) {
-        if (error instanceof AxiosError && error.response?.status === 401) {
-          consola.error("Your token is no longer valid. Please sign in again.");
-        } else {
-          consola.error("Failed to create bundle.");
-        }
-        return;
-      }
-      consola.success("Bundle successfully created.");
     }
+
+    if (!zip.isZipped(path)) {
+      consola.error("Only .zip files are supported"); // TODO
+      return;
+    }
+    consola.start("Uploading...");
+    const formData = new FormData();
+    formData.append("file", createReadStream(path));
+    if (channelName) {
+      formData.append("channelName", channelName);
+    }
+    try {
+      await appsService.create({ appId: appId, formData: formData });
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.status === 401) {
+        consola.error("Your token is no longer valid. Please sign in again.");
+      } else {
+        consola.error("Failed to create bundle.");
+      }
+      return;
+    }
+    consola.success("Bundle successfully created.");
   },
 });
