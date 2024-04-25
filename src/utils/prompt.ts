@@ -8,7 +8,7 @@ import { password as clackPassword } from "@clack/prompts";
  */
 export const prompt: typeof consola.prompt = async (message, options) => {
   const response = await consola.prompt(message, options);
-  if (response.toString() === "Symbol(clack:cancel)") {
+  if (response && response.toString() === "Symbol(clack:cancel)") {
     process.exit(0);
   }
   return response;
