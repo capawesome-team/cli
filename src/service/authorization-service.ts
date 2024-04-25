@@ -18,7 +18,7 @@ export interface AuthorizationService {
   hasAuthorizationToken(): boolean
 }
 
-export class AuthorizationServiceImpl implements AuthorizationService {
+class AuthorizationServiceImpl implements AuthorizationService {
   private readonly userConfig: UserConfig
 
   constructor(userConfig: UserConfig) {

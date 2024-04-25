@@ -1,6 +1,5 @@
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 import { API_URL } from '../config'
-import consola from 'consola'
 
 interface SuccessHttpResponse<T> {
   success: true
@@ -17,15 +16,32 @@ interface FailureHttpResponse {
 type HttpResponse<T> = SuccessHttpResponse<T> | FailureHttpResponse
 
 export interface HttpClient {
-  get<T>(url: string, headers?: Record<string, string>): Promise<HttpResponse<T>>
-
-  post<T>(url: string, data?: any, headers?: Record<string, string>): Promise<HttpResponse<T>>
+  delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>
+  get<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>
+  post<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>
 }
 
 class HttpClientImpl implements HttpClient {
-  async get<T>(url: string, headers?: Record<string, string>): Promise<HttpResponse<T>> {
+  async delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>> {
     try {
-      const res = await axios.get<T>(API_URL + url, { headers: headers })
+      const res = await axios.delete<T>(API_URL + url, config)
+      return {
+        success: true,
+        status: res.status,
+        data: res.data
+      }
+    } catch (e: any) {
+      return {
+        success: false,
+        status: e.response.status,
+        error: e
+      }
+    }  
+  }
+
+  async get<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>> {
+    try {
+      const res = await axios.get<T>(API_URL + url, config)
       return {
         success: true,
         status: res.status,
@@ -40,9 +56,9 @@ class HttpClientImpl implements HttpClient {
     }
   }
 
-  async post<T>(url: string, data?: any, headers?: Record<string, string>): Promise<HttpResponse<T>> {
+  async post<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>> {
     try {
-      const res = await axios.post<T>(API_URL + url, data, { headers: headers })
+      const res = await axios.post<T>(API_URL + url, data, config)
       return {
         success: true,
         status: res.status,

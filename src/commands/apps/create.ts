@@ -2,8 +2,8 @@ import { defineCommand } from "citty";
 import { isRunningInCi } from "../../utils/ci";
 import consola from "consola";
 import { prompt } from "../../utils/prompt";
-import httpClient from "../../utils/http-client";
-import userConfig from "../../utils/userConfig";
+import appsService from "../../service/apps";
+import { AxiosError } from "axios";
 
 export default defineCommand({
   meta: {
@@ -24,16 +24,16 @@ export default defineCommand({
     if (!name) {
       name = await prompt("Enter the name of the app:", { type: "text" });
     }
-    const res = await httpClient.post<{ id: string }>(
-      "/apps",
-      { name: name },
-      { Authorization: `Bearer ${userConfig.read().token}` },
-    );
-    if (!res.success) {
-      consola.error("App could not be created.");
-      return;
+    try {
+      const response = await appsService.create({ name });
+      consola.success("App created successfully.");
+      consola.info(`App ID: ${response.id}`);
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.status === 401) {
+        consola.error("Your token is no longer valid. Please sign in again.");
+      } else {
+        consola.error("Failed to create app.");
+      }
     }
-    consola.success("App created successfully.");
-    consola.info(`App ID: ${res.data.id}`);
   },
 });

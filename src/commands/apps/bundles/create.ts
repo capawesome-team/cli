@@ -5,8 +5,9 @@ import { AxiosError } from "axios";
 import zip from "../../../utils/zip";
 import FormData from "form-data";
 import { createReadStream } from "node:fs";
-import appsService from "../../../service/apps-service";
 import authorizationService from "../../../service/authorization-service";
+import appsService from "../../../service/apps";
+import appBundlesService from "../../../service/app-bundle";
 
 export default defineCommand({
   meta: {
@@ -41,7 +42,7 @@ export default defineCommand({
       });
     }
     if (!appId) {
-      const apps = await appsService.getAll();
+      const apps = await appsService.findAll();
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
       appId = await prompt("Which app do you want to deploy to:", {
         type: "select",
@@ -74,15 +75,14 @@ export default defineCommand({
       formData.append("channelName", channelName);
     }
     try {
-      await appsService.create({ appId: appId, formData: formData });
+      await appBundlesService.create({ appId: appId, formData: formData });
+      consola.success("Bundle successfully created.");
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 401) {
         consola.error("Your token is no longer valid. Please sign in again.");
       } else {
         consola.error("Failed to create bundle.");
       }
-      return;
     }
-    consola.success("Bundle successfully created.");
   },
 });
