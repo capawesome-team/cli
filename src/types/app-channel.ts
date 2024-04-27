@@ -1,3 +1,7 @@
+export interface AppChannelDto {
+  id: string;
+}
+
 export interface CreateAppChannelDto {
   appId: string;
   name: string;

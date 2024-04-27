@@ -39,11 +39,12 @@ export default defineCommand({
       name = await prompt('Enter the name of the channel:', { type: 'text' });
     }
     try {
-      await appChannelsService.create({
+      const response = await appChannelsService.create({
         appId,
         name,
       });
       consola.success('Channel created successfully.');
+      consola.info(`Channel ID: ${response.id}`);
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 401) {
         consola.error('Your token is no longer valid. Please sign in again.');
