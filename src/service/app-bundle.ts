@@ -1,9 +1,9 @@
-import { CreateAppBundleDto, DeleteAppBundleDto } from '../types';
+import { AppBundleDto, CreateAppBundleDto, DeleteAppBundleDto } from '../types';
 import httpClient, { HttpClient } from '../utils/http-client';
 import authorizationService from './authorization-service';
 
 export interface AppBundlesService {
-  create(dto: CreateAppBundleDto): Promise<void>;
+  create(dto: CreateAppBundleDto): Promise<AppBundleDto>;
   delete(dto: DeleteAppBundleDto): Promise<void>;
 }
 
@@ -14,26 +14,27 @@ class AppBundlesServiceImpl implements AppBundlesService {
     this.httpClient = httpClient;
   }
 
-  async create(data: CreateAppBundleDto): Promise<void> {
-    const res = await this.httpClient.post(`/apps/${data.appId}/bundles`, data.formData, {
+  async create(data: CreateAppBundleDto): Promise<AppBundleDto> {
+    const response = await this.httpClient.post<AppBundleDto>(`/apps/${data.appId}/bundles`, data.formData, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
         ...data.formData.getHeaders(),
       },
     });
-    if (!res.success) {
-      throw res.error;
+    if (!response.success) {
+      throw response.error;
     }
+    return response.data;
   }
 
   async delete(data: DeleteAppBundleDto): Promise<void> {
-    const res = await this.httpClient.delete(`/apps/${data.appId}/bundles/${data.bundleId}`, {
+    const response = await this.httpClient.delete(`/apps/${data.appId}/bundles/${data.bundleId}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
     });
-    if (!res.success) {
-      throw res.error;
+    if (!response.success) {
+      throw response.error;
     }
   }
 }

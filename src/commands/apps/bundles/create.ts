@@ -76,8 +76,9 @@ export default defineCommand({
     }
     // Upload the bundle
     try {
-      await appBundlesService.create({ appId: appId, formData: formData });
+      const response = await appBundlesService.create({ appId: appId, formData: formData });
       consola.success('Bundle successfully created.');
+      consola.info(`Bundle ID: ${response.id}`);
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 401) {
         consola.error('Your token is no longer valid. Please sign in again.');
