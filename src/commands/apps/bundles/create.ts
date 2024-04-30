@@ -70,10 +70,10 @@ export default defineCommand({
       const zipBuffer = await zip.zipFolder(path);
       formData.append('file', zipBuffer, { filename: 'bundle.zip' });
     }
-    consola.start('Uploading...');
     if (channelName) {
       formData.append('channelName', channelName);
     }
+    consola.start('Uploading...');
     // Upload the bundle
     try {
       const response = await appBundlesService.create({ appId: appId, formData: formData });
