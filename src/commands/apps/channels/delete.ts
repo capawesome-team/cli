@@ -2,9 +2,9 @@ import { defineCommand } from 'citty';
 import consola from 'consola';
 import { AxiosError } from 'axios';
 import { isRunningInCi } from '../../../utils/ci';
-import appsService from '../../../service/apps';
+import appsService from '../../../services/apps';
 import { prompt } from '../../../utils/prompt';
-import appChannelsService from '../../../service/app-channel';
+import appChannelsService from '../../../services/app-channel';
 
 export default defineCommand({
   meta: {

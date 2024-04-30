@@ -5,9 +5,9 @@ import { AxiosError } from 'axios';
 import zip from '../../../utils/zip';
 import FormData from 'form-data';
 import { createReadStream } from 'node:fs';
-import authorizationService from '../../../service/authorization-service';
-import appsService from '../../../service/apps';
-import appBundlesService from '../../../service/app-bundle';
+import authorizationService from '../../../services/authorization-service';
+import appsService from '../../../services/apps';
+import appBundlesService from '../../../services/app-bundle';
 
 export default defineCommand({
   meta: {

@@ -2,7 +2,7 @@ import { defineCommand } from 'citty';
 import { isRunningInCi } from '../../utils/ci';
 import consola from 'consola';
 import { prompt } from '../../utils/prompt';
-import appsService from '../../service/apps';
+import appsService from '../../services/apps';
 import { AxiosError } from 'axios';
 
 export default defineCommand({
