@@ -80,10 +80,15 @@ export default defineCommand({
       consola.success('Bundle successfully created.');
       consola.info(`Bundle ID: ${response.id}`);
     } catch (error) {
-      if (error instanceof AxiosError && error.response?.status === 401) {
-        consola.error('Your token is no longer valid. Please sign in again.');
+      const defaultErrorMessage = 'Failed to create bundle.';
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          consola.error('Your token is no longer valid. Please sign in again.');
+        } else {
+          consola.error(error.response?.data?.message || defaultErrorMessage);
+        }
       } else {
-        consola.error('Failed to create bundle.');
+        consola.error(defaultErrorMessage);
       }
     }
   },
