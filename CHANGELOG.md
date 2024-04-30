@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.4](https://github.com/capawesome-team/cli/compare/v0.0.3...v0.0.4) (2024-04-30)
+
+
+### Bug Fixes
+
+* **apps:** improve error message for `apps:bundles:create` ([79dc82c](https://github.com/capawesome-team/cli/commit/79dc82ce7ce7600fa3885f42b4af73a368e3249a))
+
 ## [0.0.3](https://github.com/capawesome-team/cli/compare/v0.0.2...v0.0.3) (2024-04-27)
 
 
