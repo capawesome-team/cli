@@ -1,5 +1,4 @@
 import { defineCommand } from 'citty';
-import { isRunningInCi } from '../../utils/ci';
 import consola from 'consola';
 import { prompt } from '../../utils/prompt';
 import appsService from '../../services/apps';
@@ -16,10 +15,6 @@ export default defineCommand({
     },
   },
   run: async (ctx) => {
-    if (isRunningInCi()) {
-      consola.error('This command is not supported in CI environments.');
-      return;
-    }
     let appId = ctx.args.appId;
     if (!appId) {
       const apps = await appsService.findAll();

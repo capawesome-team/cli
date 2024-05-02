@@ -1,7 +1,6 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
 import { AxiosError } from 'axios';
-import { isRunningInCi } from '../../../utils/ci';
 import appsService from '../../../services/apps';
 import { prompt } from '../../../utils/prompt';
 import appBundlesService from '../../../services/app-bundle';
@@ -21,10 +20,6 @@ export default defineCommand({
     },
   },
   run: async (ctx) => {
-    if (isRunningInCi()) {
-      consola.error('This command is not supported in CI environments.');
-      return;
-    }
     let appId = ctx.args.appId;
     if (!appId) {
       const apps = await appsService.findAll();

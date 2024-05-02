@@ -4,7 +4,6 @@ import axios from 'axios';
 import userConfig from '../utils/userConfig';
 import { API_URL } from '../config';
 import { passwordPrompt, prompt } from '../utils/prompt';
-import { isRunningInCi } from '../utils/ci';
 import usersService from '../services/users';
 
 export default defineCommand({
