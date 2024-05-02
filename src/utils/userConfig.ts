@@ -1,13 +1,11 @@
 import { readUser, writeUser } from 'rc9';
 
 export interface IUserConfig {
-  username?: string;
   token?: string;
 }
 
 export interface UserConfig {
   read(): IUserConfig;
-
   write(config: IUserConfig): void;
 }
 

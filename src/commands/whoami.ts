@@ -1,6 +1,7 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
 import userConfig from '../utils/userConfig';
+import usersService from '../services/users';
 
 export default defineCommand({
   meta: {
@@ -8,11 +9,16 @@ export default defineCommand({
     description: 'Show current user',
   },
   run: async () => {
-    const { username } = userConfig.read();
-    if (!username) {
-      consola.error('Not logged in');
+    const { token } = userConfig.read();
+    if (token) {
+      try {
+        const user = await usersService.me();
+        consola.info(`Logged in as ${user.email}.`);
+      } catch (error) {
+        consola.error('Token is invalid. Please sign in again.');
+      }
     } else {
-      consola.info(`Logged in as ${username}`);
+      consola.error('Not logged in.');
     }
   },
 });

@@ -9,10 +9,7 @@ export default defineCommand({
   },
   args: {},
   run: async () => {
-    const config = userConfig.read();
-    delete config.username;
-    delete config.token;
-    userConfig.write(config);
+    userConfig.write({});
     consola.success('Successfully signed out.');
   },
 });
