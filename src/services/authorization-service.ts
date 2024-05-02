@@ -1,4 +1,3 @@
-import { isRunningInCi } from '../utils/ci';
 import userConfig, { UserConfig } from '../utils/userConfig';
 
 export interface AuthorizationService {
@@ -26,10 +25,7 @@ class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   getCurrentAuthorizationToken(): string | null {
-    if (isRunningInCi()) {
-      return process.env.CAPAWESOME_TOKEN || null;
-    }
-    return this.userConfig.read().token || null;
+    return this.userConfig.read().token || process.env.CAPAWESOME_TOKEN || null;
   }
 
   hasAuthorizationToken(): boolean {
