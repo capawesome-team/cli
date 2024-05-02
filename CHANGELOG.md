@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.5](https://github.com/capawesome-team/cli/compare/v0.0.4...v0.0.5) (2024-05-02)
+
+
+### Features
+
+* **login:** add `--token` option ([2cdd649](https://github.com/capawesome-team/cli/commit/2cdd649bec96fbdb8a43e16a08b256b16a98a662))
+
+
+### Bug Fixes
+
+* allow execution of commands in ci ([4ce7ea6](https://github.com/capawesome-team/cli/commit/4ce7ea6e23c5cb15543df8a215274287134682e8))
+* read user config in ci ([f404989](https://github.com/capawesome-team/cli/commit/f4049890e5ebac15af5491d4ee04e7fcb6e15235))
+
 ## [0.0.4](https://github.com/capawesome-team/cli/compare/v0.0.3...v0.0.4) (2024-04-30)
 
 
