@@ -14,9 +14,13 @@ export default defineCommand({
     description: 'Create a new app bundle.',
   },
   args: {
-    path: {
+    androidMax: {
       type: 'string',
-      description: 'Path to the bundle to upload. Must be a folder (e.g. `www` or `dist`) or a zip file.',
+      description: 'The maximum Android version code (`versionCode`) that the bundle supports.',
+    },
+    androidMin: {
+      type: 'string',
+      description: 'The minimum Android version code (`versionCode`) that the bundle supports.',
     },
     appId: {
       type: 'string',
@@ -26,6 +30,18 @@ export default defineCommand({
       type: 'string',
       description: 'Channel to associate the bundle with.',
     },
+    path: {
+      type: 'string',
+      description: 'Path to the bundle to upload. Must be a folder (e.g. `www` or `dist`) or a zip file.',
+    },
+    iosMax: {
+      type: 'string',
+      description: 'The maximum iOS bundle version (`CFBundleVersion`) that the bundle supports.',
+    },
+    iosMin: {
+      type: 'string',
+      description: 'The minimum iOS bundle version (`CFBundleVersion`) that the bundle supports.',
+    },
   },
   run: async (ctx) => {
     if (!authorizationService.hasAuthorizationToken()) {
@@ -33,8 +49,9 @@ export default defineCommand({
       return;
     }
 
-    let path = ctx.args.path;
+    const { androidMax, androidMin, iosMax, iosMin } = ctx.args;
     let appId = ctx.args.appId;
+    let path = ctx.args.path;
     let channelName = ctx.args.channel;
     if (!path) {
       path = await prompt('Enter the path to the app bundle:', {
@@ -72,6 +89,18 @@ export default defineCommand({
     }
     if (channelName) {
       formData.append('channelName', channelName);
+    }
+    if (androidMax) {
+      formData.append('maxAndroidAppVersionCode', androidMax);
+    }
+    if (androidMin) {
+      formData.append('minAndroidAppVersionCode', androidMin);
+    }
+    if (iosMax) {
+      formData.append('maxIosAppVersionCode', iosMax);
+    }
+    if (iosMin) {
+      formData.append('minIosAppVersionCode', iosMin);
     }
     consola.start('Uploading...');
     // Upload the bundle
