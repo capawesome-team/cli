@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.6](https://github.com/capawesome-team/cli/compare/v0.0.5...v0.0.6) (2024-05-04)
+
+
+### Features
+
+* **bundles:** add new min and max options ([#1](https://github.com/capawesome-team/cli/issues/1)) ([41d4bad](https://github.com/capawesome-team/cli/commit/41d4badadafc4b5989d22200e58f09efe01ebeec))
+
 ## [0.0.5](https://github.com/capawesome-team/cli/compare/v0.0.4...v0.0.5) (2024-05-02)
 
 
