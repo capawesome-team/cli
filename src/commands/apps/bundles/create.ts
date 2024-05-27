@@ -34,6 +34,10 @@ export default defineCommand({
       type: 'string',
       description: 'Path to the bundle to upload. Must be a folder (e.g. `www` or `dist`) or a zip file.',
     },
+    rollout: {
+      type: 'string',
+      description: 'The percentage of devices to deploy the bundle to. Must be a number between 0 and 1 (e.g. 0.5).',
+    },
     iosMax: {
       type: 'string',
       description: 'The maximum iOS bundle version (`CFBundleVersion`) that the bundle supports.',
@@ -49,7 +53,7 @@ export default defineCommand({
       return;
     }
 
-    const { androidMax, androidMin, iosMax, iosMin } = ctx.args;
+    const { androidMax, androidMin, rollout, iosMax, iosMin } = ctx.args;
     let appId = ctx.args.appId;
     let path = ctx.args.path;
     let channelName = ctx.args.channel;
@@ -95,6 +99,14 @@ export default defineCommand({
     }
     if (androidMin) {
       formData.append('minAndroidAppVersionCode', androidMin);
+    }
+    if (rollout) {
+      const rolloutAsNumber = parseFloat(rollout);
+      if (isNaN(rolloutAsNumber) || rolloutAsNumber < 0 || rolloutAsNumber > 1) {
+        consola.error('Rollout percentage must be a number between 0 and 1 (e.g. 0.5).');
+        return;
+      }
+      formData.append('rolloutPercentage', rolloutAsNumber);
     }
     if (iosMax) {
       formData.append('maxIosAppVersionCode', iosMax);
