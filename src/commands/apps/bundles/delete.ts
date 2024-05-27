@@ -20,7 +20,9 @@ export default defineCommand({
     },
   },
   run: async (ctx) => {
+    // Prompt for missing arguments
     let appId = ctx.args.appId;
+    let bundleId = ctx.args.bundleId;
     if (!appId) {
       const apps = await appsService.findAll();
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
@@ -29,18 +31,21 @@ export default defineCommand({
         options: apps.map((app) => ({ label: app.name, value: app.id })),
       });
     }
-    let bundleId = ctx.args.bundleId;
     if (!bundleId) {
       bundleId = await prompt('Enter the bundle ID:', {
         type: 'text',
       });
     }
+
+    // Confirm deletion
     const confirmed = await prompt('Are you sure you want to delete this bundle?', {
       type: 'confirm',
     });
     if (!confirmed) {
       return;
     }
+
+    // Delete bundle
     try {
       await appBundlesService.delete({
         appId,

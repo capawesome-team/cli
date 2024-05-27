@@ -16,6 +16,7 @@ const main = defineCommand({
     'apps:delete': import('./commands/apps/delete').then((mod) => mod.default),
     'apps:bundles:create': import('./commands/apps/bundles/create').then((mod) => mod.default),
     'apps:bundles:delete': import('./commands/apps/bundles/delete').then((mod) => mod.default),
+    'apps:bundles:update': import('./commands/apps/bundles/update').then((mod) => mod.default),
     'apps:channels:create': import('./commands/apps/channels/create').then((mod) => mod.default),
     'apps:channels:delete': import('./commands/apps/channels/delete').then((mod) => mod.default),
     'apps:devices:delete': import('./commands/apps/devices/delete').then((mod) => mod.default),

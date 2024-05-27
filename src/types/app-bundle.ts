@@ -13,3 +13,13 @@ export interface DeleteAppBundleDto {
   appId: string;
   bundleId: string;
 }
+
+export interface UpadteAppBundleDto {
+  appId: string;
+  bundleId: string;
+  maxAndroidAppVersionCode?: string;
+  maxIosAppVersionCode?: string;
+  minAndroidAppVersionCode?: string;
+  minIosAppVersionCode?: string;
+  rolloutPercentage?: number;
+}

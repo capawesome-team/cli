@@ -1,10 +1,11 @@
-import { AppBundleDto, CreateAppBundleDto, DeleteAppBundleDto } from '../types';
+import { AppBundleDto, CreateAppBundleDto, DeleteAppBundleDto, UpadteAppBundleDto } from '../types';
 import httpClient, { HttpClient } from '../utils/http-client';
 import authorizationService from './authorization-service';
 
 export interface AppBundlesService {
   create(dto: CreateAppBundleDto): Promise<AppBundleDto>;
   delete(dto: DeleteAppBundleDto): Promise<void>;
+  update(dto: UpadteAppBundleDto): Promise<AppBundleDto>;
 }
 
 class AppBundlesServiceImpl implements AppBundlesService {
@@ -19,6 +20,18 @@ class AppBundlesServiceImpl implements AppBundlesService {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
         ...data.formData.getHeaders(),
+      },
+    });
+    if (!response.success) {
+      throw response.error;
+    }
+    return response.data;
+  }
+
+  async update(data: UpadteAppBundleDto): Promise<AppBundleDto> {
+    const response = await this.httpClient.patch<AppBundleDto>(`/apps/${data.appId}/bundles/${data.bundleId}`, data, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
     });
     if (!response.success) {

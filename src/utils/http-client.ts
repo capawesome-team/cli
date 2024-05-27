@@ -18,6 +18,7 @@ type HttpResponse<T> = SuccessHttpResponse<T> | FailureHttpResponse;
 export interface HttpClient {
   delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>;
   get<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>;
+  patch<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>;
   post<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>;
 }
 
@@ -42,6 +43,23 @@ class HttpClientImpl implements HttpClient {
   async get<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>> {
     try {
       const res = await axios.get<T>(API_URL + url, config);
+      return {
+        success: true,
+        status: res.status,
+        data: res.data,
+      };
+    } catch (e: any) {
+      return {
+        success: false,
+        status: e.response.status,
+        error: e,
+      };
+    }
+  }
+
+  async patch<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>> {
+    try {
+      const res = await axios.patch<T>(API_URL + url, data, config);
       return {
         success: true,
         status: res.status,
