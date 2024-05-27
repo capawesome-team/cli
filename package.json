@@ -1,6 +1,6 @@
 {
   "name": "@capawesome/cli",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "The Capawesome Cloud Command Line Interface (CLI) to manage Live Updates and more.",
   "scripts": {
     "build": "rimraf ./dist && tsc",

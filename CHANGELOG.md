@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.7](https://github.com/capawesome-team/cli/compare/v0.0.6...v0.0.7) (2024-05-27)
+
+
+### Features
+
+* add `apps:bundles:update` command ([9dbad37](https://github.com/capawesome-team/cli/commit/9dbad377bebf4ea9b2a04194c3cda73aafcae067))
+* add `rollout` argument to `apps:bundles:create` command ([30b892c](https://github.com/capawesome-team/cli/commit/30b892cd3aabfc62178420d516c162abacd1b757))
+
 ## [0.0.6](https://github.com/capawesome-team/cli/compare/v0.0.5...v0.0.6) (2024-05-04)
 
 
