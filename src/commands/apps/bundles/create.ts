@@ -7,7 +7,7 @@ import FormData from 'form-data';
 import { createReadStream } from 'node:fs';
 import authorizationService from '../../../services/authorization-service';
 import appsService from '../../../services/apps';
-import appBundlesService from '../../../services/app-bundle';
+import appBundlesService from '../../../services/app-bundles';
 
 export default defineCommand({
   meta: {

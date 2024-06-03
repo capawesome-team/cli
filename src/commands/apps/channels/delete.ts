@@ -3,7 +3,7 @@ import consola from 'consola';
 import { AxiosError } from 'axios';
 import appsService from '../../../services/apps';
 import { prompt } from '../../../utils/prompt';
-import appChannelsService from '../../../services/app-channel';
+import appChannelsService from '../../../services/app-channels';
 
 export default defineCommand({
   meta: {
