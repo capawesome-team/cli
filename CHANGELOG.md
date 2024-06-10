@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.8](https://github.com/capawesome-team/cli/compare/v0.0.7...v0.0.8) (2024-06-10)
+
+
+### Bug Fixes
+
+* improve error handling ([e67e94b](https://github.com/capawesome-team/cli/commit/e67e94b50308fe227275a9ce83097f67423d0fbd))
+* throw error if no app exists ([930857c](https://github.com/capawesome-team/cli/commit/930857cf735e102ebf1be7e8772cc251a3ddc1a2))
+
 ## [0.0.7](https://github.com/capawesome-team/cli/compare/v0.0.6...v0.0.7) (2024-05-27)
 
 
