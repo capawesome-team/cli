@@ -25,6 +25,10 @@ export default defineCommand({
     let bundleId = ctx.args.bundleId;
     if (!appId) {
       const apps = await appsService.findAll();
+      if (!apps.length) {
+        consola.error('You must create an app before deleting a bundle.');
+        return;
+      }
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
       appId = await prompt('Which app do you want to delete the bundle from?', {
         type: 'select',

@@ -64,6 +64,10 @@ export default defineCommand({
     }
     if (!appId) {
       const apps = await appsService.findAll();
+      if (!apps.length) {
+        consola.error('You must create an app before creating a bundle.');
+        return;
+      }
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
       appId = await prompt('Which app do you want to deploy to:', {
         type: 'select',

@@ -18,6 +18,10 @@ export default defineCommand({
     let appId = ctx.args.appId;
     if (!appId) {
       const apps = await appsService.findAll();
+      if (!apps.length) {
+        consola.error('You must create an app before deleting it.');
+        return;
+      }
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
       appId = await prompt('Which app do you want to delete?', {
         type: 'select',
