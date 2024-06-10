@@ -2,7 +2,7 @@ import { defineCommand } from 'citty';
 import consola from 'consola';
 import { prompt } from '../../utils/prompt';
 import appsService from '../../services/apps';
-import { AxiosError } from 'axios';
+import { getMessageFromUnknownError } from '../../utils/error';
 
 export default defineCommand({
   meta: {
@@ -34,11 +34,8 @@ export default defineCommand({
       await appsService.delete({ id: appId });
       consola.success('App deleted successfully.');
     } catch (error) {
-      if (error instanceof AxiosError && error.response?.status === 401) {
-        consola.error('Your token is no longer valid. Please sign in again.');
-      } else {
-        consola.error('Failed to delete app.');
-      }
+      const message = getMessageFromUnknownError(error);
+      consola.error(message);
     }
   },
 });

@@ -1,13 +1,10 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
 import { prompt } from '../../../utils/prompt';
-import { AxiosError } from 'axios';
-import zip from '../../../utils/zip';
-import FormData from 'form-data';
-import { createReadStream } from 'node:fs';
 import authorizationService from '../../../services/authorization-service';
 import appsService from '../../../services/apps';
 import appBundlesService from '../../../services/app-bundles';
+import { getMessageFromUnknownError } from '../../../utils/error';
 
 export default defineCommand({
   meta: {
@@ -81,11 +78,8 @@ export default defineCommand({
       });
       consola.success('Bundle updated successfully.');
     } catch (error) {
-      if (error instanceof AxiosError && error.response?.status === 401) {
-        consola.error('Your token is no longer valid. Please sign in again.');
-      } else {
-        consola.error('Failed to delete bundle.');
-      }
+      const message = getMessageFromUnknownError(error);
+      consola.error(message);
     }
   },
 });

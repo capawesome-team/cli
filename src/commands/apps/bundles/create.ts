@@ -1,13 +1,13 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
 import { prompt } from '../../../utils/prompt';
-import { AxiosError } from 'axios';
 import zip from '../../../utils/zip';
 import FormData from 'form-data';
 import { createReadStream } from 'node:fs';
 import authorizationService from '../../../services/authorization-service';
 import appsService from '../../../services/apps';
 import appBundlesService from '../../../services/app-bundles';
+import { getMessageFromUnknownError } from '../../../utils/error';
 
 export default defineCommand({
   meta: {
@@ -121,16 +121,8 @@ export default defineCommand({
       consola.success('Bundle successfully created.');
       consola.info(`Bundle ID: ${response.id}`);
     } catch (error) {
-      const defaultErrorMessage = 'Failed to create bundle.';
-      if (error instanceof AxiosError) {
-        if (error.response?.status === 401) {
-          consola.error('Your token is no longer valid. Please sign in again.');
-        } else {
-          consola.error(error.response?.data?.message || defaultErrorMessage);
-        }
-      } else {
-        consola.error(defaultErrorMessage);
-      }
+      const message = getMessageFromUnknownError(error);
+      consola.error(message);
     }
   },
 });

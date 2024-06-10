@@ -1,9 +1,9 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import { AxiosError } from 'axios';
 import appsService from '../../../services/apps';
 import { prompt } from '../../../utils/prompt';
 import appBundlesService from '../../../services/app-bundles';
+import { getMessageFromUnknownError } from '../../../utils/error';
 
 export default defineCommand({
   meta: {
@@ -53,11 +53,8 @@ export default defineCommand({
       });
       consola.success('Bundle deleted successfully.');
     } catch (error) {
-      if (error instanceof AxiosError && error.response?.status === 401) {
-        consola.error('Your token is no longer valid. Please sign in again.');
-      } else {
-        consola.error('Failed to delete bundle.');
-      }
+      const message = getMessageFromUnknownError(error);
+      consola.error(message);
     }
   },
 });
