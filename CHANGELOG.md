@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.9](https://github.com/capawesome-team/cli/compare/v0.0.8...v0.0.9) (2024-07-04)
+
+
+### Features
+
+* **bundles:** add `url` argument ([bf7b213](https://github.com/capawesome-team/cli/commit/bf7b21346813543992128f54e9a6bde283c38446))
+
 ## [0.0.8](https://github.com/capawesome-team/cli/compare/v0.0.7...v0.0.8) (2024-06-10)
 
 
