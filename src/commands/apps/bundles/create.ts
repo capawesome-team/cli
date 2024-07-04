@@ -30,6 +30,14 @@ export default defineCommand({
       type: 'string',
       description: 'Channel to associate the bundle with.',
     },
+    iosMax: {
+      type: 'string',
+      description: 'The maximum iOS bundle version (`CFBundleVersion`) that the bundle supports.',
+    },
+    iosMin: {
+      type: 'string',
+      description: 'The minimum iOS bundle version (`CFBundleVersion`) that the bundle supports.',
+    },
     path: {
       type: 'string',
       description: 'Path to the bundle to upload. Must be a folder (e.g. `www` or `dist`) or a zip file.',
@@ -38,13 +46,9 @@ export default defineCommand({
       type: 'string',
       description: 'The percentage of devices to deploy the bundle to. Must be a number between 0 and 1 (e.g. 0.5).',
     },
-    iosMax: {
+    url: {
       type: 'string',
-      description: 'The maximum iOS bundle version (`CFBundleVersion`) that the bundle supports.',
-    },
-    iosMin: {
-      type: 'string',
-      description: 'The minimum iOS bundle version (`CFBundleVersion`) that the bundle supports.',
+      description: 'The URL to the self-hosted bundle file.',
     },
   },
   run: async (ctx) => {
@@ -55,9 +59,10 @@ export default defineCommand({
 
     const { androidMax, androidMin, rollout, iosMax, iosMin } = ctx.args;
     let appId = ctx.args.appId;
-    let path = ctx.args.path;
     let channelName = ctx.args.channel;
-    if (!path) {
+    let path = ctx.args.path;
+    let url = ctx.args.url;
+    if (!path && !url) {
       path = await prompt('Enter the path to the app bundle:', {
         type: 'text',
       });
@@ -88,12 +93,17 @@ export default defineCommand({
 
     // Create form data
     const formData = new FormData();
-    if (zip.isZipped(path)) {
-      formData.append('file', createReadStream(path));
-    } else {
-      consola.start('Zipping folder...');
-      const zipBuffer = await zip.zipFolder(path);
-      formData.append('file', zipBuffer, { filename: 'bundle.zip' });
+    if (path) {
+      if (zip.isZipped(path)) {
+        formData.append('file', createReadStream(path));
+      } else {
+        consola.start('Zipping folder...');
+        const zipBuffer = await zip.zipFolder(path);
+        formData.append('file', zipBuffer, { filename: 'bundle.zip' });
+      }
+    }
+    if (url) {
+      formData.append('url', url);
     }
     if (channelName) {
       formData.append('channelName', channelName);
@@ -118,7 +128,11 @@ export default defineCommand({
     if (iosMin) {
       formData.append('minIosAppVersionCode', iosMin);
     }
-    consola.start('Uploading...');
+    if (path) {
+      consola.start('Uploading...');
+    } else {
+      consola.start('Creating...');
+    }
     // Upload the bundle
     try {
       const response = await appBundlesService.create({ appId: appId, formData: formData });
