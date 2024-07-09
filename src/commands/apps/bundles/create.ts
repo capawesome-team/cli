@@ -48,7 +48,7 @@ export default defineCommand({
     },
     url: {
       type: 'string',
-      description: 'The URL to the self-hosted bundle file.',
+      description: 'The url to the self-hosted bundle file.',
     },
   },
   run: async (ctx) => {
