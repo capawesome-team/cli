@@ -8,6 +8,8 @@ import authorizationService from '../../../services/authorization-service';
 import appsService from '../../../services/apps';
 import appBundlesService from '../../../services/app-bundles';
 import { getMessageFromUnknownError } from '../../../utils/error';
+import { createHash } from '../../../utils/hash';
+import { createBuffer } from '../../../utils/buffer';
 
 export default defineCommand({
   meta: {
@@ -95,11 +97,17 @@ export default defineCommand({
     const formData = new FormData();
     if (path) {
       if (zip.isZipped(path)) {
-        formData.append('file', createReadStream(path));
+        const readStream = createReadStream(path);
+        const buffer = await createBuffer(readStream);
+        const hash = await createHash(buffer);
+        formData.append('file', buffer, { filename: 'bundle.zip' });
+        formData.append('checksum', hash);
       } else {
         consola.start('Zipping folder...');
         const zipBuffer = await zip.zipFolder(path);
+        const hash = await createHash(zipBuffer);
         formData.append('file', zipBuffer, { filename: 'bundle.zip' });
+        formData.append('checksum', hash);
       }
     }
     if (url) {
