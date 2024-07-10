@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.10](https://github.com/capawesome-team/cli/compare/v0.0.9...v0.0.10) (2024-07-10)
+
+
+### Features
+
+* add support for checksum verification ([#5](https://github.com/capawesome-team/cli/issues/5)) ([5dbe8af](https://github.com/capawesome-team/cli/commit/5dbe8af4c866d94dc633009d26be143b079474d1))
+
 ## [0.0.9](https://github.com/capawesome-team/cli/compare/v0.0.8...v0.0.9) (2024-07-04)
 
 
