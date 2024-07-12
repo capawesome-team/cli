@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.11](https://github.com/capawesome-team/cli/compare/v0.0.10...v0.0.11) (2024-07-12)
+
+
+### Features
+
+* add support for signature verification ([#6](https://github.com/capawesome-team/cli/issues/6)) ([b82a190](https://github.com/capawesome-team/cli/commit/b82a1901f9cbca856d493e0c778fefb8205f6742))
+
+
+### Bug Fixes
+
+* **apps:** throw error if empty path is provided ([e5de25c](https://github.com/capawesome-team/cli/commit/e5de25c68dbceb412d53790349f977c71ce33683))
+
 ## [0.0.10](https://github.com/capawesome-team/cli/compare/v0.0.9...v0.0.10) (2024-07-10)
 
 
