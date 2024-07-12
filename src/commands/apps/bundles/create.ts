@@ -74,6 +74,10 @@ export default defineCommand({
       path = await prompt('Enter the path to the app bundle:', {
         type: 'text',
       });
+      if (!path) {
+        consola.error('You must provide a path to the app bundle.');
+        return;
+      }
     }
     if (!appId) {
       const apps = await appsService.findAll();
