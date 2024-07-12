@@ -15,3 +15,9 @@ export const createBuffer = async (data: ReadStream): Promise<Buffer> => {
     data.on('error', reject);
   });
 };
+
+export const createBufferFromPath = async (path: string): Promise<Buffer> => {
+  const fs = await import('fs');
+  const stream = fs.createReadStream(path);
+  return createBuffer(stream);
+};
