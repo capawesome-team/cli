@@ -6,6 +6,7 @@ node_modules
 test-folder
 test-folder.zip
 
+*.pem
 www
 www_large
 www.zip
