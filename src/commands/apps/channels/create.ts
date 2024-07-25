@@ -28,7 +28,7 @@ export default defineCommand({
         return;
       }
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      appId = await prompt('Which app do you want to delete the channel from?', {
+      appId = await prompt('Which app do you want to create the channel for?', {
         type: 'select',
         options: apps.map((app) => ({ label: app.name, value: app.id })),
       });
