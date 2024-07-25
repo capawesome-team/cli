@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.12](https://github.com/capawesome-team/cli/compare/v0.0.11...v0.0.12) (2024-07-25)
+
+
+### Bug Fixes
+
+* **apps:** typo ([2376f13](https://github.com/capawesome-team/cli/commit/2376f1397e4b8e71aeea58fff3b2338d59ab41e7))
+
 ## [0.0.11](https://github.com/capawesome-team/cli/compare/v0.0.10...v0.0.11) (2024-07-12)
 
 
