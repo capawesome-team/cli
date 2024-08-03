@@ -81,7 +81,7 @@ export default defineCommand({
     }
     if (!appId) {
       const apps = await appsService.findAll();
-      if (!apps.length) {
+      if (apps.length === 0) {
         consola.error('You must create an app before creating a bundle.');
         return;
       }
