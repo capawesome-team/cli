@@ -1,12 +1,19 @@
 #!/usr/bin/env node
 import { defineCommand, runMain } from 'citty';
 import pkg from '../package.json';
+import updateService from './services/update';
 
 const main = defineCommand({
   meta: {
     name: pkg.name,
     version: pkg.version,
     description: pkg.description,
+  },
+  setup() {
+    // No op
+  },
+  cleanup() {
+    return updateService.checkForUpdate();
   },
   subCommands: {
     whoami: import('./commands/whoami').then((mod) => mod.default),

@@ -46,12 +46,14 @@
     "citty": "0.1.6",
     "consola": "3.2.3",
     "form-data": "4.0.0",
-    "rc9": "2.1.1"
+    "rc9": "2.1.1",
+    "semver": "7.6.3"
   },
   "devDependencies": {
     "@ionic/prettier-config": "4.0.0",
     "@types/archiver": "6.0.2",
     "@types/node": "20.11.30",
+    "@types/semver": "7.5.8",
     "commit-and-tag-version": "12.4.0",
     "prettier": "3.2.5",
     "rimraf": "5.0.5",

@@ -25,7 +25,8 @@ export interface HttpClient {
 class HttpClientImpl implements HttpClient {
   async delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>> {
     try {
-      const res = await axios.delete<T>(API_URL + url, config);
+      const urlWithHost = url.startsWith('http') ? url : API_URL + url;
+      const res = await axios.delete<T>(urlWithHost, config);
       return {
         success: true,
         status: res.status,
@@ -42,7 +43,8 @@ class HttpClientImpl implements HttpClient {
 
   async get<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>> {
     try {
-      const res = await axios.get<T>(API_URL + url, config);
+      const urlWithHost = url.startsWith('http') ? url : API_URL + url;
+      const res = await axios.get<T>(urlWithHost, config);
       return {
         success: true,
         status: res.status,
@@ -59,7 +61,8 @@ class HttpClientImpl implements HttpClient {
 
   async patch<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>> {
     try {
-      const res = await axios.patch<T>(API_URL + url, data, config);
+      const urlWithHost = url.startsWith('http') ? url : API_URL + url;
+      const res = await axios.patch<T>(urlWithHost, data, config);
       return {
         success: true,
         status: res.status,
@@ -76,7 +79,8 @@ class HttpClientImpl implements HttpClient {
 
   async post<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>> {
     try {
-      const res = await axios.post<T>(API_URL + url, data, config);
+      const urlWithHost = url.startsWith('http') ? url : API_URL + url;
+      const res = await axios.post<T>(urlWithHost, data, config);
       return {
         success: true,
         status: res.status,
