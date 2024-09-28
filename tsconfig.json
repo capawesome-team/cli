@@ -9,5 +9,6 @@
     "resolveJsonModule": true,
     "outDir": "./dist",
     "rootDir": "./src",
-  },
+    "noUncheckedIndexedAccess": true
+  }
 }

@@ -1,7 +1,7 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import userConfig from '../utils/userConfig';
 import usersService from '../services/users';
+import userConfig from '../utils/userConfig';
 
 export default defineCommand({
   meta: {
@@ -13,7 +13,11 @@ export default defineCommand({
     if (token) {
       try {
         const user = await usersService.me();
-        consola.info(`Logged in as ${user.email}.`);
+        const email = user.email;
+        const userProviderProfile = user.userProviderProfiles[0]
+          ? user.userProviderProfiles[0]?.provider + ':' + user.userProviderProfiles[0]?.providerUsername
+          : null;
+        consola.info(`Logged in as ${email || userProviderProfile || '?'}.`);
       } catch (error) {
         consola.error('Token is invalid. Please sign in again.');
       }
