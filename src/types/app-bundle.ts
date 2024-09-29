@@ -10,13 +10,19 @@ export interface CreateAppBundleDto {
 }
 
 export interface DeleteAppBundleDto {
+  appBundleId: string;
   appId: string;
-  bundleId: string;
 }
 
-export interface UpadteAppBundleDto {
+export interface MultipartUploadDto {
+  key: string;
+  uploadId: string;
+}
+
+export interface UpdateAppBundleDto {
+  appBundleId: string;
   appId: string;
-  bundleId: string;
+  artifactStatus?: 'uploading' | 'uploaded';
   maxAndroidAppVersionCode?: string;
   maxIosAppVersionCode?: string;
   minAndroidAppVersionCode?: string;

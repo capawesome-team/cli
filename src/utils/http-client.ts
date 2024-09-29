@@ -20,6 +20,7 @@ export interface HttpClient {
   get<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>;
   patch<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>;
   post<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>;
+  put<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>>;
 }
 
 class HttpClientImpl implements HttpClient {
@@ -81,6 +82,24 @@ class HttpClientImpl implements HttpClient {
     try {
       const urlWithHost = url.startsWith('http') ? url : API_URL + url;
       const res = await axios.post<T>(urlWithHost, data, config);
+      return {
+        success: true,
+        status: res.status,
+        data: res.data,
+      };
+    } catch (e: any) {
+      return {
+        success: false,
+        status: e.response.status,
+        error: e,
+      };
+    }
+  }
+
+  async put<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<HttpResponse<T>> {
+    try {
+      const urlWithHost = url.startsWith('http') ? url : API_URL + url;
+      const res = await axios.put<T>(urlWithHost, data, config);
       return {
         success: true,
         status: res.status,
