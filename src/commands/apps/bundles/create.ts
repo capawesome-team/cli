@@ -142,10 +142,7 @@ export default defineCommand({
 
     // Create form data
     const formData = new FormData();
-    // Add dummy value to prevent empty form data.
-    // Otherwise, the form data will be empty and the server will return a 400 error:
-    // `Malformed FormData request. No initial boundary string (or you have a truncated message).`
-    formData.append('dummy', 'value');
+    formData.append('artifactType', artifactType || 'zip');
     if (url) {
       formData.append('url', url);
     }
@@ -175,7 +172,7 @@ export default defineCommand({
     try {
       // Create the app bundle
       consola.start('Creating bundle...');
-      const response = await appBundlesService.create({ appId: appId, formData: formData });
+      const response = await appBundlesService.create({ appId: appId, formData });
       if (path) {
         // Upload the app bundle files
         if (artifactType === 'manifest') {
@@ -206,7 +203,7 @@ const uploadManifest = async (options: {
   const files = await getFilesInDirectoryAndSubdirectories(options.path);
   // Upload each file
   for (const file of files) {
-    const relativePath = file.replace(options.path, '');
+    const relativePath = file.replace(options.path + '/', '');
     const buffer = await createBufferFromPath(file);
     await uploadFile({
       appId: options.appId,
