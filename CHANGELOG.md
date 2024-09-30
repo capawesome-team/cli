@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.14](https://github.com/capawesome-team/cli/compare/v0.0.13...v0.0.14) (2024-09-30)
+
+
+### Bug Fixes
+
+* **apps:** typo ([c65ca99](https://github.com/capawesome-team/cli/commit/c65ca99289b333ddb79d3ade0db33cb4571e860d))
+* **whoami:** support oauth provider ([7b80a7b](https://github.com/capawesome-team/cli/commit/7b80a7b3c5aa3d8dea6c77cf30a8bfae10961e36))
+
 ## [0.0.13](https://github.com/capawesome-team/cli/compare/v0.0.12...v0.0.13) (2024-08-20)
 
 
