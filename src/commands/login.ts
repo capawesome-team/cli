@@ -1,10 +1,10 @@
+import axios from 'axios';
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import axios from 'axios';
-import userConfig from '../utils/userConfig';
 import { API_URL } from '../config';
-import { passwordPrompt, prompt } from '../utils/prompt';
 import usersService from '../services/users';
+import { passwordPrompt, prompt } from '../utils/prompt';
+import userConfig from '../utils/userConfig';
 
 export default defineCommand({
   meta: {
@@ -18,20 +18,9 @@ export default defineCommand({
     },
   },
   run: async (ctx) => {
-    let token = ctx.args.token;
-    if (token) {
-      userConfig.write({
-        token: token,
-      });
-      try {
-        await usersService.me();
-      } catch (error) {
-        userConfig.write({});
-        consola.error('Invalid token.');
-        return;
-      }
-      consola.success(`Successfully signed in.`);
-    } else {
+    let token = ctx.args.token as string | undefined;
+    if (token === undefined) {
+      consola.warn('If you have signed up via an OAuth provider, please sign in using the `--token` argument.');
       const email = await prompt('Enter your email:', { type: 'text' });
       const password = await passwordPrompt('Enter your password:');
       consola.start('Logging in...');
@@ -55,6 +44,23 @@ export default defineCommand({
         token: tokenResponse.data.token,
       });
       consola.success(`Successfully signed in.`);
+    } else if (token.length === 0) {
+      consola.error(
+        'Please provide a valid token. You can create a token at https://cloud.capawesome.io/settings/tokens.',
+      );
+    } else {
+      userConfig.write({
+        token: token,
+      });
+      try {
+        await usersService.me();
+        consola.success(`Successfully signed in.`);
+      } catch (error) {
+        userConfig.write({});
+        consola.error(
+          'Invalid token. Please provide a valid token. You can create a token at https://cloud.capawesome.io/settings/tokens.',
+        );
+      }
     }
   },
 });
