@@ -7,10 +7,10 @@ export const fileExistsAtPath = async (path: string): Promise<boolean> => {
   });
 };
 
-export const getFilesInDirectoryAndSubdirectories = async (path: string): Promise<string[]> => {
+export const getFilesInDirectoryAndSubdirectories = async (path: string): Promise<{ path: string; name: string }[]> => {
   const fs = await import('fs');
   const pathModule = await import('path');
-  const files: string[] = [];
+  const files: { path: string; name: string }[] = [];
   const walk = async (directory: string) => {
     const dirEntries = await fs.promises.readdir(directory, { withFileTypes: true }).catch(() => []);
     for (const dirEntry of dirEntries) {
@@ -18,7 +18,10 @@ export const getFilesInDirectoryAndSubdirectories = async (path: string): Promis
       if (dirEntry.isDirectory()) {
         await walk(fullPath);
       } else {
-        files.push(fullPath);
+        files.push({
+          name: dirEntry.name,
+          path: fullPath,
+        });
       }
     }
   };

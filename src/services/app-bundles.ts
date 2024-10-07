@@ -1,3 +1,4 @@
+import FormData from 'form-data';
 import { AppBundleDto, CreateAppBundleDto, DeleteAppBundleDto, UpdateAppBundleDto } from '../types';
 import httpClient, { HttpClient } from '../utils/http-client';
 import authorizationService from './authorization-service';
@@ -15,11 +16,34 @@ class AppBundlesServiceImpl implements AppBundlesService {
     this.httpClient = httpClient;
   }
 
-  async create(data: CreateAppBundleDto): Promise<AppBundleDto> {
-    const response = await this.httpClient.post<AppBundleDto>(`/apps/${data.appId}/bundles`, data.formData, {
+  async create(dto: CreateAppBundleDto): Promise<AppBundleDto> {
+    const formData = new FormData();
+    formData.append('artifactType', dto.artifactType);
+    if (dto.channelName) {
+      formData.append('channelName', dto.channelName);
+    }
+    if (dto.url) {
+      formData.append('url', dto.url);
+    }
+    if (dto.maxAndroidAppVersionCode) {
+      formData.append('maxAndroidAppVersionCode', dto.maxAndroidAppVersionCode);
+    }
+    if (dto.maxIosAppVersionCode) {
+      formData.append('maxIosAppVersionCode', dto.maxIosAppVersionCode);
+    }
+    if (dto.minAndroidAppVersionCode) {
+      formData.append('minAndroidAppVersionCode', dto.minAndroidAppVersionCode);
+    }
+    if (dto.minIosAppVersionCode) {
+      formData.append('minIosAppVersionCode', dto.minIosAppVersionCode);
+    }
+    if (dto.rolloutPercentage) {
+      formData.append('rolloutPercentage', dto.rolloutPercentage.toString());
+    }
+    const response = await this.httpClient.post<AppBundleDto>(`/apps/${dto.appId}/bundles`, formData, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
-        ...data.formData.getHeaders(),
+        ...formData.getHeaders(),
       },
     });
     if (!response.success) {

@@ -2,7 +2,7 @@ import { defineCommand } from 'citty';
 import consola from 'consola';
 import FormData from 'form-data';
 import { createReadStream } from 'fs';
-import apiAppBundleUploadService, { PartDto } from '../../../services/api/api-app-bundle-upload';
+import appBundleFilesService from '../../../services/app-bundle-files';
 import appBundlesService from '../../../services/app-bundles';
 import appsService from '../../../services/apps';
 import authorizationService from '../../../services/authorization-service';
@@ -73,7 +73,10 @@ export default defineCommand({
     let androidMax = ctx.args.androidMax as string | undefined;
     let androidMin = ctx.args.androidMin as string | undefined;
     let appId = ctx.args.appId as string | undefined;
-    let artifactType = ctx.args.artifactType as string | undefined;
+    let artifactType =
+      ctx.args.artifactType === 'manifest' || ctx.args.artifactType === 'zip'
+        ? ctx.args.artifactType
+        : ('zip' as 'manifest' | 'zip');
     let channelName = ctx.args.channel as string | undefined;
     let iosMax = ctx.args.iosMax as string | undefined;
     let iosMin = ctx.args.iosMin as string | undefined;
@@ -169,31 +172,74 @@ export default defineCommand({
     if (iosMin) {
       formData.append('minIosAppVersionCode', iosMin);
     }
+    let appBundleId: string | undefined;
     try {
       // Create the app bundle
       consola.start('Creating bundle...');
-      const response = await appBundlesService.create({ appId: appId, formData });
+      const response = await appBundlesService.create({
+        appId,
+        artifactType,
+        channelName,
+        url,
+        maxAndroidAppVersionCode: androidMax,
+        maxIosAppVersionCode: iosMax,
+        minAndroidAppVersionCode: androidMin,
+        minIosAppVersionCode: androidMin,
+      });
+      appBundleId = response.id;
       if (path) {
         // Upload the app bundle files
         if (artifactType === 'manifest') {
-          await uploadManifest({ appId: appId, appBundleId: response.id, path, privateKeyBuffer });
+          await uploadFiles({ appId, appBundleId: response.id, path, privateKeyBuffer });
         } else {
-          await uploadZip({ appId: appId, appBundleId: response.id, path, privateKeyBuffer });
+          await uploadZip({ appId, appBundleId: response.id, path, privateKeyBuffer });
         }
         // Update the app bundle
         consola.start('Updating bundle...');
-        await appBundlesService.update({ appId: appId, artifactStatus: 'uploaded', appBundleId: response.id });
+        await appBundlesService.update({ appId, artifactStatus: 'ready', appBundleId: response.id });
       }
       consola.success('Bundle successfully created.');
       consola.info(`Bundle ID: ${response.id}`);
     } catch (error) {
+      if (appBundleId) {
+        await appBundlesService.delete({ appId, appBundleId }).catch(() => {
+          // No-op
+        });
+      }
       const message = getMessageFromUnknownError(error);
       consola.error(message);
     }
   },
 });
 
-const uploadManifest = async (options: {
+const uploadFile = async (options: {
+  appId: string;
+  appBundleId: string;
+  fileBuffer: Buffer;
+  fileName: string;
+  href?: string;
+  privateKeyBuffer: Buffer | undefined;
+}) => {
+  // Generate checksum
+  const hash = await createHash(options.fileBuffer);
+  // Sign the bundle
+  let signature: string | undefined;
+  if (options.privateKeyBuffer) {
+    signature = await createSignature(options.privateKeyBuffer, options.fileBuffer);
+  }
+  // Create the multipart upload
+  await appBundleFilesService.create({
+    appId: options.appId,
+    appBundleId: options.appBundleId,
+    checksum: hash,
+    fileBuffer: options.fileBuffer,
+    fileName: options.fileName,
+    href: options.href,
+    signature,
+  });
+};
+
+const uploadFiles = async (options: {
   appId: string;
   appBundleId: string;
   path: string;
@@ -201,15 +247,19 @@ const uploadManifest = async (options: {
 }) => {
   // Get all files in the directory
   const files = await getFilesInDirectoryAndSubdirectories(options.path);
-  // Upload each file
-  for (const file of files) {
-    const relativePath = file.replace(options.path + '/', '');
-    const buffer = await createBufferFromPath(file);
+  // Iterate over each file
+  for (const [index, file] of files.entries()) {
+    consola.start(`Uploading file (${index + 1}/${files.length})...`);
+    const fileBuffer = await createBufferFromPath(file.path);
+    const fileName = file.name;
+    const href = file.path.replace(options.path + '/', '');
+    // Upload the file
     await uploadFile({
       appId: options.appId,
       appBundleId: options.appBundleId,
-      buffer: buffer,
-      href: relativePath,
+      fileBuffer,
+      fileName,
+      href,
       privateKeyBuffer: options.privateKeyBuffer,
     });
   }
@@ -222,78 +272,21 @@ const uploadZip = async (options: {
   privateKeyBuffer: Buffer | undefined;
 }) => {
   // Read the zip file
-  let buffer;
+  let fileBuffer;
   if (zip.isZipped(options.path)) {
     const readStream = createReadStream(options.path);
-    buffer = await createBufferFromReadStream(readStream);
+    fileBuffer = await createBufferFromReadStream(readStream);
   } else {
     consola.start('Zipping folder...');
-    buffer = await zip.zipFolder(options.path);
+    fileBuffer = await zip.zipFolder(options.path);
   }
   // Upload the zip file
+  consola.start('Uploading file...');
   await uploadFile({
     appId: options.appId,
     appBundleId: options.appBundleId,
-    buffer: buffer,
+    fileBuffer,
+    fileName: 'bundle.zip',
     privateKeyBuffer: options.privateKeyBuffer,
-  });
-};
-
-const uploadFile = async (options: {
-  appId: string;
-  appBundleId: string;
-  buffer: Buffer;
-  href?: string;
-  privateKeyBuffer: Buffer | undefined;
-}) => {
-  // Generate checksum
-  consola.start('Generating checksum...');
-  const hash = await createHash(options.buffer);
-  // Sign the bundle
-  let signature: string | undefined;
-  if (options.privateKeyBuffer) {
-    consola.start('Signing bundle...');
-    signature = await createSignature(options.privateKeyBuffer, options.buffer);
-  }
-  // Create the multipart upload
-  consola.start('Upload bundle...');
-  const { key, uploadId } = await apiAppBundleUploadService.createMultipartUpload({
-    appId: options.appId,
-    appBundleId: options.appBundleId,
-  });
-  // Upload the parts
-  const chunkSize = 1024 * 1024 * 10; // 10 Megabytes
-  const totalSize = options.buffer.length;
-  const chunks: { buffer: Buffer; end: number; start: number }[] = [];
-  for (let start = 0; start < totalSize; start += chunkSize) {
-    const end = Math.min(start + chunkSize, totalSize);
-    const chunk = options.buffer.slice(start, end);
-    chunks.push({ start, end, buffer: chunk });
-  }
-  const parts: PartDto[] = [];
-  for (const chunk of chunks) {
-    const formData = new FormData();
-    formData.append('action', 'mpu-uploadpart');
-    formData.append('blob', chunk.buffer, { filename: 'bundle.zip' });
-    formData.append('key', key);
-    formData.append('partNumber', (parts.length + 1).toString());
-    formData.append('uploadId', uploadId);
-    const part = await apiAppBundleUploadService.uploadPart({
-      appId: options.appId,
-      appBundleId: options.appBundleId,
-      formData,
-    });
-    parts.push(part);
-  }
-  // Complete the multipart upload
-  await apiAppBundleUploadService.completeMultipartUpload({
-    appId: options.appId,
-    appBundleId: options.appBundleId,
-    checksum: hash,
-    href: options.href,
-    key,
-    parts,
-    signature,
-    uploadId,
   });
 };

@@ -1,12 +1,17 @@
-import FormData from 'form-data';
-
 export interface AppBundleDto {
   id: string;
 }
 
 export interface CreateAppBundleDto {
   appId: string;
-  formData: FormData;
+  artifactType: 'manifest' | 'zip';
+  channelName?: string;
+  url?: string;
+  maxAndroidAppVersionCode?: string;
+  maxIosAppVersionCode?: string;
+  minAndroidAppVersionCode?: string;
+  minIosAppVersionCode?: string;
+  rolloutPercentage?: number;
 }
 
 export interface DeleteAppBundleDto {
@@ -22,7 +27,7 @@ export interface MultipartUploadDto {
 export interface UpdateAppBundleDto {
   appBundleId: string;
   appId: string;
-  artifactStatus?: 'uploading' | 'uploaded';
+  artifactStatus?: 'pending' | 'ready';
   maxAndroidAppVersionCode?: string;
   maxIosAppVersionCode?: string;
   minAndroidAppVersionCode?: string;
