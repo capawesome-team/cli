@@ -11,6 +11,7 @@ import { createBufferFromPath, createBufferFromReadStream } from '../../../utils
 import { getMessageFromUnknownError } from '../../../utils/error';
 import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '../../../utils/file';
 import { createHash } from '../../../utils/hash';
+import { generateManifestJson } from '../../../utils/manifest';
 import { prompt } from '../../../utils/prompt';
 import { createSignature } from '../../../utils/signature';
 import zip from '../../../utils/zip';
@@ -100,6 +101,12 @@ export default defineCommand({
         consola.error('The path must be a folder when creating a bundle with an artifact type of `manifest`.');
         return;
       }
+    }
+    // Check if the path exists
+    const pathExists = await fileExistsAtPath(path!);
+    if (!pathExists) {
+      consola.error(`The path does not exist.`);
+      return;
     }
     if (!appId) {
       const apps = await appsService.findAll();
@@ -252,6 +259,8 @@ const uploadFiles = async (options: {
   path: string;
   privateKeyBuffer: Buffer | undefined;
 }) => {
+  // Generate the manifest file
+  await generateManifestJson(options.path);
   // Get all files in the directory
   const files = await getFilesInDirectoryAndSubdirectories(options.path);
   // Iterate over each file

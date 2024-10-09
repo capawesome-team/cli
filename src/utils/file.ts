@@ -1,12 +1,3 @@
-export const fileExistsAtPath = async (path: string): Promise<boolean> => {
-  const fs = await import('fs');
-  return new Promise((resolve) => {
-    fs.access(path, fs.constants.F_OK, (err) => {
-      resolve(!err);
-    });
-  });
-};
-
 export const getFilesInDirectoryAndSubdirectories = async (path: string): Promise<{ path: string; name: string }[]> => {
   const fs = await import('fs');
   const pathModule = await import('path');
@@ -29,11 +20,33 @@ export const getFilesInDirectoryAndSubdirectories = async (path: string): Promis
   return files;
 };
 
+export const fileExistsAtPath = async (path: string): Promise<boolean> => {
+  const fs = await import('fs');
+  return new Promise((resolve) => {
+    fs.access(path, fs.constants.F_OK, (err) => {
+      resolve(!err);
+    });
+  });
+};
+
 export const isDirectory = async (path: string): Promise<boolean> => {
   const fs = await import('fs');
   return new Promise((resolve) => {
     fs.lstat(path, (err, stats) => {
       resolve(stats.isDirectory());
+    });
+  });
+};
+
+export const writeFile = async (path: string, data: string) => {
+  const fs = await import('fs');
+  return new Promise((resolve, reject) => {
+    fs.writeFile(path, data, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(undefined);
+      }
     });
   });
 };
