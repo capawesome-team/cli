@@ -1,11 +1,10 @@
 import FormData from 'form-data';
-import { AppBundleDto } from '../types';
 import { AppBundleFileDto, CreateAppBundleFileDto } from '../types/app-bundle-file';
 import httpClient, { HttpClient } from '../utils/http-client';
 import authorizationService from './authorization-service';
 
 export interface AppBundleFilesService {
-  create(dto: CreateAppBundleFileDto): Promise<AppBundleDto>;
+  create(dto: CreateAppBundleFileDto): Promise<AppBundleFileDto>;
 }
 
 class AppBundleFilesServiceImpl implements AppBundleFilesService {
@@ -25,7 +24,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
     if (dto.signature) {
       formData.append('signature', dto.signature);
     }
-    const response = await this.httpClient.post<AppBundleDto>(
+    const response = await this.httpClient.post<AppBundleFileDto>(
       `/apps/${dto.appId}/bundles/${dto.appBundleId}/files`,
       formData,
       {

@@ -6,6 +6,7 @@ import appBundleFilesService from '../../../services/app-bundle-files';
 import appBundlesService from '../../../services/app-bundles';
 import appsService from '../../../services/apps';
 import authorizationService from '../../../services/authorization-service';
+import { AppBundleFileDto } from '../../../types/app-bundle-file';
 import { createBufferFromPath, createBufferFromReadStream } from '../../../utils/buffer';
 import { getMessageFromUnknownError } from '../../../utils/error';
 import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '../../../utils/file';
@@ -124,6 +125,10 @@ export default defineCommand({
           channelName = await prompt('Enter the channel name:', {
             type: 'text',
           });
+          if (!channelName) {
+            consola.error('The channel name must be at least one character long.');
+            return;
+          }
         }
       }
     }
@@ -188,15 +193,17 @@ export default defineCommand({
       });
       appBundleId = response.id;
       if (path) {
+        let appBundleFileId: string | undefined;
         // Upload the app bundle files
         if (artifactType === 'manifest') {
           await uploadFiles({ appId, appBundleId: response.id, path, privateKeyBuffer });
         } else {
-          await uploadZip({ appId, appBundleId: response.id, path, privateKeyBuffer });
+          const result = await uploadZip({ appId, appBundleId: response.id, path, privateKeyBuffer });
+          appBundleFileId = result.appBundleFileId;
         }
         // Update the app bundle
         consola.start('Updating bundle...');
-        await appBundlesService.update({ appId, artifactStatus: 'ready', appBundleId: response.id });
+        await appBundlesService.update({ appBundleFileId, appId, artifactStatus: 'ready', appBundleId: response.id });
       }
       consola.success('Bundle successfully created.');
       consola.info(`Bundle ID: ${response.id}`);
@@ -219,7 +226,7 @@ const uploadFile = async (options: {
   fileName: string;
   href?: string;
   privateKeyBuffer: Buffer | undefined;
-}) => {
+}): Promise<AppBundleFileDto> => {
   // Generate checksum
   const hash = await createHash(options.fileBuffer);
   // Sign the bundle
@@ -228,7 +235,7 @@ const uploadFile = async (options: {
     signature = await createSignature(options.privateKeyBuffer, options.fileBuffer);
   }
   // Create the multipart upload
-  await appBundleFilesService.create({
+  return appBundleFilesService.create({
     appId: options.appId,
     appBundleId: options.appBundleId,
     checksum: hash,
@@ -270,7 +277,7 @@ const uploadZip = async (options: {
   appBundleId: string;
   path: string;
   privateKeyBuffer: Buffer | undefined;
-}) => {
+}): Promise<{ appBundleFileId: string }> => {
   // Read the zip file
   let fileBuffer;
   if (zip.isZipped(options.path)) {
@@ -282,11 +289,14 @@ const uploadZip = async (options: {
   }
   // Upload the zip file
   consola.start('Uploading file...');
-  await uploadFile({
+  const result = await uploadFile({
     appId: options.appId,
     appBundleId: options.appBundleId,
     fileBuffer,
     fileName: 'bundle.zip',
     privateKeyBuffer: options.privateKeyBuffer,
   });
+  return {
+    appBundleFileId: result.id,
+  };
 };

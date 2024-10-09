@@ -25,6 +25,7 @@ export interface MultipartUploadDto {
 }
 
 export interface UpdateAppBundleDto {
+  appBundleFileId?: string;
   appBundleId: string;
   appId: string;
   artifactStatus?: 'pending' | 'ready';
