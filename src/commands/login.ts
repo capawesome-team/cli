@@ -1,8 +1,9 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { defineCommand } from 'citty';
 import consola from 'consola';
 import { API_URL } from '../config';
 import usersService from '../services/users';
+import { getMessageFromUnknownError } from '../utils/error';
 import { passwordPrompt, prompt } from '../utils/prompt';
 import userConfig from '../utils/userConfig';
 
@@ -57,9 +58,12 @@ export default defineCommand({
         consola.success(`Successfully signed in.`);
       } catch (error) {
         userConfig.write({});
-        consola.error(
-          'Invalid token. Please provide a valid token. You can create a token at https://cloud.capawesome.io/settings/tokens.',
-        );
+        let message = getMessageFromUnknownError(error);
+        if (error instanceof AxiosError && error.response?.status === 401) {
+          message =
+            'Invalid token. Please provide a valid token. You can create a token at https://cloud.capawesome.io/settings/tokens.';
+        }
+        consola.error(message);
       }
     }
   },

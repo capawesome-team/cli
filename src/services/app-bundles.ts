@@ -22,9 +22,6 @@ class AppBundlesServiceImpl implements AppBundlesService {
         ...data.formData.getHeaders(),
       },
     });
-    if (!response.success) {
-      throw response.error;
-    }
     return response.data;
   }
 
@@ -34,21 +31,15 @@ class AppBundlesServiceImpl implements AppBundlesService {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
     });
-    if (!response.success) {
-      throw response.error;
-    }
     return response.data;
   }
 
   async delete(data: DeleteAppBundleDto): Promise<void> {
-    const response = await this.httpClient.delete(`/apps/${data.appId}/bundles/${data.bundleId}`, {
+    await this.httpClient.delete(`/apps/${data.appId}/bundles/${data.bundleId}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
     });
-    if (!response.success) {
-      throw response.error;
-    }
   }
 }
 

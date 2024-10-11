@@ -19,9 +19,6 @@ class UsersServiceImpl implements UsersService {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
     });
-    if (!response.success) {
-      throw response.error;
-    }
     return response.data;
   }
 }
