@@ -16,15 +16,16 @@ class UpdateServiceImpl implements UpdateService {
   }
 
   async checkForUpdate(): Promise<void> {
-    const response = await this.httpClient.get<NpmPackageDto>(`https://registry.npmjs.org/${pkg.name}/latest`);
-    if (!response.success) {
-      throw response.error;
-    }
-    const latestVersion = response.data.version;
-    if (semver.gt(latestVersion, pkg.version)) {
-      consola.warn(
-        `New version of Capawesome CLI available: ${pkg.name}@${latestVersion}. Please update to receive the latest features and bug fixes.`,
-      );
+    try {
+      const response = await this.httpClient.get<NpmPackageDto>(`https://registry.npmjs.org/${pkg.name}/latest`);
+      const latestVersion = response.data.version;
+      if (semver.gt(latestVersion, pkg.version)) {
+        consola.warn(
+          `New version of Capawesome CLI available: ${pkg.name}@${latestVersion}. Please update to receive the latest features and bug fixes.`,
+        );
+      }
+    } catch (error) {
+      consola.error('Failed to check for updates.');
     }
   }
 }

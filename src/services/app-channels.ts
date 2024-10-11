@@ -20,14 +20,11 @@ class AppChannelsServiceImpl implements AppChannelsService {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
     });
-    if (!response.success) {
-      throw response.error;
-    }
     return response.data;
   }
 
   async delete(data: DeleteAppChannelDto): Promise<void> {
-    const response = await this.httpClient.delete(`/apps/${data.appId}/channels`, {
+    await this.httpClient.delete(`/apps/${data.appId}/channels`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
@@ -35,9 +32,6 @@ class AppChannelsServiceImpl implements AppChannelsService {
         name: data.name,
       },
     });
-    if (!response.success) {
-      throw response.error;
-    }
   }
 }
 

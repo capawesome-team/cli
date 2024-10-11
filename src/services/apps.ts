@@ -21,21 +21,15 @@ class AppsServiceImpl implements AppsService {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
     });
-    if (!response.success) {
-      throw response.error;
-    }
     return response.data;
   }
 
   async delete(dto: DeleteAppDto): Promise<void> {
-    const response = await this.httpClient.delete(`/apps/${dto.id}`, {
+    await this.httpClient.delete(`/apps/${dto.id}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
     });
-    if (!response.success) {
-      throw response.error;
-    }
   }
 
   async findAll(): Promise<AppDto[]> {
@@ -44,9 +38,6 @@ class AppsServiceImpl implements AppsService {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
     });
-    if (!response.success) {
-      throw response.error;
-    }
     return response.data;
   }
 }
