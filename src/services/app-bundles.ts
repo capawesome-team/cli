@@ -46,37 +46,24 @@ class AppBundlesServiceImpl implements AppBundlesService {
         ...formData.getHeaders(),
       },
     });
-    if (!response.success) {
-      throw response.error;
-    }
     return response.data;
   }
 
-  async update(data: UpdateAppBundleDto): Promise<AppBundleDto> {
-    const response = await this.httpClient.patch<AppBundleDto>(
-      `/apps/${data.appId}/bundles/${data.appBundleId}`,
-      data,
-      {
-        headers: {
-          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
-        },
-      },
-    );
-    if (!response.success) {
-      throw response.error;
-    }
-    return response.data;
-  }
-
-  async delete(data: DeleteAppBundleDto): Promise<void> {
-    const response = await this.httpClient.delete(`/apps/${data.appId}/bundles/${data.appBundleId}`, {
+  async update(dto: UpdateAppBundleDto): Promise<AppBundleDto> {
+    const response = await this.httpClient.patch<AppBundleDto>(`/apps/${dto.appId}/bundles/${dto.appBundleId}`, dto, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
     });
-    if (!response.success) {
-      throw response.error;
-    }
+    return response.data;
+  }
+
+  async delete(dto: DeleteAppBundleDto): Promise<void> {
+    await this.httpClient.delete(`/apps/${dto.appId}/bundles/${dto.appBundleId}`, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+      },
+    });
   }
 }
 

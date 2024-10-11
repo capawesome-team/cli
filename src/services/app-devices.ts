@@ -14,14 +14,11 @@ class AppDevicesServiceImpl implements AppDevicesService {
   }
 
   async delete(data: DeleteAppDeviceDto): Promise<void> {
-    const res = await this.httpClient.delete(`/apps/${data.appId}/devices/${data.deviceId}`, {
+    await this.httpClient.delete(`/apps/${data.appId}/devices/${data.deviceId}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
     });
-    if (!res.success) {
-      throw res.error;
-    }
   }
 }
 
