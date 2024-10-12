@@ -34,9 +34,6 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
         },
       },
     );
-    if (!response.success) {
-      throw response.error;
-    }
     return response.data;
   }
 }
