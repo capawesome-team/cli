@@ -264,12 +264,22 @@ const uploadFiles = async (options: {
   // Get all files in the directory
   const files = await getFilesInDirectoryAndSubdirectories(options.path);
   // Iterate over each file
-  for (const [index, file] of files.entries()) {
-    consola.start(`Uploading file (${index + 1}/${files.length})...`);
+  const MAX_CONCURRENT_UPLOADS = 5;
+  let fileIndex = 0;
+
+  const uploadNextFile = async () => {
+    if (fileIndex >= files.length) {
+      return;
+    }
+
+    const file = files[fileIndex] as { path: string; name: string };
+    fileIndex++;
+
+    consola.start(`Uploading file (${fileIndex}/${files.length})...`);
     const fileBuffer = await createBufferFromPath(file.path);
     const fileName = file.name;
     const href = file.path.replace(options.path + '/', '');
-    // Upload the file
+
     await uploadFile({
       appId: options.appId,
       appBundleId: options.appBundleId,
@@ -278,7 +288,14 @@ const uploadFiles = async (options: {
       href,
       privateKeyBuffer: options.privateKeyBuffer,
     });
+    await uploadNextFile();
+  };
+
+  const uploadPromises = Array(MAX_CONCURRENT_UPLOADS);
+  for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+    uploadPromises[i] = uploadNextFile();
   }
+  await Promise.all(uploadPromises);
 };
 
 const uploadZip = async (options: {
