@@ -27,6 +27,7 @@ const main = defineCommand({
     'apps:channels:create': import('./commands/apps/channels/create').then((mod) => mod.default),
     'apps:channels:delete': import('./commands/apps/channels/delete').then((mod) => mod.default),
     'apps:devices:delete': import('./commands/apps/devices/delete').then((mod) => mod.default),
+    'manifests:generate': import('./commands/manifests/generate').then((mod) => mod.default),
   },
 });
 

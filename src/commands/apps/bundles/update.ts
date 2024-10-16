@@ -1,10 +1,10 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import { prompt } from '../../../utils/prompt';
-import authorizationService from '../../../services/authorization-service';
-import appsService from '../../../services/apps';
 import appBundlesService from '../../../services/app-bundles';
+import appsService from '../../../services/apps';
+import authorizationService from '../../../services/authorization-service';
 import { getMessageFromUnknownError } from '../../../utils/error';
+import { prompt } from '../../../utils/prompt';
 
 export default defineCommand({
   meta: {
@@ -73,7 +73,7 @@ export default defineCommand({
       const rolloutAsNumber = parseFloat(rollout);
       await appBundlesService.update({
         appId,
-        bundleId,
+        appBundleId: bundleId,
         maxAndroidAppVersionCode: androidMax,
         maxIosAppVersionCode: iosMax,
         minAndroidAppVersionCode: androidMin,
