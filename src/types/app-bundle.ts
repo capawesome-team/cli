@@ -19,11 +19,6 @@ export interface DeleteAppBundleDto {
   appId: string;
 }
 
-export interface MultipartUploadDto {
-  key: string;
-  uploadId: string;
-}
-
 export interface UpdateAppBundleDto {
   appBundleFileId?: string;
   appBundleId: string;
