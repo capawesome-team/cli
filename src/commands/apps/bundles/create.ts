@@ -264,7 +264,7 @@ const uploadFiles = async (options: {
   // Get all files in the directory
   const files = await getFilesInDirectoryAndSubdirectories(options.path);
   // Iterate over each file
-  const MAX_CONCURRENT_UPLOADS = 5;
+  const MAX_CONCURRENT_UPLOADS = 20;
   let fileIndex = 0;
 
   const uploadNextFile = async () => {
