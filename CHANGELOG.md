@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.16](https://github.com/capawesome-team/cli/compare/v0.0.15...v0.0.16) (2024-10-20)
+
+
+### Bug Fixes
+
+* **manifests:** exclude manifest file itself ([afae1f2](https://github.com/capawesome-team/cli/commit/afae1f23e88fa6e0c35d9c27ff5fa091593a27cd))
+
 ## [0.0.15](https://github.com/capawesome-team/cli/compare/v0.0.14...v0.0.15) (2024-10-20)
 
 
