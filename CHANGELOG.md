@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.15](https://github.com/capawesome-team/cli/compare/v0.0.14...v0.0.15) (2024-10-20)
+
+
+### Features
+
+* **bundles:** support artifact type `manifest` ([#14](https://github.com/capawesome-team/cli/issues/14)) ([5e92c5e](https://github.com/capawesome-team/cli/commit/5e92c5e74574748c1c9ceaab3bf7ae94430dfb71))
+
+
+### Bug Fixes
+
+* error message on sign-in if client is offline ([#13](https://github.com/capawesome-team/cli/issues/13)) ([56404f6](https://github.com/capawesome-team/cli/commit/56404f6e779dc851fa1bd7914921fa9744e9eeeb))
+
 ## [0.0.14](https://github.com/capawesome-team/cli/compare/v0.0.13...v0.0.14) (2024-09-30)
 
 
