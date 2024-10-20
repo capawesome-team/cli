@@ -1,9 +1,9 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import appsService from '../../../services/apps';
-import { prompt } from '../../../utils/prompt';
 import appBundlesService from '../../../services/app-bundles';
+import appsService from '../../../services/apps';
 import { getMessageFromUnknownError } from '../../../utils/error';
+import { prompt } from '../../../utils/prompt';
 
 export default defineCommand({
   meta: {
@@ -53,7 +53,7 @@ export default defineCommand({
     try {
       await appBundlesService.delete({
         appId,
-        bundleId,
+        appBundleId: bundleId,
       });
       consola.success('Bundle deleted successfully.');
     } catch (error) {

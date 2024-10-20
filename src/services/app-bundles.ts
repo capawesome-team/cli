@@ -1,11 +1,12 @@
-import { AppBundleDto, CreateAppBundleDto, DeleteAppBundleDto, UpadteAppBundleDto } from '../types';
+import FormData from 'form-data';
+import { AppBundleDto, CreateAppBundleDto, DeleteAppBundleDto, UpdateAppBundleDto } from '../types';
 import httpClient, { HttpClient } from '../utils/http-client';
 import authorizationService from './authorization-service';
 
 export interface AppBundlesService {
   create(dto: CreateAppBundleDto): Promise<AppBundleDto>;
   delete(dto: DeleteAppBundleDto): Promise<void>;
-  update(dto: UpadteAppBundleDto): Promise<AppBundleDto>;
+  update(dto: UpdateAppBundleDto): Promise<AppBundleDto>;
 }
 
 class AppBundlesServiceImpl implements AppBundlesService {
@@ -15,18 +16,41 @@ class AppBundlesServiceImpl implements AppBundlesService {
     this.httpClient = httpClient;
   }
 
-  async create(data: CreateAppBundleDto): Promise<AppBundleDto> {
-    const response = await this.httpClient.post<AppBundleDto>(`/apps/${data.appId}/bundles`, data.formData, {
+  async create(dto: CreateAppBundleDto): Promise<AppBundleDto> {
+    const formData = new FormData();
+    formData.append('artifactType', dto.artifactType);
+    if (dto.channelName) {
+      formData.append('channelName', dto.channelName);
+    }
+    if (dto.url) {
+      formData.append('url', dto.url);
+    }
+    if (dto.maxAndroidAppVersionCode) {
+      formData.append('maxAndroidAppVersionCode', dto.maxAndroidAppVersionCode);
+    }
+    if (dto.maxIosAppVersionCode) {
+      formData.append('maxIosAppVersionCode', dto.maxIosAppVersionCode);
+    }
+    if (dto.minAndroidAppVersionCode) {
+      formData.append('minAndroidAppVersionCode', dto.minAndroidAppVersionCode);
+    }
+    if (dto.minIosAppVersionCode) {
+      formData.append('minIosAppVersionCode', dto.minIosAppVersionCode);
+    }
+    if (dto.rolloutPercentage) {
+      formData.append('rolloutPercentage', dto.rolloutPercentage.toString());
+    }
+    const response = await this.httpClient.post<AppBundleDto>(`/apps/${dto.appId}/bundles`, formData, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
-        ...data.formData.getHeaders(),
+        ...formData.getHeaders(),
       },
     });
     return response.data;
   }
 
-  async update(data: UpadteAppBundleDto): Promise<AppBundleDto> {
-    const response = await this.httpClient.patch<AppBundleDto>(`/apps/${data.appId}/bundles/${data.bundleId}`, data, {
+  async update(dto: UpdateAppBundleDto): Promise<AppBundleDto> {
+    const response = await this.httpClient.patch<AppBundleDto>(`/apps/${dto.appId}/bundles/${dto.appBundleId}`, dto, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
@@ -34,8 +58,8 @@ class AppBundlesServiceImpl implements AppBundlesService {
     return response.data;
   }
 
-  async delete(data: DeleteAppBundleDto): Promise<void> {
-    await this.httpClient.delete(`/apps/${data.appId}/bundles/${data.bundleId}`, {
+  async delete(dto: DeleteAppBundleDto): Promise<void> {
+    await this.httpClient.delete(`/apps/${dto.appId}/bundles/${dto.appBundleId}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },

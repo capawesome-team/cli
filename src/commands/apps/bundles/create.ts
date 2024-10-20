@@ -1,17 +1,20 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import { prompt } from '../../../utils/prompt';
-import zip from '../../../utils/zip';
 import FormData from 'form-data';
-import { createReadStream } from 'node:fs';
-import authorizationService from '../../../services/authorization-service';
-import appsService from '../../../services/apps';
+import { createReadStream } from 'fs';
+import appBundleFilesService from '../../../services/app-bundle-files';
 import appBundlesService from '../../../services/app-bundles';
+import appsService from '../../../services/apps';
+import authorizationService from '../../../services/authorization-service';
+import { AppBundleFileDto } from '../../../types/app-bundle-file';
+import { createBufferFromPath, createBufferFromReadStream } from '../../../utils/buffer';
 import { getMessageFromUnknownError } from '../../../utils/error';
+import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '../../../utils/file';
 import { createHash } from '../../../utils/hash';
-import { createBuffer, createBufferFromPath } from '../../../utils/buffer';
+import { generateManifestJson } from '../../../utils/manifest';
+import { prompt } from '../../../utils/prompt';
 import { createSignature } from '../../../utils/signature';
-import { fileExistsAtPath } from '../../../utils/file';
+import zip from '../../../utils/zip';
 
 export default defineCommand({
   meta: {
@@ -29,6 +32,10 @@ export default defineCommand({
     appId: {
       type: 'string',
       description: 'App ID to deploy to.',
+    },
+    artifactType: {
+      type: 'string',
+      description: 'The type of artifact to deploy. Must be either `manifest` or `zip`. The default is `zip`.',
     },
     channel: {
       type: 'string',
@@ -65,11 +72,20 @@ export default defineCommand({
       return;
     }
 
-    const { androidMax, androidMin, privateKey, rollout, iosMax, iosMin } = ctx.args;
-    let appId = ctx.args.appId;
-    let channelName = ctx.args.channel;
-    let path = ctx.args.path;
-    let url = ctx.args.url;
+    let androidMax = ctx.args.androidMax as string | undefined;
+    let androidMin = ctx.args.androidMin as string | undefined;
+    let appId = ctx.args.appId as string | undefined;
+    let artifactType =
+      ctx.args.artifactType === 'manifest' || ctx.args.artifactType === 'zip'
+        ? ctx.args.artifactType
+        : ('zip' as 'manifest' | 'zip');
+    let channelName = ctx.args.channel as string | undefined;
+    let iosMax = ctx.args.iosMax as string | undefined;
+    let iosMin = ctx.args.iosMin as string | undefined;
+    let path = ctx.args.path as string | undefined;
+    let privateKey = ctx.args.privateKey as string | undefined;
+    let rollout = ctx.args.rollout as string | undefined;
+    let url = ctx.args.url as string | undefined;
     if (!path && !url) {
       path = await prompt('Enter the path to the app bundle:', {
         type: 'text',
@@ -78,6 +94,19 @@ export default defineCommand({
         consola.error('You must provide a path to the app bundle.');
         return;
       }
+    }
+    if (artifactType === 'manifest' && path) {
+      const pathIsDirectory = isDirectory(path);
+      if (!pathIsDirectory) {
+        consola.error('The path must be a folder when creating a bundle with an artifact type of `manifest`.');
+        return;
+      }
+    }
+    // Check if the path exists
+    const pathExists = await fileExistsAtPath(path!);
+    if (!pathExists) {
+      consola.error(`The path does not exist.`);
+      return;
     }
     if (!appId) {
       const apps = await appsService.findAll();
@@ -90,6 +119,10 @@ export default defineCommand({
         type: 'select',
         options: apps.map((app) => ({ label: app.name, value: app.id })),
       });
+      if (!appId) {
+        consola.error('You must select an app to deploy to.');
+        return;
+      }
       if (!channelName) {
         const promptChannel = await prompt('Do you want to deploy to a specific channel?', {
           type: 'select',
@@ -99,10 +132,14 @@ export default defineCommand({
           channelName = await prompt('Enter the channel name:', {
             type: 'text',
           });
+          if (!channelName) {
+            consola.error('The channel name must be at least one character long.');
+            return;
+          }
         }
       }
     }
-    let privateKeyBuffer;
+    let privateKeyBuffer: Buffer | undefined;
     if (privateKey) {
       if (privateKey.endsWith('.pem')) {
         const fileExists = await fileExistsAtPath(privateKey);
@@ -120,25 +157,7 @@ export default defineCommand({
 
     // Create form data
     const formData = new FormData();
-    if (path) {
-      let fileBuffer;
-      if (zip.isZipped(path)) {
-        const readStream = createReadStream(path);
-        fileBuffer = await createBuffer(readStream);
-      } else {
-        consola.start('Zipping folder...');
-        fileBuffer = await zip.zipFolder(path);
-      }
-      consola.start('Generating checksum...');
-      const hash = await createHash(fileBuffer);
-      formData.append('file', fileBuffer, { filename: 'bundle.zip' });
-      formData.append('checksum', hash);
-      if (privateKeyBuffer) {
-        consola.start('Signing bundle...');
-        const signature = await createSignature(privateKeyBuffer, fileBuffer);
-        formData.append('signature', signature);
-      }
-    }
+    formData.append('artifactType', artifactType || 'zip');
     if (url) {
       formData.append('url', url);
     }
@@ -165,19 +184,145 @@ export default defineCommand({
     if (iosMin) {
       formData.append('minIosAppVersionCode', iosMin);
     }
-    if (path) {
-      consola.start('Uploading...');
-    } else {
-      consola.start('Creating...');
-    }
-    // Upload the bundle
+    let appBundleId: string | undefined;
     try {
-      const response = await appBundlesService.create({ appId: appId, formData: formData });
+      // Create the app bundle
+      consola.start('Creating bundle...');
+      const response = await appBundlesService.create({
+        appId,
+        artifactType,
+        channelName,
+        url,
+        maxAndroidAppVersionCode: androidMax,
+        maxIosAppVersionCode: iosMax,
+        minAndroidAppVersionCode: androidMin,
+        minIosAppVersionCode: androidMin,
+      });
+      appBundleId = response.id;
+      if (path) {
+        let appBundleFileId: string | undefined;
+        // Upload the app bundle files
+        if (artifactType === 'manifest') {
+          await uploadFiles({ appId, appBundleId: response.id, path, privateKeyBuffer });
+        } else {
+          const result = await uploadZip({ appId, appBundleId: response.id, path, privateKeyBuffer });
+          appBundleFileId = result.appBundleFileId;
+        }
+        // Update the app bundle
+        consola.start('Updating bundle...');
+        await appBundlesService.update({ appBundleFileId, appId, artifactStatus: 'ready', appBundleId: response.id });
+      }
       consola.success('Bundle successfully created.');
       consola.info(`Bundle ID: ${response.id}`);
     } catch (error) {
+      if (appBundleId) {
+        await appBundlesService.delete({ appId, appBundleId }).catch(() => {
+          // No-op
+        });
+      }
       const message = getMessageFromUnknownError(error);
       consola.error(message);
     }
   },
 });
+
+const uploadFile = async (options: {
+  appId: string;
+  appBundleId: string;
+  fileBuffer: Buffer;
+  fileName: string;
+  href?: string;
+  privateKeyBuffer: Buffer | undefined;
+}): Promise<AppBundleFileDto> => {
+  // Generate checksum
+  const hash = await createHash(options.fileBuffer);
+  // Sign the bundle
+  let signature: string | undefined;
+  if (options.privateKeyBuffer) {
+    signature = await createSignature(options.privateKeyBuffer, options.fileBuffer);
+  }
+  // Create the multipart upload
+  return appBundleFilesService.create({
+    appId: options.appId,
+    appBundleId: options.appBundleId,
+    checksum: hash,
+    fileBuffer: options.fileBuffer,
+    fileName: options.fileName,
+    href: options.href,
+    signature,
+  });
+};
+
+const uploadFiles = async (options: {
+  appId: string;
+  appBundleId: string;
+  path: string;
+  privateKeyBuffer: Buffer | undefined;
+}) => {
+  // Generate the manifest file
+  await generateManifestJson(options.path);
+  // Get all files in the directory
+  const files = await getFilesInDirectoryAndSubdirectories(options.path);
+  // Iterate over each file
+  const MAX_CONCURRENT_UPLOADS = 20;
+  let fileIndex = 0;
+
+  const uploadNextFile = async () => {
+    if (fileIndex >= files.length) {
+      return;
+    }
+
+    const file = files[fileIndex] as { path: string; name: string };
+    fileIndex++;
+
+    consola.start(`Uploading file (${fileIndex}/${files.length})...`);
+    const fileBuffer = await createBufferFromPath(file.path);
+    const fileName = file.name;
+    const href = file.path.replace(options.path + '/', '');
+
+    await uploadFile({
+      appId: options.appId,
+      appBundleId: options.appBundleId,
+      fileBuffer,
+      fileName,
+      href,
+      privateKeyBuffer: options.privateKeyBuffer,
+    });
+    await uploadNextFile();
+  };
+
+  const uploadPromises = Array(MAX_CONCURRENT_UPLOADS);
+  for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+    uploadPromises[i] = uploadNextFile();
+  }
+  await Promise.all(uploadPromises);
+};
+
+const uploadZip = async (options: {
+  appId: string;
+  appBundleId: string;
+  path: string;
+  privateKeyBuffer: Buffer | undefined;
+}): Promise<{ appBundleFileId: string }> => {
+  // Read the zip file
+  let fileBuffer;
+  if (zip.isZipped(options.path)) {
+    const readStream = createReadStream(options.path);
+    fileBuffer = await createBufferFromReadStream(readStream);
+  } else {
+    consola.start('Zipping folder...');
+    fileBuffer = await zip.zipFolder(options.path);
+  }
+  // Upload the zip file
+  consola.start('Uploading file...');
+  const result = await uploadFile({
+    appId: options.appId,
+    appBundleId: options.appBundleId,
+    fileBuffer,
+    fileName: 'bundle.zip',
+    privateKeyBuffer: options.privateKeyBuffer,
+  });
+  return {
+    appBundleFileId: result.id,
+  };
+};
