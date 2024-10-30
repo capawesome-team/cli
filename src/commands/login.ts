@@ -22,8 +22,12 @@ export default defineCommand({
     let token = ctx.args.token as string | undefined;
     if (token === undefined) {
       consola.warn('If you have signed up via an OAuth provider, please sign in using the `--token` argument.');
-      const email = await prompt('Enter your email:', { type: 'text' });
-      const password = await passwordPrompt('Enter your password:');
+      const email = (await prompt('Enter your email:', { type: 'text' })) as string | undefined;
+      const password = (await passwordPrompt('Enter your password:')) as string | undefined;
+      if (!email || !password) {
+        consola.error('Invalid email or password.');
+        return;
+      }
       consola.start('Logging in...');
       let sessionId: string;
       try {
