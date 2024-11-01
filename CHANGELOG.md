@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.0.0](https://github.com/capawesome-team/cli/compare/v0.0.17...v1.0.0) (2024-11-01)
+
+
+### Features
+
+* **apps:** add new `--expires-in-days` option to `apps:bundles:create` ([5e83d14](https://github.com/capawesome-team/cli/commit/5e83d1422f927c7202cde0f57d47e790aeaf02c1))
+
+
+### Bug Fixes
+
+* **login:** log error if email or password are not provided ([844acc4](https://github.com/capawesome-team/cli/commit/844acc4952886cfed83573b18961c482eae6f410))
+* **manifests:** ignore `.DS_Store` file ([5e7ef8e](https://github.com/capawesome-team/cli/commit/5e7ef8ed9ec95bb48f3c4508648fe35f9d6090e8))
+
 ## [0.0.17](https://github.com/capawesome-team/cli/compare/v0.0.16...v0.0.17) (2024-10-24)
 
 ## [0.0.16](https://github.com/capawesome-team/cli/compare/v0.0.15...v0.0.16) (2024-10-20)
