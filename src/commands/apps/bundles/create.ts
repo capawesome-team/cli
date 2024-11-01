@@ -88,7 +88,7 @@ export default defineCommand({
     let iosMin = ctx.args.iosMin as string | undefined;
     let path = ctx.args.path as string | undefined;
     let privateKey = ctx.args.privateKey as string | undefined;
-    let rollout = ctx.args.rollout as string | undefined;
+    let rolloutAsString = ctx.args.rollout as string | undefined;
     let url = ctx.args.url as string | undefined;
     // Validate the expiration days
     let expiresAt: string | undefined;
@@ -101,6 +101,16 @@ export default defineCommand({
       const expiresAtDate = new Date();
       expiresAtDate.setDate(expiresAtDate.getDate() + expiresInDaysAsNumber);
       expiresAt = expiresAtDate.toISOString();
+    }
+    // Validate the rollout percentage
+    let rolloutPercentage = 1;
+    if (rolloutAsString) {
+      const rolloutAsNumber = parseFloat(rolloutAsString);
+      if (isNaN(rolloutAsNumber) || rolloutAsNumber < 0 || rolloutAsNumber > 1) {
+        consola.error('Rollout percentage must be a number between 0 and 1.');
+        return;
+      }
+      rolloutPercentage = rolloutAsNumber;
     }
     if (!path && !url) {
       path = await prompt('Enter the path to the app bundle:', {
@@ -185,6 +195,7 @@ export default defineCommand({
         maxIosAppVersionCode: iosMax,
         minAndroidAppVersionCode: androidMin,
         minIosAppVersionCode: androidMin,
+        rolloutPercentage,
       });
       appBundleId = response.id;
       if (path) {
