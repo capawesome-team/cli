@@ -22,6 +22,9 @@ class AppBundlesServiceImpl implements AppBundlesService {
     if (dto.channelName) {
       formData.append('channelName', dto.channelName);
     }
+    if (dto.expiresAt) {
+      formData.append('expiresAt', dto.expiresAt);
+    }
     if (dto.url) {
       formData.append('url', dto.url);
     }

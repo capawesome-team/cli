@@ -1,6 +1,5 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import FormData from 'form-data';
 import { createReadStream } from 'fs';
 import appBundleFilesService from '../../../services/app-bundle-files';
 import appBundlesService from '../../../services/app-bundles';
@@ -41,6 +40,10 @@ export default defineCommand({
       type: 'string',
       description: 'Channel to associate the bundle with.',
     },
+    expiresInDays: {
+      type: 'string',
+      description: 'The number of days until the bundle is automatically deleted.',
+    },
     iosMax: {
       type: 'string',
       description: 'The maximum iOS bundle version (`CFBundleVersion`) that the bundle supports.',
@@ -80,12 +83,25 @@ export default defineCommand({
         ? ctx.args.artifactType
         : ('zip' as 'manifest' | 'zip');
     let channelName = ctx.args.channel as string | undefined;
+    let expiresInDays = ctx.args.expiresInDays as string | undefined;
     let iosMax = ctx.args.iosMax as string | undefined;
     let iosMin = ctx.args.iosMin as string | undefined;
     let path = ctx.args.path as string | undefined;
     let privateKey = ctx.args.privateKey as string | undefined;
     let rollout = ctx.args.rollout as string | undefined;
     let url = ctx.args.url as string | undefined;
+    // Validate the expiration days
+    let expiresAt: string | undefined;
+    if (expiresInDays) {
+      const expiresInDaysAsNumber = parseInt(expiresInDays, 10);
+      if (isNaN(expiresInDaysAsNumber) || expiresInDaysAsNumber < 1) {
+        consola.error('Expires in days must be a number greater than 0.');
+        return;
+      }
+      const expiresAtDate = new Date();
+      expiresAtDate.setDate(expiresAtDate.getDate() + expiresInDaysAsNumber);
+      expiresAt = expiresAtDate.toISOString();
+    }
     if (!path && !url) {
       path = await prompt('Enter the path to the app bundle:', {
         type: 'text',
@@ -155,35 +171,6 @@ export default defineCommand({
       }
     }
 
-    // Create form data
-    const formData = new FormData();
-    formData.append('artifactType', artifactType || 'zip');
-    if (url) {
-      formData.append('url', url);
-    }
-    if (channelName) {
-      formData.append('channelName', channelName);
-    }
-    if (androidMax) {
-      formData.append('maxAndroidAppVersionCode', androidMax);
-    }
-    if (androidMin) {
-      formData.append('minAndroidAppVersionCode', androidMin);
-    }
-    if (rollout) {
-      const rolloutAsNumber = parseFloat(rollout);
-      if (isNaN(rolloutAsNumber) || rolloutAsNumber < 0 || rolloutAsNumber > 1) {
-        consola.error('Rollout percentage must be a number between 0 and 1 (e.g. 0.5).');
-        return;
-      }
-      formData.append('rolloutPercentage', rolloutAsNumber);
-    }
-    if (iosMax) {
-      formData.append('maxIosAppVersionCode', iosMax);
-    }
-    if (iosMin) {
-      formData.append('minIosAppVersionCode', iosMin);
-    }
     let appBundleId: string | undefined;
     try {
       // Create the app bundle
@@ -192,6 +179,7 @@ export default defineCommand({
         appId,
         artifactType,
         channelName,
+        expiresAt: expiresAt,
         url,
         maxAndroidAppVersionCode: androidMax,
         maxIosAppVersionCode: iosMax,
