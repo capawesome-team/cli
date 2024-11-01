@@ -194,7 +194,7 @@ export default defineCommand({
         maxAndroidAppVersionCode: androidMax,
         maxIosAppVersionCode: iosMax,
         minAndroidAppVersionCode: androidMin,
-        minIosAppVersionCode: androidMin,
+        minIosAppVersionCode: iosMin,
         rolloutPercentage,
       });
       appBundleId = response.id;
