@@ -3,6 +3,8 @@ import { createBufferFromPath } from './buffer';
 import { getFilesInDirectoryAndSubdirectories, writeFile } from './file';
 import { createHash } from './hash';
 
+const ignoreFiles = ['.DS_Store', MANIFEST_JSON_FILE_NAME];
+
 export const generateManifestJson = async (path: string) => {
   const manifestItems: ManifestItem[] = [];
   // Get all files
@@ -13,8 +15,8 @@ export const generateManifestJson = async (path: string) => {
     const checksum = await createHash(fileBuffer);
     const sizeInBytes = fileBuffer.byteLength;
     const href = file.path.replace(path + '/', '');
-    // Do NOT include the manifest file itself
-    if (href === MANIFEST_JSON_FILE_NAME) {
+    // Skip ignored files
+    if (ignoreFiles.includes(file.name)) {
       continue;
     }
     manifestItems.push({
