@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.0.1](https://github.com/capawesome-team/cli/compare/v1.0.0...v1.0.1) (2024-11-01)
+
+
+### Bug Fixes
+
+* **apps:** `--ios-min` option was ignored ([d2de664](https://github.com/capawesome-team/cli/commit/d2de66481f7b54e44fc52eac6d1c868e82499160))
+* **apps:** `--rollout` option was ignored ([5f1b2d8](https://github.com/capawesome-team/cli/commit/5f1b2d85a77d6a99e123dc690d947a740e864d6e))
+
 ## [1.0.0](https://github.com/capawesome-team/cli/compare/v0.0.17...v1.0.0) (2024-11-01)
 
 
