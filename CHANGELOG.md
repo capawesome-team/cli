@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.1.0](https://github.com/capawesome-team/cli/compare/v1.0.1...v1.1.0) (2024-11-01)
+
+
+### Features
+
+* **apps:** add `--bundle-limit` option ([#18](https://github.com/capawesome-team/cli/issues/18)) ([b20d33c](https://github.com/capawesome-team/cli/commit/b20d33cb0504c4bd83fec62fe40317b996357ef0))
+
 ## [1.0.1](https://github.com/capawesome-team/cli/compare/v1.0.0...v1.0.1) (2024-11-01)
 
 
