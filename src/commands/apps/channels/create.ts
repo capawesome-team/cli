@@ -1,9 +1,9 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import { prompt } from '../../../utils/prompt';
-import appsService from '../../../services/apps';
 import appChannelsService from '../../../services/app-channels';
+import appsService from '../../../services/apps';
 import { getMessageFromUnknownError } from '../../../utils/error';
+import { prompt } from '../../../utils/prompt';
 
 export default defineCommand({
   meta: {
@@ -14,6 +14,11 @@ export default defineCommand({
       type: 'string',
       description: 'ID of the app.',
     },
+    bundleLimit: {
+      type: 'string',
+      description:
+        'Maximum number of bundles that can be assigned to the channel. If more bundles are assigned, the oldest bundles will be automatically deleted.',
+    },
     name: {
       type: 'string',
       description: 'Name of the channel.',
@@ -21,6 +26,9 @@ export default defineCommand({
   },
   run: async (ctx) => {
     let appId = ctx.args.appId;
+    let bundleLimitAsString = ctx.args.bundleLimit;
+    let name = ctx.args.name;
+    // Validate the app ID
     if (!appId) {
       const apps = await appsService.findAll();
       if (!apps.length) {
@@ -33,7 +41,16 @@ export default defineCommand({
         options: apps.map((app) => ({ label: app.name, value: app.id })),
       });
     }
-    let name = ctx.args.name;
+    // Validate the bundle limit
+    let bundleLimit: number | undefined;
+    if (bundleLimitAsString) {
+      bundleLimit = parseInt(bundleLimitAsString, 10);
+      if (isNaN(bundleLimit)) {
+        consola.error('The bundle limit must be a number.');
+        return;
+      }
+    }
+    // Validate the channel name
     if (!name) {
       name = await prompt('Enter the name of the channel:', { type: 'text' });
     }
@@ -41,6 +58,7 @@ export default defineCommand({
       const response = await appChannelsService.create({
         appId,
         name,
+        totalAppBundleLimit: bundleLimit,
       });
       consola.success('Channel created successfully.');
       consola.info(`Channel ID: ${response.id}`);
