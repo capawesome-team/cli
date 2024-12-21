@@ -1,7 +1,7 @@
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import configService from '../services/config';
+import sessionsService from '../services/sessions';
 import usersService from '../services/users';
 import { getMessageFromUnknownError } from '../utils/error';
 import { passwordPrompt, prompt } from '../utils/prompt';
@@ -31,14 +31,11 @@ export default defineCommand({
       consola.start('Logging in...');
       let sessionId: string;
       try {
-        const sessionResponse = await axios.post<{ id: string }>(
-          `${await configService.getValueForKey('API_URL')}/sessions`,
-          {
-            email: email,
-            password: password,
-          },
-        );
-        sessionId = sessionResponse.data.id;
+        const response = await sessionsService.create({
+          email,
+          password,
+        });
+        sessionId = response.id;
       } catch (error) {
         consola.error('Invalid email or password.');
         return;
