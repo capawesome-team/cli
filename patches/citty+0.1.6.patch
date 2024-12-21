@@ -1,0 +1,12 @@
+diff --git a/node_modules/citty/dist/index.cjs b/node_modules/citty/dist/index.cjs
+index f36a0e2..f8c60cf 100644
+--- a/node_modules/citty/dist/index.cjs
++++ b/node_modules/citty/dist/index.cjs
+@@ -454,6 +454,7 @@ async function runMain(cmd, opts = {}) {
+     const isCLIError = error instanceof CLIError;
+     if (!isCLIError) {
+       consola__default.error(error, "\n");
++      throw error;
+     }
+     if (isCLIError) {
+       await showUsage$1(...await resolveSubCommand(cmd, rawArgs));

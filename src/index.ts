@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import * as Sentry from '@sentry/node';
 import { defineCommand, runMain } from 'citty';
 import pkg from '../package.json';
 import updateService from './services/update';
@@ -31,4 +32,17 @@ const main = defineCommand({
   },
 });
 
-runMain(main);
+const captureException = async (error: unknown) => {
+  Sentry.init({
+    dsn: 'https://19f30f2ec4b91899abc33818568ceb42@o4507446340747264.ingest.de.sentry.io/4508506426966096',
+  });
+  Sentry.captureException(error);
+  await Sentry.close();
+};
+
+runMain(main).catch(async (error) => {
+  await captureException(error).catch(() => {
+    // No op
+  });
+  process.exit(1);
+});

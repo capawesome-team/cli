@@ -41,12 +41,14 @@
   ],
   "dependencies": {
     "@clack/prompts": "0.7.0",
+    "@sentry/node": "8.47.0",
     "archiver": "7.0.1",
     "axios": "1.7.7",
     "c12": "2.0.1",
     "citty": "0.1.6",
     "consola": "3.2.3",
     "form-data": "4.0.1",
+    "patch-package": "8.0.0",
     "rc9": "2.1.2",
     "semver": "7.6.3"
   },
