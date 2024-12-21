@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.2.0](https://github.com/capawesome-team/cli/compare/v1.1.0...v1.2.0) (2024-12-21)
+
+
+### Features
+
+* add Sentry for error reporting ([398868c](https://github.com/capawesome-team/cli/commit/398868c762c2fb24dcd631d19f33134ef876a6ed)), closes [#4](https://github.com/capawesome-team/cli/issues/4)
+
 ## [1.1.0](https://github.com/capawesome-team/cli/compare/v1.0.1...v1.1.0) (2024-11-01)
 
 
