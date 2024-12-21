@@ -40,13 +40,8 @@ export default defineCommand({
         consola.error('Invalid email or password.');
         return;
       }
-      const tokenResponse = await axios.post<{ token: string }>(
-        `${API_URL}/tokens`,
-        { name: 'Capawesome CLI' },
-        { headers: { Authorization: `Bearer ${sessionId}` } },
-      );
       userConfig.write({
-        token: tokenResponse.data.token,
+        token: sessionId,
       });
       consola.success(`Successfully signed in.`);
     } else if (token.length === 0) {
