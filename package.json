@@ -43,6 +43,7 @@
     "@clack/prompts": "0.7.0",
     "archiver": "7.0.1",
     "axios": "1.7.7",
+    "c12": "2.0.1",
     "citty": "0.1.6",
     "consola": "3.2.3",
     "form-data": "4.0.1",

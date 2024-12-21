@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { API_URL } from '../config';
+import configService from '../services/config';
 
 export interface HttpClient {
   delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>>;
@@ -10,28 +10,33 @@ export interface HttpClient {
 }
 
 class HttpClientImpl implements HttpClient {
-  delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
-    const urlWithHost = url.startsWith('http') ? url : API_URL + url;
+  async delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
+    const baseUrl = await configService.getValueForKey('API_URL');
+    const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
     return axios.delete<T>(urlWithHost, config);
   }
 
   get<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
-    const urlWithHost = url.startsWith('http') ? url : API_URL + url;
+    const baseUrl = configService.getValueForKey('API_URL');
+    const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
     return axios.get<T>(urlWithHost, config);
   }
 
   patch<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
-    const urlWithHost = url.startsWith('http') ? url : API_URL + url;
+    const baseUrl = configService.getValueForKey('API_URL');
+    const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
     return axios.patch<T>(urlWithHost, data, config);
   }
 
   post<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
-    const urlWithHost = url.startsWith('http') ? url : API_URL + url;
+    const baseUrl = configService.getValueForKey('API_URL');
+    const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
     return axios.post<T>(urlWithHost, data, config);
   }
 
   put<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
-    const urlWithHost = url.startsWith('http') ? url : API_URL + url;
+    const baseUrl = configService.getValueForKey('API_URL');
+    const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
     return axios.put<T>(urlWithHost, data, config);
   }
 }
