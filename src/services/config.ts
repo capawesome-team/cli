@@ -19,6 +19,7 @@ class ConfigServiceImpl implements ConfigService {
     const { config } = await loadConfig({
       defaults: {
         API_URL: 'https://api.cloud.capawesome.io/v1',
+        ENVIRONMENT: 'production',
       },
       name: 'capawesome',
     });

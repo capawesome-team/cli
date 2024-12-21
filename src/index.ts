@@ -2,6 +2,7 @@
 import * as Sentry from '@sentry/node';
 import { defineCommand, runMain } from 'citty';
 import pkg from '../package.json';
+import configService from './services/config';
 import updateService from './services/update';
 
 const main = defineCommand({
@@ -33,6 +34,10 @@ const main = defineCommand({
 });
 
 const captureException = async (error: unknown) => {
+  const environment = await configService.getValueForKey('ENVIRONMENT');
+  if (environment !== 'production') {
+    return;
+  }
   Sentry.init({
     dsn: 'https://19f30f2ec4b91899abc33818568ceb42@o4507446340747264.ingest.de.sentry.io/4508506426966096',
   });
