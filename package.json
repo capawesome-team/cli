@@ -3,14 +3,13 @@
   "version": "1.3.1",
   "description": "The Capawesome Cloud Command Line Interface (CLI) to manage Live Updates and more.",
   "scripts": {
-    "build": "rimraf ./dist && tsc",
+    "build": "patch-package && rimraf ./dist && tsc",
     "start": "npm run build && node ./dist/index.js",
     "lint": "npm run prettier -- --check",
     "fmt": "npm run prettier -- --write",
     "prettier": "prettier \"**/*.{css,html,ts,js}\"",
     "prepublishOnly": "npm run build",
-    "release": "commit-and-tag-version",
-    "postinstall": "patch-package"
+    "release": "commit-and-tag-version"
   },
   "bin": {
     "capawesome": "./dist/index.js"
