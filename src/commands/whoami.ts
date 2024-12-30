@@ -20,9 +20,11 @@ export default defineCommand({
         consola.info(`Logged in as ${email || userProviderProfile || '?'}.`);
       } catch (error) {
         consola.error('Token is invalid. Please sign in again.');
+        process.exit(1);
       }
     } else {
       consola.error('Not logged in.');
+      process.exit(1);
     }
   },
 });

@@ -23,7 +23,7 @@ export default defineCommand({
       });
       if (!path) {
         consola.error('You must provide a path to the web assets folder.');
-        return;
+        process.exit(1);
       }
     }
 
@@ -31,7 +31,7 @@ export default defineCommand({
     const pathExists = await fileExistsAtPath(path);
     if (!pathExists) {
       consola.error(`The path does not exist.`);
-      return;
+      process.exit(1);
     }
     // Generate the manifest file
     await generateManifestJson(path);
