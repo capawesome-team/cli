@@ -1,14 +1,11 @@
-import consola from 'consola';
 import { password as clackPassword } from '@clack/prompts';
+import consola from 'consola';
 
-/**
- * This is a workaround for the issue with consola.prompt not detecting command cancellation.
- *
- * @see https://github.com/unjs/consola/issues/251#issuecomment-1810269084
- */
 export const prompt: typeof consola.prompt = async (message, options) => {
+  options = { ...(options || {}), cancel: 'symbol' } as any;
   const response = await consola.prompt(message, options);
-  if (response && response.toString() === 'Symbol(clack:cancel)') {
+  // See https://github.com/unjs/consola/pull/325#issue-2751614453
+  if (response === Symbol.for('cancel')) {
     process.exit(0);
   }
   return response;
