@@ -1,8 +1,8 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import { prompt } from '../../utils/prompt';
 import appsService from '../../services/apps';
 import { getMessageFromUnknownError } from '../../utils/error';
+import { prompt } from '../../utils/prompt';
 
 export default defineCommand({
   meta: {
@@ -26,6 +26,7 @@ export default defineCommand({
     } catch (error) {
       const message = getMessageFromUnknownError(error);
       consola.error(message);
+      process.exit(1);
     }
   },
 });

@@ -43,7 +43,7 @@ export default defineCommand({
   run: async (ctx) => {
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command.');
-      return;
+      process.exit(1);
     }
 
     // Prompt for missing arguments
@@ -54,7 +54,7 @@ export default defineCommand({
       const apps = await appsService.findAll();
       if (!apps.length) {
         consola.error('You must create an app before updating a bundle.');
-        return;
+        process.exit(1);
       }
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
       appId = await prompt('Which app do you want to update the bundle for?', {
@@ -84,6 +84,7 @@ export default defineCommand({
     } catch (error) {
       const message = getMessageFromUnknownError(error);
       consola.error(message);
+      process.exit(1);
     }
   },
 });

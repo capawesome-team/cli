@@ -26,6 +26,7 @@ class UpdateServiceImpl implements UpdateService {
       }
     } catch (error) {
       consola.error('Failed to check for updates.');
+      process.exit(1);
     }
   }
 }

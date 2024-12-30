@@ -72,7 +72,7 @@ export default defineCommand({
   run: async (ctx) => {
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command.');
-      return;
+      process.exit(1);
     }
 
     let androidMax = ctx.args.androidMax as string | undefined;
@@ -96,7 +96,7 @@ export default defineCommand({
       const expiresInDaysAsNumber = parseInt(expiresInDays, 10);
       if (isNaN(expiresInDaysAsNumber) || expiresInDaysAsNumber < 1) {
         consola.error('Expires in days must be a number greater than 0.');
-        return;
+        process.exit(1);
       }
       const expiresAtDate = new Date();
       expiresAtDate.setDate(expiresAtDate.getDate() + expiresInDaysAsNumber);
@@ -108,7 +108,7 @@ export default defineCommand({
       const rolloutAsNumber = parseFloat(rolloutAsString);
       if (isNaN(rolloutAsNumber) || rolloutAsNumber < 0 || rolloutAsNumber > 1) {
         consola.error('Rollout percentage must be a number between 0 and 1.');
-        return;
+        process.exit(1);
       }
       rolloutPercentage = rolloutAsNumber;
     }
@@ -118,27 +118,27 @@ export default defineCommand({
       });
       if (!path) {
         consola.error('You must provide a path to the app bundle.');
-        return;
+        process.exit(1);
       }
     }
     if (artifactType === 'manifest' && path) {
       const pathIsDirectory = isDirectory(path);
       if (!pathIsDirectory) {
         consola.error('The path must be a folder when creating a bundle with an artifact type of `manifest`.');
-        return;
+        process.exit(1);
       }
     }
     // Check if the path exists
     const pathExists = await fileExistsAtPath(path!);
     if (!pathExists) {
       consola.error(`The path does not exist.`);
-      return;
+      process.exit(1);
     }
     if (!appId) {
       const apps = await appsService.findAll();
       if (apps.length === 0) {
         consola.error('You must create an app before creating a bundle.');
-        return;
+        process.exit(1);
       }
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
       appId = await prompt('Which app do you want to deploy to:', {
@@ -147,7 +147,7 @@ export default defineCommand({
       });
       if (!appId) {
         consola.error('You must select an app to deploy to.');
-        return;
+        process.exit(1);
       }
       if (!channelName) {
         const promptChannel = await prompt('Do you want to deploy to a specific channel?', {
@@ -160,7 +160,7 @@ export default defineCommand({
           });
           if (!channelName) {
             consola.error('The channel name must be at least one character long.');
-            return;
+            process.exit(1);
           }
         }
       }
@@ -173,11 +173,11 @@ export default defineCommand({
           privateKeyBuffer = await createBufferFromPath(privateKey);
         } else {
           consola.error('Private key file not found.');
-          return;
+          process.exit(1);
         }
       } else {
         consola.error('Private key must be a path to a .pem file.');
-        return;
+        process.exit(1);
       }
     }
 
@@ -221,6 +221,7 @@ export default defineCommand({
       }
       const message = getMessageFromUnknownError(error);
       consola.error(message);
+      process.exit(1);
     }
   },
 });

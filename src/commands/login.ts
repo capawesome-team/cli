@@ -26,7 +26,7 @@ export default defineCommand({
       const password = (await passwordPrompt('Enter your password:')) as string | undefined;
       if (!email || !password) {
         consola.error('Invalid email or password.');
-        return;
+        process.exit(1);
       }
       consola.start('Logging in...');
       let sessionId: string;
@@ -38,7 +38,7 @@ export default defineCommand({
         sessionId = response.id;
       } catch (error) {
         consola.error('Invalid email or password.');
-        return;
+        process.exit(1);
       }
       userConfig.write({
         token: sessionId,
@@ -48,6 +48,7 @@ export default defineCommand({
       consola.error(
         'Please provide a valid token. You can create a token at https://cloud.capawesome.io/settings/tokens.',
       );
+      process.exit(1);
     } else {
       userConfig.write({
         token: token,
@@ -63,6 +64,7 @@ export default defineCommand({
             'Invalid token. Please provide a valid token. You can create a token at https://cloud.capawesome.io/settings/tokens.';
         }
         consola.error(message);
+        process.exit(1);
       }
     }
   },

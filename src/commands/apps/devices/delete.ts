@@ -1,9 +1,9 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import appsService from '../../../services/apps';
-import { prompt } from '../../../utils/prompt';
 import appDevicesService from '../../../services/app-devices';
+import appsService from '../../../services/apps';
 import { getMessageFromUnknownError } from '../../../utils/error';
+import { prompt } from '../../../utils/prompt';
 
 export default defineCommand({
   meta: {
@@ -25,7 +25,7 @@ export default defineCommand({
       const apps = await appsService.findAll();
       if (!apps.length) {
         consola.error('You must create an app before deleting a device.');
-        return;
+        process.exit(1);
       }
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
       appId = await prompt('Which app do you want to delete the device from?', {
@@ -54,6 +54,7 @@ export default defineCommand({
     } catch (error) {
       const message = getMessageFromUnknownError(error);
       consola.error(message);
+      process.exit(1);
     }
   },
 });
