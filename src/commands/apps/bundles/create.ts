@@ -42,7 +42,8 @@ export default defineCommand({
     },
     customProperty: {
       type: 'string',
-      description: 'Custom properties to associate with the bundle.',
+      description:
+        'A custom property to assign to the bundle. Must be in the format `key=value`. Can be specified multiple times.',
     },
     expiresInDays: {
       type: 'string',
