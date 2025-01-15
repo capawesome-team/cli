@@ -1,4 +1,3 @@
-import FormData from 'form-data';
 import { AppBundleDto, CreateAppBundleDto, DeleteAppBundleDto, UpdateAppBundleDto } from '../types';
 import httpClient, { HttpClient } from '../utils/http-client';
 import authorizationService from './authorization-service';
@@ -17,36 +16,9 @@ class AppBundlesServiceImpl implements AppBundlesService {
   }
 
   async create(dto: CreateAppBundleDto): Promise<AppBundleDto> {
-    const formData = new FormData();
-    formData.append('artifactType', dto.artifactType);
-    if (dto.channelName) {
-      formData.append('channelName', dto.channelName);
-    }
-    if (dto.expiresAt) {
-      formData.append('expiresAt', dto.expiresAt);
-    }
-    if (dto.url) {
-      formData.append('url', dto.url);
-    }
-    if (dto.maxAndroidAppVersionCode) {
-      formData.append('maxAndroidAppVersionCode', dto.maxAndroidAppVersionCode);
-    }
-    if (dto.maxIosAppVersionCode) {
-      formData.append('maxIosAppVersionCode', dto.maxIosAppVersionCode);
-    }
-    if (dto.minAndroidAppVersionCode) {
-      formData.append('minAndroidAppVersionCode', dto.minAndroidAppVersionCode);
-    }
-    if (dto.minIosAppVersionCode) {
-      formData.append('minIosAppVersionCode', dto.minIosAppVersionCode);
-    }
-    if (dto.rolloutPercentage) {
-      formData.append('rolloutPercentage', dto.rolloutPercentage.toString());
-    }
-    const response = await this.httpClient.post<AppBundleDto>(`/apps/${dto.appId}/bundles`, formData, {
+    const response = await this.httpClient.post<AppBundleDto>(`/apps/${dto.appId}/bundles`, dto, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
-        ...formData.getHeaders(),
       },
     });
     return response.data;
