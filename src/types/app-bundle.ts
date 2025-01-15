@@ -6,6 +6,7 @@ export interface CreateAppBundleDto {
   appId: string;
   artifactType: 'manifest' | 'zip';
   channelName?: string;
+  customProperties?: Record<string, string>;
   expiresAt?: string;
   url?: string;
   maxAndroidAppVersionCode?: string;

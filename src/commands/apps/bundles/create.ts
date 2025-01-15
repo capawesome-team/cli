@@ -40,6 +40,10 @@ export default defineCommand({
       type: 'string',
       description: 'Channel to associate the bundle with.',
     },
+    customProperty: {
+      type: 'string',
+      description: 'Custom properties to associate with the bundle.',
+    },
     expiresInDays: {
       type: 'string',
       description: 'The number of days until the bundle is automatically deleted.',
@@ -83,6 +87,7 @@ export default defineCommand({
         ? ctx.args.artifactType
         : ('zip' as 'manifest' | 'zip');
     let channelName = ctx.args.channel as string | undefined;
+    let customProperty = ctx.args.customProperty as string | string[] | undefined;
     let expiresInDays = ctx.args.expiresInDays as string | undefined;
     let iosMax = ctx.args.iosMax as string | undefined;
     let iosMin = ctx.args.iosMin as string | undefined;
@@ -189,6 +194,7 @@ export default defineCommand({
         appId,
         artifactType,
         channelName,
+        customProperties: parseCustomProperties(customProperty),
         expiresAt: expiresAt,
         url,
         maxAndroidAppVersionCode: androidMax,
@@ -325,4 +331,25 @@ const uploadZip = async (options: {
   return {
     appBundleFileId: result.id,
   };
+};
+
+const parseCustomProperties = (customProperty: string | string[] | undefined): Record<string, string> | undefined => {
+  let customProperties: Record<string, string> | undefined;
+  if (customProperty) {
+    customProperties = {};
+    if (Array.isArray(customProperty)) {
+      for (const property of customProperty) {
+        const [key, value] = property.split('=');
+        if (key && value) {
+          customProperties[key] = value;
+        }
+      }
+    } else {
+      const [key, value] = customProperty.split('=');
+      if (key && value) {
+        customProperties[key] = value;
+      }
+    }
+  }
+  return customProperties;
 };
