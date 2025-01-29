@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.4.0](https://github.com/capawesome-team/cli/compare/v1.3.2...v1.4.0) (2025-01-29)
+
+
+### Features
+
+* **bundles:** support custom properties ([#31](https://github.com/capawesome-team/cli/issues/31)) ([405634b](https://github.com/capawesome-team/cli/commit/405634b8a46a77a72ea9812fb350f54ca79a8387))
+
+
+### Bug Fixes
+
+* convert command arguments to string if not undefined ([b147e21](https://github.com/capawesome-team/cli/commit/b147e214b4ee0da3babc82773b1426162f753c36)), closes [#33](https://github.com/capawesome-team/cli/issues/33)
+
 ## [1.3.2](https://github.com/capawesome-team/cli/compare/v1.3.1...v1.3.2) (2024-12-30)
 
 
