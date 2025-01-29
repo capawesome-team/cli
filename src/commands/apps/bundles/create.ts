@@ -80,8 +80,8 @@ export default defineCommand({
       process.exit(1);
     }
 
-    let androidMax = ctx.args.androidMax as string | undefined;
-    let androidMin = ctx.args.androidMin as string | undefined;
+    let androidMax = ctx.args.androidMax === undefined ? undefined : ctx.args.androidMax + ''; // Convert to string
+    let androidMin = ctx.args.androidMin === undefined ? undefined : ctx.args.androidMin + ''; // Convert to string
     let appId = ctx.args.appId as string | undefined;
     let artifactType =
       ctx.args.artifactType === 'manifest' || ctx.args.artifactType === 'zip'
@@ -89,12 +89,12 @@ export default defineCommand({
         : ('zip' as 'manifest' | 'zip');
     let channelName = ctx.args.channel as string | undefined;
     let customProperty = ctx.args.customProperty as string | string[] | undefined;
-    let expiresInDays = ctx.args.expiresInDays as string | undefined;
-    let iosMax = ctx.args.iosMax as string | undefined;
-    let iosMin = ctx.args.iosMin as string | undefined;
+    let expiresInDays = ctx.args.expiresInDays === undefined ? undefined : ctx.args.expiresInDays + ''; // Convert to string
+    let iosMax = ctx.args.iosMax === undefined ? undefined : ctx.args.iosMax + ''; // Convert to string
+    let iosMin = ctx.args.iosMin === undefined ? undefined : ctx.args.iosMin + ''; // Convert to string
     let path = ctx.args.path as string | undefined;
     let privateKey = ctx.args.privateKey as string | undefined;
-    let rolloutAsString = ctx.args.rollout as string | undefined;
+    let rolloutAsString = ctx.args.rollout === undefined ? undefined : ctx.args.rollout + ''; // Convert to string
     let url = ctx.args.url as string | undefined;
     // Validate the expiration days
     let expiresAt: string | undefined;
