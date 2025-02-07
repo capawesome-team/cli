@@ -1,1 +1,2 @@
 API_URL="http://api.cloud.capawesome.io/v1"
+ENVIRONMENT="development"
