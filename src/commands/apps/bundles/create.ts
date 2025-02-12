@@ -73,6 +73,18 @@ export default defineCommand({
       type: 'string',
       description: 'The url to the self-hosted bundle file.',
     },
+    commitRef: {
+      type: 'string',
+      description: 'The commit ref related to the bundle.',
+    },
+    commitSha: {
+      type: 'string',
+      description: 'The commit sha related to the bundle.',
+    },
+    commitMessage: {
+      type: 'string',
+      description: 'The commit message related to the bundle.',
+    },
   },
   run: async (ctx) => {
     if (!authorizationService.hasAuthorizationToken()) {
@@ -96,6 +108,9 @@ export default defineCommand({
     let privateKey = ctx.args.privateKey as string | undefined;
     let rolloutAsString = ctx.args.rollout === undefined ? undefined : ctx.args.rollout + ''; // Convert to string
     let url = ctx.args.url as string | undefined;
+    let commitRef = ctx.args.commitRef as string | undefined;
+    let commitSha = ctx.args.commitSha as string | undefined;
+    let commitMessage = ctx.args.commitMessage as string | undefined;
     // Validate the expiration days
     let expiresAt: string | undefined;
     if (expiresInDays) {

@@ -14,6 +14,9 @@ export interface CreateAppBundleDto {
   minAndroidAppVersionCode?: string;
   minIosAppVersionCode?: string;
   rolloutPercentage?: number;
+  commitRef?: string;
+  commitSha?: string;
+  commitMessage?: string;
 }
 
 export interface DeleteAppBundleDto {
