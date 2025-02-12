@@ -218,6 +218,9 @@ export default defineCommand({
         minAndroidAppVersionCode: androidMin,
         minIosAppVersionCode: iosMin,
         rolloutPercentage,
+        commitReference: commitRef,
+        commitSha,
+        commitMessage,
       });
       appBundleId = response.id;
       if (path) {
