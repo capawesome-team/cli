@@ -240,24 +240,35 @@ const uploadFile = async (options: {
   fileName: string;
   href?: string;
   privateKeyBuffer: Buffer | undefined;
+  retryOnFailure?: boolean;
 }): Promise<AppBundleFileDto> => {
-  // Generate checksum
-  const hash = await createHash(options.fileBuffer);
-  // Sign the bundle
-  let signature: string | undefined;
-  if (options.privateKeyBuffer) {
-    signature = await createSignature(options.privateKeyBuffer, options.fileBuffer);
+  try {
+    // Generate checksum
+    const hash = await createHash(options.fileBuffer);
+    // Sign the bundle
+    let signature: string | undefined;
+    if (options.privateKeyBuffer) {
+      signature = await createSignature(options.privateKeyBuffer, options.fileBuffer);
+    }
+    // Create the multipart upload
+    return await appBundleFilesService.create({
+      appId: options.appId,
+      appBundleId: options.appBundleId,
+      checksum: hash,
+      fileBuffer: options.fileBuffer,
+      fileName: options.fileName,
+      href: options.href,
+      signature,
+    });
+  } catch (error) {
+    if (options.retryOnFailure) {
+      return uploadFile({
+        ...options,
+        retryOnFailure: false,
+      });
+    }
+    throw error;
   }
-  // Create the multipart upload
-  return appBundleFilesService.create({
-    appId: options.appId,
-    appBundleId: options.appBundleId,
-    checksum: hash,
-    fileBuffer: options.fileBuffer,
-    fileName: options.fileName,
-    href: options.href,
-    signature,
-  });
 };
 
 const uploadFiles = async (options: {
@@ -294,6 +305,7 @@ const uploadFiles = async (options: {
       fileName,
       href,
       privateKeyBuffer: options.privateKeyBuffer,
+      retryOnFailure: true,
     });
     await uploadNextFile();
   };
