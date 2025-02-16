@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.4.1](https://github.com/capawesome-team/cli/compare/v1.4.0...v1.4.1) (2025-02-16)
+
+
+### Bug Fixes
+
+* **bundles:** add retry mechanism for file upload on failure ([86a62da](https://github.com/capawesome-team/cli/commit/86a62daa2ae50d691791714ef6a5812a6e87dc4b))
+
 ## [1.4.0](https://github.com/capawesome-team/cli/compare/v1.3.2...v1.4.0) (2025-01-29)
 
 
