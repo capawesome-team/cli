@@ -75,7 +75,7 @@ export default defineCommand({
     },
     commitRef: {
       type: 'string',
-      description: 'The commit ref related to the bundle.',
+      description: 'The commit reference related to the bundle.',
     },
     commitSha: {
       type: 'string',
