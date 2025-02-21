@@ -6,6 +6,7 @@ export interface CreateAppBundleDto {
   appId: string;
   artifactType: 'manifest' | 'zip';
   channelName?: string;
+  checksum?: string;
   customProperties?: Record<string, string>;
   expiresAt?: string;
   url?: string;
@@ -14,6 +15,7 @@ export interface CreateAppBundleDto {
   minAndroidAppVersionCode?: string;
   minIosAppVersionCode?: string;
   rolloutPercentage?: number;
+  signature?: string;
 }
 
 export interface DeleteAppBundleDto {

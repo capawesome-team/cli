@@ -136,6 +136,13 @@ export default defineCommand({
         process.exit(1);
       }
     }
+    // Check that a URL is not provided when creating a bundle with an artifact type of manifest
+    if (artifactType === 'manifest' && url) {
+      consola.error(
+        'It is not yet possible to provide a URL when creating a bundle with an artifact type of `manifest`.',
+      );
+      process.exit(1);
+    }
     // Check if the path exists when a path is provided
     if (path) {
       const pathExists = await fileExistsAtPath(path);
@@ -144,6 +151,7 @@ export default defineCommand({
         process.exit(1);
       }
     }
+    // Let the user select an app and channel if not provided
     if (!appId) {
       const apps = await appsService.findAll();
       if (apps.length === 0) {
@@ -175,6 +183,7 @@ export default defineCommand({
         }
       }
     }
+    // Create the private key buffer
     let privateKeyBuffer: Buffer | undefined;
     if (privateKey) {
       if (privateKey.endsWith('.pem')) {
@@ -195,10 +204,22 @@ export default defineCommand({
     try {
       // Create the app bundle
       consola.start('Creating bundle...');
+      let checksum: string | undefined;
+      let signature: string | undefined;
+      if (path && url) {
+        const fileBuffer = await createBufferFromPath(path);
+        // Generate checksum
+        checksum = await createHash(fileBuffer);
+        // Sign the bundle
+        if (privateKeyBuffer) {
+          signature = await createSignature(privateKeyBuffer, fileBuffer);
+        }
+      }
       const response = await appBundlesService.create({
         appId,
         artifactType,
         channelName,
+        checksum,
         customProperties: parseCustomProperties(customProperty),
         expiresAt: expiresAt,
         url,
@@ -207,20 +228,26 @@ export default defineCommand({
         minAndroidAppVersionCode: androidMin,
         minIosAppVersionCode: iosMin,
         rolloutPercentage,
+        signature,
       });
       appBundleId = response.id;
       if (path) {
-        let appBundleFileId: string | undefined;
-        // Upload the app bundle files
-        if (artifactType === 'manifest') {
-          await uploadFiles({ appId, appBundleId: response.id, path, privateKeyBuffer });
+        if (url) {
+          // Important: Do NOT upload files if the URL is provided.
+          // The user wants to self-host the bundle. The path is only needed for code signing.
         } else {
-          const result = await uploadZip({ appId, appBundleId: response.id, path, privateKeyBuffer });
-          appBundleFileId = result.appBundleFileId;
+          let appBundleFileId: string | undefined;
+          // Upload the app bundle files
+          if (artifactType === 'manifest') {
+            await uploadFiles({ appId, appBundleId: response.id, path, privateKeyBuffer });
+          } else {
+            const result = await uploadZip({ appId, appBundleId: response.id, path, privateKeyBuffer });
+            appBundleFileId = result.appBundleFileId;
+          }
+          // Update the app bundle
+          consola.start('Updating bundle...');
+          await appBundlesService.update({ appBundleFileId, appId, artifactStatus: 'ready', appBundleId: response.id });
         }
-        // Update the app bundle
-        consola.start('Updating bundle...');
-        await appBundlesService.update({ appBundleFileId, appId, artifactStatus: 'ready', appBundleId: response.id });
       }
       consola.success('Bundle successfully created.');
       consola.info(`Bundle ID: ${response.id}`);
