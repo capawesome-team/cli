@@ -118,6 +118,7 @@ export default defineCommand({
       }
       rolloutPercentage = rolloutAsNumber;
     }
+    // Check that either a path or a url is provided
     if (!path && !url) {
       path = await prompt('Enter the path to the app bundle:', {
         type: 'text',
@@ -127,6 +128,7 @@ export default defineCommand({
         process.exit(1);
       }
     }
+    // Check that the path is a directory when creating a bundle with an artifact type
     if (artifactType === 'manifest' && path) {
       const pathIsDirectory = isDirectory(path);
       if (!pathIsDirectory) {
@@ -134,11 +136,13 @@ export default defineCommand({
         process.exit(1);
       }
     }
-    // Check if the path exists
-    const pathExists = await fileExistsAtPath(path!);
-    if (!pathExists) {
-      consola.error(`The path does not exist.`);
-      process.exit(1);
+    // Check if the path exists when a path is provided
+    if (path) {
+      const pathExists = await fileExistsAtPath(path);
+      if (!pathExists) {
+        consola.error(`The path does not exist.`);
+        process.exit(1);
+      }
     }
     if (!appId) {
       const apps = await appsService.findAll();
