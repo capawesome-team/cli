@@ -75,7 +75,7 @@ export default defineCommand({
     },
     commitRef: {
       type: 'string',
-      description: 'The commit reference related to the bundle.',
+      description: 'The commit ref related to the bundle.',
     },
     commitSha: {
       type: 'string',
@@ -218,7 +218,7 @@ export default defineCommand({
         minAndroidAppVersionCode: androidMin,
         minIosAppVersionCode: iosMin,
         rolloutPercentage,
-        commitReference: commitRef,
+        commitRef,
         commitSha,
         commitMessage,
       });
