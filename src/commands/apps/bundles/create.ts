@@ -133,6 +133,7 @@ export default defineCommand({
       }
       rolloutPercentage = rolloutAsNumber;
     }
+    // Check that either a path or a url is provided
     if (!path && !url) {
       path = await prompt('Enter the path to the app bundle:', {
         type: 'text',
@@ -142,6 +143,7 @@ export default defineCommand({
         process.exit(1);
       }
     }
+    // Check that the path is a directory when creating a bundle with an artifact type
     if (artifactType === 'manifest' && path) {
       const pathIsDirectory = isDirectory(path);
       if (!pathIsDirectory) {
@@ -149,12 +151,22 @@ export default defineCommand({
         process.exit(1);
       }
     }
-    // Check if the path exists
-    const pathExists = await fileExistsAtPath(path!);
-    if (!pathExists) {
-      consola.error(`The path does not exist.`);
+    // Check that a URL is not provided when creating a bundle with an artifact type of manifest
+    if (artifactType === 'manifest' && url) {
+      consola.error(
+        'It is not yet possible to provide a URL when creating a bundle with an artifact type of `manifest`.',
+      );
       process.exit(1);
     }
+    // Check if the path exists when a path is provided
+    if (path) {
+      const pathExists = await fileExistsAtPath(path);
+      if (!pathExists) {
+        consola.error(`The path does not exist.`);
+        process.exit(1);
+      }
+    }
+    // Let the user select an app and channel if not provided
     if (!appId) {
       const apps = await appsService.findAll();
       if (apps.length === 0) {
@@ -186,6 +198,7 @@ export default defineCommand({
         }
       }
     }
+    // Create the private key buffer
     let privateKeyBuffer: Buffer | undefined;
     if (privateKey) {
       if (privateKey.endsWith('.pem')) {
@@ -206,10 +219,25 @@ export default defineCommand({
     try {
       // Create the app bundle
       consola.start('Creating bundle...');
+      let checksum: string | undefined;
+      let signature: string | undefined;
+      if (path && url) {
+        const fileBuffer = await createBufferFromPath(path);
+        // Generate checksum
+        checksum = await createHash(fileBuffer);
+        // Sign the bundle
+        if (privateKeyBuffer) {
+          signature = await createSignature(privateKeyBuffer, fileBuffer);
+        }
+      }
       const response = await appBundlesService.create({
         appId,
         artifactType,
         channelName,
+        checksum,
+        commitRef,
+        commitSha,
+        commitMessage,
         customProperties: parseCustomProperties(customProperty),
         expiresAt: expiresAt,
         url,
@@ -218,23 +246,26 @@ export default defineCommand({
         minAndroidAppVersionCode: androidMin,
         minIosAppVersionCode: iosMin,
         rolloutPercentage,
-        commitRef,
-        commitSha,
-        commitMessage,
+        signature,
       });
       appBundleId = response.id;
       if (path) {
-        let appBundleFileId: string | undefined;
-        // Upload the app bundle files
-        if (artifactType === 'manifest') {
-          await uploadFiles({ appId, appBundleId: response.id, path, privateKeyBuffer });
+        if (url) {
+          // Important: Do NOT upload files if the URL is provided.
+          // The user wants to self-host the bundle. The path is only needed for code signing.
         } else {
-          const result = await uploadZip({ appId, appBundleId: response.id, path, privateKeyBuffer });
-          appBundleFileId = result.appBundleFileId;
+          let appBundleFileId: string | undefined;
+          // Upload the app bundle files
+          if (artifactType === 'manifest') {
+            await uploadFiles({ appId, appBundleId: response.id, path, privateKeyBuffer });
+          } else {
+            const result = await uploadZip({ appId, appBundleId: response.id, path, privateKeyBuffer });
+            appBundleFileId = result.appBundleFileId;
+          }
+          // Update the app bundle
+          consola.start('Updating bundle...');
+          await appBundlesService.update({ appBundleFileId, appId, artifactStatus: 'ready', appBundleId: response.id });
         }
-        // Update the app bundle
-        consola.start('Updating bundle...');
-        await appBundlesService.update({ appBundleFileId, appId, artifactStatus: 'ready', appBundleId: response.id });
       }
       consola.success('Bundle successfully created.');
       consola.info(`Bundle ID: ${response.id}`);
@@ -258,24 +289,35 @@ const uploadFile = async (options: {
   fileName: string;
   href?: string;
   privateKeyBuffer: Buffer | undefined;
+  retryOnFailure?: boolean;
 }): Promise<AppBundleFileDto> => {
-  // Generate checksum
-  const hash = await createHash(options.fileBuffer);
-  // Sign the bundle
-  let signature: string | undefined;
-  if (options.privateKeyBuffer) {
-    signature = await createSignature(options.privateKeyBuffer, options.fileBuffer);
+  try {
+    // Generate checksum
+    const hash = await createHash(options.fileBuffer);
+    // Sign the bundle
+    let signature: string | undefined;
+    if (options.privateKeyBuffer) {
+      signature = await createSignature(options.privateKeyBuffer, options.fileBuffer);
+    }
+    // Create the multipart upload
+    return await appBundleFilesService.create({
+      appId: options.appId,
+      appBundleId: options.appBundleId,
+      checksum: hash,
+      fileBuffer: options.fileBuffer,
+      fileName: options.fileName,
+      href: options.href,
+      signature,
+    });
+  } catch (error) {
+    if (options.retryOnFailure) {
+      return uploadFile({
+        ...options,
+        retryOnFailure: false,
+      });
+    }
+    throw error;
   }
-  // Create the multipart upload
-  return appBundleFilesService.create({
-    appId: options.appId,
-    appBundleId: options.appBundleId,
-    checksum: hash,
-    fileBuffer: options.fileBuffer,
-    fileName: options.fileName,
-    href: options.href,
-    signature,
-  });
 };
 
 const uploadFiles = async (options: {
@@ -312,6 +354,7 @@ const uploadFiles = async (options: {
       fileName,
       href,
       privateKeyBuffer: options.privateKeyBuffer,
+      retryOnFailure: true,
     });
     await uploadNextFile();
   };

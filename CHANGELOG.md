@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.5.0](https://github.com/capawesome-team/cli/compare/v1.4.1...v1.5.0) (2025-02-21)
+
+
+### Features
+
+* **apps:bundles:create:** support code signing for self-hosted bundles ([ebc84ec](https://github.com/capawesome-team/cli/commit/ebc84ecdf3006e9b68491d3082991d0bcf8f9423))
+
+
+### Bug Fixes
+
+* **apps:bundles:create:** provide a url without path to support self-hosted bundles ([1dcf020](https://github.com/capawesome-team/cli/commit/1dcf020ff006445e3ff211ed66a1cec1afdd012d))
+
+## [1.4.1](https://github.com/capawesome-team/cli/compare/v1.4.0...v1.4.1) (2025-02-16)
+
+
+### Bug Fixes
+
+* **bundles:** add retry mechanism for file upload on failure ([86a62da](https://github.com/capawesome-team/cli/commit/86a62daa2ae50d691791714ef6a5812a6e87dc4b))
+
 ## [1.4.0](https://github.com/capawesome-team/cli/compare/v1.3.2...v1.4.0) (2025-01-29)
 
 
