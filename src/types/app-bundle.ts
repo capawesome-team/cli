@@ -7,9 +7,9 @@ export interface CreateAppBundleDto {
   artifactType: 'manifest' | 'zip';
   channelName?: string;
   checksum?: string;
-  commitRef?: string;
-  commitSha?: string;
-  commitMessage?: string;
+  gitCommitMessage?: string;
+  gitCommitRef?: string;
+  gitCommitSha?: string;
   customProperties?: Record<string, string>;
   expiresAt?: string;
   url?: string;
