@@ -40,6 +40,18 @@ export default defineCommand({
       type: 'string',
       description: 'Channel to associate the bundle with.',
     },
+    commitMessage: {
+      type: 'string',
+      description: 'The commit message related to the bundle.',
+    },
+    commitRef: {
+      type: 'string',
+      description: 'The commit ref related to the bundle.',
+    },
+    commitSha: {
+      type: 'string',
+      description: 'The commit sha related to the bundle.',
+    },
     customProperty: {
       type: 'string',
       description:
@@ -96,6 +108,9 @@ export default defineCommand({
     let privateKey = ctx.args.privateKey as string | undefined;
     let rolloutAsString = ctx.args.rollout === undefined ? undefined : ctx.args.rollout + ''; // Convert to string
     let url = ctx.args.url as string | undefined;
+    let commitMessage = ctx.args.commitMessage as string | undefined;
+    let commitRef = ctx.args.commitRef as string | undefined;
+    let commitSha = ctx.args.commitSha as string | undefined;
     // Validate the expiration days
     let expiresAt: string | undefined;
     if (expiresInDays) {
@@ -220,6 +235,9 @@ export default defineCommand({
         artifactType,
         channelName,
         checksum,
+        gitCommitMessage: commitMessage,
+        gitCommitRef: commitRef,
+        gitCommitSha: commitSha,
         customProperties: parseCustomProperties(customProperty),
         expiresAt: expiresAt,
         url,
