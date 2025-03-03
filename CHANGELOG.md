@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.6.0](https://github.com/capawesome-team/cli/compare/v1.5.0...v1.6.0) (2025-03-03)
+
+
+### Features
+
+* add git integration ([#34](https://github.com/capawesome-team/cli/issues/34)) ([7ca323a](https://github.com/capawesome-team/cli/commit/7ca323a030e9c70866c2cf1c34c69ef9dc0129e0))
+
 ## [1.5.0](https://github.com/capawesome-team/cli/compare/v1.4.1...v1.5.0) (2025-02-21)
 
 
