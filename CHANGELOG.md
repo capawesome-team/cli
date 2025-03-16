@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.6.1](https://github.com/capawesome-team/cli/compare/v1.6.0...v1.6.1) (2025-03-16)
+
+
+### Bug Fixes
+
+* **apps:bundles:create:** validate zip file if url is passed ([bd1c4c7](https://github.com/capawesome-team/cli/commit/bd1c4c7463ed3a1611ec6da1b2e87eccb0665fed))
+* improve error handling ([949e358](https://github.com/capawesome-team/cli/commit/949e35826d3e75d5077b55966cff75ccd15a54d7))
+
 ## [1.6.0](https://github.com/capawesome-team/cli/compare/v1.5.0...v1.6.0) (2025-03-03)
 
 
