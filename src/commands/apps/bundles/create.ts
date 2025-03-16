@@ -222,6 +222,11 @@ export default defineCommand({
       let checksum: string | undefined;
       let signature: string | undefined;
       if (path && url) {
+        // Create the file buffer
+        if (!zip.isZipped(path)) {
+          consola.error('The path must be a zip file when providing a URL.');
+          process.exit(1);
+        }
         const fileBuffer = await createBufferFromPath(path);
         // Generate checksum
         checksum = await createHash(fileBuffer);
