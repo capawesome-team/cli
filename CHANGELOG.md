@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.6.2](https://github.com/capawesome-team/cli/compare/v1.6.1...v1.6.2) (2025-03-18)
+
+
+### Bug Fixes
+
+* invalid hrefs were created for the artifact type `manifest` if path starts with `./` ([5d3f629](https://github.com/capawesome-team/cli/commit/5d3f6299fbfde98705589e1518af654dba7e234f))
+
 ## [1.6.1](https://github.com/capawesome-team/cli/compare/v1.6.0...v1.6.1) (2025-03-16)
 
 
