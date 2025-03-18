@@ -1,7 +1,9 @@
-export const getFilesInDirectoryAndSubdirectories = async (path: string): Promise<{ path: string; name: string }[]> => {
+export const getFilesInDirectoryAndSubdirectories = async (
+  path: string,
+): Promise<{ href: string; path: string; name: string }[]> => {
   const fs = await import('fs');
   const pathModule = await import('path');
-  const files: { path: string; name: string }[] = [];
+  const files: { href: string; path: string; name: string }[] = [];
   const walk = async (directory: string) => {
     const dirEntries = await fs.promises.readdir(directory, { withFileTypes: true }).catch(() => []);
     for (const dirEntry of dirEntries) {
@@ -9,7 +11,18 @@ export const getFilesInDirectoryAndSubdirectories = async (path: string): Promis
       if (dirEntry.isDirectory()) {
         await walk(fullPath);
       } else {
+        let pathToReplace = path;
+        // Remove the leading './' from the path
+        if (pathToReplace.startsWith('./')) {
+          pathToReplace = pathToReplace.replace('./', '');
+        }
+        let href = fullPath.replace(pathToReplace, '');
+        // Remove the leading '/' from the href
+        if (href.startsWith('/')) {
+          href = href.replace('/', '');
+        }
         files.push({
+          href,
           name: dirEntry.name,
           path: fullPath,
         });

@@ -143,9 +143,27 @@ export default defineCommand({
         process.exit(1);
       }
     }
+    if (path) {
+      // Check if the path exists when a path is provided
+      const pathExists = await fileExistsAtPath(path);
+      if (!pathExists) {
+        consola.error(`The path does not exist.`);
+        process.exit(1);
+      }
+      // Check if the directory contains an index.html file
+      const pathIsDirectory = await isDirectory(path);
+      if (pathIsDirectory) {
+        const files = await getFilesInDirectoryAndSubdirectories(path);
+        const indexHtml = files.find((file) => file.href === 'index.html');
+        if (!indexHtml) {
+          consola.error('The directory must contain an `index.html` file.');
+          process.exit(1);
+        }
+      }
+    }
     // Check that the path is a directory when creating a bundle with an artifact type
     if (artifactType === 'manifest' && path) {
-      const pathIsDirectory = isDirectory(path);
+      const pathIsDirectory = await isDirectory(path);
       if (!pathIsDirectory) {
         consola.error('The path must be a folder when creating a bundle with an artifact type of `manifest`.');
         process.exit(1);
@@ -157,14 +175,6 @@ export default defineCommand({
         'It is not yet possible to provide a URL when creating a bundle with an artifact type of `manifest`.',
       );
       process.exit(1);
-    }
-    // Check if the path exists when a path is provided
-    if (path) {
-      const pathExists = await fileExistsAtPath(path);
-      if (!pathExists) {
-        consola.error(`The path does not exist.`);
-        process.exit(1);
-      }
     }
     // Let the user select an app and channel if not provided
     if (!appId) {
@@ -344,20 +354,18 @@ const uploadFiles = async (options: {
       return;
     }
 
-    const file = files[fileIndex] as { path: string; name: string };
+    const file = files[fileIndex] as { href: string; path: string; name: string };
     fileIndex++;
 
     consola.start(`Uploading file (${fileIndex}/${files.length})...`);
     const fileBuffer = await createBufferFromPath(file.path);
-    const fileName = file.name;
-    const href = file.path.replace(options.path + '/', '');
 
     await uploadFile({
       appId: options.appId,
       appBundleId: options.appBundleId,
       fileBuffer,
-      fileName,
-      href,
+      fileName: file.name,
+      href: file.href,
       privateKeyBuffer: options.privateKeyBuffer,
       retryOnFailure: true,
     });

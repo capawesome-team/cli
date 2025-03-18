@@ -14,14 +14,13 @@ export const generateManifestJson = async (path: string) => {
     const fileBuffer = await createBufferFromPath(file.path);
     const checksum = await createHash(fileBuffer);
     const sizeInBytes = fileBuffer.byteLength;
-    const href = file.path.replace(path + '/', '');
     // Skip ignored files
     if (ignoreFiles.includes(file.name)) {
       continue;
     }
     manifestItems.push({
       checksum,
-      href,
+      href: file.href,
       sizeInBytes,
     });
   }
