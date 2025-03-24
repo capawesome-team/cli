@@ -39,6 +39,12 @@ body:
     attributes:
       label: Other information
       description: List any other information that is relevant to your issue. Operating system, Node.js version, etc.
+  - type: textarea
+    attributes:
+      label: Doctor
+      description: Run `npx capawesome doctor` in a terminal and paste the output below.
+    validations:
+      required: true
   - type: checkboxes
     attributes:
       label:  Before submitting 
