@@ -1,6 +1,6 @@
 {
   "name": "@capawesome/cli",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "The Capawesome Cloud Command Line Interface (CLI) to manage Live Updates and more.",
   "scripts": {
     "build": "patch-package && rimraf ./dist && tsc",
@@ -41,9 +41,9 @@
   ],
   "dependencies": {
     "@clack/prompts": "0.7.0",
-    "@sentry/node": "8.47.0",
+    "@sentry/node": "8.55.0",
     "archiver": "7.0.1",
-    "axios": "1.7.7",
+    "axios": "1.8.4",
     "c12": "2.0.1",
     "citty": "0.1.6",
     "consola": "3.3.0",

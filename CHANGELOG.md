@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.6.3](https://github.com/capawesome-team/cli/compare/v1.6.2...v1.6.3) (2025-03-20)
+
+
+### Bug Fixes
+
+* **apps:bundles:create:** handle backslashes on WIndows ([8754f93](https://github.com/capawesome-team/cli/commit/8754f9306e25ff466ec14ba817781f5cad2b4634))
+
 ## [1.6.2](https://github.com/capawesome-team/cli/compare/v1.6.1...v1.6.2) (2025-03-18)
 
 

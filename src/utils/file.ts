@@ -11,12 +11,14 @@ export const getFilesInDirectoryAndSubdirectories = async (
       if (dirEntry.isDirectory()) {
         await walk(fullPath);
       } else {
-        let pathToReplace = path;
+        let pathToReplace = pathModule.normalize(path);
         // Remove the leading './' from the path
         if (pathToReplace.startsWith('./')) {
           pathToReplace = pathToReplace.replace('./', '');
         }
         let href = fullPath.replace(pathToReplace, '');
+        // Replace the backslashes with forward slashes (Windows only)
+        href = href.replace(/\\/g, '/');
         // Remove the leading '/' from the href
         if (href.startsWith('/')) {
           href = href.replace('/', '');
