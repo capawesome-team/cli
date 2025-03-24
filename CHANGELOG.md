@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.7.0](https://github.com/capawesome-team/cli/compare/v1.6.3...v1.7.0) (2025-03-24)
+
+
+### Features
+
+* **doctor:** add doctor command ([#37](https://github.com/capawesome-team/cli/issues/37)) ([1d9d0ac](https://github.com/capawesome-team/cli/commit/1d9d0acf74b1b3ce63c87031a8499227bf3e3f8b))
+
 ## [1.6.3](https://github.com/capawesome-team/cli/compare/v1.6.2...v1.6.3) (2025-03-20)
 
 
