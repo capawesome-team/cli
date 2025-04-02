@@ -50,6 +50,5 @@ runMain(main).catch(async (error) => {
   await captureException(error).catch(() => {
     // No op
   });
-  console.error(error);
   process.exit(1);
 });
