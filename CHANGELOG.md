@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.8.0](https://github.com/capawesome-team/cli/compare/v1.7.0...v1.8.0) (2025-04-06)
+
+
+### Features
+
+* login via browser ([#39](https://github.com/capawesome-team/cli/issues/39)) ([814f0e4](https://github.com/capawesome-team/cli/commit/814f0e4875e6ce0a21fd655cfa3c57b50fa5146a)), closes [#32](https://github.com/capawesome-team/cli/issues/32)
+
+
+### Bug Fixes
+
+* improved error handling ([9f12894](https://github.com/capawesome-team/cli/commit/9f128941d1a8576034712cadea22da62313fa90c))
+
 ## [1.7.0](https://github.com/capawesome-team/cli/compare/v1.6.3...v1.7.0) (2025-03-24)
 
 
