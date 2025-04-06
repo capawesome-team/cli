@@ -1,6 +1,7 @@
 import { AxiosError } from 'axios';
 import { defineCommand } from 'citty';
 import consola from 'consola';
+import open from 'open';
 import configService from '../services/config';
 import sessionCodesService from '../services/session-code';
 import sessionsService from '../services/sessions';
@@ -21,6 +22,7 @@ export default defineCommand({
     },
   },
   run: async (ctx) => {
+    const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
     let sessionIdOrToken = ctx.args.token as string | undefined;
     if (sessionIdOrToken === undefined) {
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
@@ -49,7 +51,7 @@ export default defineCommand({
         }
         // Open the authorization URL in the user's default browser
         consola.start('Opening browser...');
-        const authorizationUrl = await getAuthorizationUrl();
+        const authorizationUrl = `${consoleBaseUrl}/login/device`;
         try {
           open(authorizationUrl);
         } catch (error) {
@@ -76,9 +78,7 @@ export default defineCommand({
       }
     } else if (sessionIdOrToken.length === 0) {
       // No token provided
-      consola.error(
-        'Please provide a valid token. You can create a token at https://cloud.capawesome.io/settings/tokens.',
-      );
+      consola.error(`Please provide a valid token. You can create a token at ${consoleBaseUrl}/settings/tokens.`);
       process.exit(1);
     }
     // Sign in with the provided token
@@ -93,8 +93,7 @@ export default defineCommand({
       userConfig.write({});
       let message = getMessageFromUnknownError(error);
       if (error instanceof AxiosError && error.response?.status === 401) {
-        message =
-          'Invalid token. Please provide a valid token. You can create a token at https://cloud.capawesome.io/settings/tokens.';
+        message = `Invalid token. Please provide a valid token. You can create a token at ${consoleBaseUrl}/settings/tokens.`;
       }
       consola.error(message);
       process.exit(1);
@@ -104,7 +103,7 @@ export default defineCommand({
 
 const createSession = async (deviceCode: string) => {
   const maxAttempts = 20;
-  const interval = 3 * 1000; // 5 seconds
+  const interval = 3 * 1000; // 3 seconds
   let attempts = 0;
   let sessionId: string | null = null;
   while (attempts < maxAttempts && sessionId === null) {
@@ -125,9 +124,4 @@ const createSession = async (deviceCode: string) => {
     }
   }
   return sessionId;
-};
-
-const getAuthorizationUrl = async () => {
-  const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
-  return `${consoleBaseUrl}/login/device`;
 };
