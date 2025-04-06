@@ -25,7 +25,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
       formData.append('signature', dto.signature);
     }
     const response = await this.httpClient.post<AppBundleFileDto>(
-      `/apps/${dto.appId}/bundles/${dto.appBundleId}/files`,
+      `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files`,
       formData,
       {
         headers: {

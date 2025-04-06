@@ -15,12 +15,12 @@ class SessionsServiceImpl implements SessionsService {
   }
 
   async create(dto: CreateSessionDto): Promise<SessionDto> {
-    const response = await this.httpClient.post<SessionDto>(`/sessions`, dto);
+    const response = await this.httpClient.post<SessionDto>(`/v1/sessions`, dto);
     return response.data;
   }
 
   async delete(dto: DeleteSessionDto): Promise<void> {
-    await this.httpClient.delete(`/sessions/${dto.id}`, {
+    await this.httpClient.delete(`/v1/sessions/${dto.id}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },

@@ -14,7 +14,7 @@ class UsersServiceImpl implements UsersService {
   }
 
   async me(bearerToken?: string): Promise<UserDto> {
-    const response = await this.httpClient.get<UserDto>('/users/me', {
+    const response = await this.httpClient.get<UserDto>('/v1/users/me', {
       headers: {
         Authorization: `Bearer ${bearerToken || authorizationService.getCurrentAuthorizationToken()}`,
       },

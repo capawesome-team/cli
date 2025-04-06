@@ -1,6 +1,7 @@
 import { AxiosError } from 'axios';
 import { defineCommand } from 'citty';
 import consola from 'consola';
+import configService from '../services/config';
 import sessionCodesService from '../services/session-code';
 import sessionsService from '../services/sessions';
 import usersService from '../services/users';
@@ -32,7 +33,7 @@ export default defineCommand({
       });
       if (authenticationMethod === 'browser') {
         // Create a session code
-        const { id: deviceCode, code: userCode, authorizationUrl } = await sessionCodesService.create();
+        const { id: deviceCode, code: userCode } = await sessionCodesService.create();
         consola.box(`Copy your one-time code: ${userCode.slice(0, 4)}-${userCode.slice(4)}`);
         // Prompt the user to open the authorization URL in their browser
         const shouldProceed = await prompt(
@@ -48,6 +49,7 @@ export default defineCommand({
         }
         // Open the authorization URL in the user's default browser
         consola.start('Opening browser...');
+        const authorizationUrl = await getAuthorizationUrl();
         try {
           open(authorizationUrl);
         } catch (error) {
@@ -123,4 +125,9 @@ const createSession = async (deviceCode: string) => {
     }
   }
   return sessionId;
+};
+
+const getAuthorizationUrl = async () => {
+  const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
+  return `${consoleBaseUrl}/login/device`;
 };

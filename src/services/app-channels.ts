@@ -15,7 +15,7 @@ class AppChannelsServiceImpl implements AppChannelsService {
   }
 
   async create(dto: CreateAppChannelDto): Promise<AppChannelDto> {
-    const response = await this.httpClient.post<AppChannelDto>(`/apps/${dto.appId}/channels`, dto, {
+    const response = await this.httpClient.post<AppChannelDto>(`/v1/apps/${dto.appId}/channels`, dto, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
@@ -24,7 +24,7 @@ class AppChannelsServiceImpl implements AppChannelsService {
   }
 
   async delete(data: DeleteAppChannelDto): Promise<void> {
-    await this.httpClient.delete(`/apps/${data.appId}/channels`, {
+    await this.httpClient.delete(`/v1/apps/${data.appId}/channels`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },

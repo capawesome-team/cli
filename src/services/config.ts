@@ -18,7 +18,8 @@ class ConfigServiceImpl implements ConfigService {
   private async loadConfig(): Promise<UserInputConfig> {
     const { config } = await loadConfig({
       defaults: {
-        API_URL: 'https://api.cloud.capawesome.io/v1',
+        API_BASE_URL: 'https://api.cloud.capawesome.io',
+        CONSOLE_BASE_URL: 'https://console.cloud.capawesome.io',
         ENVIRONMENT: 'production',
       },
       name: 'capawesome',

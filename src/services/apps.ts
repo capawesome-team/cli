@@ -16,7 +16,7 @@ class AppsServiceImpl implements AppsService {
   }
 
   async create(dto: CreateAppDto): Promise<AppDto> {
-    const response = await this.httpClient.post<AppDto>(`/apps`, dto, {
+    const response = await this.httpClient.post<AppDto>(`/v1/apps`, dto, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
@@ -25,7 +25,7 @@ class AppsServiceImpl implements AppsService {
   }
 
   async delete(dto: DeleteAppDto): Promise<void> {
-    await this.httpClient.delete(`/apps/${dto.id}`, {
+    await this.httpClient.delete(`/v1/apps/${dto.id}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
@@ -33,7 +33,7 @@ class AppsServiceImpl implements AppsService {
   }
 
   async findAll(): Promise<AppDto[]> {
-    const response = await this.httpClient.get<AppDto[]>('/apps', {
+    const response = await this.httpClient.get<AppDto[]>('/v1/apps', {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },

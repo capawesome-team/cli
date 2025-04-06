@@ -13,7 +13,7 @@ class SessionCodesServiceImpl implements SessionCodesService {
   }
 
   async create(): Promise<SessionCodeDto> {
-    const response = await this.httpClient.post<SessionCodeDto>(`/sessions/codes`, {});
+    const response = await this.httpClient.post<SessionCodeDto>(`/v1/sessions/codes`, {});
     return response.data;
   }
 }
