@@ -16,7 +16,7 @@ class AppBundlesServiceImpl implements AppBundlesService {
   }
 
   async create(dto: CreateAppBundleDto): Promise<AppBundleDto> {
-    const response = await this.httpClient.post<AppBundleDto>(`/apps/${dto.appId}/bundles`, dto, {
+    const response = await this.httpClient.post<AppBundleDto>(`/v1/apps/${dto.appId}/bundles`, dto, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
@@ -25,16 +25,20 @@ class AppBundlesServiceImpl implements AppBundlesService {
   }
 
   async update(dto: UpdateAppBundleDto): Promise<AppBundleDto> {
-    const response = await this.httpClient.patch<AppBundleDto>(`/apps/${dto.appId}/bundles/${dto.appBundleId}`, dto, {
-      headers: {
-        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+    const response = await this.httpClient.patch<AppBundleDto>(
+      `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}`,
+      dto,
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
       },
-    });
+    );
     return response.data;
   }
 
   async delete(dto: DeleteAppBundleDto): Promise<void> {
-    await this.httpClient.delete(`/apps/${dto.appId}/bundles/${dto.appBundleId}`, {
+    await this.httpClient.delete(`/v1/apps/${dto.appId}/bundles/${dto.appBundleId}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
