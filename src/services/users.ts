@@ -3,7 +3,7 @@ import httpClient, { HttpClient } from '../utils/http-client';
 import authorizationService from './authorization-service';
 
 export interface UsersService {
-  me(): Promise<UserDto>;
+  me(bearerToken?: string): Promise<UserDto>;
 }
 
 class UsersServiceImpl implements UsersService {
@@ -13,10 +13,10 @@ class UsersServiceImpl implements UsersService {
     this.httpClient = httpClient;
   }
 
-  async me(): Promise<UserDto> {
+  async me(bearerToken?: string): Promise<UserDto> {
     const response = await this.httpClient.get<UserDto>('/users/me', {
       headers: {
-        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        Authorization: `Bearer ${bearerToken || authorizationService.getCurrentAuthorizationToken()}`,
       },
     });
     return response.data;

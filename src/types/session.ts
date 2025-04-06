@@ -1,6 +1,6 @@
 export interface CreateSessionDto {
-  email: string;
-  password: string;
+  code: string;
+  provider: 'code';
 }
 
 export interface DeleteSessionDto {
