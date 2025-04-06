@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 import * as Sentry from '@sentry/node';
 import { defineCommand, runMain } from 'citty';
+import consola from 'consola';
 import pkg from '../package.json';
 import configService from './services/config';
 import updateService from './services/update';
+import { getMessageFromUnknownError } from './utils/error';
 
 const main = defineCommand({
   meta: {
@@ -47,8 +49,15 @@ const captureException = async (error: unknown) => {
 };
 
 runMain(main).catch(async (error) => {
-  await captureException(error).catch(() => {
-    // No op
-  });
-  process.exit(1);
+  try {
+    await captureException(error).catch(() => {
+      // No op
+    });
+    // Print the error message
+    const message = getMessageFromUnknownError(error);
+    consola.error(message);
+  } finally {
+    // Exit with a non-zero code
+    process.exit(1);
+  }
 });
