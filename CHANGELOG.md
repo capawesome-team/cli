@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.8.1](https://github.com/capawesome-team/cli/compare/v1.8.0...v1.8.1) (2025-04-07)
+
+
+### Bug Fixes
+
+* `login` command throws ES Module error ([#41](https://github.com/capawesome-team/cli/issues/41)) ([ed36738](https://github.com/capawesome-team/cli/commit/ed36738a4eac38729bf3f1971d4f7ecda7bfaa40)), closes [#40](https://github.com/capawesome-team/cli/issues/40) [/github.com/sindresorhus/open/issues/340#issuecomment-2410444952](https://github.com/capawesome-team//github.com/sindresorhus/open/issues/340/issues/issuecomment-2410444952)
+
 ## [1.8.0](https://github.com/capawesome-team/cli/compare/v1.7.0...v1.8.0) (2025-04-06)
 
 
