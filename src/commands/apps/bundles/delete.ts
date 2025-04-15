@@ -20,8 +20,9 @@ export default defineCommand({
     },
     bundleName: {
       type: 'string',
-      description: 'Name of the bundle. If both bundleId and bundleName are provided, bundleId will be used and bundleName will be ignored.',
-    }
+      description:
+        'Name of the bundle. If both bundleId and bundleName are provided, bundleId will be used and bundleName will be ignored.',
+    },
   },
   run: async (ctx) => {
     // Prompt for missing arguments
