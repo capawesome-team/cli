@@ -22,7 +22,8 @@ export interface CreateAppBundleDto {
 }
 
 export interface DeleteAppBundleDto {
-  appBundleId: string;
+  appBundleId?: string;
+  appBundleName?: string;
   appId: string;
 }
 

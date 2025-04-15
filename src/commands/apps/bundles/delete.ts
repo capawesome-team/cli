@@ -18,11 +18,16 @@ export default defineCommand({
       type: 'string',
       description: 'ID of the bundle.',
     },
+    bundleName: {
+      type: 'string',
+      description: 'Name of the bundle. If both bundleId and bundleName are provided, bundleId will be used and bundleName will be ignored.',
+    }
   },
   run: async (ctx) => {
     // Prompt for missing arguments
     let appId = ctx.args.appId;
     let bundleId = ctx.args.bundleId;
+    let bundleName = ctx.args.bundleName;
     if (!appId) {
       const apps = await appsService.findAll();
       if (!apps.length) {
@@ -35,7 +40,7 @@ export default defineCommand({
         options: apps.map((app) => ({ label: app.name, value: app.id })),
       });
     }
-    if (!bundleId) {
+    if (!bundleId && !bundleName) {
       bundleId = await prompt('Enter the bundle ID:', {
         type: 'text',
       });
@@ -54,6 +59,7 @@ export default defineCommand({
       await appBundlesService.delete({
         appId,
         appBundleId: bundleId,
+        appBundleName: bundleName,
       });
       consola.success('Bundle deleted successfully.');
     } catch (error) {

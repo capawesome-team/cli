@@ -38,11 +38,22 @@ class AppBundlesServiceImpl implements AppBundlesService {
   }
 
   async delete(dto: DeleteAppBundleDto): Promise<void> {
-    await this.httpClient.delete(`/v1/apps/${dto.appId}/bundles/${dto.appBundleId}`, {
-      headers: {
-        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
-      },
-    });
+    if (dto.appBundleId) {
+      await this.httpClient.delete(`/v1/apps/${dto.appId}/bundles/${dto.appBundleId}`, {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
+      });
+    } else if (dto.appBundleName) {
+      await this.httpClient.delete(`/v1/apps/${dto.appId}/bundles`, {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
+        params: {
+          name: dto.appBundleName,
+        },
+      });
+    }
   }
 }
 
