@@ -176,7 +176,6 @@ export default defineCommand({
       );
       process.exit(1);
     }
-    // Let the user select an app and channel if not provided
     if (!appId) {
       const apps = await appsService.findAll();
       if (apps.length === 0) {
@@ -192,19 +191,19 @@ export default defineCommand({
         consola.error('You must select an app to deploy to.');
         process.exit(1);
       }
-      if (!channelName) {
-        const promptChannel = await prompt('Do you want to deploy to a specific channel?', {
-          type: 'select',
-          options: ['Yes', 'No'],
+    }
+    if (!channelName) {
+      const promptChannel = await prompt('Do you want to deploy to a specific channel?', {
+        type: 'select',
+        options: ['Yes', 'No'],
+      });
+      if (promptChannel === 'Yes') {
+        channelName = await prompt('Enter the channel name:', {
+          type: 'text',
         });
-        if (promptChannel === 'Yes') {
-          channelName = await prompt('Enter the channel name:', {
-            type: 'text',
-          });
-          if (!channelName) {
-            consola.error('The channel name must be at least one character long.');
-            process.exit(1);
-          }
+        if (!channelName) {
+          consola.error('The channel name must be at least one character long.');
+          process.exit(1);
         }
       }
     }
