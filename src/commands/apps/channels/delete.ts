@@ -16,11 +16,17 @@ export default defineCommand({
     },
     channelId: {
       type: 'string',
-      description: 'ID of the channel.',
+      description: 'ID of the channel. Either the ID or name of the channel must be provided.',
+    },
+    name: {
+      type: 'string',
+      description: 'Name of the channel. Either the ID or name of the channel must be provided.',
     },
   },
   run: async (ctx) => {
     let appId = ctx.args.appId;
+    let channelId = ctx.args.channelId;
+    let channelName = ctx.args.name;
     if (!appId) {
       const apps = await appsService.findAll();
       if (!apps.length) {
@@ -33,15 +39,10 @@ export default defineCommand({
         options: apps.map((app) => ({ label: app.name, value: app.id })),
       });
     }
-    let channel = ctx.args.channel;
-    if (!channel) {
-      channel = await prompt('Enter the channel name:', {
+    if (!channelId && !channelName) {
+      channelName = await prompt('Enter the channel name:', {
         type: 'text',
       });
-    }
-    if (typeof channel !== 'string') {
-      consola.error('Channel name must be a string.');
-      process.exit(1);
     }
     const confirmed = await prompt('Are you sure you want to delete this channel?', {
       type: 'confirm',
@@ -52,7 +53,8 @@ export default defineCommand({
     try {
       await appChannelsService.delete({
         appId,
-        name: channel,
+        id: channelId,
+        name: channelName,
       });
       consola.success('Channel deleted successfully.');
     } catch (error) {
