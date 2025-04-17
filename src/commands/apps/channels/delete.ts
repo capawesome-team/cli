@@ -17,18 +17,18 @@ export default defineCommand({
     channelId: {
       type: 'string',
       description:
-        'ID of the channel. Either channelId or channelName must be provided. If both are provided, channelName will be used.',
+        'ID of the channel. Either channelId or name must be provided. If both are provided, channelId will be used.',
     },
-    channelName: {
+    name: {
       type: 'string',
       description:
-        'Name of the channel. Either channelId or channelName must be provided. If both are provided, channelName will be used.',
+        'Name of the channel. Either channelId or name must be provided. If both are provided, channelId will be used.',
     },
   },
   run: async (ctx) => {
     let appId = ctx.args.appId;
     let channelId = ctx.args.channelId;
-    let channelName = ctx.args.channelName;
+    let channelName = ctx.args.name;
     if (!appId) {
       const apps = await appsService.findAll();
       if (!apps.length) {
