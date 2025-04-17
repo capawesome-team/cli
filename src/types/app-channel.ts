@@ -10,5 +10,6 @@ export interface CreateAppChannelDto {
 
 export interface DeleteAppChannelDto {
   appId: string;
-  name: string;
+  id?: string;
+  name?: string;
 }
