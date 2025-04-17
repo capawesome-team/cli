@@ -23,6 +23,10 @@ export default defineCommand({
       type: 'string',
       description: 'Name of the channel.',
     },
+    ignoreErrors: {
+      type: 'boolean',
+      description: 'Ignore errors on channel creation and continue.',
+    },
   },
   run: async (ctx) => {
     let appId = ctx.args.appId;
@@ -63,9 +67,13 @@ export default defineCommand({
       consola.success('Channel created successfully.');
       consola.info(`Channel ID: ${response.id}`);
     } catch (error) {
-      const message = getMessageFromUnknownError(error);
-      consola.error(message);
-      process.exit(1);
+      if (ctx.args.ignoreErrors) {
+        consola.error('An error occurred while creating the channel, but ignoring errors is enabled.');
+      } else {
+        const message = getMessageFromUnknownError(error);
+        consola.error(message);
+        process.exit(1);
+      }
     }
   },
 });
