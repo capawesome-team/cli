@@ -19,19 +19,24 @@ export default defineCommand({
       description:
         'Maximum number of bundles that can be assigned to the channel. If more bundles are assigned, the oldest bundles will be automatically deleted.',
     },
+    ignoreErrors: {
+      type: 'boolean',
+      description: 'Whether to ignore errors or not.',
+    },
     name: {
       type: 'string',
       description: 'Name of the channel.',
-    },
-    ignoreErrors: {
-      type: 'boolean',
-      description: 'Ignore errors on channel creation and continue.',
     },
   },
   run: async (ctx) => {
     let appId = ctx.args.appId;
     let bundleLimitAsString = ctx.args.bundleLimit;
+    let ignoreErrors = ctx.args.ignoreErrors as boolean | string | undefined;
     let name = ctx.args.name;
+    // Convert ignoreErrors to boolean
+    if (typeof ignoreErrors === 'string') {
+      ignoreErrors = ignoreErrors.toLowerCase() === 'true';
+    }
     // Validate the app ID
     if (!appId) {
       const apps = await appsService.findAll();
@@ -69,7 +74,7 @@ export default defineCommand({
     } catch (error) {
       const message = getMessageFromUnknownError(error);
       consola.error(message);
-      process.exit(ctx.args.ignoreErrors ? 0 : 1);
+      process.exit(ignoreErrors ? 0 : 1);
     }
   },
 });
