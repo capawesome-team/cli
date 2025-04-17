@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.9.0](https://github.com/capawesome-team/cli/compare/v1.8.1...v1.9.0) (2025-04-17)
+
+
+### Features
+
+* add `--ignore-errors` option to `apps:channels:create` command ([#48](https://github.com/capawesome-team/cli/issues/48)) ([3bfb65e](https://github.com/capawesome-team/cli/commit/3bfb65e3c6f9915a6a67b31525b1737497408d59))
+* add `--name` option to `apps:channels:create` ([#46](https://github.com/capawesome-team/cli/issues/46)) ([d6190b7](https://github.com/capawesome-team/cli/commit/d6190b7c9617a0d197d062aa21d01fe26d6e172f))
+* add support for `CAPAWESOME_CLOUD_TOKEN` env variable ([5a8de4c](https://github.com/capawesome-team/cli/commit/5a8de4c9230112e71f74ee72888a86de18d67be7)), closes [#28](https://github.com/capawesome-team/cli/issues/28)
+
+
+### Bug Fixes
+
+* `apps:bundles:create` command should always ask for a channel ([#47](https://github.com/capawesome-team/cli/issues/47)) ([fcd97a3](https://github.com/capawesome-team/cli/commit/fcd97a38a64599a8013da94e2f4ef3cdf2b641e5))
+* **apps:channels:delete:** skip prompt in CI environment ([c455e15](https://github.com/capawesome-team/cli/commit/c455e15b711706a9422fc18fbec142f5fe86776d))
+
 ## [1.8.1](https://github.com/capawesome-team/cli/compare/v1.8.0...v1.8.1) (2025-04-07)
 
 
