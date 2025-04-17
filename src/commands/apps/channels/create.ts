@@ -23,6 +23,10 @@ export default defineCommand({
       type: 'string',
       description: 'Name of the channel.',
     },
+    ignoreErrors: {
+      type: 'boolean',
+      description: 'Ignore errors on channel creation and continue.',
+    },
   },
   run: async (ctx) => {
     let appId = ctx.args.appId;
@@ -65,7 +69,7 @@ export default defineCommand({
     } catch (error) {
       const message = getMessageFromUnknownError(error);
       consola.error(message);
-      process.exit(1);
+      process.exit(ctx.args.ignoreErrors ? 0 : 1);
     }
   },
 });
