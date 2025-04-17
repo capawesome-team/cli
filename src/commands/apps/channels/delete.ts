@@ -2,6 +2,7 @@ import { defineCommand } from 'citty';
 import consola from 'consola';
 import appChannelsService from '../../../services/app-channels';
 import appsService from '../../../services/apps';
+import { isRunningInCi } from '../../../utils/ci';
 import { getMessageFromUnknownError } from '../../../utils/error';
 import { prompt } from '../../../utils/prompt';
 
@@ -44,11 +45,13 @@ export default defineCommand({
         type: 'text',
       });
     }
-    const confirmed = await prompt('Are you sure you want to delete this channel?', {
-      type: 'confirm',
-    });
-    if (!confirmed) {
-      return;
+    if (!isRunningInCi()) {
+      const confirmed = await prompt('Are you sure you want to delete this channel?', {
+        type: 'confirm',
+      });
+      if (!confirmed) {
+        return;
+      }
     }
     try {
       await appChannelsService.delete({
