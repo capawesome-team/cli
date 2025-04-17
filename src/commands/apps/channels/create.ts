@@ -67,13 +67,9 @@ export default defineCommand({
       consola.success('Channel created successfully.');
       consola.info(`Channel ID: ${response.id}`);
     } catch (error) {
-      if (ctx.args.ignoreErrors) {
-        consola.error('An error occurred while creating the channel, but ignoring errors is enabled.');
-      } else {
-        const message = getMessageFromUnknownError(error);
-        consola.error(message);
-        process.exit(1);
-      }
+      const message = getMessageFromUnknownError(error);
+      consola.error(message);
+      process.exit(ctx.args.ignoreErrors ? 0 : 1);
     }
   },
 });
