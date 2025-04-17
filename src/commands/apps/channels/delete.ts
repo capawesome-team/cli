@@ -16,13 +16,11 @@ export default defineCommand({
     },
     channelId: {
       type: 'string',
-      description:
-        'ID of the channel. Either channelId or name must be provided. If both are provided, channelId will be used.',
+      description: 'ID of the channel. Either the ID or name of the channel must be provided.',
     },
     name: {
       type: 'string',
-      description:
-        'Name of the channel. Either channelId or name must be provided. If both are provided, channelId will be used.',
+      description: 'Name of the channel. Either the ID or name of the channel must be provided.',
     },
   },
   run: async (ctx) => {
