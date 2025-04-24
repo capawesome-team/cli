@@ -31,13 +31,13 @@ breaking change.
 
 ## Guidelines
 
-- The scope should be a noun describing a section of the codebase.
+- The scope should be either the command name or a noun describing a section of the codebase.
 - The description should be in present tense, lowercase, and without a period at the end.
 
 ## Examples
 
-- Regular commit: `feat(auth): add login functionality`
-- Breaking change: `feat(api)!: change authentication endpoints`
+- Regular commit: `feat(apps:bundles:create): add error handling`
+- Breaking change: `feat!: remove support for Node.js 12`
     ```
-    BREAKING CHANGE: The authentication endpoints now require a different payload structure
+    BREAKING CHANGE: This version drops support for Node.js 12 due to security vulnerabilities.
     ```
