@@ -13,11 +13,7 @@ export default defineCommand({
     if (token) {
       try {
         const user = await usersService.me();
-        const email = user.email;
-        const userProviderProfile = user.userProviderProfiles[0]
-          ? user.userProviderProfiles[0]?.provider + ':' + user.userProviderProfiles[0]?.providerUsername
-          : null;
-        consola.info(`Logged in as ${email || userProviderProfile || '?'}.`);
+        consola.info(`Logged in as ${user.email}.`);
       } catch (error) {
         consola.error('Token is invalid. Please sign in again.');
         process.exit(1);
