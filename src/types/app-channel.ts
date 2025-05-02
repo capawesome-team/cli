@@ -13,3 +13,10 @@ export interface DeleteAppChannelDto {
   id?: string;
   name?: string;
 }
+
+export interface UpdateAppChannelDto {
+  appId: string;
+  appChannelId: string;
+  name?: string;
+  totalAppBundleLimit?: number;
+}
