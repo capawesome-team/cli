@@ -1,5 +1,8 @@
 export interface AppChannelDto {
   id: string;
+  appId: string;
+  name: string;
+  totalAppBundleLimit: number;
 }
 
 export interface CreateAppChannelDto {
@@ -11,6 +14,16 @@ export interface CreateAppChannelDto {
 export interface DeleteAppChannelDto {
   appId: string;
   id?: string;
+  name?: string;
+}
+
+export interface FindOneAppChannelByIdDto {
+  appId: string;
+  id: string;
+}
+
+export interface FindAllAppChannelsDto {
+  appId: string;
   name?: string;
 }
 

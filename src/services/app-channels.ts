@@ -1,10 +1,19 @@
-import { AppChannelDto, CreateAppChannelDto, DeleteAppChannelDto, UpdateAppChannelDto } from '../types';
+import {
+  AppChannelDto,
+  CreateAppChannelDto,
+  DeleteAppChannelDto,
+  FindAllAppChannelsDto,
+  FindOneAppChannelByIdDto,
+  UpdateAppChannelDto,
+} from '../types';
 import httpClient, { HttpClient } from '../utils/http-client';
 import authorizationService from './authorization-service';
 
 export interface AppChannelsService {
   create(dto: CreateAppChannelDto): Promise<AppChannelDto>;
   delete(dto: DeleteAppChannelDto): Promise<void>;
+  findAll(dto: FindAllAppChannelsDto): Promise<AppChannelDto[]>;
+  findOneById(dto: FindOneAppChannelByIdDto): Promise<AppChannelDto>;
   update(dto: UpdateAppChannelDto): Promise<AppChannelDto>;
 }
 
@@ -41,6 +50,28 @@ class AppChannelsServiceImpl implements AppChannelsService {
         },
       });
     }
+  }
+
+  async findAll(data: FindAllAppChannelsDto): Promise<AppChannelDto[]> {
+    const queryParams = new URLSearchParams();
+    if (data.name) {
+      queryParams.append('name', data.name);
+    }
+    const response = await this.httpClient.get<AppChannelDto[]>(`/v1/apps/${data.appId}/channels?${queryParams}`, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+      },
+    });
+    return response.data;
+  }
+
+  async findOneById(data: FindOneAppChannelByIdDto): Promise<AppChannelDto> {
+    const response = await this.httpClient.get<AppChannelDto>(`/v1/apps/${data.appId}/channels/${data.id}`, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+      },
+    });
+    return response.data;
   }
 
   async update(dto: UpdateAppChannelDto): Promise<AppChannelDto> {

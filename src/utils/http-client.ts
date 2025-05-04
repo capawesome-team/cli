@@ -12,6 +12,7 @@ export interface HttpClient {
 
 class HttpClientImpl implements HttpClient {
   private readonly baseHeaders = {
+    'Content-Type': 'application/json',
     'User-Agent': `Capawesome CLI v${version}`,
   };
 
