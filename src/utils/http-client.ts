@@ -12,38 +12,37 @@ export interface HttpClient {
 
 class HttpClientImpl implements HttpClient {
   private readonly baseHeaders = {
-    'Content-Type': 'application/json',
     'User-Agent': `Capawesome CLI v${version}`,
   };
 
   async delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
     const baseUrl = await configService.getValueForKey('API_BASE_URL');
     const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
-    return axios.delete<T>(urlWithHost, { ...config, headers: { ...config?.headers, ...this.baseHeaders } });
+    return axios.delete<T>(urlWithHost, { ...config, headers: { ...this.baseHeaders, ...config?.headers } });
   }
 
   async get<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
     const baseUrl = await configService.getValueForKey('API_BASE_URL');
     const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
-    return axios.get<T>(urlWithHost, { ...config, headers: { ...config?.headers, ...this.baseHeaders } });
+    return axios.get<T>(urlWithHost, { ...config, headers: { ...this.baseHeaders, ...config?.headers } });
   }
 
   async patch<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
     const baseUrl = await configService.getValueForKey('API_BASE_URL');
     const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
-    return axios.patch<T>(urlWithHost, data, { ...config, headers: { ...config?.headers, ...this.baseHeaders } });
+    return axios.patch<T>(urlWithHost, data, { ...config, headers: { ...this.baseHeaders, ...config?.headers } });
   }
 
   async post<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
     const baseUrl = await configService.getValueForKey('API_BASE_URL');
     const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
-    return axios.post<T>(urlWithHost, data, { ...config, headers: { ...config?.headers, ...this.baseHeaders } });
+    return axios.post<T>(urlWithHost, data, { ...config, headers: { ...this.baseHeaders, ...config?.headers } });
   }
 
   async put<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
     const baseUrl = await configService.getValueForKey('API_BASE_URL');
     const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
-    return axios.put<T>(urlWithHost, data, { ...config, headers: { ...config?.headers, ...this.baseHeaders } });
+    return axios.put<T>(urlWithHost, data, { ...config, headers: { ...this.baseHeaders, ...config?.headers } });
   }
 }
 
