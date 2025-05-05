@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.11.1](https://github.com/capawesome-team/cli/compare/v1.11.0...v1.11.1) (2025-05-05)
+
+
+### Bug Fixes
+
+* `File must be a File object` error ([bd154a3](https://github.com/capawesome-team/cli/commit/bd154a3d418093b471d58830a7ab2e150b7d33c3))
+
 ## [1.11.0](https://github.com/capawesome-team/cli/compare/v1.10.0...v1.11.0) (2025-05-04)
 
 
