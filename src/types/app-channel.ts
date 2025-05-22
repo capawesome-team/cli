@@ -3,6 +3,8 @@ export interface AppChannelDto {
   appId: string;
   name: string;
   totalAppBundleLimit: number;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface CreateAppChannelDto {
@@ -25,6 +27,8 @@ export interface FindOneAppChannelByIdDto {
 export interface FindAllAppChannelsDto {
   appId: string;
   name?: string;
+  limit?: number;
+  offset?: number;
 }
 
 export interface UpdateAppChannelDto {

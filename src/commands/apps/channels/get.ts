@@ -7,7 +7,7 @@ import { getMessageFromUnknownError } from '../../../utils/error';
 
 export default defineCommand({
   meta: {
-    description: 'Update an existing app channel.',
+    description: 'Get an existing app channel.',
   },
   args: {
     appId: {

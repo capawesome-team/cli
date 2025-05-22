@@ -52,12 +52,18 @@ class AppChannelsServiceImpl implements AppChannelsService {
     }
   }
 
-  async findAll(data: FindAllAppChannelsDto): Promise<AppChannelDto[]> {
+  async findAll(dto: FindAllAppChannelsDto): Promise<AppChannelDto[]> {
     const queryParams = new URLSearchParams();
-    if (data.name) {
-      queryParams.append('name', data.name);
+    if (dto.limit) {
+      queryParams.append('limit', dto.limit.toString());
     }
-    const response = await this.httpClient.get<AppChannelDto[]>(`/v1/apps/${data.appId}/channels?${queryParams}`, {
+    if (dto.name) {
+      queryParams.append('name', dto.name);
+    }
+    if (dto.offset) {
+      queryParams.append('offset', dto.offset.toString());
+    }
+    const response = await this.httpClient.get<AppChannelDto[]>(`/v1/apps/${dto.appId}/channels?${queryParams}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
