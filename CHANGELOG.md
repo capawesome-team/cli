@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.12.0](https://github.com/capawesome-team/cli/compare/v1.11.1...v1.12.0) (2025-05-22)
+
+
+### Features
+
+* add `apps:channels:list` command ([87234f2](https://github.com/capawesome-team/cli/commit/87234f28b8daf487f7f06c2b87060499596025e2))
+
 ## [1.11.1](https://github.com/capawesome-team/cli/compare/v1.11.0...v1.11.1) (2025-05-05)
 
 
