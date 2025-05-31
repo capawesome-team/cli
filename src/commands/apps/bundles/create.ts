@@ -323,8 +323,8 @@ const uploadFile = async (options: {
         appId: options.appId,
         appBundleId: options.appBundleId,
         checksum: hash,
-        fileBuffer: options.buffer,
-        fileName: options.name,
+        buffer: options.buffer,
+        name: options.name,
         href: options.href,
         mimeType: options.mimeType,
       });
@@ -363,7 +363,6 @@ const uploadFiles = async (options: {
   const files = await getFilesInDirectoryAndSubdirectories(options.path);
   // Iterate over each file
   let fileIndex = 0;
-
   const uploadNextFile = async () => {
     if (fileIndex >= files.length) {
       return;

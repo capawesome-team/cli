@@ -15,10 +15,10 @@ export interface CreateAppBundleFileDto {
 export interface UploadAppBundleFileDto {
   appId: string;
   appBundleId: string;
+  buffer: Buffer;
   checksum: string;
-  fileBuffer: Buffer;
-  fileName: string;
   href?: string;
   mimeType: string;
+  name: string;
   signature?: string;
 }

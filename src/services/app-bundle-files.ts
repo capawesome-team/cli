@@ -1,4 +1,5 @@
 import FormData from 'form-data';
+import { MAX_CONCURRENT_UPLOADS } from '../config';
 import { AppBundleFileDto, CreateAppBundleFileDto, UploadAppBundleFileDto } from '../types/app-bundle-file';
 import httpClient, { HttpClient } from '../utils/http-client';
 import authorizationService from './authorization-service';
@@ -6,6 +7,42 @@ import authorizationService from './authorization-service';
 export interface AppBundleFilesService {
   create(dto: CreateAppBundleFileDto): Promise<AppBundleFileDto>;
   upload(dto: UploadAppBundleFileDto): Promise<AppBundleFileDto>;
+}
+
+interface AppBundleFileUploadDto {
+  uploadId: string;
+  key: string;
+}
+
+interface AppBundleFileUploadPartDto {
+  partNumber: number;
+  etag: string;
+}
+
+interface CompleteAppBundleFileUploadDto extends UploadAppBundleFileDto {
+  key: string;
+  parts: AppBundleFileUploadPartDto[];
+  uploadId: string;
+}
+
+interface CreateAppBundleFileUploadPartDto {
+  appBundleId: string;
+  appId: string;
+  buffer: Buffer;
+  key: string;
+  name: string;
+  partNumber: number;
+  uploadId: string;
+}
+
+interface CreateAppBundleFileUploadPartsDto extends UploadAppBundleFileDto {
+  key: string;
+  uploadId: string;
+}
+
+interface CreateAppBundleFileUploadDto {
+  appBundleId: string;
+  appId: string;
 }
 
 class AppBundleFilesServiceImpl implements AppBundleFilesService {
@@ -40,58 +77,28 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
 
   async upload(dto: UploadAppBundleFileDto): Promise<AppBundleFileDto> {
     // 1. Create a multipart upload
-    const { key, uploadId } = await this.httpClient
-      .post<{ key: string; uploadId: string }>(
-        `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files/upload`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
-          },
-        },
-      )
-      .then((response) => response.data);
+    const { key, uploadId } = await this.createUpload(dto);
     // 2. Upload the file in parts
-    const uploadPartPromises: Promise<{
-      partNumber: number;
-      etag: string;
-    }>[] = [];
-    const partSize = 10 * 1024 * 1024; // 10 MB. 5 MB is the minimum part size except for the last part.
-    const totalParts = Math.ceil(dto.fileBuffer.length / partSize);
-    for (let partNumber = 1; partNumber <= totalParts; partNumber++) {
-      const start = (partNumber - 1) * partSize;
-      const end = Math.min(start + partSize, dto.fileBuffer.length);
-      const partBuffer = dto.fileBuffer.subarray(start, end);
-      const formData = new FormData();
-      formData.append('blob', partBuffer, { filename: dto.fileName });
-      formData.append('key', key);
-      formData.append('partNumber', partNumber.toString());
-      uploadPartPromises.push(
-        this.httpClient
-          .post<{
-            partNumber: number;
-            etag: string;
-          }>(`/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files/upload/${uploadId}/parts`, formData, {
-            headers: {
-              Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
-              ...formData.getHeaders(),
-            },
-          })
-          .then((response) => response.data),
-      );
-    }
-    const uploadedParts = await Promise.all(uploadPartPromises);
+    const parts = await this.createUploadParts({
+      ...dto,
+      key,
+      uploadId,
+    });
     // 3. Complete the upload
-    return await this.httpClient
+    return this.completeUpload({ ...dto, key, parts, uploadId });
+  }
+
+  private async completeUpload(dto: CompleteAppBundleFileUploadDto): Promise<AppBundleFileDto> {
+    return this.httpClient
       .post<AppBundleFileDto>(
-        `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files/upload/${uploadId}/complete`,
+        `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files/upload/${dto.uploadId}/complete`,
         {
           checksum: dto.checksum,
           href: dto.href,
-          key,
+          key: dto.key,
           mimeType: dto.mimeType,
-          name: dto.fileName,
-          parts: uploadedParts,
+          name: dto.name,
+          parts: dto.parts,
           signature: dto.signature,
         },
         {
@@ -101,6 +108,74 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
         },
       )
       .then((response) => response.data);
+  }
+
+  private async createUpload(dto: CreateAppBundleFileUploadDto): Promise<AppBundleFileUploadDto> {
+    const response = await this.httpClient.post<AppBundleFileUploadDto>(
+      `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files/upload`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
+      },
+    );
+    return response.data;
+  }
+
+  private async createUploadPart(dto: CreateAppBundleFileUploadPartDto): Promise<AppBundleFileUploadPartDto> {
+    const formData = new FormData();
+    formData.append('blob', dto.buffer, { filename: dto.name });
+    formData.append('key', dto.key);
+    formData.append('partNumber', dto.partNumber.toString());
+
+    return this.httpClient
+      .post<AppBundleFileUploadPartDto>(
+        `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files/upload/${dto.uploadId}/parts`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+            ...formData.getHeaders(),
+          },
+        },
+      )
+      .then((response) => response.data);
+  }
+
+  private async createUploadParts(dto: CreateAppBundleFileUploadPartsDto): Promise<AppBundleFileUploadPartDto[]> {
+    const uploadedParts: AppBundleFileUploadPartDto[] = [];
+    const partSize = 10 * 1024 * 1024; // 10 MB. 5 MB is the minimum part size except for the last part.
+    const totalParts = Math.ceil(dto.buffer.length / partSize);
+    let partNumber = 0;
+    const uploadNextPart = async () => {
+      if (partNumber >= totalParts) {
+        return;
+      }
+      partNumber++;
+      const start = (partNumber - 1) * partSize;
+      const end = Math.min(start + partSize, dto.buffer.length);
+      const partBuffer = dto.buffer.subarray(start, end);
+
+      const uploadedPart = await this.createUploadPart({
+        appBundleId: dto.appBundleId,
+        appId: dto.appId,
+        buffer: partBuffer,
+        key: dto.key,
+        name: dto.name,
+        partNumber,
+        uploadId: dto.uploadId,
+      });
+      uploadedParts.push(uploadedPart);
+      await uploadNextPart();
+    };
+
+    const uploadPartPromises = Array(MAX_CONCURRENT_UPLOADS);
+    for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+      uploadPartPromises[i] = uploadNextPart();
+    }
+    await Promise.all(uploadPartPromises);
+    return uploadedParts;
   }
 }
 
