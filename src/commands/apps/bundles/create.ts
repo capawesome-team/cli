@@ -1,6 +1,7 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
 import { createReadStream } from 'fs';
+import { MAX_CONCURRENT_UPLOADS } from '../../../config';
 import appBundleFilesService from '../../../services/app-bundle-files';
 import appBundlesService from '../../../services/app-bundles';
 import appsService from '../../../services/apps';
@@ -299,30 +300,46 @@ export default defineCommand({
 const uploadFile = async (options: {
   appId: string;
   appBundleId: string;
-  fileBuffer: Buffer;
-  fileName: string;
+  buffer: Buffer;
   href?: string;
+  mimeType: string;
+  name: string;
   privateKeyBuffer: Buffer | undefined;
   retryOnFailure?: boolean;
 }): Promise<AppBundleFileDto> => {
   try {
     // Generate checksum
-    const hash = await createHash(options.fileBuffer);
+    const hash = await createHash(options.buffer);
     // Sign the bundle
     let signature: string | undefined;
     if (options.privateKeyBuffer) {
-      signature = await createSignature(options.privateKeyBuffer, options.fileBuffer);
+      signature = await createSignature(options.privateKeyBuffer, options.buffer);
     }
     // Create the multipart upload
-    return await appBundleFilesService.create({
-      appId: options.appId,
-      appBundleId: options.appBundleId,
-      checksum: hash,
-      fileBuffer: options.fileBuffer,
-      fileName: options.fileName,
-      href: options.href,
-      signature,
-    });
+    const sizeInBytes = options.buffer.byteLength;
+    if (sizeInBytes > 100 * 1024 * 1024) {
+      // Use multipart upload for files larger than 100 MB
+      return await appBundleFilesService.upload({
+        appId: options.appId,
+        appBundleId: options.appBundleId,
+        checksum: hash,
+        fileBuffer: options.buffer,
+        fileName: options.name,
+        href: options.href,
+        mimeType: options.mimeType,
+      });
+    } else {
+      // Use single upload for files smaller than 100 MB
+      return await appBundleFilesService.create({
+        appId: options.appId,
+        appBundleId: options.appBundleId,
+        buffer: options.buffer,
+        checksum: hash,
+        href: options.href,
+        name: options.name,
+        signature,
+      });
+    }
   } catch (error) {
     if (options.retryOnFailure) {
       return uploadFile({
@@ -345,7 +362,6 @@ const uploadFiles = async (options: {
   // Get all files in the directory
   const files = await getFilesInDirectoryAndSubdirectories(options.path);
   // Iterate over each file
-  const MAX_CONCURRENT_UPLOADS = 20;
   let fileIndex = 0;
 
   const uploadNextFile = async () => {
@@ -353,18 +369,19 @@ const uploadFiles = async (options: {
       return;
     }
 
-    const file = files[fileIndex] as { href: string; path: string; name: string };
+    const file = files[fileIndex] as { href: string; mimeType: string; name: string; path: string };
     fileIndex++;
 
     consola.start(`Uploading file (${fileIndex}/${files.length})...`);
-    const fileBuffer = await createBufferFromPath(file.path);
+    const buffer = await createBufferFromPath(file.path);
 
     await uploadFile({
       appId: options.appId,
       appBundleId: options.appBundleId,
-      fileBuffer,
-      fileName: file.name,
+      buffer,
       href: file.href,
+      mimeType: file.mimeType,
+      name: file.name,
       privateKeyBuffer: options.privateKeyBuffer,
       retryOnFailure: true,
     });
@@ -398,8 +415,9 @@ const uploadZip = async (options: {
   const result = await uploadFile({
     appId: options.appId,
     appBundleId: options.appBundleId,
-    fileBuffer,
-    fileName: 'bundle.zip',
+    buffer: fileBuffer,
+    mimeType: 'application/zip',
+    name: 'bundle.zip',
     privateKeyBuffer: options.privateKeyBuffer,
   });
   return {

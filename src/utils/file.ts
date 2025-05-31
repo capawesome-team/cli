@@ -1,9 +1,11 @@
+import fs from 'fs';
+import mime from 'mime';
+import pathModule from 'path';
+
 export const getFilesInDirectoryAndSubdirectories = async (
   path: string,
-): Promise<{ href: string; path: string; name: string }[]> => {
-  const fs = await import('fs');
-  const pathModule = await import('path');
-  const files: { href: string; path: string; name: string }[] = [];
+): Promise<{ href: string; mimeType: string; name: string; path: string }[]> => {
+  const files: { href: string; mimeType: string; name: string; path: string }[] = [];
   const walk = async (directory: string) => {
     const dirEntries = await fs.promises.readdir(directory, { withFileTypes: true }).catch(() => []);
     for (const dirEntry of dirEntries) {
@@ -25,6 +27,7 @@ export const getFilesInDirectoryAndSubdirectories = async (
         }
         files.push({
           href,
+          mimeType: mime.getType(dirEntry.name) || 'application/octet-stream',
           name: dirEntry.name,
           path: fullPath,
         });
@@ -36,7 +39,6 @@ export const getFilesInDirectoryAndSubdirectories = async (
 };
 
 export const fileExistsAtPath = async (path: string): Promise<boolean> => {
-  const fs = await import('fs');
   return new Promise((resolve) => {
     fs.access(path, fs.constants.F_OK, (err) => {
       resolve(!err);
@@ -45,7 +47,6 @@ export const fileExistsAtPath = async (path: string): Promise<boolean> => {
 };
 
 export const isDirectory = async (path: string): Promise<boolean> => {
-  const fs = await import('fs');
   return new Promise((resolve) => {
     fs.lstat(path, (err, stats) => {
       resolve(stats.isDirectory());
@@ -54,7 +55,6 @@ export const isDirectory = async (path: string): Promise<boolean> => {
 };
 
 export const writeFile = async (path: string, data: string) => {
-  const fs = await import('fs');
   return new Promise((resolve, reject) => {
     fs.writeFile(path, data, (err) => {
       if (err) {
