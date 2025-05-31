@@ -387,7 +387,7 @@ const uploadFiles = async (options: {
     await uploadNextFile();
   };
 
-  const uploadPromises = Array(MAX_CONCURRENT_UPLOADS);
+  const uploadPromises = Array.from({ length: MAX_CONCURRENT_UPLOADS });
   for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
     uploadPromises[i] = uploadNextFile();
   }

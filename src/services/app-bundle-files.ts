@@ -136,7 +136,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
       await uploadNextPart();
     };
 
-    const uploadPartPromises = Array(MAX_CONCURRENT_UPLOADS);
+    const uploadPartPromises = Array.from({ length: MAX_CONCURRENT_UPLOADS });
     for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
       uploadPartPromises[i] = uploadNextPart();
     }
