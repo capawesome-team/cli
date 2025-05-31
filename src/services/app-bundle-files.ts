@@ -9,42 +9,6 @@ export interface AppBundleFilesService {
   upload(dto: UploadAppBundleFileDto): Promise<AppBundleFileDto>;
 }
 
-interface AppBundleFileUploadDto {
-  uploadId: string;
-  key: string;
-}
-
-interface AppBundleFileUploadPartDto {
-  partNumber: number;
-  etag: string;
-}
-
-interface CompleteAppBundleFileUploadDto extends UploadAppBundleFileDto {
-  key: string;
-  parts: AppBundleFileUploadPartDto[];
-  uploadId: string;
-}
-
-interface CreateAppBundleFileUploadPartDto {
-  appBundleId: string;
-  appId: string;
-  buffer: Buffer;
-  key: string;
-  name: string;
-  partNumber: number;
-  uploadId: string;
-}
-
-interface CreateAppBundleFileUploadPartsDto extends UploadAppBundleFileDto {
-  key: string;
-  uploadId: string;
-}
-
-interface CreateAppBundleFileUploadDto {
-  appBundleId: string;
-  appId: string;
-}
-
 class AppBundleFilesServiceImpl implements AppBundleFilesService {
   private readonly httpClient: HttpClient;
 
@@ -113,7 +77,9 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
   private async createUpload(dto: CreateAppBundleFileUploadDto): Promise<AppBundleFileUploadDto> {
     const response = await this.httpClient.post<AppBundleFileUploadDto>(
       `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files/upload`,
-      {},
+      {
+        sizeInBytes: dto.buffer.length,
+      },
       {
         headers: {
           Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
@@ -182,3 +148,40 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
 const appBundleFilesService: AppBundleFilesService = new AppBundleFilesServiceImpl(httpClient);
 
 export default appBundleFilesService;
+
+interface AppBundleFileUploadDto {
+  uploadId: string;
+  key: string;
+}
+
+interface AppBundleFileUploadPartDto {
+  partNumber: number;
+  etag: string;
+}
+
+interface CompleteAppBundleFileUploadDto extends UploadAppBundleFileDto {
+  key: string;
+  parts: AppBundleFileUploadPartDto[];
+  uploadId: string;
+}
+
+interface CreateAppBundleFileUploadPartDto {
+  appBundleId: string;
+  appId: string;
+  buffer: Buffer;
+  key: string;
+  name: string;
+  partNumber: number;
+  uploadId: string;
+}
+
+interface CreateAppBundleFileUploadPartsDto extends UploadAppBundleFileDto {
+  key: string;
+  uploadId: string;
+}
+
+interface CreateAppBundleFileUploadDto {
+  appBundleId: string;
+  appId: string;
+  buffer: Buffer;
+}
