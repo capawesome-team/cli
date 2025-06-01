@@ -17,7 +17,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
 
   async create(dto: CreateAppBundleFileDto): Promise<AppBundleFileDto> {
     const sizeInBytes = dto.buffer.byteLength;
-    const useMultipartUpload = sizeInBytes > 100 * 1024 * 1024; // 100 MB
+    const useMultipartUpload = sizeInBytes >= 100 * 1024 * 1024; // 100 MB
     const formData = new FormData();
     formData.append('checksum', dto.checksum);
     if (!useMultipartUpload) {
