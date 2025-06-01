@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.13.0](https://github.com/capawesome-team/cli/compare/v1.12.0...v1.13.0) (2025-06-01)
+
+
+### Features
+
+* support for uploading bundles with more than 100 mb ([#52](https://github.com/capawesome-team/cli/issues/52)) ([788b70b](https://github.com/capawesome-team/cli/commit/788b70b71258f57537a8284ce9c5fc93be81443b))
+
 ## [1.12.0](https://github.com/capawesome-team/cli/compare/v1.11.1...v1.12.0) (2025-05-22)
 
 
