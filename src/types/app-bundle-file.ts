@@ -5,9 +5,11 @@ export interface AppBundleFileDto {
 export interface CreateAppBundleFileDto {
   appId: string;
   appBundleId: string;
+  buffer: Buffer;
   checksum: string;
-  fileBuffer: Buffer;
-  fileName: string;
   href?: string;
+  mimeType: string;
+  name: string;
   signature?: string;
+  sizeInBytes?: number;
 }
