@@ -8,17 +8,8 @@ export interface CreateAppBundleFileDto {
   buffer: Buffer;
   checksum: string;
   href?: string;
-  name: string;
-  signature?: string;
-}
-
-export interface UploadAppBundleFileDto {
-  appId: string;
-  appBundleId: string;
-  buffer: Buffer;
-  checksum: string;
-  href?: string;
   mimeType: string;
   name: string;
   signature?: string;
+  sizeInBytes?: number;
 }

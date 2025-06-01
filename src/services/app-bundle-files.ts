@@ -1,12 +1,11 @@
 import FormData from 'form-data';
 import { MAX_CONCURRENT_UPLOADS } from '../config';
-import { AppBundleFileDto, CreateAppBundleFileDto, UploadAppBundleFileDto } from '../types/app-bundle-file';
+import { AppBundleFileDto, CreateAppBundleFileDto } from '../types/app-bundle-file';
 import httpClient, { HttpClient } from '../utils/http-client';
 import authorizationService from './authorization-service';
 
 export interface AppBundleFilesService {
   create(dto: CreateAppBundleFileDto): Promise<AppBundleFileDto>;
-  upload(dto: UploadAppBundleFileDto): Promise<AppBundleFileDto>;
 }
 
 class AppBundleFilesServiceImpl implements AppBundleFilesService {
@@ -17,15 +16,22 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
   }
 
   async create(dto: CreateAppBundleFileDto): Promise<AppBundleFileDto> {
+    const sizeInBytes = dto.buffer.byteLength;
+    const useMultipartUpload = sizeInBytes > 100 * 1024 * 1024; // 100 MB
     const formData = new FormData();
     formData.append('checksum', dto.checksum);
-    formData.append('file', dto.buffer, { filename: dto.name });
+    if (!useMultipartUpload) {
+      formData.append('file', dto.buffer, { filename: dto.name });
+    }
     if (dto.href) {
       formData.append('href', dto.href);
     }
+    formData.append('mimeType', dto.mimeType);
+    formData.append('name', dto.name);
     if (dto.signature) {
       formData.append('signature', dto.signature);
     }
+    formData.append('sizeInBytes', sizeInBytes.toString());
     const response = await this.httpClient.post<AppBundleFileDto>(
       `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files`,
       formData,
@@ -36,34 +42,25 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
         },
       },
     );
+    if (useMultipartUpload) {
+      await this.upload({
+        appBundleFileId: response.data.id,
+        appBundleId: dto.appBundleId,
+        appId: dto.appId,
+        buffer: dto.buffer,
+        name: dto.name,
+        checksum: dto.checksum,
+      });
+    }
     return response.data;
   }
 
-  async upload(dto: UploadAppBundleFileDto): Promise<AppBundleFileDto> {
-    // 1. Create a multipart upload
-    const { key, uploadId } = await this.createUpload(dto);
-    // 2. Upload the file in parts
-    const parts = await this.createUploadParts({
-      ...dto,
-      key,
-      uploadId,
-    });
-    // 3. Complete the upload
-    return this.completeUpload({ ...dto, key, parts, uploadId });
-  }
-
-  private async completeUpload(dto: CompleteAppBundleFileUploadDto): Promise<AppBundleFileDto> {
+  private async completeUpload(dto: CompleteAppBundleFileUploadDto): Promise<void> {
     return this.httpClient
-      .post<AppBundleFileDto>(
-        `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files/upload/${dto.uploadId}/complete`,
+      .post<void>(
+        `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files/${dto.appBundleFileId}/upload?action=mpu-complete&uploadId=${dto.uploadId}`,
         {
-          checksum: dto.checksum,
-          href: dto.href,
-          key: dto.key,
-          mimeType: dto.mimeType,
-          name: dto.name,
           parts: dto.parts,
-          signature: dto.signature,
         },
         {
           headers: {
@@ -76,10 +73,8 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
 
   private async createUpload(dto: CreateAppBundleFileUploadDto): Promise<AppBundleFileUploadDto> {
     const response = await this.httpClient.post<AppBundleFileUploadDto>(
-      `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files/upload`,
-      {
-        sizeInBytes: dto.buffer.length,
-      },
+      `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files/${dto.appBundleFileId}/upload?action=mpu-create`,
+      {},
       {
         headers: {
           Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
@@ -92,12 +87,11 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
   private async createUploadPart(dto: CreateAppBundleFileUploadPartDto): Promise<AppBundleFileUploadPartDto> {
     const formData = new FormData();
     formData.append('blob', dto.buffer, { filename: dto.name });
-    formData.append('key', dto.key);
     formData.append('partNumber', dto.partNumber.toString());
 
     return this.httpClient
-      .post<AppBundleFileUploadPartDto>(
-        `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files/upload/${dto.uploadId}/parts`,
+      .put<AppBundleFileUploadPartDto>(
+        `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files/${dto.appBundleFileId}/upload?action=mpu-uploadpart&uploadId=${dto.uploadId}`,
         formData,
         {
           headers: {
@@ -124,10 +118,10 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
       const partBuffer = dto.buffer.subarray(start, end);
 
       const uploadedPart = await this.createUploadPart({
+        appBundleFileId: dto.appBundleFileId,
         appBundleId: dto.appBundleId,
         appId: dto.appId,
         buffer: partBuffer,
-        key: dto.key,
         name: dto.name,
         partNumber,
         uploadId: dto.uploadId,
@@ -143,6 +137,32 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
     await Promise.all(uploadPartPromises);
     return uploadedParts;
   }
+
+  private async upload(dto: UploadAppBundleFileDto): Promise<void> {
+    // 1. Create a multipart upload
+    const { uploadId } = await this.createUpload({
+      appBundleFileId: dto.appBundleFileId,
+      appBundleId: dto.appBundleId,
+      appId: dto.appId,
+    });
+    // 2. Upload the file in parts
+    const parts = await this.createUploadParts({
+      appBundleFileId: dto.appBundleFileId,
+      appBundleId: dto.appBundleId,
+      appId: dto.appId,
+      buffer: dto.buffer,
+      name: dto.name,
+      uploadId,
+    });
+    // 3. Complete the upload
+    await this.completeUpload({
+      appBundleFileId: dto.appBundleFileId,
+      appBundleId: dto.appBundleId,
+      appId: dto.appId,
+      parts,
+      uploadId,
+    });
+  }
 }
 
 const appBundleFilesService: AppBundleFilesService = new AppBundleFilesServiceImpl(httpClient);
@@ -151,37 +171,53 @@ export default appBundleFilesService;
 
 interface AppBundleFileUploadDto {
   uploadId: string;
-  key: string;
 }
 
 interface AppBundleFileUploadPartDto {
-  partNumber: number;
   etag: string;
+  partNumber: number;
 }
 
-interface CompleteAppBundleFileUploadDto extends UploadAppBundleFileDto {
-  key: string;
+interface CompleteAppBundleFileUploadDto {
+  appId: string;
+  appBundleId: string;
+  appBundleFileId: string;
   parts: AppBundleFileUploadPartDto[];
   uploadId: string;
 }
 
-interface CreateAppBundleFileUploadPartDto {
-  appBundleId: string;
+interface CreateAppBundleFileUploadDto {
   appId: string;
+  appBundleId: string;
+  appBundleFileId: string;
+}
+
+interface CreateAppBundleFileUploadPartDto {
+  appId: string;
+  appBundleId: string;
+  appBundleFileId: string;
   buffer: Buffer;
-  key: string;
   name: string;
   partNumber: number;
   uploadId: string;
 }
 
-interface CreateAppBundleFileUploadPartsDto extends UploadAppBundleFileDto {
-  key: string;
+interface CreateAppBundleFileUploadPartsDto {
+  appId: string;
+  appBundleId: string;
+  appBundleFileId: string;
+  buffer: Buffer;
+  name: string;
   uploadId: string;
 }
 
-interface CreateAppBundleFileUploadDto {
+interface UploadAppBundleFileDto {
+  appBundleFileId: string;
   appBundleId: string;
   appId: string;
   buffer: Buffer;
+  name: string;
+  checksum: string;
+  href?: string;
+  signature?: string;
 }

@@ -316,30 +316,16 @@ const uploadFile = async (options: {
       signature = await createSignature(options.privateKeyBuffer, options.buffer);
     }
     // Create the multipart upload
-    const sizeInBytes = options.buffer.byteLength;
-    if (sizeInBytes > 100 * 1024 * 1024) {
-      // Use multipart upload for files larger than 100 MB
-      return await appBundleFilesService.upload({
-        appId: options.appId,
-        appBundleId: options.appBundleId,
-        checksum: hash,
-        buffer: options.buffer,
-        name: options.name,
-        href: options.href,
-        mimeType: options.mimeType,
-      });
-    } else {
-      // Use single upload for files smaller than 100 MB
-      return await appBundleFilesService.create({
-        appId: options.appId,
-        appBundleId: options.appBundleId,
-        buffer: options.buffer,
-        checksum: hash,
-        href: options.href,
-        name: options.name,
-        signature,
-      });
-    }
+    return await appBundleFilesService.create({
+      appId: options.appId,
+      appBundleId: options.appBundleId,
+      buffer: options.buffer,
+      checksum: hash,
+      href: options.href,
+      mimeType: options.mimeType,
+      name: options.name,
+      signature,
+    });
   } catch (error) {
     if (options.retryOnFailure) {
       return uploadFile({
