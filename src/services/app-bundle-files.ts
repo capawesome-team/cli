@@ -106,7 +106,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
   private async createUploadParts(dto: CreateAppBundleFileUploadPartsDto): Promise<AppBundleFileUploadPartDto[]> {
     const uploadedParts: AppBundleFileUploadPartDto[] = [];
     const partSize = 10 * 1024 * 1024; // 10 MB. 5 MB is the minimum part size except for the last part.
-    const totalParts = Math.ceil(dto.buffer.length / partSize);
+    const totalParts = Math.ceil(dto.buffer.byteLength / partSize);
     let partNumber = 0;
     const uploadNextPart = async () => {
       if (partNumber >= totalParts) {
@@ -114,7 +114,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
       }
       partNumber++;
       const start = (partNumber - 1) * partSize;
-      const end = Math.min(start + partSize, dto.buffer.length);
+      const end = Math.min(start + partSize, dto.buffer.byteLength);
       const partBuffer = dto.buffer.subarray(start, end);
 
       const uploadedPart = await this.createUploadPart({
