@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.13.1](https://github.com/capawesome-team/cli/compare/v1.13.0...v1.13.1) (2025-06-02)
+
+
+### Bug Fixes
+
+* ES Module error ([bfe5f83](https://github.com/capawesome-team/cli/commit/bfe5f83c172386c84c8a58a3d7da71e63d664f65))
+
 ## [1.13.0](https://github.com/capawesome-team/cli/compare/v1.12.0...v1.13.0) (2025-06-01)
 
 
