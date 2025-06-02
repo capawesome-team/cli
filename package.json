@@ -1,6 +1,6 @@
 {
   "name": "@capawesome/cli",
-  "version": "1.13.0",
+  "version": "1.13.0-dev.eb9056a.1748876506",
   "description": "The Capawesome Cloud Command Line Interface (CLI) to manage Live Updates and more.",
   "scripts": {
     "build": "patch-package && rimraf ./dist && tsc",
@@ -48,7 +48,7 @@
     "citty": "0.1.6",
     "consola": "3.3.0",
     "form-data": "4.0.1",
-    "mime": "4.0.7",
+    "mime": "3.0.0",
     "open": "8.4.2",
     "rc9": "2.1.2",
     "semver": "7.6.3",
@@ -57,6 +57,7 @@
   "devDependencies": {
     "@ionic/prettier-config": "4.0.0",
     "@types/archiver": "6.0.3",
+    "@types/mime": "3.0.4",
     "@types/node": "20.11.30",
     "@types/semver": "7.5.8",
     "commit-and-tag-version": "12.5.0",
