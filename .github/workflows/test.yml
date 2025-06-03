@@ -7,7 +7,7 @@ on:
 
 env:
   BUNDLE_PATH: www
-  BUNDLE_URL: https://api.cloud.capawesome.io/v1/apps/8fc9b959-cd26-4584-9564-1a9a2b207671/bundles/a8326913-b1e2-4071-8818-6045fe8935f4/download
+  BUNDLE_URL: https://github.com/user-attachments/files/20565742/www.zip
   CAPAWESOME_CLOUD_APP_ID: 08c68ab0-e51c-4504-aa51-70b949577e46
 
 jobs:
