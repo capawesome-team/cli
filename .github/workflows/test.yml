@@ -28,8 +28,6 @@ jobs:
         run: curl -sS -L ${{ env.BUNDLE_URL }} --output ${{ env.BUNDLE_PATH }}.zip
       - name: Unzip the bundle
         run: unzip ${{ env.BUNDLE_PATH }}.zip
-      - name: List files in the bundle
-        run: ls -la ${{ env.BUNDLE_PATH }}
       - name: Install latest Capawesome CLI version
         run: npm i -g @capawesome/cli@latest
       - name: Login to Capawesome CLI
