@@ -25,7 +25,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Download sample bundle
-        run: wget ${{ env.BUNDLE_URL }} -O ${{ env.BUNDLE_PATH }}.zip
+        run: |
+          curl -sS -L ${{ env.BUNDLE_URL }} \
+          -o ${{ env.BUNDLE_PATH }}.zip
       - name: Unzip the bundle
         run: unzip ${{ env.BUNDLE_PATH }}.zip
       - name: List files in the bundle
