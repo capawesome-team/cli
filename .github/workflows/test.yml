@@ -30,7 +30,7 @@ jobs:
       - name: Unzip the bundle
         run: unzip ${{ env.BUNDLE_PATH }}.zip -d ${{ env.BUNDLE_PATH }}
       - name: Install latest Capawesome CLI version
-        run: npm i @capawesome/cli@latest
+        run: npm i -g @capawesome/cli@latest
       - name: Login to Capawesome CLI
         run: capawesome login --token ${{ secrets.CAPAWESOME_CLOUD_TOKEN }}
       - name: Check who is logged in
