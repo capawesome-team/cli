@@ -1,13 +1,23 @@
 name: Test
 
 on:
-  # schedule:
-  #   - cron: '0 0 * * *'
+  pull_request:
+    paths:
+      - .github/workflows/test.yml
+      - package.json
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/test.yml
+      - package.json
+  schedule:
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 env:
   BUNDLE_PATH: www
-  BUNDLE_URL: https://github.com/user-attachments/files/20565742/www.zip
+  BUNDLE_URL: https://api.cloud.capawesome.io/v1/apps/08c68ab0-e51c-4504-aa51-70b949577e46/bundles/3866d9a6-7a2c-4c5d-832c-e36bdc5f6239/download
   CAPAWESOME_CLOUD_APP_ID: 08c68ab0-e51c-4504-aa51-70b949577e46
 
 jobs:
@@ -24,33 +34,20 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Download sample bundle
-        run: |
-          curl -L ${{ env.BUNDLE_URL }} \
-          -o ${{ env.BUNDLE_PATH }}.zip
+        run: curl -sS -L ${{ env.BUNDLE_URL }} --output ${{ env.BUNDLE_PATH }}.zip
       - name: Unzip the bundle
-        run: unzip ${{ env.BUNDLE_PATH }}.zip -d ${{ env.BUNDLE_PATH }}
+        run: unzip ${{ env.BUNDLE_PATH }}.zip
       - name: Install latest Capawesome CLI version
-        run: npm i @capawesome/cli@latest
+        run: npm i -g @capawesome/cli@latest
       - name: Login to Capawesome CLI
         run: capawesome login --token ${{ secrets.CAPAWESOME_CLOUD_TOKEN }}
       - name: Check who is logged in
         run: npx capawesome whoami
       - name: Create a channel
-        run: |
-          npx capawesome apps:channels:create \
-          --name test-${{ matrix.os }}-${{ matrix.node-version }} \
-          --ignore-errors
+        run: npx capawesome apps:channels:create --app-id ${{ env.CAPAWESOME_CLOUD_APP_ID }} --name test-${{ matrix.os }}-${{ matrix.node-version }} --ignore-errors
       - name: Generate a manifest file
-        run: |
-          npx capawesome manifest:generate \
-          --path ${{ env.BUNDLE_PATH }}
+        run: npx capawesome manifests:generate --path ${{ env.BUNDLE_PATH }}
       - name: Create a bundle
-        run: |
-          npx capawesome apps:bundles:create \
-          --app-id ${{ env.CAPAWESOME_CLOUD_APP_ID }} \
-          --channel test-${{ matrix.os }}-${{ matrix.node-version }} \
-          --path ${{ env.BUNDLE_PATH }}
-      # - name: Delete the channel
-      #   run: |
-      #     npx capawesome apps:channels:delete \
-      #     --name test-${{ matrix.os }}-${{ matrix.node-version }}
+        run: npx capawesome apps:bundles:create --app-id ${{ env.CAPAWESOME_CLOUD_APP_ID }} --channel test-${{ matrix.os }}-${{ matrix.node-version }} --path ${{ env.BUNDLE_PATH }}
+      - name: Delete the channel
+        run: npx capawesome apps:channels:delete --app-id ${{ env.CAPAWESOME_CLOUD_APP_ID }} --name test-${{ matrix.os }}-${{ matrix.node-version }}
