@@ -7,7 +7,7 @@ on:
 
 env:
   BUNDLE_PATH: www
-  BUNDLE_URL: https://github.com/user-attachments/files/20565742/www.zip
+  BUNDLE_URL: https://api.cloud.capawesome.io/v1/apps/08c68ab0-e51c-4504-aa51-70b949577e46/bundles/16ee2fea-aea5-4acc-b99d-35420d62c2be/download
   CAPAWESOME_CLOUD_APP_ID: 08c68ab0-e51c-4504-aa51-70b949577e46
 
 jobs:
@@ -24,7 +24,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Download sample bundle
-        run: wget ${{ env.BUNDLE_URL }} -O ${{ env.BUNDLE_PATH }}.zip
+        run: |
+          curl -L ${{ env.BUNDLE_URL }} \
+          -o ${{ env.BUNDLE_PATH }}.zip
       - name: Unzip the bundle
         run: unzip ${{ env.BUNDLE_PATH }}.zip -d ${{ env.BUNDLE_PATH }}
       - name: Install latest Capawesome CLI version
