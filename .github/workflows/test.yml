@@ -28,7 +28,7 @@ jobs:
           curl -L ${{ env.BUNDLE_URL }} \
           -o ${{ env.BUNDLE_PATH }}.zip
       - name: Unzip the bundle
-        run: unzip ${{ env.BUNDLE_PATH }}.zip -d ${{ env.BUNDLE_PATH }}
+        run: unzip ${{ env.BUNDLE_PATH }}.zip
       - name: List files in the bundle
         run: ls -la ${{ env.BUNDLE_PATH }}
       # - name: Install latest Capawesome CLI version
