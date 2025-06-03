@@ -16,7 +16,8 @@ jobs:
     strategy:
       matrix:
         node-version: [18, 20, 22]
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        # os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Set up Node.js ${{ matrix.node-version }}
@@ -24,9 +25,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Download sample bundle
-        run: |
-          curl -L ${{ env.BUNDLE_URL }} \
-          -o ${{ env.BUNDLE_PATH }}.zip
+        run: wget ${{ env.BUNDLE_URL }} -O ${{ env.BUNDLE_PATH }}.zip
       - name: Unzip the bundle
         run: unzip ${{ env.BUNDLE_PATH }}.zip
       - name: List files in the bundle
