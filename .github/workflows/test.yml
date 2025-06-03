@@ -38,11 +38,12 @@ jobs:
       - name: Create a channel
         run: |
           npx capawesome apps:channels:create \
+          --app-id ${{ env.CAPAWESOME_CLOUD_APP_ID }} \
           --name test-${{ matrix.os }}-${{ matrix.node-version }} \
           --ignore-errors
       - name: Generate a manifest file
         run: |
-          npx capawesome manifest:generate \
+          npx capawesome manifests:generate \
           --path ${{ env.BUNDLE_PATH }}
       - name: Create a bundle
         run: |
@@ -53,4 +54,5 @@ jobs:
       # - name: Delete the channel
       #   run: |
       #     npx capawesome apps:channels:delete \
+      #     --app-id ${{ env.CAPAWESOME_CLOUD_APP_ID }} \
       #     --name test-${{ matrix.os }}-${{ matrix.node-version }}
