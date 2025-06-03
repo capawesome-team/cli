@@ -1,8 +1,18 @@
 name: Test
 
 on:
-  # schedule:
-  #   - cron: '0 0 * * *'
+  pull_request:
+    paths:
+      - .github/workflows/test.yml
+      - package.json
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/test.yml
+      - package.json
+  schedule:
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 env:
@@ -16,8 +26,7 @@ jobs:
     strategy:
       matrix:
         node-version: [18, 20, 22]
-        # os: [macos-latest, ubuntu-latest, windows-latest]
-        os: [windows-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Set up Node.js ${{ matrix.node-version }}
