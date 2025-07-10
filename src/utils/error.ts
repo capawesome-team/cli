@@ -18,7 +18,7 @@ const getErrorMessageFromAxiosError = (error: AxiosError): string => {
     message = (error.response?.data as any)?.message;
   } else if ((error.response?.data as any)?.error?.issues[0]?.message) {
     message = (error.response?.data as any).error.issues[0].message;
-  } else if (typeof error.response?.data === 'string') {
+  } else if (error.response?.data && typeof error.response?.data === 'string') {
     message = error.response.data;
   }
   return message;
