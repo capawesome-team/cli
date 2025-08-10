@@ -16,7 +16,8 @@ class AppsServiceImpl implements AppsService {
   }
 
   async create(dto: CreateAppDto): Promise<AppDto> {
-    const response = await this.httpClient.post<AppDto>(`/v1/apps?organizationId=${dto.organizationId}`, dto, {
+    const params = new URLSearchParams({ organizationId: dto.organizationId });
+    const response = await this.httpClient.post<AppDto>(`/v1/apps?${params.toString()}`, dto, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
@@ -33,7 +34,8 @@ class AppsServiceImpl implements AppsService {
   }
 
   async findAll(dto: FindAllAppsDto): Promise<AppDto[]> {
-    const response = await this.httpClient.get<AppDto[]>(`/v1/apps?organizationId=${dto.organizationId}`, {
+    const params = new URLSearchParams({ organizationId: dto.organizationId });
+    const response = await this.httpClient.get<AppDto[]>(`/v1/apps?${params.toString()}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
