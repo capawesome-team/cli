@@ -1,6 +1,7 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
 import appsService from '../../services/apps';
+import organizationsService from '../../services/organizations';
 import { getMessageFromUnknownError } from '../../utils/error';
 import { prompt } from '../../utils/prompt';
 
@@ -13,14 +14,35 @@ export default defineCommand({
       type: 'string',
       description: 'Name of the app.',
     },
+    organizationId: {
+      type: 'string',
+      description: 'ID of the organization to create the app in.',
+    },
   },
   run: async (ctx) => {
+    let organizationId = ctx.args.organizationId;
+    if (!organizationId) {
+      const organizations = await organizationsService.findAll();
+      if (organizations.length === 0) {
+        consola.error('You must create an organization before creating an app.');
+        process.exit(1);
+      }
+      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+      organizationId = await prompt('Which organization do you want to create the app in?', {
+        type: 'select',
+        options: organizations.map((organization) => ({ label: organization.name, value: organization.id })),
+      });
+      if (!organizationId) {
+        consola.error('You must select an organization to create the app in.');
+        process.exit(1);
+      }
+    }
     let name = ctx.args.name;
     if (!name) {
       name = await prompt('Enter the name of the app:', { type: 'text' });
     }
     try {
-      const response = await appsService.create({ name });
+      const response = await appsService.create({ name, organizationId });
       consola.success('App created successfully.');
       consola.info(`App ID: ${response.id}`);
     } catch (error) {
