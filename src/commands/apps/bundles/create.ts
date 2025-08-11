@@ -6,6 +6,7 @@ import appBundleFilesService from '../../../services/app-bundle-files';
 import appBundlesService from '../../../services/app-bundles';
 import appsService from '../../../services/apps';
 import authorizationService from '../../../services/authorization-service';
+import organizationsService from '../../../services/organizations';
 import { AppBundleFileDto } from '../../../types/app-bundle-file';
 import { createBufferFromPath, createBufferFromReadStream } from '../../../utils/buffer';
 import { getMessageFromUnknownError } from '../../../utils/error';
@@ -178,7 +179,23 @@ export default defineCommand({
       process.exit(1);
     }
     if (!appId) {
-      const apps = await appsService.findAll();
+      const organizations = await organizationsService.findAll();
+      if (organizations.length === 0) {
+        consola.error('You must create an organization before creating a bundle.');
+        process.exit(1);
+      }
+      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+      const organizationId = await prompt('Select the organization of the app for which you want to create a bundle.', {
+        type: 'select',
+        options: organizations.map((organization) => ({ label: organization.name, value: organization.id })),
+      });
+      if (!organizationId) {
+        consola.error('You must select the organization of an app for which you want to create a bundle.');
+        process.exit(1);
+      }
+      const apps = await appsService.findAll({
+        organizationId,
+      });
       if (apps.length === 0) {
         consola.error('You must create an app before creating a bundle.');
         process.exit(1);

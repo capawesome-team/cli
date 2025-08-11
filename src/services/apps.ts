@@ -1,11 +1,11 @@
-import { AppDto, CreateAppDto, DeleteAppDto } from '../types/app';
+import { AppDto, CreateAppDto, DeleteAppDto, FindAllAppsDto } from '../types/app';
 import httpClient, { HttpClient } from '../utils/http-client';
 import authorizationService from './authorization-service';
 
 export interface AppsService {
   create(dto: CreateAppDto): Promise<AppDto>;
   delete(dto: DeleteAppDto): Promise<void>;
-  findAll(): Promise<AppDto[]>;
+  findAll(dto: FindAllAppsDto): Promise<AppDto[]>;
 }
 
 class AppsServiceImpl implements AppsService {
@@ -16,7 +16,8 @@ class AppsServiceImpl implements AppsService {
   }
 
   async create(dto: CreateAppDto): Promise<AppDto> {
-    const response = await this.httpClient.post<AppDto>(`/v1/apps`, dto, {
+    const params = new URLSearchParams({ organizationId: dto.organizationId });
+    const response = await this.httpClient.post<AppDto>(`/v1/apps?${params.toString()}`, dto, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
@@ -32,8 +33,9 @@ class AppsServiceImpl implements AppsService {
     });
   }
 
-  async findAll(): Promise<AppDto[]> {
-    const response = await this.httpClient.get<AppDto[]>('/v1/apps', {
+  async findAll(dto: FindAllAppsDto): Promise<AppDto[]> {
+    const params = new URLSearchParams({ organizationId: dto.organizationId });
+    const response = await this.httpClient.get<AppDto[]>(`/v1/apps?${params.toString()}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },

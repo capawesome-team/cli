@@ -2,6 +2,7 @@ import { defineCommand } from 'citty';
 import consola from 'consola';
 import appDevicesService from '../../../services/app-devices';
 import appsService from '../../../services/apps';
+import organizationsService from '../../../services/organizations';
 import { getMessageFromUnknownError } from '../../../utils/error';
 import { prompt } from '../../../utils/prompt';
 
@@ -22,7 +23,26 @@ export default defineCommand({
   run: async (ctx) => {
     let appId = ctx.args.appId;
     if (!appId) {
-      const apps = await appsService.findAll();
+      const organizations = await organizationsService.findAll();
+      if (organizations.length === 0) {
+        consola.error('You must create an organization before deleting a device.');
+        process.exit(1);
+      }
+      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+      const organizationId = await prompt(
+        'Select the organization of the app from which you want to delete a device.',
+        {
+          type: 'select',
+          options: organizations.map((organization) => ({ label: organization.name, value: organization.id })),
+        },
+      );
+      if (!organizationId) {
+        consola.error('You must select the organization of an app from which you want to delete a device.');
+        process.exit(1);
+      }
+      const apps = await appsService.findAll({
+        organizationId,
+      });
       if (!apps.length) {
         consola.error('You must create an app before deleting a device.');
         process.exit(1);
