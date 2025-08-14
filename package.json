@@ -2,6 +2,7 @@
   "name": "@capawesome/cli",
   "version": "1.14.0",
   "description": "The Capawesome Cloud Command Line Interface (CLI) to manage Live Updates and more.",
+  "type": "module",
   "scripts": {
     "build": "patch-package && rimraf ./dist && tsc",
     "start": "npm run build && node ./dist/index.js",
@@ -45,14 +46,15 @@
     "archiver": "7.0.1",
     "axios": "1.8.4",
     "c12": "2.0.1",
-    "citty": "0.1.6",
     "consola": "3.3.0",
     "form-data": "4.0.4",
     "mime": "3.0.0",
     "open": "8.4.2",
     "rc9": "2.1.2",
     "semver": "7.6.3",
-    "systeminformation": "5.25.11"
+    "systeminformation": "5.25.11",
+    "zod": "3.25.76",
+    "zodest": "0.3.2"
   },
   "devDependencies": {
     "@ionic/prettier-config": "4.0.0",
