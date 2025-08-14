@@ -23,21 +23,11 @@ export default defineCommand({
   options: defineOptions(
     z.object({
       androidMax: z.coerce
-        .number({
-          message: 'Android max version must be an integer.',
-        })
-        .int({
-          message: 'Android max version must be an integer.',
-        })
+        .string()
         .optional()
         .describe('The maximum Android version code (`versionCode`) that the bundle supports.'),
       androidMin: z.coerce
-        .number({
-          message: 'Android min version must be an integer.',
-        })
-        .int({
-          message: 'Android min version must be an integer.',
-        })
+        .string()
         .optional()
         .describe('The minimum Android version code (`versionCode`) that the bundle supports.'),
       appId: z
