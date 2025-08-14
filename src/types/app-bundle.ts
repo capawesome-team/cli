@@ -13,9 +13,9 @@ export interface CreateAppBundleDto {
   customProperties?: Record<string, string>;
   expiresAt?: string;
   url?: string;
-  maxAndroidAppVersionCode?: string;
+  maxAndroidAppVersionCode?: number;
   maxIosAppVersionCode?: string;
-  minAndroidAppVersionCode?: string;
+  minAndroidAppVersionCode?: number;
   minIosAppVersionCode?: string;
   rolloutPercentage?: number;
   signature?: string;

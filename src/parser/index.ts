@@ -1,6 +1,19 @@
 import { z } from 'zod';
+import pkg from '../../package.json' with { type: 'json' };
 import type { CommandDefinition, DefineConfig, OptionsDefinition, ProcessResult } from './types.js';
 
+/**
+ * Parses command line arguments into flags and non-flag arguments.
+ * Handles both long flags (--flag) and short flags (-f), including flag clustering (-abc).
+ * Supports flags with values (--flag=value or --flag value) and boolean flags.
+ * 
+ * @param args - Array of command line arguments to parse
+ * @returns Object containing parsed flags and non-flag arguments under '_' key
+ * 
+ * @example
+ * parseFlags(['--verbose', '--count', '5', 'file.txt'])
+ * // Returns: { verbose: true, count: '5', _: ['file.txt'] }
+ */
 function parseFlags(args: string[]): Record<string, string | boolean | string[]> {
   const flags: Record<string, string | boolean> = {};
   const nonFlags: string[] = [];
@@ -48,6 +61,18 @@ function parseFlags(args: string[]): Record<string, string | boolean | string[]>
   return { ...flags, _: nonFlags };
 }
 
+/**
+ * Resolves flag aliases by replacing alias keys with their target keys.
+ * If both alias and target exist, the alias value takes precedence.
+ * 
+ * @param flags - Object containing parsed flags
+ * @param aliases - Optional mapping of alias keys to target keys
+ * @returns New flags object with aliases resolved to their target keys
+ * 
+ * @example
+ * resolveAliases({ v: true, verbose: false }, { v: 'verbose' })
+ * // Returns: { verbose: true }
+ */
 function resolveAliases(flags: Record<string, any>, aliases?: Record<string, string>): Record<string, any> {
   if (!aliases) return flags;
 
@@ -61,6 +86,151 @@ function resolveAliases(flags: Record<string, any>, aliases?: Record<string, str
   return resolved;
 }
 
+/**
+ * Converts a camelCase string to kebab-case.
+ * 
+ * @param str - The camelCase string to convert
+ * @returns The kebab-case version of the input string
+ * 
+ * @example
+ * camelToKebab('androidMax') // Returns: 'android-max'
+ * camelToKebab('expiresInDays') // Returns: 'expires-in-days'
+ */
+function camelToKebab(str: string): string {
+  return str.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+}
+
+/**
+ * Resolves kebab-case flags to their camelCase equivalents based on the schema.
+ * Only converts kebab-case flags when the camelCase version is not already present.
+ * This allows users to pass --android-max instead of --androidMax.
+ * 
+ * @param flags - Object containing parsed flags
+ * @param schema - Zod schema object defining the expected camelCase keys
+ * @returns New flags object with kebab-case flags converted to camelCase
+ * 
+ * @example
+ * resolveKebabCase({ 'android-max': '10' }, schema)
+ * // Returns: { androidMax: '10' } (if androidMax is in schema)
+ */
+function resolveKebabCase(flags: Record<string, any>, schema: z.ZodObject<any>): Record<string, any> {
+  const resolved = { ...flags };
+  const schemaKeys = Object.keys(schema.shape);
+
+  for (const camelKey of schemaKeys) {
+    if (!(camelKey in resolved)) {
+      const kebabKey = camelToKebab(camelKey);
+      if (kebabKey in resolved) {
+        resolved[camelKey] = resolved[kebabKey];
+        delete resolved[kebabKey];
+      }
+    }
+  }
+
+  return resolved;
+}
+
+/**
+ * Displays the main help screen with all available commands.
+ * Shows CLI version, usage instructions, and a formatted list of commands with descriptions.
+ * 
+ * @param commands - Object mapping command names to their definitions
+ */
+function displayHelp<T extends Record<string, CommandDefinition<any, any>>>(commands: T): void {
+  console.log(
+    `\x1b[90mThe Capawesome Cloud Command Line Interface (CLI) to manage Live Updates and more. (@capawesome/cli v${pkg.version})\x1b[0m\n`,
+  );
+
+  const commandNames = Object.keys(commands).join('|');
+  console.log(`\x1b[1mUSAGE\x1b[0m \x1b[36m@capawesome/cli ${commandNames}\x1b[0m\n`);
+
+  console.log('\x1b[1mCOMMANDS\x1b[0m\n');
+
+  // Find the maximum command name length for alignment
+  const maxLength = Math.max(...Object.keys(commands).map((name) => name.length));
+
+  for (const [name, command] of Object.entries(commands)) {
+    const description = command.description || '';
+    const padding = ' '.repeat(Math.max(2, maxLength - name.length + 4));
+    console.log(`  \x1b[36m${name}\x1b[0m${padding}${description}`);
+  }
+
+  console.log('\nUse \x1b[36m@capawesome/cli <command> --help\x1b[0m for more information about a command.');
+}
+
+/**
+ * Displays help information for a specific command.
+ * Shows command description, usage, and available options with their descriptions.
+ * 
+ * @param commandName - Name of the command to show help for
+ * @param command - Command definition containing options and description
+ */
+function displayCommandHelp(commandName: string, command: CommandDefinition<any, any>): void {
+  const description = command.description || '';
+  console.log(`${description} (@capawesome/cli ${commandName} v${pkg.version})\n`);
+
+  // Build usage line
+  let usageLine = `\x1b[1mUSAGE\x1b[0m \x1b[36m@capawesome/cli ${commandName}\x1b[0m`;
+
+  // Add [OPTIONS] if the command has options
+  if (command.options) {
+    usageLine += ' [OPTIONS]';
+  }
+
+  // Add args placeholder if the command expects args
+  if (command.args) {
+    usageLine += ' [ARGS]';
+  }
+
+  console.log(`${usageLine}\n`);
+
+  // Display options if they exist
+  if (command.options?.schema) {
+    console.log('\x1b[1mOPTIONS\x1b[0m\n');
+
+    const shape = command.options.schema.shape;
+    const aliases = command.options.aliases || {};
+
+    // Calculate the maximum length for consistent padding
+    let maxLength = 0;
+    for (const [key] of Object.entries(shape)) {
+      const alias = Object.keys(aliases).find((alias) => aliases[alias] === key);
+      const kebabKey = camelToKebab(key);
+      const visibleLength = `  --${kebabKey}${alias ? `, -${alias}` : ''}`.length;
+      maxLength = Math.max(maxLength, visibleLength);
+    }
+
+    for (const [key, zodType] of Object.entries(shape)) {
+      const description = (zodType as any)._def?.description || '';
+      const alias = Object.keys(aliases).find((alias) => aliases[alias] === key);
+      const kebabKey = camelToKebab(key);
+
+      let optionLine = `  \x1b[36m--${kebabKey}\x1b[0m`;
+      if (alias) {
+        optionLine += `, \x1b[36m-${alias}\x1b[0m`;
+      }
+
+      // Add padding and description (accounting for color codes)
+      const visibleLength = `  --${kebabKey}${alias ? `, -${alias}` : ''}`.length;
+      const padding = ' '.repeat(Math.max(2, maxLength - visibleLength + 4));
+      console.log(`${optionLine}${padding}${description}`);
+    }
+  }
+}
+
+/**
+ * Validates and transforms command options using Zod schema validation.
+ * Processes aliases and kebab-case conversion before validation.
+ * 
+ * @param flags - Raw parsed flags from command line
+ * @param optionsDef - Optional options definition with schema and aliases
+ * @returns Validated options object matching the schema
+ * @throws Error if validation fails
+ * 
+ * @example
+ * validateOptions({ 'android-max': '10' }, { schema: z.object({ androidMax: z.string() }) })
+ * // Returns: { androidMax: '10' }
+ */
 function validateOptions<T extends z.ZodObject<any> = z.ZodObject<any>>(
   flags: Record<string, any>,
   optionsDef?: OptionsDefinition<T>,
@@ -69,8 +239,9 @@ function validateOptions<T extends z.ZodObject<any> = z.ZodObject<any>>(
     return {};
   }
 
-  const resolved = resolveAliases(flags, optionsDef.aliases);
-  const { _, ...options } = resolved;
+  const resolvedAliases = resolveAliases(flags, optionsDef.aliases);
+  const resolvedKebab = resolveKebabCase(resolvedAliases, optionsDef.schema);
+  const { _, ...options } = resolvedKebab;
 
   try {
     return optionsDef.schema.parse(options);
@@ -79,6 +250,20 @@ function validateOptions<T extends z.ZodObject<any> = z.ZodObject<any>>(
   }
 }
 
+/**
+ * Main entry point for processing CLI configuration and arguments.
+ * Parses command line arguments, validates options, and returns the processed result.
+ * Handles help display, command validation, and option processing.
+ * 
+ * @param config - CLI configuration with commands and global options
+ * @param args - Command line arguments (typically process.argv.slice(2))
+ * @returns Processed result containing command, options, and arguments
+ * @throws Error for invalid commands or validation failures
+ * 
+ * @example
+ * processConfig(config, ['apps:bundles:create', '--android-max', '10'])
+ * // Returns: { command: ..., options: { androidMax: '10' }, args: [], globalOptions: {} }
+ */
 export function processConfig<
   TGlobalOptions extends z.ZodObject<any> = z.ZodObject<any>,
   TCommands extends Record<string, CommandDefinition<any, any>> = {},
@@ -88,23 +273,32 @@ export function processConfig<
 
   // Find the command
   const commandName = commandArgs[0];
-  if (!commandName) {
-    // Show available commands
-    const commands = Object.keys(config.commands).join(', ');
-    throw new Error(`No command specified. Available commands: ${commands}`);
-  }
 
-  if (!(commandName in config.commands)) {
-    const commands = Object.keys(config.commands).join(', ');
-    throw new Error(`Unknown command: ${commandName}. Available commands: ${commands}`);
+  if (!commandName) {
+    if (parsedFlags.help === true) {
+      // Show help and exit successfully
+      displayHelp(config.commands);
+      process.exit(0);
+    } else {
+      // Show help and throw error
+      displayHelp(config.commands);
+      throw new Error('No command specified.');
+    }
   }
 
   const command = config.commands[commandName];
   if (!command) {
-    throw new Error(`Command not found: ${commandName}`);
+    displayHelp(config.commands);
+    throw new Error(`Unknown command: \x1b[36m${commandName}\x1b[0m`);
   }
 
   const remainingArgs = commandArgs.slice(1);
+
+  // Check for help flag for the specific command
+  if (parsedFlags.help === true) {
+    displayCommandHelp(commandName, command);
+    process.exit(0);
+  }
 
   // Process global options
   const globalOptions = validateOptions(parsedFlags, config.globalOptions);

@@ -9,10 +9,21 @@ export function defineOptions<T extends z.ZodObject<any> = z.ZodObject<any>>(
 }
 
 export function defineCommand<
-  TOptions extends z.ZodObject<any> = z.ZodObject<any>,
+  TOptions extends OptionsDefinition<any> | undefined = undefined,
   TArgs extends z.ZodType | undefined = undefined,
->(config: CommandDefinition<TOptions, TArgs>): CommandDefinition<TOptions, TArgs> {
-  return config;
+>(config: {
+  description?: string;
+  options?: TOptions;
+  args?: TArgs;
+  action: (
+    options: TOptions extends OptionsDefinition<infer U> ? z.infer<U> : {},
+    args: TArgs extends z.ZodType ? z.infer<TArgs> : undefined
+  ) => void | Promise<void>;
+}): CommandDefinition<
+  TOptions extends OptionsDefinition<infer U> ? U : z.ZodObject<any>,
+  TArgs
+> {
+  return config as any;
 }
 
 export function defineConfig<

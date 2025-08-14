@@ -12,7 +12,10 @@ export interface CommandDefinition<
   description?: string;
   options?: OptionsDefinition<TOptions>;
   args?: TArgs;
-  action: (options: any, args: any) => void | Promise<void>;
+  action: (
+    options: TOptions extends z.ZodObject<any> ? z.infer<TOptions> : {},
+    args: TArgs extends z.ZodType ? z.infer<TArgs> : undefined
+  ) => void | Promise<void>;
 }
 
 export interface DefineConfig<

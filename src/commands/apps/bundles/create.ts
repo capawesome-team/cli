@@ -22,17 +22,37 @@ export default defineCommand({
   description: 'Create a new app bundle.',
   options: defineOptions(
     z.object({
-      androidMax: z
-        .string()
+      androidMax: z.coerce
+        .number({
+          message: 'Android max version must be an integer.',
+        })
+        .int({
+          message: 'Android max version must be an integer.',
+        })
         .optional()
         .describe('The maximum Android version code (`versionCode`) that the bundle supports.'),
-      androidMin: z
-        .string()
+      androidMin: z.coerce
+        .number({
+          message: 'Android min version must be an integer.',
+        })
+        .int({
+          message: 'Android min version must be an integer.',
+        })
         .optional()
         .describe('The minimum Android version code (`versionCode`) that the bundle supports.'),
-      appId: z.string().optional().describe('App ID to deploy to.'),
+      appId: z
+        .string({
+          message: 'App ID must be a UUID.',
+        })
+        .uuid({
+          message: 'App ID must be a UUID.',
+        })
+        .optional()
+        .describe('App ID to deploy to.'),
       artifactType: z
-        .enum(['manifest', 'zip'])
+        .enum(['manifest', 'zip'], {
+          message: 'Invalid artifact type. Must be either `manifest` or `zip`.',
+        })
         .optional()
         .describe('The type of artifact to deploy. Must be either `manifest` or `zip`. The default is `zip`.')
         .default('zip'),
@@ -41,13 +61,15 @@ export default defineCommand({
       commitRef: z.string().optional().describe('The commit ref related to the bundle.'),
       commitSha: z.string().optional().describe('The commit sha related to the bundle.'),
       customProperty: z
-        .string()
+        .array(z.string().min(1).max(100))
         .optional()
         .describe(
           'A custom property to assign to the bundle. Must be in the format `key=value`. Can be specified multiple times.',
         ),
       expiresInDays: z.coerce
-        .number()
+        .number({
+          message: 'Expiration days must be an integer.',
+        })
         .int({
           message: 'Expiration days must be an integer.',
         })
@@ -97,6 +119,8 @@ export default defineCommand({
       rollout,
       url,
     } = options;
+
+    console.log(customProperty);
 
     // Check if the user is logged in
     if (!authorizationService.hasAuthorizationToken()) {
