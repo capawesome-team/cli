@@ -49,8 +49,8 @@
     "citty": "0.1.6",
     "consola": "3.3.0",
     "form-data": "4.0.4",
-    "mime": "3.0.0",
-    "open": "8.4.2",
+    "mime": "4.0.7",
+    "open": "10.2.0",
     "rc9": "2.1.2",
     "semver": "7.6.3",
     "systeminformation": "5.25.11"
