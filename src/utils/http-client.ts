@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { version } from '../../package.json';
-import configService from '../services/config';
+import pkg from '../../package.json' with { type: 'json' };
+import configService from '../services/config.js';
 
 export interface HttpClient {
   delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>>;
@@ -12,7 +12,7 @@ export interface HttpClient {
 
 class HttpClientImpl implements HttpClient {
   private readonly baseHeaders = {
-    'User-Agent': `Capawesome CLI v${version}`,
+    'User-Agent': `Capawesome CLI v${pkg.version}`,
   };
 
   async delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {

@@ -2,13 +2,13 @@ import { AxiosError } from 'axios';
 import { defineCommand } from 'citty';
 import consola from 'consola';
 import open from 'open';
-import configService from '../services/config';
-import sessionCodesService from '../services/session-code';
-import sessionsService from '../services/sessions';
-import usersService from '../services/users';
-import { getMessageFromUnknownError } from '../utils/error';
-import { prompt } from '../utils/prompt';
-import userConfig from '../utils/userConfig';
+import configService from '../services/config.js';
+import sessionCodesService from '../services/session-code.js';
+import sessionsService from '../services/sessions.js';
+import usersService from '../services/users.js';
+import { getMessageFromUnknownError } from '../utils/error.js';
+import { prompt } from '../utils/prompt.js';
+import userConfig from '../utils/userConfig.js';
 
 export default defineCommand({
   meta: {

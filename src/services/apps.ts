@@ -1,6 +1,6 @@
-import { AppDto, CreateAppDto, DeleteAppDto, FindAllAppsDto } from '../types/app';
-import httpClient, { HttpClient } from '../utils/http-client';
-import authorizationService from './authorization-service';
+import { AppDto, CreateAppDto, DeleteAppDto, FindAllAppsDto } from '../types/app.js';
+import httpClient, { HttpClient } from '../utils/http-client.js';
+import authorizationService from './authorization-service.js';
 
 export interface AppsService {
   create(dto: CreateAppDto): Promise<AppDto>;

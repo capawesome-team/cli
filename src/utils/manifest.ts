@@ -1,7 +1,7 @@
-import { MANIFEST_JSON_FILE_NAME } from '../config';
-import { createBufferFromPath } from './buffer';
-import { getFilesInDirectoryAndSubdirectories, writeFile } from './file';
-import { createHash } from './hash';
+import { MANIFEST_JSON_FILE_NAME } from '../config/index.js';
+import { createBufferFromPath } from './buffer.js';
+import { getFilesInDirectoryAndSubdirectories, writeFile } from './file.js';
+import { createHash } from './hash.js';
 
 const ignoreFiles = ['.DS_Store', MANIFEST_JSON_FILE_NAME];
 

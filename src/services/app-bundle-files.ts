@@ -1,8 +1,8 @@
 import FormData from 'form-data';
-import { MAX_CONCURRENT_UPLOADS } from '../config';
-import { AppBundleFileDto, CreateAppBundleFileDto } from '../types/app-bundle-file';
-import httpClient, { HttpClient } from '../utils/http-client';
-import authorizationService from './authorization-service';
+import { MAX_CONCURRENT_UPLOADS } from '../config/index.js';
+import { AppBundleFileDto, CreateAppBundleFileDto } from '../types/app-bundle-file.js';
+import httpClient, { HttpClient } from '../utils/http-client.js';
+import authorizationService from './authorization-service.js';
 
 export interface AppBundleFilesService {
   create(dto: CreateAppBundleFileDto): Promise<AppBundleFileDto>;

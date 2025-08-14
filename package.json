@@ -2,6 +2,7 @@
   "name": "@capawesome/cli",
   "version": "1.14.0",
   "description": "The Capawesome Cloud Command Line Interface (CLI) to manage Live Updates and more.",
+  "type": "module",
   "scripts": {
     "build": "patch-package && rimraf ./dist && tsc",
     "start": "npm run build && node ./dist/index.js",

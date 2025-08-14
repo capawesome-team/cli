@@ -1,6 +1,6 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import pkg from '../../package.json';
+import pkg from '../../package.json' with { type: 'json' };
 import systeminformation from 'systeminformation';
 
 export default defineCommand({

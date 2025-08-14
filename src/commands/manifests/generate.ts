@@ -1,8 +1,8 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import { fileExistsAtPath } from '../../utils/file';
-import { generateManifestJson } from '../../utils/manifest';
-import { prompt } from '../../utils/prompt';
+import { fileExistsAtPath } from '../../utils/file.js';
+import { generateManifestJson } from '../../utils/manifest.js';
+import { prompt } from '../../utils/prompt.js';
 
 export default defineCommand({
   meta: {

@@ -1,7 +1,7 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import usersService from '../services/users';
-import userConfig from '../utils/userConfig';
+import usersService from '../services/users.js';
+import userConfig from '../utils/userConfig.js';
 
 export default defineCommand({
   meta: {
