@@ -1,9 +1,9 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
+import { isCI } from 'std-env';
 import appChannelsService from '../../../services/app-channels.js';
 import appsService from '../../../services/apps.js';
 import organizationsService from '../../../services/organizations.js';
-import { isRunningInCi } from '../../../utils/ci.js';
 import { getMessageFromUnknownError } from '../../../utils/error.js';
 import { prompt } from '../../../utils/prompt.js';
 
@@ -65,7 +65,7 @@ export default defineCommand({
         type: 'text',
       });
     }
-    if (!isRunningInCi()) {
+    if (!isCI) {
       const confirmed = await prompt('Are you sure you want to delete this channel?', {
         type: 'confirm',
       });
