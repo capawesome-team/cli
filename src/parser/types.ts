@@ -14,7 +14,7 @@ export interface CommandDefinition<
   args?: TArgs;
   action: (
     options: TOptions extends z.ZodObject<any> ? z.infer<TOptions> : {},
-    args: TArgs extends z.ZodType ? z.infer<TArgs> : undefined
+    args: TArgs extends z.ZodType ? z.infer<TArgs> : undefined,
   ) => void | Promise<void>;
 }
 
@@ -26,9 +26,7 @@ export interface DefineConfig<
   commands: TCommands;
 }
 
-export interface ProcessResult<
-  TCommand extends CommandDefinition<any, any> = CommandDefinition<any, any>,
-> {
+export interface ProcessResult<TCommand extends CommandDefinition<any, any> = CommandDefinition<any, any>> {
   globalOptions: any;
   command: TCommand;
   options: any;

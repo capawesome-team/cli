@@ -17,12 +17,9 @@ export function defineCommand<
   args?: TArgs;
   action: (
     options: TOptions extends OptionsDefinition<infer U> ? z.infer<U> : {},
-    args: TArgs extends z.ZodType ? z.infer<TArgs> : undefined
+    args: TArgs extends z.ZodType ? z.infer<TArgs> : undefined,
   ) => void | Promise<void>;
-}): CommandDefinition<
-  TOptions extends OptionsDefinition<infer U> ? U : z.ZodObject<any>,
-  TArgs
-> {
+}): CommandDefinition<TOptions extends OptionsDefinition<infer U> ? U : z.ZodObject<any>, TArgs> {
   return config as any;
 }
 

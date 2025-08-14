@@ -120,8 +120,6 @@ export default defineCommand({
       url,
     } = options;
 
-    console.log(customProperty);
-
     // Check if the user is logged in
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command.');
@@ -437,19 +435,12 @@ const uploadZip = async (options: {
   };
 };
 
-const parseCustomProperties = (customProperty: string | string[] | undefined): Record<string, string> | undefined => {
+const parseCustomProperties = (customProperty: string[] | undefined): Record<string, string> | undefined => {
   let customProperties: Record<string, string> | undefined;
   if (customProperty) {
     customProperties = {};
-    if (Array.isArray(customProperty)) {
-      for (const property of customProperty) {
-        const [key, value] = property.split('=');
-        if (key && value) {
-          customProperties[key] = value;
-        }
-      }
-    } else {
-      const [key, value] = customProperty.split('=');
+    for (const property of customProperty) {
+      const [key, value] = property.split('=');
       if (key && value) {
         customProperties[key] = value;
       }

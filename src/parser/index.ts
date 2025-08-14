@@ -6,17 +6,35 @@ import type { CommandDefinition, DefineConfig, OptionsDefinition, ProcessResult 
  * Parses command line arguments into flags and non-flag arguments.
  * Handles both long flags (--flag) and short flags (-f), including flag clustering (-abc).
  * Supports flags with values (--flag=value or --flag value) and boolean flags.
- * 
+ * When the same flag is specified multiple times, values are collected into an array.
+ *
  * @param args - Array of command line arguments to parse
  * @returns Object containing parsed flags and non-flag arguments under '_' key
- * 
+ *
  * @example
  * parseFlags(['--verbose', '--count', '5', 'file.txt'])
  * // Returns: { verbose: true, count: '5', _: ['file.txt'] }
+ *
+ * @example
+ * parseFlags(['--custom-property', 'key1=value1', '--custom-property', 'key2=value2'])
+ * // Returns: { 'custom-property': ['key1=value1', 'key2=value2'], _: [] }
  */
 function parseFlags(args: string[]): Record<string, string | boolean | string[]> {
-  const flags: Record<string, string | boolean> = {};
+  const flags: Record<string, string | boolean | string[]> = {};
   const nonFlags: string[] = [];
+
+  const addFlag = (key: string, value: string | boolean) => {
+    if (key in flags) {
+      const existing = flags[key];
+      if (Array.isArray(existing)) {
+        existing.push(value as string);
+      } else {
+        flags[key] = [existing as string, value as string];
+      }
+    } else {
+      flags[key] = value;
+    }
+  };
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -27,15 +45,15 @@ function parseFlags(args: string[]): Record<string, string | boolean | string[]>
       if (key.includes('=')) {
         const [flagName, ...valueParts] = key.split('=');
         if (flagName) {
-          flags[flagName] = valueParts.join('=');
+          addFlag(flagName, valueParts.join('='));
         }
       } else {
         const nextArg = args[i + 1];
         if (nextArg && !nextArg.startsWith('-')) {
-          flags[key] = nextArg;
+          addFlag(key, nextArg);
           i++;
         } else {
-          flags[key] = true;
+          addFlag(key, true);
         }
       }
     } else if (arg.startsWith('-') && arg.length > 1) {
@@ -43,14 +61,14 @@ function parseFlags(args: string[]): Record<string, string | boolean | string[]>
       if (key.length === 1) {
         const nextArg = args[i + 1];
         if (nextArg && !nextArg.startsWith('-')) {
-          flags[key] = nextArg;
+          addFlag(key, nextArg);
           i++;
         } else {
-          flags[key] = true;
+          addFlag(key, true);
         }
       } else {
         for (const char of key) {
-          flags[char] = true;
+          addFlag(char, true);
         }
       }
     } else {
@@ -64,11 +82,11 @@ function parseFlags(args: string[]): Record<string, string | boolean | string[]>
 /**
  * Resolves flag aliases by replacing alias keys with their target keys.
  * If both alias and target exist, the alias value takes precedence.
- * 
+ *
  * @param flags - Object containing parsed flags
  * @param aliases - Optional mapping of alias keys to target keys
  * @returns New flags object with aliases resolved to their target keys
- * 
+ *
  * @example
  * resolveAliases({ v: true, verbose: false }, { v: 'verbose' })
  * // Returns: { verbose: true }
@@ -88,10 +106,10 @@ function resolveAliases(flags: Record<string, any>, aliases?: Record<string, str
 
 /**
  * Converts a camelCase string to kebab-case.
- * 
+ *
  * @param str - The camelCase string to convert
  * @returns The kebab-case version of the input string
- * 
+ *
  * @example
  * camelToKebab('androidMax') // Returns: 'android-max'
  * camelToKebab('expiresInDays') // Returns: 'expires-in-days'
@@ -104,11 +122,11 @@ function camelToKebab(str: string): string {
  * Resolves kebab-case flags to their camelCase equivalents based on the schema.
  * Only converts kebab-case flags when the camelCase version is not already present.
  * This allows users to pass --android-max instead of --androidMax.
- * 
+ *
  * @param flags - Object containing parsed flags
  * @param schema - Zod schema object defining the expected camelCase keys
  * @returns New flags object with kebab-case flags converted to camelCase
- * 
+ *
  * @example
  * resolveKebabCase({ 'android-max': '10' }, schema)
  * // Returns: { androidMax: '10' } (if androidMax is in schema)
@@ -133,7 +151,7 @@ function resolveKebabCase(flags: Record<string, any>, schema: z.ZodObject<any>):
 /**
  * Displays the main help screen with all available commands.
  * Shows CLI version, usage instructions, and a formatted list of commands with descriptions.
- * 
+ *
  * @param commands - Object mapping command names to their definitions
  */
 function displayHelp<T extends Record<string, CommandDefinition<any, any>>>(commands: T): void {
@@ -161,7 +179,7 @@ function displayHelp<T extends Record<string, CommandDefinition<any, any>>>(comm
 /**
  * Displays help information for a specific command.
  * Shows command description, usage, and available options with their descriptions.
- * 
+ *
  * @param commandName - Name of the command to show help for
  * @param command - Command definition containing options and description
  */
@@ -219,17 +237,80 @@ function displayCommandHelp(commandName: string, command: CommandDefinition<any,
 }
 
 /**
+ * Normalizes single values to arrays for fields that are defined as arrays in the schema.
+ * This ensures that when a user provides a single value for an array field,
+ * it gets wrapped in an array before validation.
+ *
+ * @param options - Object containing parsed options
+ * @param schema - Zod schema object defining the expected field types
+ * @returns New options object with single values normalized to arrays where needed
+ *
+ * @example
+ * normalizeArrayFields({ customProperty: 'key=value' }, schema)
+ * // Returns: { customProperty: ['key=value'] } (if customProperty is defined as array in schema)
+ */
+function normalizeArrayFields(options: Record<string, any>, schema: z.ZodObject<any>): Record<string, any> {
+  const normalized = { ...options };
+  const shape = schema.shape;
+
+  for (const [key, zodType] of Object.entries(shape)) {
+    if (key in normalized) {
+      // Check if this field is defined as an array (including optional arrays)
+      const isArrayField = isZodArrayType(zodType);
+
+      if (isArrayField && !Array.isArray(normalized[key])) {
+        // Convert single value to array
+        normalized[key] = [normalized[key]];
+      }
+    }
+  }
+
+  return normalized;
+}
+
+/**
+ * Checks if a Zod type is an array type, handling optional and default wrappers.
+ *
+ * @param zodType - The Zod type to check
+ * @returns True if the type is an array type
+ */
+function isZodArrayType(zodType: any): boolean {
+  // Handle ZodOptional and ZodDefault wrappers, but stop when we find the actual type
+  let innerType = zodType;
+
+  // Only unwrap wrapper types like ZodOptional and ZodDefault, not the content types
+  while (innerType._def && (innerType._def.innerType || innerType._def.type)) {
+    const next = innerType._def.innerType || innerType._def.type;
+
+    // Stop unwrapping if we reach a content type (like ZodArray, ZodString, etc.)
+    if (innerType.constructor.name === 'ZodOptional' || innerType.constructor.name === 'ZodDefault') {
+      innerType = next;
+    } else {
+      break;
+    }
+  }
+
+  // Check for ZodArray type name as instanceof might not work with different zod instances
+  return innerType instanceof z.ZodArray || (innerType._def && innerType._def.typeName === 'ZodArray');
+}
+
+/**
  * Validates and transforms command options using Zod schema validation.
  * Processes aliases and kebab-case conversion before validation.
- * 
+ * Ensures that single values for array fields are converted to arrays.
+ *
  * @param flags - Raw parsed flags from command line
  * @param optionsDef - Optional options definition with schema and aliases
  * @returns Validated options object matching the schema
  * @throws Error if validation fails
- * 
+ *
  * @example
  * validateOptions({ 'android-max': '10' }, { schema: z.object({ androidMax: z.string() }) })
  * // Returns: { androidMax: '10' }
+ *
+ * @example
+ * validateOptions({ 'custom-property': 'key=value' }, { schema: z.object({ customProperty: z.array(z.string()) }) })
+ * // Returns: { customProperty: ['key=value'] }
  */
 function validateOptions<T extends z.ZodObject<any> = z.ZodObject<any>>(
   flags: Record<string, any>,
@@ -243,8 +324,11 @@ function validateOptions<T extends z.ZodObject<any> = z.ZodObject<any>>(
   const resolvedKebab = resolveKebabCase(resolvedAliases, optionsDef.schema);
   const { _, ...options } = resolvedKebab;
 
+  // Normalize single values to arrays for fields that expect arrays
+  const normalizedOptions = normalizeArrayFields(options, optionsDef.schema);
+
   try {
-    return optionsDef.schema.parse(options);
+    return optionsDef.schema.parse(normalizedOptions);
   } catch (error) {
     throw error;
   }
@@ -254,12 +338,12 @@ function validateOptions<T extends z.ZodObject<any> = z.ZodObject<any>>(
  * Main entry point for processing CLI configuration and arguments.
  * Parses command line arguments, validates options, and returns the processed result.
  * Handles help display, command validation, and option processing.
- * 
+ *
  * @param config - CLI configuration with commands and global options
  * @param args - Command line arguments (typically process.argv.slice(2))
  * @returns Processed result containing command, options, and arguments
  * @throws Error for invalid commands or validation failures
- * 
+ *
  * @example
  * processConfig(config, ['apps:bundles:create', '--android-max', '10'])
  * // Returns: { command: ..., options: { androidMax: '10' }, args: [], globalOptions: {} }
