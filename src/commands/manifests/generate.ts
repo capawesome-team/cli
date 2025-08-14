@@ -1,4 +1,4 @@
-import { defineCommand, defineOptions } from 'zodest/config';
+import { defineCommand, defineOptions } from '../../parser/config.js';
 import { z } from 'zod';
 import consola from 'consola';
 import { fileExistsAtPath } from '../../utils/file.js';
@@ -12,7 +12,7 @@ export default defineCommand({
       path: z.string().optional().describe('Path to the web assets folder (e.g. `www` or `dist`).'),
     }),
   ),
-  action: async (options, args) => {
+  action: async (options: any, args: any) => {
     let path = options.path;
 
     if (!path) {

@@ -1,8 +1,8 @@
 import consola from 'consola';
 import { createReadStream } from 'fs';
 import { z } from 'zod';
-import { defineCommand, defineOptions } from 'zodest/config';
 import { MAX_CONCURRENT_UPLOADS } from '../../../config/index.js';
+import { defineCommand, defineOptions } from '../../../parser/config.js';
 import appBundleFilesService from '../../../services/app-bundle-files.js';
 import appBundlesService from '../../../services/app-bundles.js';
 import appsService from '../../../services/apps.js';
@@ -48,6 +48,9 @@ export default defineCommand({
         ),
       expiresInDays: z.coerce
         .number()
+        .int({
+          message: 'Expiration days must be an integer.',
+        })
         .optional()
         .describe('The number of days until the bundle is automatically deleted.'),
       iosMax: z
@@ -94,7 +97,7 @@ export default defineCommand({
       rollout,
       url,
     } = options;
-    console.log('rollout: ', rollout);
+
     // Check if the user is logged in
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command.');

@@ -1,4 +1,4 @@
-import { defineCommand } from 'zodest/config';
+import { defineCommand } from '../parser/config.js';
 import consola from 'consola';
 import pkg from '../../package.json' with { type: 'json' };
 import systeminformation from 'systeminformation';

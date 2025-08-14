@@ -1,6 +1,6 @@
 import consola from 'consola';
 import { z } from 'zod';
-import { defineCommand, defineOptions } from 'zodest/config';
+import { defineCommand, defineOptions } from '../../../parser/config.js';
 import appBundlesService from '../../../services/app-bundles.js';
 import appsService from '../../../services/apps.js';
 import authorizationService from '../../../services/authorization-service.js';

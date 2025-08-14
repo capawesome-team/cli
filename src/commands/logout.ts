@@ -1,4 +1,4 @@
-import { defineCommand } from 'zodest/config';
+import { defineCommand } from '../parser/config.js';
 import consola from 'consola';
 import authorizationService from '../services/authorization-service.js';
 import sessionsService from '../services/sessions.js';

@@ -58,8 +58,7 @@
     "semver": "7.6.3",
     "std-env": "3.9.0",
     "systeminformation": "5.25.11",
-    "zod": "3.25.76",
-    "zodest": "0.3.2"
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@ionic/prettier-config": "4.0.0",
