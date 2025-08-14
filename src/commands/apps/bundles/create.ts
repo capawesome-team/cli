@@ -1,21 +1,21 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
 import { createReadStream } from 'fs';
-import { MAX_CONCURRENT_UPLOADS } from '../../../config';
-import appBundleFilesService from '../../../services/app-bundle-files';
-import appBundlesService from '../../../services/app-bundles';
-import appsService from '../../../services/apps';
-import authorizationService from '../../../services/authorization-service';
-import organizationsService from '../../../services/organizations';
-import { AppBundleFileDto } from '../../../types/app-bundle-file';
-import { createBufferFromPath, createBufferFromReadStream } from '../../../utils/buffer';
-import { getMessageFromUnknownError } from '../../../utils/error';
-import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '../../../utils/file';
-import { createHash } from '../../../utils/hash';
-import { generateManifestJson } from '../../../utils/manifest';
-import { prompt } from '../../../utils/prompt';
-import { createSignature } from '../../../utils/signature';
-import zip from '../../../utils/zip';
+import { MAX_CONCURRENT_UPLOADS } from '../../../config/index.js';
+import appBundleFilesService from '../../../services/app-bundle-files.js';
+import appBundlesService from '../../../services/app-bundles.js';
+import appsService from '../../../services/apps.js';
+import authorizationService from '../../../services/authorization-service.js';
+import organizationsService from '../../../services/organizations.js';
+import { AppBundleFileDto } from '../../../types/app-bundle-file.js';
+import { createBufferFromPath, createBufferFromReadStream } from '../../../utils/buffer.js';
+import { getMessageFromUnknownError } from '../../../utils/error.js';
+import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '../../../utils/file.js';
+import { createHash } from '../../../utils/hash.js';
+import { generateManifestJson } from '../../../utils/manifest.js';
+import { prompt } from '../../../utils/prompt.js';
+import { createSignature } from '../../../utils/signature.js';
+import zip from '../../../utils/zip.js';
 
 export default defineCommand({
   meta: {

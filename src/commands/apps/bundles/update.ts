@@ -1,11 +1,11 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import appBundlesService from '../../../services/app-bundles';
-import appsService from '../../../services/apps';
-import authorizationService from '../../../services/authorization-service';
-import organizationsService from '../../../services/organizations';
-import { getMessageFromUnknownError } from '../../../utils/error';
-import { prompt } from '../../../utils/prompt';
+import appBundlesService from '../../../services/app-bundles.js';
+import appsService from '../../../services/apps.js';
+import authorizationService from '../../../services/authorization-service.js';
+import organizationsService from '../../../services/organizations.js';
+import { getMessageFromUnknownError } from '../../../utils/error.js';
+import { prompt } from '../../../utils/prompt.js';
 
 export default defineCommand({
   meta: {

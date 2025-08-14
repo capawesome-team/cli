@@ -1,10 +1,10 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import appChannelsService from '../../../services/app-channels';
-import appsService from '../../../services/apps';
-import organizationsService from '../../../services/organizations';
-import { getMessageFromUnknownError } from '../../../utils/error';
-import { prompt } from '../../../utils/prompt';
+import appChannelsService from '../../../services/app-channels.js';
+import appsService from '../../../services/apps.js';
+import organizationsService from '../../../services/organizations.js';
+import { getMessageFromUnknownError } from '../../../utils/error.js';
+import { prompt } from '../../../utils/prompt.js';
 
 export default defineCommand({
   meta: {

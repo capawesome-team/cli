@@ -1,8 +1,8 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import appChannelsService from '../../../services/app-channels';
-import authorizationService from '../../../services/authorization-service';
-import { getMessageFromUnknownError } from '../../../utils/error';
+import appChannelsService from '../../../services/app-channels.js';
+import authorizationService from '../../../services/authorization-service.js';
+import { getMessageFromUnknownError } from '../../../utils/error.js';
 
 export default defineCommand({
   meta: {
