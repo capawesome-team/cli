@@ -1,7 +1,8 @@
 import { AxiosError } from 'axios';
-import { defineCommand } from 'citty';
 import consola from 'consola';
 import open from 'open';
+import { z } from 'zod';
+import { defineCommand, defineOptions } from 'zodest/config';
 import configService from '../services/config.js';
 import sessionCodesService from '../services/session-code.js';
 import sessionsService from '../services/sessions.js';
@@ -11,19 +12,15 @@ import { prompt } from '../utils/prompt.js';
 import userConfig from '../utils/userConfig.js';
 
 export default defineCommand({
-  meta: {
-    name: 'login',
-    description: 'Sign in to the Capawesome Cloud Console.',
-  },
-  args: {
-    token: {
-      type: 'string',
-      description: 'Token to use for authentication.',
-    },
-  },
-  run: async (ctx) => {
+  description: 'Sign in to the Capawesome Cloud Console.',
+  options: defineOptions(
+    z.object({
+      token: z.string().optional().describe('Token to use for authentication.'),
+    }),
+  ),
+  action: async (options, args) => {
     const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
-    let sessionIdOrToken = ctx.args.token as string | undefined;
+    let { token: sessionIdOrToken } = options;
     if (sessionIdOrToken === undefined) {
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
       const authenticationMethod = await prompt('How would you like to authenticate Capawesome CLI?', {

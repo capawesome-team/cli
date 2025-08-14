@@ -1,21 +1,19 @@
-import { defineCommand } from 'citty';
+import { defineCommand, defineOptions } from 'zodest/config';
+import { z } from 'zod';
 import consola from 'consola';
 import { fileExistsAtPath } from '../../utils/file.js';
 import { generateManifestJson } from '../../utils/manifest.js';
 import { prompt } from '../../utils/prompt.js';
 
 export default defineCommand({
-  meta: {
-    description: 'Generate a manifest file.',
-  },
-  args: {
-    path: {
-      type: 'string',
-      description: 'Path to the web assets folder (e.g. `www` or `dist`).',
-    },
-  },
-  run: async (ctx) => {
-    let path = ctx.args.path as string | undefined;
+  description: 'Generate a manifest file.',
+  options: defineOptions(
+    z.object({
+      path: z.string().optional().describe('Path to the web assets folder (e.g. `www` or `dist`).'),
+    }),
+  ),
+  action: async (options, args) => {
+    let path = options.path;
 
     if (!path) {
       path = await prompt('Enter the path to the web assets folder:', {

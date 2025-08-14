@@ -1,5 +1,6 @@
-import { defineCommand } from 'citty';
 import consola from 'consola';
+import { z } from 'zod';
+import { defineCommand, defineOptions } from 'zodest/config';
 import appChannelsService from '../../../services/app-channels.js';
 import appsService from '../../../services/apps.js';
 import organizationsService from '../../../services/organizations.js';
@@ -7,37 +8,23 @@ import { getMessageFromUnknownError } from '../../../utils/error.js';
 import { prompt } from '../../../utils/prompt.js';
 
 export default defineCommand({
-  meta: {
-    description: 'Create a new app channel.',
-  },
-  args: {
-    appId: {
-      type: 'string',
-      description: 'ID of the app.',
-    },
-    bundleLimit: {
-      type: 'string',
-      description:
-        'Maximum number of bundles that can be assigned to the channel. If more bundles are assigned, the oldest bundles will be automatically deleted.',
-    },
-    ignoreErrors: {
-      type: 'boolean',
-      description: 'Whether to ignore errors or not.',
-    },
-    name: {
-      type: 'string',
-      description: 'Name of the channel.',
-    },
-  },
-  run: async (ctx) => {
-    let appId = ctx.args.appId;
-    let bundleLimitAsString = ctx.args.bundleLimit;
-    let ignoreErrors = ctx.args.ignoreErrors as boolean | string | undefined;
-    let name = ctx.args.name;
-    // Convert ignoreErrors to boolean
-    if (typeof ignoreErrors === 'string') {
-      ignoreErrors = ignoreErrors.toLowerCase() === 'true';
-    }
+  description: 'Create a new app channel.',
+  options: defineOptions(
+    z.object({
+      appId: z.string().optional().describe('ID of the app.'),
+      bundleLimit: z.coerce
+        .number()
+        .optional()
+        .describe(
+          'Maximum number of bundles that can be assigned to the channel. If more bundles are assigned, the oldest bundles will be automatically deleted.',
+        ),
+      ignoreErrors: z.boolean().optional().describe('Whether to ignore errors or not.'),
+      name: z.string().optional().describe('Name of the channel.'),
+    }),
+  ),
+  action: async (options, args) => {
+    let { appId, bundleLimit, ignoreErrors, name } = options;
+
     // Validate the app ID
     if (!appId) {
       const organizations = await organizationsService.findAll();
@@ -69,15 +56,6 @@ export default defineCommand({
         type: 'select',
         options: apps.map((app) => ({ label: app.name, value: app.id })),
       });
-    }
-    // Validate the bundle limit
-    let bundleLimit: number | undefined;
-    if (bundleLimitAsString) {
-      bundleLimit = parseInt(bundleLimitAsString, 10);
-      if (isNaN(bundleLimit)) {
-        consola.error('The bundle limit must be a number.');
-        process.exit(1);
-      }
     }
     // Validate the channel name
     if (!name) {

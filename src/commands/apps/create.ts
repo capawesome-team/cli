@@ -1,26 +1,21 @@
-import { defineCommand } from 'citty';
 import consola from 'consola';
+import { z } from 'zod';
+import { defineCommand, defineOptions } from 'zodest/config';
 import appsService from '../../services/apps.js';
 import organizationsService from '../../services/organizations.js';
 import { getMessageFromUnknownError } from '../../utils/error.js';
 import { prompt } from '../../utils/prompt.js';
 
 export default defineCommand({
-  meta: {
-    description: 'Create a new app.',
-  },
-  args: {
-    name: {
-      type: 'string',
-      description: 'Name of the app.',
-    },
-    organizationId: {
-      type: 'string',
-      description: 'ID of the organization to create the app in.',
-    },
-  },
-  run: async (ctx) => {
-    let organizationId = ctx.args.organizationId;
+  description: 'Create a new app.',
+  options: defineOptions(
+    z.object({
+      name: z.string().optional().describe('Name of the app.'),
+      organizationId: z.string().optional().describe('ID of the organization to create the app in.'),
+    }),
+  ),
+  action: async (options, args) => {
+    let { name, organizationId } = options;
     if (!organizationId) {
       const organizations = await organizationsService.findAll();
       if (organizations.length === 0) {
@@ -37,7 +32,6 @@ export default defineCommand({
         process.exit(1);
       }
     }
-    let name = ctx.args.name;
     if (!name) {
       name = await prompt('Enter the name of the app:', { type: 'text' });
     }

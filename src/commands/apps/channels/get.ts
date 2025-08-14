@@ -1,46 +1,29 @@
-import { defineCommand } from 'citty';
 import consola from 'consola';
+import { z } from 'zod';
+import { defineCommand, defineOptions } from 'zodest/config';
 import appChannelsService from '../../../services/app-channels.js';
 import authorizationService from '../../../services/authorization-service.js';
 import { AppChannelDto } from '../../../types/index.js';
 import { getMessageFromUnknownError } from '../../../utils/error.js';
 
 export default defineCommand({
-  meta: {
-    description: 'Get an existing app channel.',
-  },
-  args: {
-    appId: {
-      type: 'string',
-      description: 'ID of the app.',
-    },
-    channelId: {
-      type: 'string',
-      description: 'ID of the channel.',
-    },
-    json: {
-      type: 'boolean',
-      description: 'Output in JSON format.',
-    },
-    name: {
-      type: 'string',
-      description: 'Name of the channel.',
-    },
-  },
-  run: async (ctx) => {
+  description: 'Get an existing app channel.',
+  options: defineOptions(
+    z.object({
+      appId: z.string().optional().describe('ID of the app.'),
+      channelId: z.string().optional().describe('ID of the channel.'),
+      json: z.boolean().optional().describe('Output in JSON format.'),
+      name: z.string().optional().describe('Name of the channel.'),
+    }),
+  ),
+  action: async (options, args) => {
+    let { appId, channelId, json, name } = options;
+
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command.');
       process.exit(1);
     }
 
-    let appId = ctx.args.appId as string | undefined;
-    let channelId = ctx.args.channelId as string | undefined;
-    let json = ctx.args.json as boolean | string | undefined;
-    // Convert json to boolean
-    if (typeof json === 'string') {
-      json = json.toLowerCase() === 'true';
-    }
-    let name = ctx.args.name as string | undefined;
     if (!appId) {
       consola.error('You must provide an app ID.');
       process.exit(1);
