@@ -1,8 +1,8 @@
 import { defineCommand } from 'citty';
 import consola from 'consola';
-import authorizationService from '../services/authorization-service';
-import sessionsService from '../services/sessions';
-import userConfig from '../utils/userConfig';
+import authorizationService from '../services/authorization-service.js';
+import sessionsService from '../services/sessions.js';
+import userConfig from '../utils/userConfig.js';
 
 export default defineCommand({
   meta: {

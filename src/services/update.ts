@@ -1,8 +1,8 @@
 import consola from 'consola';
 import * as semver from 'semver';
-import pkg from '../../package.json';
-import { NpmPackageDto } from '../types/npm-package';
-import httpClient, { HttpClient } from '../utils/http-client';
+import pkg from '../../package.json' with { type: 'json' };
+import { NpmPackageDto } from '../types/npm-package.js';
+import httpClient, { HttpClient } from '../utils/http-client.js';
 
 export interface UpdateService {
   checkForUpdate(): Promise<void>;
