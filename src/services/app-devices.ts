@@ -1,6 +1,6 @@
-import { DeleteAppDeviceDto } from '../types/index.js';
-import httpClient, { HttpClient } from '../utils/http-client.js';
-import authorizationService from './authorization-service.js';
+import { DeleteAppDeviceDto } from '@/types/index.js';
+import httpClient, { HttpClient } from '@/utils/http-client.js';
+import authorizationService from '@/services/authorization-service.js';
 
 export interface AppDevicesService {
   delete(dto: DeleteAppDeviceDto): Promise<void>;

@@ -1,6 +1,6 @@
-import { CreateSessionDto, DeleteSessionDto, SessionDto } from '../types/session.js';
-import httpClient, { HttpClient } from '../utils/http-client.js';
-import authorizationService from './authorization-service.js';
+import { CreateSessionDto, DeleteSessionDto, SessionDto } from '@/types/session.js';
+import httpClient, { HttpClient } from '@/utils/http-client.js';
+import authorizationService from '@/services/authorization-service.js';
 
 export interface SessionsService {
   create(dto: CreateSessionDto): Promise<SessionDto>;

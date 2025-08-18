@@ -3,9 +3,9 @@ import { defineConfig, processConfig } from '@robingenz/zli';
 import * as Sentry from '@sentry/node';
 import consola from 'consola';
 import pkg from '../package.json' with { type: 'json' };
-import configService from './services/config.js';
-import updateService from './services/update.js';
-import { getMessageFromUnknownError } from './utils/error.js';
+import configService from '@/services/config.js';
+import updateService from '@/services/update.js';
+import { getMessageFromUnknownError } from '@/utils/error.js';
 
 const config = defineConfig({
   meta: {
@@ -14,22 +14,22 @@ const config = defineConfig({
     description: pkg.description,
   },
   commands: {
-    whoami: await import('./commands/whoami.js').then((mod) => mod.default),
-    login: await import('./commands/login.js').then((mod) => mod.default),
-    logout: await import('./commands/logout.js').then((mod) => mod.default),
-    doctor: await import('./commands/doctor.js').then((mod) => mod.default),
-    'apps:create': await import('./commands/apps/create.js').then((mod) => mod.default),
-    'apps:delete': await import('./commands/apps/delete.js').then((mod) => mod.default),
-    'apps:bundles:create': await import('./commands/apps/bundles/create.js').then((mod) => mod.default),
-    'apps:bundles:delete': await import('./commands/apps/bundles/delete.js').then((mod) => mod.default),
-    'apps:bundles:update': await import('./commands/apps/bundles/update.js').then((mod) => mod.default),
-    'apps:channels:create': await import('./commands/apps/channels/create.js').then((mod) => mod.default),
-    'apps:channels:delete': await import('./commands/apps/channels/delete.js').then((mod) => mod.default),
-    'apps:channels:get': await import('./commands/apps/channels/get.js').then((mod) => mod.default),
-    'apps:channels:list': await import('./commands/apps/channels/list.js').then((mod) => mod.default),
-    'apps:channels:update': await import('./commands/apps/channels/update.js').then((mod) => mod.default),
-    'apps:devices:delete': await import('./commands/apps/devices/delete.js').then((mod) => mod.default),
-    'manifests:generate': await import('./commands/manifests/generate.js').then((mod) => mod.default),
+    whoami: await import('@/commands/whoami.js').then((mod) => mod.default),
+    login: await import('@/commands/login.js').then((mod) => mod.default),
+    logout: await import('@/commands/logout.js').then((mod) => mod.default),
+    doctor: await import('@/commands/doctor.js').then((mod) => mod.default),
+    'apps:create': await import('@/commands/apps/create.js').then((mod) => mod.default),
+    'apps:delete': await import('@/commands/apps/delete.js').then((mod) => mod.default),
+    'apps:bundles:create': await import('@/commands/apps/bundles/create.js').then((mod) => mod.default),
+    'apps:bundles:delete': await import('@/commands/apps/bundles/delete.js').then((mod) => mod.default),
+    'apps:bundles:update': await import('@/commands/apps/bundles/update.js').then((mod) => mod.default),
+    'apps:channels:create': await import('@/commands/apps/channels/create.js').then((mod) => mod.default),
+    'apps:channels:delete': await import('@/commands/apps/channels/delete.js').then((mod) => mod.default),
+    'apps:channels:get': await import('@/commands/apps/channels/get.js').then((mod) => mod.default),
+    'apps:channels:list': await import('@/commands/apps/channels/list.js').then((mod) => mod.default),
+    'apps:channels:update': await import('@/commands/apps/channels/update.js').then((mod) => mod.default),
+    'apps:devices:delete': await import('@/commands/apps/devices/delete.js').then((mod) => mod.default),
+    'manifests:generate': await import('@/commands/manifests/generate.js').then((mod) => mod.default),
   },
 });
 

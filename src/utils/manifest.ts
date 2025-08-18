@@ -1,4 +1,4 @@
-import { MANIFEST_JSON_FILE_NAME } from '../config/index.js';
+import { MANIFEST_JSON_FILE_NAME } from '@/config/index.js';
 import { createBufferFromPath } from './buffer.js';
 import { getFilesInDirectoryAndSubdirectories, writeFile } from './file.js';
 import { createHash } from './hash.js';

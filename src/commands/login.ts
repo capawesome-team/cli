@@ -3,13 +3,13 @@ import { AxiosError } from 'axios';
 import consola from 'consola';
 import open from 'open';
 import { z } from 'zod';
-import configService from '../services/config.js';
-import sessionCodesService from '../services/session-code.js';
-import sessionsService from '../services/sessions.js';
-import usersService from '../services/users.js';
-import { getMessageFromUnknownError } from '../utils/error.js';
-import { prompt } from '../utils/prompt.js';
-import userConfig from '../utils/userConfig.js';
+import configService from '@/services/config.js';
+import sessionCodesService from '@/services/session-code.js';
+import sessionsService from '@/services/sessions.js';
+import usersService from '@/services/users.js';
+import { getMessageFromUnknownError } from '@/utils/error.js';
+import { prompt } from '@/utils/prompt.js';
+import userConfig from '@/utils/userConfig.js';
 
 export default defineCommand({
   description: 'Sign in to the Capawesome Cloud Console.',

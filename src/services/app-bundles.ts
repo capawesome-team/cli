@@ -1,6 +1,6 @@
-import { AppBundleDto, CreateAppBundleDto, DeleteAppBundleDto, UpdateAppBundleDto } from '../types/index.js';
-import httpClient, { HttpClient } from '../utils/http-client.js';
-import authorizationService from './authorization-service.js';
+import { AppBundleDto, CreateAppBundleDto, DeleteAppBundleDto, UpdateAppBundleDto } from '@/types/index.js';
+import httpClient, { HttpClient } from '@/utils/http-client.js';
+import authorizationService from '@/services/authorization-service.js';
 
 export interface AppBundlesService {
   create(dto: CreateAppBundleDto): Promise<AppBundleDto>;

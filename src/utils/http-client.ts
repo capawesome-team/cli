@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import pkg from '../../package.json' with { type: 'json' };
-import configService from '../services/config.js';
+import configService from '@/services/config.js';
 
 export interface HttpClient {
   delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>>;

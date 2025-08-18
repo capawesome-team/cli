@@ -1,12 +1,12 @@
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { z } from 'zod';
-import appBundlesService from '../../../services/app-bundles.js';
-import appsService from '../../../services/apps.js';
-import authorizationService from '../../../services/authorization-service.js';
-import organizationsService from '../../../services/organizations.js';
-import { getMessageFromUnknownError } from '../../../utils/error.js';
-import { prompt } from '../../../utils/prompt.js';
+import appBundlesService from '@/services/app-bundles.js';
+import appsService from '@/services/apps.js';
+import authorizationService from '@/services/authorization-service.js';
+import organizationsService from '@/services/organizations.js';
+import { getMessageFromUnknownError } from '@/utils/error.js';
+import { prompt } from '@/utils/prompt.js';
 
 export default defineCommand({
   description: 'Update an app bundle.',

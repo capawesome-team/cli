@@ -5,9 +5,9 @@ import {
   FindAllAppChannelsDto,
   FindOneAppChannelByIdDto,
   UpdateAppChannelDto,
-} from '../types/index.js';
-import httpClient, { HttpClient } from '../utils/http-client.js';
-import authorizationService from './authorization-service.js';
+} from '@/types/index.js';
+import httpClient, { HttpClient } from '@/utils/http-client.js';
+import authorizationService from '@/services/authorization-service.js';
 
 export interface AppChannelsService {
   create(dto: CreateAppChannelDto): Promise<AppChannelDto>;

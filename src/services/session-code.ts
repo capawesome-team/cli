@@ -1,5 +1,5 @@
-import { SessionCodeDto } from '../types/index.js';
-import httpClient, { HttpClient } from '../utils/http-client.js';
+import { SessionCodeDto } from '@/types/index.js';
+import httpClient, { HttpClient } from '@/utils/http-client.js';
 
 export interface SessionCodesService {
   create(): Promise<SessionCodeDto>;

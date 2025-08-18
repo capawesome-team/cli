@@ -1,6 +1,6 @@
-import { UserDto } from '../types/index.js';
-import httpClient, { HttpClient } from '../utils/http-client.js';
-import authorizationService from './authorization-service.js';
+import { UserDto } from '@/types/index.js';
+import httpClient, { HttpClient } from '@/utils/http-client.js';
+import authorizationService from '@/services/authorization-service.js';
 
 export interface UsersService {
   me(): Promise<UserDto>;

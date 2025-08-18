@@ -1,9 +1,9 @@
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { z } from 'zod';
-import appChannelsService from '../../../services/app-channels.js';
-import authorizationService from '../../../services/authorization-service.js';
-import { getMessageFromUnknownError } from '../../../utils/error.js';
+import appChannelsService from '@/services/app-channels.js';
+import authorizationService from '@/services/authorization-service.js';
+import { getMessageFromUnknownError } from '@/utils/error.js';
 
 export default defineCommand({
   description: 'Retrieve a list of existing app channels.',

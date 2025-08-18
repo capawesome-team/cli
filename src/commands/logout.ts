@@ -1,8 +1,8 @@
 import { defineCommand } from '@robingenz/zli';
 import consola from 'consola';
-import authorizationService from '../services/authorization-service.js';
-import sessionsService from '../services/sessions.js';
-import userConfig from '../utils/userConfig.js';
+import authorizationService from '@/services/authorization-service.js';
+import sessionsService from '@/services/sessions.js';
+import userConfig from '@/utils/userConfig.js';
 
 export default defineCommand({
   description: 'Sign out from the Capawesome Cloud Console.',
