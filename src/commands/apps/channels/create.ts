@@ -1,6 +1,6 @@
+import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { z } from 'zod';
-import { defineCommand, defineOptions } from '../../../parser/config.js';
 import appChannelsService from '../../../services/app-channels.js';
 import appsService from '../../../services/apps.js';
 import organizationsService from '../../../services/organizations.js';

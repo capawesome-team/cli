@@ -1,8 +1,8 @@
+import { defineCommand, defineOptions } from '@robingenz/zli';
 import { AxiosError } from 'axios';
 import consola from 'consola';
 import open from 'open';
 import { z } from 'zod';
-import { defineCommand, defineOptions } from '../parser/config.js';
 import configService from '../services/config.js';
 import sessionCodesService from '../services/session-code.js';
 import sessionsService from '../services/sessions.js';

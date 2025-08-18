@@ -1,6 +1,6 @@
-import { defineCommand, defineOptions } from '../../parser/config.js';
-import { z } from 'zod';
+import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
+import { z } from 'zod';
 import { fileExistsAtPath } from '../../utils/file.js';
 import { generateManifestJson } from '../../utils/manifest.js';
 import { prompt } from '../../utils/prompt.js';

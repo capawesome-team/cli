@@ -1,4 +1,4 @@
-import { defineCommand } from '../parser/config.js';
+import { defineCommand } from '@robingenz/zli';
 import consola from 'consola';
 import authorizationService from '../services/authorization-service.js';
 import sessionsService from '../services/sessions.js';

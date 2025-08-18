@@ -1,5 +1,5 @@
+import { defineCommand } from '@robingenz/zli';
 import consola from 'consola';
-import { defineCommand } from '../parser/config.js';
 import usersService from '../services/users.js';
 import userConfig from '../utils/userConfig.js';
 

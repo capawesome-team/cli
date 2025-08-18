@@ -1,7 +1,7 @@
-import { defineCommand } from '../parser/config.js';
+import { defineCommand } from '@robingenz/zli';
 import consola from 'consola';
-import pkg from '../../package.json' with { type: 'json' };
 import systeminformation from 'systeminformation';
+import pkg from '../../package.json' with { type: 'json' };
 
 export default defineCommand({
   description: 'Prints out neccessary information for debugging',

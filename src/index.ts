@@ -1,8 +1,7 @@
 #!/usr/bin/env node
+import { defineConfig, processConfig } from '@robingenz/zli';
 import * as Sentry from '@sentry/node';
 import consola from 'consola';
-import { defineConfig } from './parser/config.js';
-import { processConfig } from './parser/index.js';
 import configService from './services/config.js';
 import updateService from './services/update.js';
 import { getMessageFromUnknownError } from './utils/error.js';
