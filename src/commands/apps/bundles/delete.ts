@@ -1,5 +1,6 @@
-import { defineCommand } from 'citty';
+import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
+import { z } from 'zod';
 import appBundlesService from '../../../services/app-bundles.js';
 import appsService from '../../../services/apps.js';
 import organizationsService from '../../../services/organizations.js';
@@ -7,23 +8,17 @@ import { getMessageFromUnknownError } from '../../../utils/error.js';
 import { prompt } from '../../../utils/prompt.js';
 
 export default defineCommand({
-  meta: {
-    description: 'Delete an app bundle.',
-  },
-  args: {
-    appId: {
-      type: 'string',
-      description: 'ID of the app.',
-    },
-    bundleId: {
-      type: 'string',
-      description: 'ID of the bundle.',
-    },
-  },
-  run: async (ctx) => {
+  description: 'Delete an app bundle.',
+  options: defineOptions(
+    z.object({
+      appId: z.string().optional().describe('ID of the app.'),
+      bundleId: z.string().optional().describe('ID of the bundle.'),
+    }),
+  ),
+  action: async (options, args) => {
+    let { appId, bundleId } = options;
+
     // Prompt for missing arguments
-    let appId = ctx.args.appId;
-    let bundleId = ctx.args.bundleId;
     if (!appId) {
       const organizations = await organizationsService.findAll();
       if (organizations.length === 0) {

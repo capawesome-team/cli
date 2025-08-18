@@ -1,48 +1,28 @@
-import { defineCommand } from 'citty';
+import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
+import { z } from 'zod';
 import appChannelsService from '../../../services/app-channels.js';
 import authorizationService from '../../../services/authorization-service.js';
 import { getMessageFromUnknownError } from '../../../utils/error.js';
 
 export default defineCommand({
-  meta: {
-    description: 'Retrieve a list of existing app channels.',
-  },
-  args: {
-    appId: {
-      type: 'string',
-      description: 'ID of the app.',
-    },
-    json: {
-      type: 'boolean',
-      description: 'Output in JSON format.',
-    },
-    limit: {
-      type: 'string',
-      description: 'Limit for pagination.',
-    },
-    offset: {
-      type: 'string',
-      description: 'Offset for pagination.',
-    },
-  },
-  run: async (ctx) => {
+  description: 'Retrieve a list of existing app channels.',
+  options: defineOptions(
+    z.object({
+      appId: z.string().optional().describe('ID of the app.'),
+      json: z.boolean().optional().describe('Output in JSON format.'),
+      limit: z.coerce.number().optional().describe('Limit for pagination.'),
+      offset: z.coerce.number().optional().describe('Offset for pagination.'),
+    }),
+  ),
+  action: async (options, args) => {
+    let { appId, json, limit, offset } = options;
+
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command.');
       process.exit(1);
     }
 
-    let appId = ctx.args.appId as string | undefined;
-    let json = ctx.args.json as boolean | string | undefined;
-    const limit = ctx.args.limit as string | undefined;
-    const offset = ctx.args.offset as string | undefined;
-    // Convert limit and offset to numbers
-    const limitAsNumber = limit ? parseInt(limit, 10) : undefined;
-    const offsetAsNumber = offset ? parseInt(offset, 10) : undefined;
-    // Convert json to boolean
-    if (typeof json === 'string') {
-      json = json.toLowerCase() === 'true';
-    }
     if (!appId) {
       consola.error('You must provide an app ID.');
       process.exit(1);
@@ -51,8 +31,8 @@ export default defineCommand({
     try {
       const foundChannels = await appChannelsService.findAll({
         appId,
-        limit: limitAsNumber,
-        offset: offsetAsNumber,
+        limit,
+        offset,
       });
       const logData = foundChannels.map((channel) => ({
         id: channel.id,

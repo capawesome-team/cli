@@ -1,14 +1,11 @@
-import { defineCommand } from 'citty';
+import { defineCommand } from '@robingenz/zli';
 import consola from 'consola';
 import usersService from '../services/users.js';
 import userConfig from '../utils/userConfig.js';
 
 export default defineCommand({
-  meta: {
-    name: 'whoami',
-    description: 'Show current user',
-  },
-  run: async () => {
+  description: 'Show current user',
+  action: async (options, args) => {
     const { token } = userConfig.read();
     if (token) {
       try {

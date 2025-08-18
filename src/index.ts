@@ -1,41 +1,35 @@
 #!/usr/bin/env node
+import { defineConfig, processConfig } from '@robingenz/zli';
 import * as Sentry from '@sentry/node';
-import { defineCommand, runMain } from 'citty';
 import consola from 'consola';
 import pkg from '../package.json' with { type: 'json' };
 import configService from './services/config.js';
 import updateService from './services/update.js';
 import { getMessageFromUnknownError } from './utils/error.js';
 
-const main = defineCommand({
+const config = defineConfig({
   meta: {
     name: pkg.name,
     version: pkg.version,
     description: pkg.description,
   },
-  setup() {
-    // No op
-  },
-  cleanup() {
-    return updateService.checkForUpdate();
-  },
-  subCommands: {
-    whoami: import('./commands/whoami.js').then((mod) => mod.default),
-    login: import('./commands/login.js').then((mod) => mod.default),
-    logout: import('./commands/logout.js').then((mod) => mod.default),
-    doctor: import('./commands/doctor.js').then((mod) => mod.default),
-    'apps:create': import('./commands/apps/create.js').then((mod) => mod.default),
-    'apps:delete': import('./commands/apps/delete.js').then((mod) => mod.default),
-    'apps:bundles:create': import('./commands/apps/bundles/create.js').then((mod) => mod.default),
-    'apps:bundles:delete': import('./commands/apps/bundles/delete.js').then((mod) => mod.default),
-    'apps:bundles:update': import('./commands/apps/bundles/update.js').then((mod) => mod.default),
-    'apps:channels:create': import('./commands/apps/channels/create.js').then((mod) => mod.default),
-    'apps:channels:delete': import('./commands/apps/channels/delete.js').then((mod) => mod.default),
-    'apps:channels:get': import('./commands/apps/channels/get.js').then((mod) => mod.default),
-    'apps:channels:list': import('./commands/apps/channels/list.js').then((mod) => mod.default),
-    'apps:channels:update': import('./commands/apps/channels/update.js').then((mod) => mod.default),
-    'apps:devices:delete': import('./commands/apps/devices/delete.js').then((mod) => mod.default),
-    'manifests:generate': import('./commands/manifests/generate.js').then((mod) => mod.default),
+  commands: {
+    whoami: await import('./commands/whoami.js').then((mod) => mod.default),
+    login: await import('./commands/login.js').then((mod) => mod.default),
+    logout: await import('./commands/logout.js').then((mod) => mod.default),
+    doctor: await import('./commands/doctor.js').then((mod) => mod.default),
+    'apps:create': await import('./commands/apps/create.js').then((mod) => mod.default),
+    'apps:delete': await import('./commands/apps/delete.js').then((mod) => mod.default),
+    'apps:bundles:create': await import('./commands/apps/bundles/create.js').then((mod) => mod.default),
+    'apps:bundles:delete': await import('./commands/apps/bundles/delete.js').then((mod) => mod.default),
+    'apps:bundles:update': await import('./commands/apps/bundles/update.js').then((mod) => mod.default),
+    'apps:channels:create': await import('./commands/apps/channels/create.js').then((mod) => mod.default),
+    'apps:channels:delete': await import('./commands/apps/channels/delete.js').then((mod) => mod.default),
+    'apps:channels:get': await import('./commands/apps/channels/get.js').then((mod) => mod.default),
+    'apps:channels:list': await import('./commands/apps/channels/list.js').then((mod) => mod.default),
+    'apps:channels:update': await import('./commands/apps/channels/update.js').then((mod) => mod.default),
+    'apps:devices:delete': await import('./commands/apps/devices/delete.js').then((mod) => mod.default),
+    'manifests:generate': await import('./commands/manifests/generate.js').then((mod) => mod.default),
   },
 });
 
@@ -51,7 +45,10 @@ const captureException = async (error: unknown) => {
   await Sentry.close();
 };
 
-runMain(main).catch(async (error) => {
+try {
+  const result = processConfig(config, process.argv.slice(2));
+  await result.command.action(result.options, result.args);
+} catch (error) {
   try {
     await captureException(error).catch(() => {
       // No op
@@ -60,7 +57,12 @@ runMain(main).catch(async (error) => {
     const message = getMessageFromUnknownError(error);
     consola.error(message);
   } finally {
+    // Check for updates
+    await updateService.checkForUpdate();
     // Exit with a non-zero code
     process.exit(1);
   }
-});
+} finally {
+  // Check for updates
+  await updateService.checkForUpdate();
+}

@@ -1,5 +1,6 @@
-import { defineCommand } from 'citty';
+import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
+import { z } from 'zod';
 import appDevicesService from '../../../services/app-devices.js';
 import appsService from '../../../services/apps.js';
 import organizationsService from '../../../services/organizations.js';
@@ -7,21 +8,16 @@ import { getMessageFromUnknownError } from '../../../utils/error.js';
 import { prompt } from '../../../utils/prompt.js';
 
 export default defineCommand({
-  meta: {
-    description: 'Delete an app device.',
-  },
-  args: {
-    appId: {
-      type: 'string',
-      description: 'ID of the app.',
-    },
-    deviceId: {
-      type: 'string',
-      description: 'ID of the device.',
-    },
-  },
-  run: async (ctx) => {
-    let appId = ctx.args.appId;
+  description: 'Delete an app device.',
+  options: defineOptions(
+    z.object({
+      appId: z.string().optional().describe('ID of the app.'),
+      deviceId: z.string().optional().describe('ID of the device.'),
+    }),
+  ),
+  action: async (options, args) => {
+    let { appId, deviceId } = options;
+
     if (!appId) {
       const organizations = await organizationsService.findAll();
       if (organizations.length === 0) {
@@ -53,7 +49,6 @@ export default defineCommand({
         options: apps.map((app) => ({ label: app.name, value: app.id })),
       });
     }
-    let deviceId = ctx.args.deviceId;
     if (!deviceId) {
       deviceId = await prompt('Enter the device ID:', {
         type: 'text',

@@ -1,14 +1,11 @@
-import { defineCommand } from 'citty';
+import { defineCommand } from '@robingenz/zli';
 import consola from 'consola';
-import pkg from '../../package.json' with { type: 'json' };
 import systeminformation from 'systeminformation';
+import pkg from '../../package.json' with { type: 'json' };
 
 export default defineCommand({
-  meta: {
-    name: 'doctor',
-    description: 'Prints out neccessary information for debugging',
-  },
-  run: async () => {
+  description: 'Prints out neccessary information for debugging',
+  action: async (options, args) => {
     const osInfo = await systeminformation.osInfo();
     const versions = await systeminformation.versions('npm, node');
     consola.box(

@@ -1,5 +1,6 @@
-import { defineCommand } from 'citty';
+import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
+import { z } from 'zod';
 import appChannelsService from '../../../services/app-channels.js';
 import appsService from '../../../services/apps.js';
 import authorizationService from '../../../services/authorization-service.js';
@@ -8,47 +9,28 @@ import { getMessageFromUnknownError } from '../../../utils/error.js';
 import { prompt } from '../../../utils/prompt.js';
 
 export default defineCommand({
-  meta: {
-    description: 'Update an existing app channel.',
-  },
-  args: {
-    appId: {
-      type: 'string',
-      description: 'ID of the app.',
-    },
-    channelId: {
-      type: 'string',
-      description: 'ID of the channel.',
-    },
-    bundleLimit: {
-      type: 'string',
-      description:
-        'Maximum number of bundles that can be assigned to the channel. If more bundles are assigned, the oldest bundles will be automatically deleted.',
-    },
-    name: {
-      type: 'string',
-      description: 'Name of the channel.',
-    },
-  },
-  run: async (ctx) => {
+  description: 'Update an existing app channel.',
+  options: defineOptions(
+    z.object({
+      appId: z.string().optional().describe('ID of the app.'),
+      channelId: z.string().optional().describe('ID of the channel.'),
+      bundleLimit: z.coerce
+        .number()
+        .optional()
+        .describe(
+          'Maximum number of bundles that can be assigned to the channel. If more bundles are assigned, the oldest bundles will be automatically deleted.',
+        ),
+      name: z.string().optional().describe('Name of the channel.'),
+    }),
+  ),
+  action: async (options, args) => {
+    let { appId, channelId, bundleLimit, name } = options;
+
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command.');
       process.exit(1);
     }
 
-    let appId = ctx.args.appId;
-    let bundleLimitAsString = ctx.args.bundleLimit as string | undefined;
-    let channelId = ctx.args.channelId;
-    let name = ctx.args.name as string | undefined;
-    // Validate the bundle limit
-    let bundleLimit: number | undefined;
-    if (bundleLimitAsString) {
-      bundleLimit = parseInt(bundleLimitAsString, 10);
-      if (isNaN(bundleLimit)) {
-        consola.error('The bundle limit must be a number.');
-        process.exit(1);
-      }
-    }
     if (!appId) {
       const organizations = await organizationsService.findAll();
       if (organizations.length === 0) {

@@ -1,22 +1,20 @@
-import { defineCommand } from 'citty';
+import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
+import { z } from 'zod';
 import appsService from '../../services/apps.js';
 import organizationsService from '../../services/organizations.js';
 import { getMessageFromUnknownError } from '../../utils/error.js';
 import { prompt } from '../../utils/prompt.js';
 
 export default defineCommand({
-  meta: {
-    description: 'Delete an app.',
-  },
-  args: {
-    appId: {
-      type: 'string',
-      description: 'ID of the app.',
-    },
-  },
-  run: async (ctx) => {
-    let appId = ctx.args.appId;
+  description: 'Delete an app.',
+  options: defineOptions(
+    z.object({
+      appId: z.string().optional().describe('ID of the app.'),
+    }),
+  ),
+  action: async (options, args) => {
+    let { appId } = options;
     if (!appId) {
       const organizations = await organizationsService.findAll();
       if (organizations.length === 0) {

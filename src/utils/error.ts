@@ -1,9 +1,12 @@
 import { AxiosError } from 'axios';
+import { ZodError } from 'zod';
 
 export const getMessageFromUnknownError = (error: unknown): string => {
   let message = 'An unknown error has occurred.';
   if (error instanceof AxiosError) {
     message = getErrorMessageFromAxiosError(error);
+  } else if (error instanceof ZodError) {
+    message = getErrorMessageFromZodError(error);
   } else if (error instanceof Error) {
     message = error.message;
   }
@@ -20,6 +23,15 @@ const getErrorMessageFromAxiosError = (error: AxiosError): string => {
     message = (error.response?.data as any).error.issues[0].message;
   } else if (error.response?.data && typeof error.response?.data === 'string') {
     message = error.response.data;
+  }
+  return message;
+};
+
+const getErrorMessageFromZodError = (error: ZodError): string => {
+  let message: string = 'An unknown validation error has occurred. Please check your input.';
+  const firstIssue = error.issues[0];
+  if (firstIssue) {
+    message = firstIssue.message;
   }
   return message;
 };

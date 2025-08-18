@@ -1,5 +1,6 @@
-import { defineCommand } from 'citty';
+import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
+import { z } from 'zod';
 import appBundlesService from '../../../services/app-bundles.js';
 import appsService from '../../../services/apps.js';
 import authorizationService from '../../../services/authorization-service.js';
@@ -8,49 +9,46 @@ import { getMessageFromUnknownError } from '../../../utils/error.js';
 import { prompt } from '../../../utils/prompt.js';
 
 export default defineCommand({
-  meta: {
-    description: 'Update an app bundle.',
-  },
-  args: {
-    androidMax: {
-      type: 'string',
-      description: 'The maximum Android version code (`versionCode`) that the bundle supports.',
-    },
-    androidMin: {
-      type: 'string',
-      description: 'The minimum Android version code (`versionCode`) that the bundle supports.',
-    },
-    appId: {
-      type: 'string',
-      description: 'ID of the app.',
-    },
-    bundleId: {
-      type: 'string',
-      description: 'ID of the bundle.',
-    },
-    rollout: {
-      type: 'string',
-      description: 'The percentage of devices to deploy the bundle to. Must be a number between 0 and 1 (e.g. 0.5).',
-    },
-    iosMax: {
-      type: 'string',
-      description: 'The maximum iOS bundle version (`CFBundleVersion`) that the bundle supports.',
-    },
-    iosMin: {
-      type: 'string',
-      description: 'The minimum iOS bundle version (`CFBundleVersion`) that the bundle supports.',
-    },
-  },
-  run: async (ctx) => {
+  description: 'Update an app bundle.',
+  options: defineOptions(
+    z.object({
+      androidMax: z
+        .string()
+        .optional()
+        .describe('The maximum Android version code (`versionCode`) that the bundle supports.'),
+      androidMin: z
+        .string()
+        .optional()
+        .describe('The minimum Android version code (`versionCode`) that the bundle supports.'),
+      appId: z.string().optional().describe('ID of the app.'),
+      bundleId: z.string().optional().describe('ID of the bundle.'),
+      rollout: z.coerce
+        .number()
+        .min(0)
+        .max(1, {
+          message: 'Rollout percentage must be a number between 0 and 1 (e.g. 0.5).',
+        })
+        .optional()
+        .describe('The percentage of devices to deploy the bundle to. Must be a number between 0 and 1 (e.g. 0.5).'),
+      iosMax: z
+        .string()
+        .optional()
+        .describe('The maximum iOS bundle version (`CFBundleVersion`) that the bundle supports.'),
+      iosMin: z
+        .string()
+        .optional()
+        .describe('The minimum iOS bundle version (`CFBundleVersion`) that the bundle supports.'),
+    }),
+  ),
+  action: async (options, args) => {
+    let { androidMax, androidMin, appId, bundleId, rollout, iosMax, iosMin } = options;
+
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command.');
       process.exit(1);
     }
 
     // Prompt for missing arguments
-    const { androidMax, androidMin, rollout, iosMax, iosMin } = ctx.args;
-    let appId = ctx.args.appId;
-    let bundleId = ctx.args.bundleId;
     if (!appId) {
       const organizations = await organizationsService.findAll();
       if (organizations.length === 0) {
@@ -87,7 +85,6 @@ export default defineCommand({
 
     // Update bundle
     try {
-      const rolloutAsNumber = parseFloat(rollout);
       await appBundlesService.update({
         appId,
         appBundleId: bundleId,
@@ -95,7 +92,7 @@ export default defineCommand({
         maxIosAppVersionCode: iosMax,
         minAndroidAppVersionCode: androidMin,
         minIosAppVersionCode: iosMin,
-        rolloutPercentage: rolloutAsNumber,
+        rolloutPercentage: rollout,
       });
       consola.success('Bundle updated successfully.');
     } catch (error) {

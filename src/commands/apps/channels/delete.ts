@@ -1,6 +1,7 @@
-import { defineCommand } from 'citty';
+import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { isCI } from 'std-env';
+import { z } from 'zod';
 import appChannelsService from '../../../services/app-channels.js';
 import appsService from '../../../services/apps.js';
 import organizationsService from '../../../services/organizations.js';
@@ -8,27 +9,23 @@ import { getMessageFromUnknownError } from '../../../utils/error.js';
 import { prompt } from '../../../utils/prompt.js';
 
 export default defineCommand({
-  meta: {
-    description: 'Delete an app channel.',
-  },
-  args: {
-    appId: {
-      type: 'string',
-      description: 'ID of the app.',
-    },
-    channelId: {
-      type: 'string',
-      description: 'ID of the channel. Either the ID or name of the channel must be provided.',
-    },
-    name: {
-      type: 'string',
-      description: 'Name of the channel. Either the ID or name of the channel must be provided.',
-    },
-  },
-  run: async (ctx) => {
-    let appId = ctx.args.appId;
-    let channelId = ctx.args.channelId;
-    let channelName = ctx.args.name;
+  description: 'Delete an app channel.',
+  options: defineOptions(
+    z.object({
+      appId: z.string().optional().describe('ID of the app.'),
+      channelId: z
+        .string()
+        .optional()
+        .describe('ID of the channel. Either the ID or name of the channel must be provided.'),
+      name: z
+        .string()
+        .optional()
+        .describe('Name of the channel. Either the ID or name of the channel must be provided.'),
+    }),
+  ),
+  action: async (options, args) => {
+    let { appId, channelId, name } = options;
+
     if (!appId) {
       const organizations = await organizationsService.findAll();
       if (organizations.length === 0) {
@@ -60,8 +57,8 @@ export default defineCommand({
         options: apps.map((app) => ({ label: app.name, value: app.id })),
       });
     }
-    if (!channelId && !channelName) {
-      channelName = await prompt('Enter the channel name:', {
+    if (!channelId && !name) {
+      name = await prompt('Enter the channel name:', {
         type: 'text',
       });
     }
@@ -77,7 +74,7 @@ export default defineCommand({
       await appChannelsService.delete({
         appId,
         id: channelId,
-        name: channelName,
+        name,
       });
       consola.success('Channel deleted successfully.');
     } catch (error) {
