@@ -2,15 +2,16 @@
 import { defineConfig, processConfig } from '@robingenz/zli';
 import * as Sentry from '@sentry/node';
 import consola from 'consola';
+import pkg from '../package.json' with { type: 'json' };
 import configService from './services/config.js';
 import updateService from './services/update.js';
 import { getMessageFromUnknownError } from './utils/error.js';
 
 const config = defineConfig({
   meta: {
-    name: '@capawesome/cli',
-    version: '1.14.0',
-    description: 'The Capawesome Cloud Command Line Interface (CLI) to manage Live Updates and more.',
+    name: pkg.name,
+    version: pkg.version,
+    description: pkg.description,
   },
   commands: {
     whoami: await import('./commands/whoami.js').then((mod) => mod.default),

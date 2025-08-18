@@ -11,8 +11,8 @@ export default defineCommand({
     z.object({
       appId: z.string().optional().describe('ID of the app.'),
       json: z.boolean().optional().describe('Output in JSON format.'),
-      limit: z.string().optional().describe('Limit for pagination.'),
-      offset: z.string().optional().describe('Offset for pagination.'),
+      limit: z.coerce.number().optional().describe('Limit for pagination.'),
+      offset: z.coerce.number().optional().describe('Offset for pagination.'),
     }),
   ),
   action: async (options, args) => {
@@ -23,9 +23,6 @@ export default defineCommand({
       process.exit(1);
     }
 
-    // Convert limit and offset to numbers
-    const limitAsNumber = limit ? parseInt(limit, 10) : undefined;
-    const offsetAsNumber = offset ? parseInt(offset, 10) : undefined;
     if (!appId) {
       consola.error('You must provide an app ID.');
       process.exit(1);
@@ -34,8 +31,8 @@ export default defineCommand({
     try {
       const foundChannels = await appChannelsService.findAll({
         appId,
-        limit: limitAsNumber,
-        offset: offsetAsNumber,
+        limit,
+        offset,
       });
       const logData = foundChannels.map((channel) => ({
         id: channel.id,
