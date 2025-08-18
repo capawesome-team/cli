@@ -13,8 +13,8 @@
     "release": "commit-and-tag-version"
   },
   "engines": {
-    "npm": ">=10.0.0",
-    "node": ">=20.0.0"
+    "npm": ">=8.0.0",
+    "node": ">=16.0.0"
   },
   "bin": {
     "capawesome": "./dist/index.js"
