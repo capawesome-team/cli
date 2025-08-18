@@ -258,8 +258,8 @@ export default defineCommand({
         gitCommitRef: commitRef,
         gitCommitSha: commitSha,
         customProperties: parseCustomProperties(customProperty),
-        expiresAt: expiresAt,
-        url: url,
+        expiresAt,
+        url,
         maxAndroidAppVersionCode: androidMax,
         maxIosAppVersionCode: iosMax,
         minAndroidAppVersionCode: androidMin,
@@ -276,9 +276,9 @@ export default defineCommand({
           let appBundleFileId: string | undefined;
           // Upload the app bundle files
           if (artifactType === 'manifest') {
-            await uploadFiles({ appId, appBundleId: response.id, path: path, privateKeyBuffer });
+            await uploadFiles({ appId, appBundleId: response.id, path, privateKeyBuffer });
           } else {
-            const result = await uploadZip({ appId, appBundleId: response.id, path: path, privateKeyBuffer });
+            const result = await uploadZip({ appId, appBundleId: response.id, path, privateKeyBuffer });
             appBundleFileId = result.appBundleFileId;
           }
           // Update the app bundle
@@ -329,12 +329,12 @@ const uploadFile = async (options: {
     // Create the multipart upload
     return await appBundleFilesService.create({
       appId,
-      appBundleId: appBundleId,
-      buffer: buffer,
+      appBundleId,
+      buffer,
       checksum: hash,
-      href: href,
-      mimeType: mimeType,
-      name: name,
+      href,
+      mimeType,
+      name,
       signature,
     });
   } catch (error) {
