@@ -71,9 +71,9 @@ export default defineCommand({
     // Update channel
     try {
       await appChannelsService.update({
-        appId: appId,
+        appId,
         appChannelId: channelId,
-        name: name,
+        name,
         totalAppBundleLimit: bundleLimit,
       });
       consola.success('Channel updated successfully.');

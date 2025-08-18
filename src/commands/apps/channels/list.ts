@@ -33,7 +33,7 @@ export default defineCommand({
 
     try {
       const foundChannels = await appChannelsService.findAll({
-        appId: appId,
+        appId,
         limit: limitAsNumber,
         offset: offsetAsNumber,
       });

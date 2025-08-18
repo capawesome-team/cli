@@ -22,6 +22,11 @@ export interface DefineConfig<
   TGlobalOptions extends z.ZodObject<any> = z.ZodObject<any>,
   TCommands extends Record<string, CommandDefinition<any, any>> = {},
 > {
+  meta?: {
+    name?: string;
+    version?: string;
+    description?: string;
+  };
   globalOptions?: OptionsDefinition<TGlobalOptions>;
   commands: TCommands;
 }

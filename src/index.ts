@@ -4,9 +4,15 @@ import consola from 'consola';
 import { defineConfig } from './parser/config.js';
 import { processConfig } from './parser/index.js';
 import configService from './services/config.js';
+import updateService from './services/update.js';
 import { getMessageFromUnknownError } from './utils/error.js';
 
 const config = defineConfig({
+  meta: {
+    name: '@capawesome/cli',
+    version: '1.14.0',
+    description: 'The Capawesome Cloud Command Line Interface (CLI) to manage Live Updates and more.',
+  },
   commands: {
     whoami: await import('./commands/whoami.js').then((mod) => mod.default),
     login: await import('./commands/login.js').then((mod) => mod.default),
@@ -51,7 +57,12 @@ try {
     const message = getMessageFromUnknownError(error);
     consola.error(message);
   } finally {
+    // Check for updates
+    await updateService.checkForUpdate();
     // Exit with a non-zero code
     process.exit(1);
   }
+} finally {
+  // Check for updates
+  await updateService.checkForUpdate();
 }

@@ -22,8 +22,12 @@ export default defineCommand({
         .describe('The minimum Android version code (`versionCode`) that the bundle supports.'),
       appId: z.string().optional().describe('ID of the app.'),
       bundleId: z.string().optional().describe('ID of the bundle.'),
-      rollout: z
-        .string()
+      rollout: z.coerce
+        .number()
+        .min(0)
+        .max(1, {
+          message: 'Rollout percentage must be a number between 0 and 1 (e.g. 0.5).',
+        })
         .optional()
         .describe('The percentage of devices to deploy the bundle to. Must be a number between 0 and 1 (e.g. 0.5).'),
       iosMax: z
@@ -81,7 +85,6 @@ export default defineCommand({
 
     // Update bundle
     try {
-      const rolloutAsNumber = rollout ? parseFloat(rollout) : undefined;
       await appBundlesService.update({
         appId,
         appBundleId: bundleId,
@@ -89,7 +92,7 @@ export default defineCommand({
         maxIosAppVersionCode: iosMax,
         minAndroidAppVersionCode: androidMin,
         minIosAppVersionCode: iosMin,
-        rolloutPercentage: rolloutAsNumber,
+        rolloutPercentage: rollout,
       });
       consola.success('Bundle updated successfully.');
     } catch (error) {

@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import pkg from '../../package.json' with { type: 'json' };
 import type { CommandDefinition, DefineConfig, OptionsDefinition, ProcessResult } from './types.js';
 
 /**
@@ -149,18 +148,53 @@ function resolveKebabCase(flags: Record<string, any>, schema: z.ZodObject<any>):
 }
 
 /**
+ * Builds and displays a header line with description and meta information.
+ *
+ * @param options - Header display options
+ */
+function displayHeader(options: {
+  commandName?: string;
+  description?: string;
+  packageName?: string;
+  version?: string;
+}): void {
+  const parts = [];
+  if (options.description) parts.push(options.description);
+
+  const metaParts = [];
+  if (options.packageName) metaParts.push(options.packageName);
+  if (options.commandName) metaParts.push(options.commandName);
+  if (options.version) metaParts.push(`v${options.version}`);
+
+  if (metaParts.length > 0) {
+    parts.push(`(${metaParts.join(' ')})`);
+  }
+
+  if (parts.length > 0) {
+    console.log(`\x1b[90m${parts.join(' ')}\x1b[0m\n`);
+  }
+}
+
+/**
  * Displays the main help screen with all available commands.
  * Shows CLI version, usage instructions, and a formatted list of commands with descriptions.
  *
  * @param commands - Object mapping command names to their definitions
+ * @param meta - Meta information about the CLI
  */
-function displayHelp<T extends Record<string, CommandDefinition<any, any>>>(commands: T): void {
-  console.log(
-    `\x1b[90mThe Capawesome Cloud Command Line Interface (CLI) to manage Live Updates and more. (@capawesome/cli v${pkg.version})\x1b[0m\n`,
-  );
+function displayHelp<T extends Record<string, CommandDefinition<any, any>>>(
+  commands: T,
+  meta?: { name?: string; version?: string; description?: string },
+): void {
+  displayHeader({
+    description: meta?.description,
+    packageName: meta?.name,
+    version: meta?.version,
+  });
 
   const commandNames = Object.keys(commands).join('|');
-  console.log(`\x1b[1mUSAGE\x1b[0m \x1b[36m@capawesome/cli ${commandNames}\x1b[0m\n`);
+  const usageName = meta?.name || 'cli';
+  console.log(`\x1b[1mUSAGE\x1b[0m \x1b[36m${usageName} ${commandNames}\x1b[0m\n`);
 
   console.log('\x1b[1mCOMMANDS\x1b[0m\n');
 
@@ -173,7 +207,9 @@ function displayHelp<T extends Record<string, CommandDefinition<any, any>>>(comm
     console.log(`  \x1b[36m${name}\x1b[0m${padding}${description}`);
   }
 
-  console.log('\nUse \x1b[36m@capawesome/cli <command> --help\x1b[0m for more information about a command.');
+  if (meta?.name) {
+    console.log(`\nUse \x1b[36m${meta.name} <command> --help\x1b[0m for more information about a command.`);
+  }
 }
 
 /**
@@ -182,13 +218,23 @@ function displayHelp<T extends Record<string, CommandDefinition<any, any>>>(comm
  *
  * @param commandName - Name of the command to show help for
  * @param command - Command definition containing options and description
+ * @param meta - Meta information about the CLI
  */
-function displayCommandHelp(commandName: string, command: CommandDefinition<any, any>): void {
-  const description = command.description || '';
-  console.log(`${description} (@capawesome/cli ${commandName} v${pkg.version})\n`);
+function displayCommandHelp(
+  commandName: string,
+  command: CommandDefinition<any, any>,
+  meta?: { name?: string; version?: string; description?: string },
+): void {
+  displayHeader({
+    commandName,
+    description: command.description,
+    packageName: meta?.name,
+    version: meta?.version,
+  });
 
   // Build usage line
-  let usageLine = `\x1b[1mUSAGE\x1b[0m \x1b[36m@capawesome/cli ${commandName}\x1b[0m`;
+  const usageName = meta?.name || 'cli';
+  let usageLine = `\x1b[1mUSAGE\x1b[0m \x1b[36m${usageName} ${commandName}`;
 
   // Add [OPTIONS] if the command has options
   if (command.options) {
@@ -200,7 +246,7 @@ function displayCommandHelp(commandName: string, command: CommandDefinition<any,
     usageLine += ' [ARGS]';
   }
 
-  console.log(`${usageLine}\n`);
+  console.log(`${usageLine}\x1b[0m\n`);
 
   // Display options if they exist
   if (command.options?.schema) {
@@ -361,18 +407,18 @@ export function processConfig<
   if (!commandName) {
     if (parsedFlags.help === true) {
       // Show help and exit successfully
-      displayHelp(config.commands);
+      displayHelp(config.commands, config.meta);
       process.exit(0);
     } else {
       // Show help and throw error
-      displayHelp(config.commands);
+      displayHelp(config.commands, config.meta);
       throw new Error('No command specified.');
     }
   }
 
   const command = config.commands[commandName];
   if (!command) {
-    displayHelp(config.commands);
+    displayHelp(config.commands, config.meta);
     throw new Error(`Unknown command: \x1b[36m${commandName}\x1b[0m`);
   }
 
@@ -380,7 +426,7 @@ export function processConfig<
 
   // Check for help flag for the specific command
   if (parsedFlags.help === true) {
-    displayCommandHelp(commandName, command);
+    displayCommandHelp(commandName, command, config.meta);
     process.exit(0);
   }
 
