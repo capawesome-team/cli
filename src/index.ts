@@ -60,6 +60,9 @@ try {
     const message = getMessageFromUnknownError(error);
     consola.error(message);
   } finally {
+    // Suggest opening an issue
+    consola.log('If you think this is a bug, please open an issue at:');
+    consola.log('  https://github.com/capawesome-team/cli/issues/new/choose');
     // Check for updates
     await updateService.checkForUpdate();
     // Exit with a non-zero code
