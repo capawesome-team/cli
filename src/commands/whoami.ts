@@ -1,7 +1,8 @@
-import { defineCommand } from '@robingenz/zli';
-import consola from 'consola';
 import usersService from '@/services/users.js';
 import userConfig from '@/utils/userConfig.js';
+import { defineCommand } from '@robingenz/zli';
+import { AxiosError } from 'axios';
+import consola from 'consola';
 
 export default defineCommand({
   description: 'Show current user',
@@ -12,8 +13,12 @@ export default defineCommand({
         const user = await usersService.me();
         consola.info(`Logged in as ${user.email}.`);
       } catch (error) {
-        consola.error('Token is invalid. Please sign in again.');
-        process.exit(1);
+        if (error instanceof AxiosError && error.response?.status === 401) {
+          consola.error('Token is invalid. Please sign in again.');
+          process.exit(1);
+        } else {
+          throw error;
+        }
       }
     } else {
       consola.error('Not logged in.');

@@ -1,15 +1,14 @@
+import configService from '@/services/config.js';
+import sessionCodesService from '@/services/session-code.js';
+import sessionsService from '@/services/sessions.js';
+import usersService from '@/services/users.js';
+import { prompt } from '@/utils/prompt.js';
+import userConfig from '@/utils/userConfig.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import { AxiosError } from 'axios';
 import consola from 'consola';
 import open from 'open';
 import { z } from 'zod';
-import configService from '@/services/config.js';
-import sessionCodesService from '@/services/session-code.js';
-import sessionsService from '@/services/sessions.js';
-import usersService from '@/services/users.js';
-import { getMessageFromUnknownError } from '@/utils/error.js';
-import { prompt } from '@/utils/prompt.js';
-import userConfig from '@/utils/userConfig.js';
 
 export default defineCommand({
   description: 'Sign in to the Capawesome Cloud Console.',
@@ -88,12 +87,14 @@ export default defineCommand({
       consola.success(`Successfully signed in.`);
     } catch (error) {
       userConfig.write({});
-      let message = getMessageFromUnknownError(error);
       if (error instanceof AxiosError && error.response?.status === 401) {
-        message = `Invalid token. Please provide a valid token. You can create a token at ${consoleBaseUrl}/settings/tokens.`;
+        consola.error(
+          `Invalid token. Please provide a valid token. You can create a token at ${consoleBaseUrl}/settings/tokens.`,
+        );
+        process.exit(1);
+      } else {
+        throw error;
       }
-      consola.error(message);
-      process.exit(1);
     }
   },
 });

@@ -1,11 +1,10 @@
-import { defineCommand, defineOptions } from '@robingenz/zli';
-import consola from 'consola';
-import { z } from 'zod';
 import appDevicesService from '@/services/app-devices.js';
 import appsService from '@/services/apps.js';
 import organizationsService from '@/services/organizations.js';
-import { getMessageFromUnknownError } from '@/utils/error.js';
 import { prompt } from '@/utils/prompt.js';
+import { defineCommand, defineOptions } from '@robingenz/zli';
+import consola from 'consola';
+import { z } from 'zod';
 
 export default defineCommand({
   description: 'Delete an app device.',
@@ -60,16 +59,10 @@ export default defineCommand({
     if (!confirmed) {
       return;
     }
-    try {
-      await appDevicesService.delete({
-        appId,
-        deviceId,
-      });
-      consola.success('Device deleted successfully.');
-    } catch (error) {
-      const message = getMessageFromUnknownError(error);
-      consola.error(message);
-      process.exit(1);
-    }
+    await appDevicesService.delete({
+      appId,
+      deviceId,
+    });
+    consola.success('Device deleted successfully.');
   },
 });
