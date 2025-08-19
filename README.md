@@ -12,10 +12,10 @@ npm install -g @capawesome/cli
 
 ## Usage
 
-The Capawesome Cloud CLI can be invoked with the `capawesome` command.
+The Capawesome Cloud CLI can be invoked with the `@capawesome/cli` command.
 
 ```bash
-npx capawesome <command> [options]
+npx @capawesome/cli <command> [options]
 ```
 
 You can find a list of available commands in the [Command Reference](https://capawesome.io/cloud/cli/).
@@ -25,7 +25,7 @@ You can find a list of available commands in the [Command Reference](https://cap
 The Capawesome Cloud CLI ships with command documentation that is accessible with the `--help` flag.
 
 ```bash
-npx capawesome --help
+npx @capawesome/cli --help
 ```
 
 ## Development

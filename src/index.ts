@@ -1,11 +1,11 @@
 #!/usr/bin/env node
+import configService from '@/services/config.js';
+import updateService from '@/services/update.js';
+import { getMessageFromUnknownError } from '@/utils/error.js';
 import { defineConfig, processConfig } from '@robingenz/zli';
 import * as Sentry from '@sentry/node';
 import consola from 'consola';
 import pkg from '../package.json' with { type: 'json' };
-import configService from '@/services/config.js';
-import updateService from '@/services/update.js';
-import { getMessageFromUnknownError } from '@/utils/error.js';
 
 const config = defineConfig({
   meta: {
@@ -46,6 +46,9 @@ const captureException = async (error: unknown) => {
 };
 
 try {
+  if (!process.argv.includes('@capawesome/cli')) {
+    consola.warn('The `capawesome` command is deprecated. Please use `@capawesome/cli` instead.');
+  }
   const result = processConfig(config, process.argv.slice(2));
   await result.command.action(result.options, result.args);
 } catch (error) {
