@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@capawesome/cli)](https://www.npmjs.com/package/@capawesome/cli)
 [![npm downloads](https://img.shields.io/npm/dm/@capawesome/cli)](https://www.npmjs.com/package/@capawesome/cli)
-[![license](https://img.shields.io/npm/l/@capawesome/cli)](https://github.com/capawesome-team/cli/blob/main/LICENSE.md)
+[![license](https://img.shields.io/npm/l/@capawesome/cli)](https://github.com/capawesome-team/cli/blob/main/LICENSE)
 
 💻 The Capawesome Cloud Command Line Interface (CLI) can be used to manage [Live Updates](https://capawesome.io/cloud/) from the command line.
 
