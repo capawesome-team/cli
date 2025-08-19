@@ -21,3 +21,11 @@ export const createBufferFromReadStream = async (data: ReadStream): Promise<Buff
     data.on('error', reject);
   });
 };
+
+export const createBufferFromString = (content: string): Buffer => {
+  return Buffer.from(content, 'utf8');
+};
+
+export const isPrivateKeyContent = (input: string): boolean => {
+  return input.includes('-----BEGIN') && input.includes('PRIVATE KEY-----');
+};

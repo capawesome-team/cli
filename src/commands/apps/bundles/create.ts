@@ -9,7 +9,12 @@ import appsService from '@/services/apps.js';
 import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
 import { AppBundleFileDto } from '@/types/app-bundle-file.js';
-import { createBufferFromPath, createBufferFromReadStream } from '@/utils/buffer.js';
+import {
+  createBufferFromPath,
+  createBufferFromReadStream,
+  createBufferFromString,
+  isPrivateKeyContent,
+} from '@/utils/buffer.js';
 import { getMessageFromUnknownError } from '@/utils/error.js';
 import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '@/utils/file.js';
 import { createHash } from '@/utils/hash.js';
@@ -77,7 +82,12 @@ export default defineCommand({
         .string()
         .optional()
         .describe('Path to the bundle to upload. Must be a folder (e.g. `www` or `dist`) or a zip file.'),
-      privateKey: z.string().optional().describe('The path to the private key file to sign the bundle with.'),
+      privateKey: z
+        .string()
+        .optional()
+        .describe(
+          'The private key to sign the bundle with. Can be a file path to a .pem file or the private key content as plain text.',
+        ),
       rollout: z.coerce
         .number()
         .min(0)
@@ -215,7 +225,11 @@ export default defineCommand({
     // Create the private key buffer
     let privateKeyBuffer: Buffer | undefined;
     if (privateKey) {
-      if (privateKey.endsWith('.pem')) {
+      if (isPrivateKeyContent(privateKey)) {
+        // Handle plain text private key content
+        privateKeyBuffer = createBufferFromString(privateKey);
+      } else if (privateKey.endsWith('.pem')) {
+        // Handle file path
         const fileExists = await fileExistsAtPath(privateKey);
         if (fileExists) {
           privateKeyBuffer = await createBufferFromPath(privateKey);
@@ -224,7 +238,7 @@ export default defineCommand({
           process.exit(1);
         }
       } else {
-        consola.error('Private key must be a path to a .pem file.');
+        consola.error('Private key must be either a path to a .pem file or the private key content as plain text.');
         process.exit(1);
       }
     }

@@ -14,6 +14,7 @@ vi.mock('@/utils/file.js');
 vi.mock('@/utils/zip.js');
 vi.mock('@/utils/buffer.js');
 vi.mock('@/utils/hash.js');
+vi.mock('@/utils/signature.js');
 vi.mock('consola');
 
 describe('apps-bundles-create', () => {
@@ -173,6 +174,169 @@ describe('apps-bundles-create', () => {
 
     expect(scope.isDone()).toBe(true);
     expect(mockConsola.error).toHaveBeenCalled();
+    expect(process.exit).toHaveBeenCalledWith(1);
+  });
+
+  it('should handle private key file path', async () => {
+    const appId = 'app-123';
+    const bundleUrl = 'https://example.com/bundle.zip';
+    const bundlePath = './bundle.zip';
+    const privateKeyPath = 'private-key.pem';
+    const testHash = 'test-hash';
+    const testSignature = 'test-signature';
+    const bundleId = 'bundle-456';
+    const testToken = 'test-token';
+    const testBuffer = Buffer.from('test');
+
+    const options = {
+      appId,
+      url: bundleUrl,
+      path: bundlePath,
+      privateKey: privateKeyPath,
+      artifactType: 'zip' as const,
+      rollout: 1,
+    };
+
+    mockFileExistsAtPath.mockImplementation((path: string) => {
+      if (path === privateKeyPath) return Promise.resolve(true);
+      if (path === bundlePath) return Promise.resolve(true);
+      return Promise.resolve(false);
+    });
+    mockIsDirectory.mockResolvedValue(false);
+
+    // Mock utility functions
+    const mockZip = await import('@/utils/zip.js');
+    const mockBuffer = await import('@/utils/buffer.js');
+    const mockHash = await import('@/utils/hash.js');
+    const mockSignature = await import('@/utils/signature.js');
+
+    vi.mocked(mockZip.default.isZipped).mockReturnValue(true);
+    vi.mocked(mockBuffer.createBufferFromPath).mockResolvedValue(testBuffer);
+    vi.mocked(mockBuffer.isPrivateKeyContent).mockReturnValue(false);
+    vi.mocked(mockHash.createHash).mockResolvedValue(testHash);
+    vi.mocked(mockSignature.createSignature).mockResolvedValue(testSignature);
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/bundles`, {
+        appId,
+        url: bundleUrl,
+        checksum: testHash,
+        signature: testSignature,
+        artifactType: 'zip',
+        rolloutPercentage: 1,
+      })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: bundleId });
+
+    await createBundleCommand.action(options, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    expect(mockConsola.success).toHaveBeenCalledWith('Bundle successfully created.');
+  });
+
+  it('should handle private key plain text content', async () => {
+    const appId = 'app-123';
+    const bundleUrl = 'https://example.com/bundle.zip';
+    const bundlePath = './bundle.zip';
+    const privateKeyContent =
+      '-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCgxvzJrMCbmtjb\n-----END PRIVATE KEY-----';
+    const testHash = 'test-hash';
+    const testSignature = 'test-signature';
+    const bundleId = 'bundle-456';
+    const testToken = 'test-token';
+    const testBuffer = Buffer.from('test');
+
+    const options = {
+      appId,
+      url: bundleUrl,
+      path: bundlePath,
+      privateKey: privateKeyContent,
+      artifactType: 'zip' as const,
+      rollout: 1,
+    };
+
+    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsDirectory.mockResolvedValue(false);
+
+    // Mock utility functions
+    const mockZip = await import('@/utils/zip.js');
+    const mockBuffer = await import('@/utils/buffer.js');
+    const mockHash = await import('@/utils/hash.js');
+    const mockSignature = await import('@/utils/signature.js');
+
+    vi.mocked(mockZip.default.isZipped).mockReturnValue(true);
+    vi.mocked(mockBuffer.createBufferFromPath).mockResolvedValue(testBuffer);
+    vi.mocked(mockBuffer.createBufferFromString).mockReturnValue(testBuffer);
+    vi.mocked(mockBuffer.isPrivateKeyContent).mockReturnValue(true);
+    vi.mocked(mockHash.createHash).mockResolvedValue(testHash);
+    vi.mocked(mockSignature.createSignature).mockResolvedValue(testSignature);
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/bundles`, {
+        appId,
+        url: bundleUrl,
+        checksum: testHash,
+        signature: testSignature,
+        artifactType: 'zip',
+        rolloutPercentage: 1,
+      })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: bundleId });
+
+    await createBundleCommand.action(options, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    expect(mockConsola.success).toHaveBeenCalledWith('Bundle successfully created.');
+  });
+
+  it('should handle private key file not found', async () => {
+    const appId = 'app-123';
+    const privateKeyPath = 'nonexistent-key.pem';
+
+    const options = {
+      appId,
+      path: './dist',
+      privateKey: privateKeyPath,
+      artifactType: 'zip' as const,
+      rollout: 1,
+    };
+
+    mockFileExistsAtPath.mockImplementation((path: string) => {
+      if (path === privateKeyPath) return Promise.resolve(false);
+      return Promise.resolve(true);
+    });
+
+    // Mock utility functions
+    const mockBuffer = await import('@/utils/buffer.js');
+    vi.mocked(mockBuffer.isPrivateKeyContent).mockReturnValue(false);
+
+    await createBundleCommand.action(options, undefined);
+
+    expect(mockConsola.error).toHaveBeenCalledWith('Private key file not found.');
+    expect(process.exit).toHaveBeenCalledWith(1);
+  });
+
+  it('should handle invalid private key format', async () => {
+    const appId = 'app-123';
+    const invalidPrivateKey = 'not-a-valid-key';
+
+    const options = {
+      appId,
+      path: './dist',
+      privateKey: invalidPrivateKey,
+      artifactType: 'zip' as const,
+      rollout: 1,
+    };
+
+    // Mock utility functions
+    const mockBuffer = await import('@/utils/buffer.js');
+    vi.mocked(mockBuffer.isPrivateKeyContent).mockReturnValue(false);
+
+    await createBundleCommand.action(options, undefined);
+
+    expect(mockConsola.error).toHaveBeenCalledWith(
+      'Private key must be either a path to a .pem file or the private key content as plain text.',
+    );
     expect(process.exit).toHaveBeenCalledWith(1);
   });
 });
