@@ -1,3 +1,4 @@
+import { DEFAULT_API_BASE_URL, DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import { loadConfig, UserInputConfig } from 'c12';
 
 export interface ConfigService {
@@ -18,8 +19,8 @@ class ConfigServiceImpl implements ConfigService {
   private async loadConfig(): Promise<UserInputConfig> {
     const { config } = await loadConfig({
       defaults: {
-        API_BASE_URL: 'https://api.cloud.capawesome.io',
-        CONSOLE_BASE_URL: 'https://console.cloud.capawesome.io',
+        API_BASE_URL: DEFAULT_API_BASE_URL,
+        CONSOLE_BASE_URL: DEFAULT_CONSOLE_BASE_URL,
         ENVIRONMENT: 'production',
       },
       name: 'capawesome',

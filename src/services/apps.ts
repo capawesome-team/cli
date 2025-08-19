@@ -1,6 +1,6 @@
+import authorizationService from '@/services/authorization-service.js';
 import { AppDto, CreateAppDto, DeleteAppDto, FindAllAppsDto } from '@/types/app.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
-import authorizationService from '@/services/authorization-service.js';
 
 export interface AppsService {
   create(dto: CreateAppDto): Promise<AppDto>;
@@ -17,7 +17,8 @@ class AppsServiceImpl implements AppsService {
 
   async create(dto: CreateAppDto): Promise<AppDto> {
     const params = new URLSearchParams({ organizationId: dto.organizationId });
-    const response = await this.httpClient.post<AppDto>(`/v1/apps?${params.toString()}`, dto, {
+    const { organizationId, ...bodyData } = dto;
+    const response = await this.httpClient.post<AppDto>(`/v1/apps?${params.toString()}`, bodyData, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
