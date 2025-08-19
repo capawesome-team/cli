@@ -1,10 +1,9 @@
+import appsService from '@/services/apps.js';
+import organizationsService from '@/services/organizations.js';
+import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { z } from 'zod';
-import appsService from '@/services/apps.js';
-import organizationsService from '@/services/organizations.js';
-import { getMessageFromUnknownError } from '@/utils/error.js';
-import { prompt } from '@/utils/prompt.js';
 
 export default defineCommand({
   description: 'Create a new app.',
@@ -35,14 +34,8 @@ export default defineCommand({
     if (!name) {
       name = await prompt('Enter the name of the app:', { type: 'text' });
     }
-    try {
-      const response = await appsService.create({ name, organizationId });
-      consola.success('App created successfully.');
-      consola.info(`App ID: ${response.id}`);
-    } catch (error) {
-      const message = getMessageFromUnknownError(error);
-      consola.error(message);
-      process.exit(1);
-    }
+    const response = await appsService.create({ name, organizationId });
+    consola.success('App created successfully.');
+    consola.info(`App ID: ${response.id}`);
   },
 });

@@ -1,12 +1,11 @@
-import { defineCommand, defineOptions } from '@robingenz/zli';
-import consola from 'consola';
-import { z } from 'zod';
 import appBundlesService from '@/services/app-bundles.js';
 import appsService from '@/services/apps.js';
 import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
-import { getMessageFromUnknownError } from '@/utils/error.js';
 import { prompt } from '@/utils/prompt.js';
+import { defineCommand, defineOptions } from '@robingenz/zli';
+import consola from 'consola';
+import { z } from 'zod';
 
 export default defineCommand({
   description: 'Update an app bundle.',
@@ -84,21 +83,15 @@ export default defineCommand({
     }
 
     // Update bundle
-    try {
-      await appBundlesService.update({
-        appId,
-        appBundleId: bundleId,
-        maxAndroidAppVersionCode: androidMax,
-        maxIosAppVersionCode: iosMax,
-        minAndroidAppVersionCode: androidMin,
-        minIosAppVersionCode: iosMin,
-        rolloutPercentage: rollout,
-      });
-      consola.success('Bundle updated successfully.');
-    } catch (error) {
-      const message = getMessageFromUnknownError(error);
-      consola.error(message);
-      process.exit(1);
-    }
+    await appBundlesService.update({
+      appId,
+      appBundleId: bundleId,
+      maxAndroidAppVersionCode: androidMax,
+      maxIosAppVersionCode: iosMax,
+      minAndroidAppVersionCode: androidMin,
+      minIosAppVersionCode: iosMin,
+      rolloutPercentage: rollout,
+    });
+    consola.success('Bundle updated successfully.');
   },
 });
