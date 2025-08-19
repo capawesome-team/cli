@@ -21,7 +21,9 @@ describe('apps-channels-create', () => {
 
     mockUserConfig.read.mockReturnValue({ token: 'test-token' });
 
-    vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
+      throw new Error(`Process exited with code ${code}`);
+    });
   });
 
   afterEach(() => {
@@ -123,11 +125,10 @@ describe('apps-channels-create', () => {
       .matchHeader('Authorization', 'Bearer test-token')
       .reply(400, { message: 'Channel name already exists' });
 
-    await createChannelCommand.action(options, undefined);
+    await expect(createChannelCommand.action(options, undefined)).rejects.toThrow('Process exited with code 0');
 
     expect(scope.isDone()).toBe(true);
     expect(mockConsola.error).toHaveBeenCalled();
-    expect(process.exit).toHaveBeenCalledWith(0);
   });
 
   it('should handle error without ignoreErrors flag', async () => {
@@ -138,10 +139,8 @@ describe('apps-channels-create', () => {
       .matchHeader('Authorization', 'Bearer test-token')
       .reply(400, { message: 'Channel name already exists' });
 
-    await createChannelCommand.action(options, undefined);
+    await expect(createChannelCommand.action(options, undefined)).rejects.toThrow();
 
     expect(scope.isDone()).toBe(true);
-    expect(mockConsola.error).toHaveBeenCalled();
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 });

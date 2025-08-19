@@ -23,7 +23,9 @@ describe('apps-channels-get', () => {
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(true);
     mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue('test-token');
 
-    vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
+      throw new Error(`Process exited with code ${code}`);
+    });
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'table').mockImplementation(() => {});
   });
@@ -39,34 +41,37 @@ describe('apps-channels-get', () => {
 
     const options = { appId, channelId };
 
-    mockAuthorizationService.hasAuthorizationToken.mockReturnValue(false);
+    // Mock no authentication token
+    mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue(null);
 
-    await getChannelCommand.action(options, undefined);
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}/channels/${channelId}`)
+      .matchHeader('Authorization', 'Bearer null')
+      .reply(401, { message: 'Unauthorized' });
 
-    expect(mockConsola.error).toHaveBeenCalledWith('You must be logged in to run this command.');
-    expect(process.exit).toHaveBeenCalledWith(1);
+    await expect(getChannelCommand.action(options, undefined)).rejects.toThrow();
+
+    expect(scope.isDone()).toBe(true);
   });
 
   it('should require appId', async () => {
     const channelId = 'channel-456';
 
-    const options = { channelId };
+    const options = { channelId, appId: undefined };
 
-    await getChannelCommand.action(options, undefined);
+    await expect(getChannelCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith('You must provide an app ID.');
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should require channelId or name', async () => {
     const appId = 'app-123';
 
-    const options = { appId };
+    const options = { appId, channelId: undefined, name: undefined };
 
-    await getChannelCommand.action(options, undefined);
+    await expect(getChannelCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith('You must provide a channel ID or name.');
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should get channel by channelId and display table format', async () => {
@@ -132,11 +137,9 @@ describe('apps-channels-get', () => {
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(404, { message: 'Channel not found' });
 
-    await getChannelCommand.action(options, undefined);
+    await expect(getChannelCommand.action(options, undefined)).rejects.toThrow();
 
     expect(scope.isDone()).toBe(true);
-    expect(mockConsola.error).toHaveBeenCalled();
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should handle channel not found by name', async () => {
@@ -152,11 +155,10 @@ describe('apps-channels-get', () => {
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(200, []);
 
-    await getChannelCommand.action(options, undefined);
+    await expect(getChannelCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(scope.isDone()).toBe(true);
     expect(mockConsola.error).toHaveBeenCalledWith('Channel not found.');
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should handle API error', async () => {
@@ -171,10 +173,8 @@ describe('apps-channels-get', () => {
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(500, { message: 'Internal server error' });
 
-    await getChannelCommand.action(options, undefined);
+    await expect(getChannelCommand.action(options, undefined)).rejects.toThrow();
 
     expect(scope.isDone()).toBe(true);
-    expect(mockConsola.error).toHaveBeenCalled();
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 });

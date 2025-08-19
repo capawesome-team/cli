@@ -41,7 +41,9 @@ describe('login', () => {
       return Promise.resolve('');
     });
 
-    vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
+      throw new Error(`Process exited with code ${code}`);
+    });
   });
 
   afterEach(() => {
@@ -111,21 +113,12 @@ describe('login', () => {
   it('should throw an error because the provided token is empty', async () => {
     const options = { token: '' };
 
-    // Mock userConfig.read to return empty token
-    mockUserConfig.read.mockReturnValue({ token: '' });
-
-    // Set up nock to intercept potential API call (should get 401)
-    const scope = nock(DEFAULT_API_BASE_URL)
-      .get('/v1/users/me')
-      .matchHeader('Authorization', 'Bearer ')
-      .reply(401, { message: 'Unauthorized' });
-
-    await loginCommand.action(options, undefined);
+    // This test should exit early without making API calls since empty token is caught in login logic
+    await expect(loginCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith(
       `Please provide a valid token. You can create a token at ${DEFAULT_CONSOLE_BASE_URL}/settings/tokens.`,
     );
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should throw an error because the provided token is invalid', async () => {
@@ -141,7 +134,7 @@ describe('login', () => {
       .matchHeader('Authorization', `Bearer ${invalidToken}`)
       .reply(401, { message: 'Unauthorized' });
 
-    await loginCommand.action(options, undefined);
+    await expect(loginCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockUserConfig.write).toHaveBeenCalledWith({ token: invalidToken });
     expect(mockUserConfig.write).toHaveBeenCalledWith({}); // Clears token on error
@@ -149,6 +142,5 @@ describe('login', () => {
     expect(mockConsola.error).toHaveBeenCalledWith(
       `Invalid token. Please provide a valid token. You can create a token at ${DEFAULT_CONSOLE_BASE_URL}/settings/tokens.`,
     );
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 });

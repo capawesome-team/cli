@@ -20,7 +20,9 @@ describe('manifests-generate', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
+      throw new Error(`Process exited with code ${code}`);
+    });
   });
 
   afterEach(() => {
@@ -62,10 +64,9 @@ describe('manifests-generate', () => {
 
     mockPrompt.mockResolvedValueOnce('');
 
-    await generateManifestCommand.action(options, undefined);
+    await expect(generateManifestCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith('You must provide a path to the web assets folder.');
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should handle nonexistent path', async () => {
@@ -73,9 +74,8 @@ describe('manifests-generate', () => {
 
     mockFileExistsAtPath.mockResolvedValue(false);
 
-    await generateManifestCommand.action(options, undefined);
+    await expect(generateManifestCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith('The path does not exist.');
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 });

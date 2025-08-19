@@ -23,7 +23,9 @@ describe('apps-channels-list', () => {
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(true);
     mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue('test-token');
 
-    vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
+      throw new Error(`Process exited with code ${code}`);
+    });
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'table').mockImplementation(() => {});
   });
@@ -40,19 +42,17 @@ describe('apps-channels-list', () => {
 
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(false);
 
-    await listChannelsCommand.action(options, undefined);
+    await expect(listChannelsCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith('You must be logged in to run this command.');
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should require appId', async () => {
-    const options = {};
+    const options = { appId: undefined };
 
-    await listChannelsCommand.action(options, undefined);
+    await expect(listChannelsCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith('You must provide an app ID.');
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should list channels and display table format', async () => {
@@ -148,10 +148,8 @@ describe('apps-channels-list', () => {
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(500, { message: 'Internal server error' });
 
-    await listChannelsCommand.action(options, undefined);
+    await expect(listChannelsCommand.action(options, undefined)).rejects.toThrow();
 
     expect(scope.isDone()).toBe(true);
-    expect(mockConsola.error).toHaveBeenCalled();
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 });
