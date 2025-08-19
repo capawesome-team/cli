@@ -17,6 +17,8 @@ const getErrorMessageFromAxiosError = (error: AxiosError): string => {
   let message: string = 'An unknown network error has occurred.';
   if (error.response?.status === 401) {
     message = 'Your token is no longer valid. Please sign in again.';
+  } else if (error.response?.status === 403) {
+    message = 'You do not have permission to access this resource.';
   } else if ((error.response?.data as any)?.message) {
     message = (error.response?.data as any)?.message;
   } else if ((error.response?.data as any)?.error?.issues[0]?.message) {
