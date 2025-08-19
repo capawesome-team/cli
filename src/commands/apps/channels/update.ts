@@ -1,12 +1,11 @@
-import { defineCommand, defineOptions } from '@robingenz/zli';
-import consola from 'consola';
-import { z } from 'zod';
 import appChannelsService from '@/services/app-channels.js';
 import appsService from '@/services/apps.js';
 import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
-import { getMessageFromUnknownError } from '@/utils/error.js';
 import { prompt } from '@/utils/prompt.js';
+import { defineCommand, defineOptions } from '@robingenz/zli';
+import consola from 'consola';
+import { z } from 'zod';
 
 export default defineCommand({
   description: 'Update an existing app channel.',
@@ -69,18 +68,12 @@ export default defineCommand({
     }
 
     // Update channel
-    try {
-      await appChannelsService.update({
-        appId,
-        appChannelId: channelId,
-        name,
-        totalAppBundleLimit: bundleLimit,
-      });
-      consola.success('Channel updated successfully.');
-    } catch (error) {
-      const message = getMessageFromUnknownError(error);
-      consola.error(message);
-      process.exit(1);
-    }
+    await appChannelsService.update({
+      appId,
+      appChannelId: channelId,
+      name,
+      totalAppBundleLimit: bundleLimit,
+    });
+    consola.success('Channel updated successfully.');
   },
 });

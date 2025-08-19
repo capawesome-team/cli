@@ -1,7 +1,3 @@
-import { defineCommand, defineOptions } from '@robingenz/zli';
-import consola from 'consola';
-import { createReadStream } from 'fs';
-import { z } from 'zod';
 import { MAX_CONCURRENT_UPLOADS } from '@/config/index.js';
 import appBundleFilesService from '@/services/app-bundle-files.js';
 import appBundlesService from '@/services/app-bundles.js';
@@ -10,13 +6,16 @@ import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
 import { AppBundleFileDto } from '@/types/app-bundle-file.js';
 import { createBufferFromPath, createBufferFromReadStream } from '@/utils/buffer.js';
-import { getMessageFromUnknownError } from '@/utils/error.js';
 import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '@/utils/file.js';
 import { createHash } from '@/utils/hash.js';
 import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
 import { createSignature } from '@/utils/signature.js';
 import zip from '@/utils/zip.js';
+import { defineCommand, defineOptions } from '@robingenz/zli';
+import consola from 'consola';
+import { createReadStream } from 'fs';
+import { z } from 'zod';
 
 export default defineCommand({
   description: 'Create a new app bundle.',
@@ -299,9 +298,7 @@ export default defineCommand({
           // No-op
         });
       }
-      const message = getMessageFromUnknownError(error);
-      consola.error(message);
-      process.exit(1);
+      throw error;
     }
   },
 });

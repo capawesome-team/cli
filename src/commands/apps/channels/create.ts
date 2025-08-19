@@ -1,11 +1,11 @@
-import { defineCommand, defineOptions } from '@robingenz/zli';
-import consola from 'consola';
-import { z } from 'zod';
 import appChannelsService from '@/services/app-channels.js';
 import appsService from '@/services/apps.js';
 import organizationsService from '@/services/organizations.js';
 import { getMessageFromUnknownError } from '@/utils/error.js';
 import { prompt } from '@/utils/prompt.js';
+import { defineCommand, defineOptions } from '@robingenz/zli';
+import consola from 'consola';
+import { z } from 'zod';
 
 export default defineCommand({
   description: 'Create a new app channel.',
@@ -70,9 +70,13 @@ export default defineCommand({
       consola.success('Channel created successfully.');
       consola.info(`Channel ID: ${response.id}`);
     } catch (error) {
-      const message = getMessageFromUnknownError(error);
-      consola.error(message);
-      process.exit(ignoreErrors ? 0 : 1);
+      if (ignoreErrors) {
+        const message = getMessageFromUnknownError(error);
+        consola.error(message);
+        process.exit(0);
+      } else {
+        throw error;
+      }
     }
   },
 });

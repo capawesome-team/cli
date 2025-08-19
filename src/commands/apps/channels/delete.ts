@@ -1,12 +1,11 @@
+import appChannelsService from '@/services/app-channels.js';
+import appsService from '@/services/apps.js';
+import organizationsService from '@/services/organizations.js';
+import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { isCI } from 'std-env';
 import { z } from 'zod';
-import appChannelsService from '@/services/app-channels.js';
-import appsService from '@/services/apps.js';
-import organizationsService from '@/services/organizations.js';
-import { getMessageFromUnknownError } from '@/utils/error.js';
-import { prompt } from '@/utils/prompt.js';
 
 export default defineCommand({
   description: 'Delete an app channel.',
@@ -70,17 +69,11 @@ export default defineCommand({
         return;
       }
     }
-    try {
-      await appChannelsService.delete({
-        appId,
-        id: channelId,
-        name,
-      });
-      consola.success('Channel deleted successfully.');
-    } catch (error) {
-      const message = getMessageFromUnknownError(error);
-      consola.error(message);
-      process.exit(1);
-    }
+    await appChannelsService.delete({
+      appId,
+      id: channelId,
+      name,
+    });
+    consola.success('Channel deleted successfully.');
   },
 });
