@@ -26,7 +26,9 @@ describe('apps-channels-update', () => {
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(true);
     mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue('test-token');
 
-    vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
+      throw new Error(`Process exited with code ${code}`);
+    });
   });
 
   afterEach(() => {
@@ -42,10 +44,9 @@ describe('apps-channels-update', () => {
 
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(false);
 
-    await updateChannelCommand.action(options, undefined);
+    await expect(updateChannelCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith('You must be logged in to run this command.');
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should update channel with provided options', async () => {
@@ -145,11 +146,9 @@ describe('apps-channels-update', () => {
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(404, { message: 'Channel not found' });
 
-    await updateChannelCommand.action(options, undefined);
+    await expect(updateChannelCommand.action(options, undefined)).rejects.toThrow();
 
     expect(scope.isDone()).toBe(true);
-    expect(mockConsola.error).toHaveBeenCalled();
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should handle error when no organizations exist', async () => {

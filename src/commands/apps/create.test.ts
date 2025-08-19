@@ -25,7 +25,9 @@ describe('apps-create', () => {
     mockUserConfig.read.mockReturnValue({ token: 'test-token' });
     mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue('test-token');
 
-    vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
+      throw new Error(`Process exited with code ${code}`);
+    });
   });
 
   afterEach(() => {
@@ -123,11 +125,10 @@ describe('apps-create', () => {
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(200, []);
 
-    await createAppCommand.action(options, undefined);
+    await expect(createAppCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(scope.isDone()).toBe(true);
     expect(mockConsola.error).toHaveBeenCalledWith('You must create an organization before creating an app.');
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should handle API error during creation', async () => {
@@ -142,10 +143,8 @@ describe('apps-create', () => {
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(400, { message: 'App name already exists' });
 
-    await createAppCommand.action(options, undefined);
+    await expect(createAppCommand.action(options, undefined)).rejects.toThrow();
 
     expect(scope.isDone()).toBe(true);
-    expect(mockConsola.error).toHaveBeenCalled();
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 });

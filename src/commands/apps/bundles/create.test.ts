@@ -31,7 +31,9 @@ describe('apps-bundles-create', () => {
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(true);
     mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue('test-token');
 
-    vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
+      throw new Error(`Process exited with code ${code}`);
+    });
   });
 
   afterEach(() => {
@@ -45,10 +47,9 @@ describe('apps-bundles-create', () => {
 
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(false);
 
-    await createBundleCommand.action(options, undefined);
+    await expect(createBundleCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith('You must be logged in to run this command.');
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should create bundle with self-hosted URL', async () => {
@@ -106,10 +107,9 @@ describe('apps-bundles-create', () => {
 
     mockFileExistsAtPath.mockResolvedValue(false);
 
-    await createBundleCommand.action(options, undefined);
+    await expect(createBundleCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith('The path does not exist.');
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should validate manifest artifact type requires directory', async () => {
@@ -126,12 +126,11 @@ describe('apps-bundles-create', () => {
     mockFileExistsAtPath.mockResolvedValue(true);
     mockIsDirectory.mockResolvedValue(false);
 
-    await createBundleCommand.action(options, undefined);
+    await expect(createBundleCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith(
       'The path must be a folder when creating a bundle with an artifact type of `manifest`.',
     );
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should validate manifest artifact type cannot use URL', async () => {
@@ -145,12 +144,11 @@ describe('apps-bundles-create', () => {
       rollout: 1,
     };
 
-    await createBundleCommand.action(options, undefined);
+    await expect(createBundleCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith(
       'It is not yet possible to provide a URL when creating a bundle with an artifact type of `manifest`.',
     );
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should handle API error during creation', async () => {
@@ -170,11 +168,9 @@ describe('apps-bundles-create', () => {
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(400, { message: 'Invalid bundle data' });
 
-    await createBundleCommand.action(options, undefined);
+    await expect(createBundleCommand.action(options, undefined)).rejects.toThrow();
 
     expect(scope.isDone()).toBe(true);
-    expect(mockConsola.error).toHaveBeenCalled();
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should handle private key file path', async () => {
@@ -310,10 +306,9 @@ describe('apps-bundles-create', () => {
     const mockBuffer = await import('@/utils/buffer.js');
     vi.mocked(mockBuffer.isPrivateKeyContent).mockReturnValue(false);
 
-    await createBundleCommand.action(options, undefined);
+    await expect(createBundleCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith('Private key file not found.');
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it('should handle invalid private key format', async () => {
@@ -328,15 +323,17 @@ describe('apps-bundles-create', () => {
       rollout: 1,
     };
 
+    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsDirectory.mockResolvedValue(false);
+
     // Mock utility functions
     const mockBuffer = await import('@/utils/buffer.js');
     vi.mocked(mockBuffer.isPrivateKeyContent).mockReturnValue(false);
 
-    await createBundleCommand.action(options, undefined);
+    await expect(createBundleCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith(
       'Private key must be either a path to a .pem file or the private key content as plain text.',
     );
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 });

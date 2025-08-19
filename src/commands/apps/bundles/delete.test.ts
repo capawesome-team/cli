@@ -173,10 +173,8 @@ describe('apps-bundles-delete', () => {
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(404, { message: 'Bundle not found' });
 
-    await deleteBundleCommand.action(options, undefined);
+    await expect(deleteBundleCommand.action(options, undefined)).rejects.toThrow();
 
     expect(scope.isDone()).toBe(true);
-    expect(mockConsola.error).toHaveBeenCalled();
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 });

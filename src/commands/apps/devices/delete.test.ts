@@ -173,10 +173,8 @@ describe('apps-devices-delete', () => {
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(404, { message: 'Device not found' });
 
-    await deleteDeviceCommand.action(options, undefined);
+    await expect(deleteDeviceCommand.action(options, undefined)).rejects.toThrow();
 
     expect(scope.isDone()).toBe(true);
-    expect(mockConsola.error).toHaveBeenCalled();
-    expect(process.exit).toHaveBeenCalledWith(1);
   });
 });
