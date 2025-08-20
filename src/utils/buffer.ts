@@ -29,4 +29,3 @@ export const createBufferFromString = (content: string): Buffer => {
 export const isPrivateKeyContent = (input: string): boolean => {
   return input.includes('-----BEGIN') && input.includes('PRIVATE KEY-----');
 };
-
