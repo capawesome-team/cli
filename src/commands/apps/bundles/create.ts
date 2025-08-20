@@ -11,6 +11,7 @@ import {
   createBufferFromString,
   isPrivateKeyContent,
 } from '@/utils/buffer.js';
+import { formatPrivateKey } from '@/utils/private-key.js';
 import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '@/utils/file.js';
 import { createHash } from '@/utils/hash.js';
 import { generateManifestJson } from '@/utils/manifest.js';
@@ -226,12 +227,16 @@ export default defineCommand({
     if (privateKey) {
       if (isPrivateKeyContent(privateKey)) {
         // Handle plain text private key content
-        privateKeyBuffer = createBufferFromString(privateKey);
+        const formattedPrivateKey = formatPrivateKey(privateKey);
+        privateKeyBuffer = createBufferFromString(formattedPrivateKey);
       } else if (privateKey.endsWith('.pem')) {
         // Handle file path
         const fileExists = await fileExistsAtPath(privateKey);
         if (fileExists) {
-          privateKeyBuffer = await createBufferFromPath(privateKey);
+          const keyBuffer = await createBufferFromPath(privateKey);
+          const keyContent = keyBuffer.toString('utf8');
+          const formattedPrivateKey = formatPrivateKey(keyContent);
+          privateKeyBuffer = createBufferFromString(formattedPrivateKey);
         } else {
           consola.error('Private key file not found.');
           process.exit(1);

@@ -13,6 +13,7 @@ vi.mock('@/services/authorization-service.js');
 vi.mock('@/utils/file.js');
 vi.mock('@/utils/zip.js');
 vi.mock('@/utils/buffer.js');
+vi.mock('@/utils/private-key.js');
 vi.mock('@/utils/hash.js');
 vi.mock('@/utils/signature.js');
 vi.mock('consola');
@@ -203,12 +204,15 @@ describe('apps-bundles-create', () => {
     // Mock utility functions
     const mockZip = await import('@/utils/zip.js');
     const mockBuffer = await import('@/utils/buffer.js');
+    const mockPrivateKey = await import('@/utils/private-key.js');
     const mockHash = await import('@/utils/hash.js');
     const mockSignature = await import('@/utils/signature.js');
 
     vi.mocked(mockZip.default.isZipped).mockReturnValue(true);
     vi.mocked(mockBuffer.createBufferFromPath).mockResolvedValue(testBuffer);
     vi.mocked(mockBuffer.isPrivateKeyContent).mockReturnValue(false);
+    vi.mocked(mockPrivateKey.formatPrivateKey).mockReturnValue('formatted-private-key');
+    vi.mocked(mockBuffer.createBufferFromString).mockReturnValue(testBuffer);
     vi.mocked(mockHash.createHash).mockResolvedValue(testHash);
     vi.mocked(mockSignature.createSignature).mockResolvedValue(testSignature);
 
@@ -257,6 +261,7 @@ describe('apps-bundles-create', () => {
     // Mock utility functions
     const mockZip = await import('@/utils/zip.js');
     const mockBuffer = await import('@/utils/buffer.js');
+    const mockPrivateKey = await import('@/utils/private-key.js');
     const mockHash = await import('@/utils/hash.js');
     const mockSignature = await import('@/utils/signature.js');
 
@@ -264,6 +269,7 @@ describe('apps-bundles-create', () => {
     vi.mocked(mockBuffer.createBufferFromPath).mockResolvedValue(testBuffer);
     vi.mocked(mockBuffer.createBufferFromString).mockReturnValue(testBuffer);
     vi.mocked(mockBuffer.isPrivateKeyContent).mockReturnValue(true);
+    vi.mocked(mockPrivateKey.formatPrivateKey).mockReturnValue('formatted-private-key');
     vi.mocked(mockHash.createHash).mockResolvedValue(testHash);
     vi.mocked(mockSignature.createSignature).mockResolvedValue(testSignature);
 
