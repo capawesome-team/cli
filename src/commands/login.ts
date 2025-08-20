@@ -3,7 +3,7 @@ import sessionCodesService from '@/services/session-code.js';
 import sessionsService from '@/services/sessions.js';
 import usersService from '@/services/users.js';
 import { prompt } from '@/utils/prompt.js';
-import userConfig from '@/utils/userConfig.js';
+import userConfig from '@/utils/user-config.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import { AxiosError } from 'axios';
 import consola from 'consola';

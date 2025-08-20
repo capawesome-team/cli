@@ -1,6 +1,6 @@
 import { DEFAULT_API_BASE_URL } from '@/config/consts.js';
 import authorizationService from '@/services/authorization-service.js';
-import userConfig from '@/utils/userConfig.js';
+import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
 import nock from 'nock';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -8,7 +8,7 @@ import logoutCommand from './logout.js';
 
 // Mock dependencies
 vi.mock('@/services/authorization-service.js');
-vi.mock('@/utils/userConfig.js');
+vi.mock('@/utils/user-config.js');
 vi.mock('consola');
 
 describe('logout', () => {

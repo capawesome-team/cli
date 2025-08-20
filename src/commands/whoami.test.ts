@@ -1,11 +1,11 @@
 import { DEFAULT_API_BASE_URL } from '@/config/consts.js';
-import userConfig from '@/utils/userConfig.js';
+import userConfig from '@/utils/user-config.js';
 import nock from 'nock';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import whoamiCommand from './whoami.js';
 
 // Mock only the dependencies we need to control
-vi.mock('@/utils/userConfig.js');
+vi.mock('@/utils/user-config.js');
 
 describe('whoami', () => {
   const mockUserConfig = vi.mocked(userConfig);

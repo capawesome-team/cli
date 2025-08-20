@@ -1,13 +1,13 @@
 import { DEFAULT_API_BASE_URL } from '@/config/consts.js';
 import { prompt } from '@/utils/prompt.js';
-import userConfig from '@/utils/userConfig.js';
+import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
 import nock from 'nock';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import createChannelCommand from './create.js';
 
 // Mock dependencies
-vi.mock('@/utils/userConfig.js');
+vi.mock('@/utils/user-config.js');
 vi.mock('@/utils/prompt.js');
 vi.mock('consola');
 

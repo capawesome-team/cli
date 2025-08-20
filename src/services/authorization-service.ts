@@ -1,4 +1,4 @@
-import userConfig, { UserConfig } from '@/utils/userConfig.js';
+import userConfig, { UserConfig } from '@/utils/user-config.js';
 
 export interface AuthorizationService {
   /**

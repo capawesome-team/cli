@@ -1,14 +1,14 @@
 import { DEFAULT_API_BASE_URL } from '@/config/consts.js';
 import authorizationService from '@/services/authorization-service.js';
 import { fileExistsAtPath, isDirectory } from '@/utils/file.js';
-import userConfig from '@/utils/userConfig.js';
+import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
 import nock from 'nock';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import createBundleCommand from './create.js';
 
 // Mock dependencies
-vi.mock('@/utils/userConfig.js');
+vi.mock('@/utils/user-config.js');
 vi.mock('@/services/authorization-service.js');
 vi.mock('@/utils/file.js');
 vi.mock('@/utils/zip.js');
