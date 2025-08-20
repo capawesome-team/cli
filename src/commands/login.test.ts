@@ -3,7 +3,7 @@ import configService from '@/services/config.js';
 import sessionCodesService from '@/services/session-code.js';
 import sessionsService from '@/services/sessions.js';
 import { prompt } from '@/utils/prompt.js';
-import userConfig from '@/utils/userConfig.js';
+import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
 import nock from 'nock';
 import open from 'open';
@@ -11,7 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import loginCommand from './login.js';
 
 // Mock dependencies
-vi.mock('@/utils/userConfig.js');
+vi.mock('@/utils/user-config.js');
 vi.mock('@/services/session-code.js');
 vi.mock('@/services/sessions.js');
 vi.mock('@/services/config.js');

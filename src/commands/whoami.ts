@@ -1,5 +1,5 @@
 import usersService from '@/services/users.js';
-import userConfig from '@/utils/userConfig.js';
+import userConfig from '@/utils/user-config.js';
 import { defineCommand } from '@robingenz/zli';
 import { AxiosError } from 'axios';
 import consola from 'consola';
