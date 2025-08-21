@@ -1,8 +1,9 @@
-import { OrganizationDto } from '@/types/organization.js';
+import { CreateOrganizationDto, OrganizationDto } from '@/types/organization.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
 import authorizationService from '@/services/authorization-service.js';
 
 export interface OrganizationsService {
+  create(dto: CreateOrganizationDto): Promise<OrganizationDto>;
   findAll(): Promise<OrganizationDto[]>;
 }
 
@@ -11,6 +12,15 @@ class OrganizationsServiceImpl implements OrganizationsService {
 
   constructor(httpClient: HttpClient) {
     this.httpClient = httpClient;
+  }
+
+  async create(dto: CreateOrganizationDto): Promise<OrganizationDto> {
+    const response = await this.httpClient.post<OrganizationDto>('/v1/organizations', dto, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+      },
+    });
+    return response.data;
   }
 
   async findAll(): Promise<OrganizationDto[]> {

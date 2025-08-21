@@ -30,6 +30,7 @@ const config = defineConfig({
     'apps:channels:update': await import('@/commands/apps/channels/update.js').then((mod) => mod.default),
     'apps:devices:delete': await import('@/commands/apps/devices/delete.js').then((mod) => mod.default),
     'manifests:generate': await import('@/commands/manifests/generate.js').then((mod) => mod.default),
+    'organizations:create': await import('@/commands/organizations/create.js').then((mod) => mod.default),
   },
 });
 
