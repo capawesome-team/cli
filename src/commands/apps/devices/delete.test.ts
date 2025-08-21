@@ -24,6 +24,7 @@ describe('apps-devices-delete', () => {
 
     mockUserConfig.read.mockReturnValue({ token: 'test-token' });
     mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue('test-token');
+    mockAuthorizationService.hasAuthorizationToken.mockReturnValue(true);
 
     vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
   });

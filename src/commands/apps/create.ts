@@ -1,4 +1,5 @@
 import appsService from '@/services/apps.js';
+import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
@@ -15,6 +16,11 @@ export default defineCommand({
   ),
   action: async (options, args) => {
     let { name, organizationId } = options;
+
+    if (!authorizationService.hasAuthorizationToken()) {
+      consola.error('You must be logged in to run this command.');
+      process.exit(1);
+    }
     if (!organizationId) {
       const organizations = await organizationsService.findAll();
       if (organizations.length === 0) {

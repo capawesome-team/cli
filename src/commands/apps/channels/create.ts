@@ -1,5 +1,6 @@
 import appChannelsService from '@/services/app-channels.js';
 import appsService from '@/services/apps.js';
+import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
 import { getMessageFromUnknownError } from '@/utils/error.js';
 import { prompt } from '@/utils/prompt.js';
@@ -24,6 +25,11 @@ export default defineCommand({
   ),
   action: async (options, args) => {
     let { appId, bundleLimit, ignoreErrors, name } = options;
+
+    if (!authorizationService.hasAuthorizationToken()) {
+      consola.error('You must be logged in to run this command.');
+      process.exit(1);
+    }
 
     // Validate the app ID
     if (!appId) {

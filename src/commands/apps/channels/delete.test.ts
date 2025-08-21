@@ -27,6 +27,7 @@ describe('apps-channels-delete', () => {
 
     mockUserConfig.read.mockReturnValue({ token: 'test-token' });
     mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue('test-token');
+    mockAuthorizationService.hasAuthorizationToken.mockReturnValue(true);
 
     vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
       throw new Error(`Process exited with code ${code}`);
