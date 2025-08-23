@@ -20,6 +20,7 @@ const config = defineConfig({
     doctor: await import('@/commands/doctor.js').then((mod) => mod.default),
     'apps:create': await import('@/commands/apps/create.js').then((mod) => mod.default),
     'apps:delete': await import('@/commands/apps/delete.js').then((mod) => mod.default),
+    'apps:setup': await import('@/commands/apps/setup.js').then((mod) => mod.default),
     'apps:bundles:create': await import('@/commands/apps/bundles/create.js').then((mod) => mod.default),
     'apps:bundles:delete': await import('@/commands/apps/bundles/delete.js').then((mod) => mod.default),
     'apps:bundles:update': await import('@/commands/apps/bundles/update.js').then((mod) => mod.default),
