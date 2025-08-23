@@ -21,8 +21,8 @@ This change ensures that the CLI is properly namespaced and avoids potential con
 
 ### Minimum Node.js Version
 
-The minimum required Node.js version has been updated to 16.x.x. Please ensure that your environment meets this requirement before using the CLI. You can still use the CLI with older Node.js versions, but it is no longer officially supported.
+The minimum required Node.js version has been updated to **18.0.0**. Please ensure that your environment meets this requirement before using the CLI. You can still use the CLI with older Node.js versions, but it is no longer officially supported.
 
 ### Minimum npm Version
 
-The minimum required npm version has been updated to 8.x.x. Please ensure that your environment meets this requirement before using the CLI. You can still use the CLI with older npm versions, but it is no longer officially supported.
+The minimum required npm version has been updated to **8.0.0**. Please ensure that your environment meets this requirement before using the CLI. You can still use the CLI with older npm versions, but it is no longer officially supported.
