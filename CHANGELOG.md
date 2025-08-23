@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.0.0](https://github.com/capawesome-team/cli/compare/v1.14.0...v2.0.0) (2025-08-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* You should now call the CLI using `@capawesome/cli` instead of just `capawesome`.
+* set npm minimum version to `8.0.0`
+* set Node.js minimum version to `16.0.0`
+
+* deprecate `capawesome` command ([d59ea30](https://github.com/capawesome-team/cli/commit/d59ea305b7bb873071162b2ef896fc2f87b7ea21))
+* set Node.js minimum version to `16.0.0` ([396688c](https://github.com/capawesome-team/cli/commit/396688c96b69131dc0433e79af2d79eca19ee7fe))
+* set npm minimum version to `8.0.0` ([8c382fa](https://github.com/capawesome-team/cli/commit/8c382fab37c53b0df8d7efc18e6a0efbb45e1c39))
+
+
+### Features
+
+* add `organizations:create` command ([a3b5855](https://github.com/capawesome-team/cli/commit/a3b5855a84f0c58cc0463b40c9965811837d92bb))
+* add link to report bugs ([#64](https://github.com/capawesome-team/cli/issues/64)) ([9eb95b2](https://github.com/capawesome-team/cli/commit/9eb95b2d1e8b47cb0f13f26aae6cccb50ec401e0)), closes [#56](https://github.com/capawesome-team/cli/issues/56)
+* **apps:bundles:create:** support private key as plain text or file path ([#62](https://github.com/capawesome-team/cli/issues/62)) ([1db77a2](https://github.com/capawesome-team/cli/commit/1db77a2aa665f8f28e459598112a37e22c391944)), closes [#25](https://github.com/capawesome-team/cli/issues/25)
+
+
+### Bug Fixes
+
+* add missing authorization token checks to commands ([6699b1e](https://github.com/capawesome-team/cli/commit/6699b1e6993cc8f4ff5cdcd5ebef64de53a93b0e))
+* handle private keys without line breaks ([#66](https://github.com/capawesome-team/cli/issues/66)) ([d1b8d2f](https://github.com/capawesome-team/cli/commit/d1b8d2f69e64b9c97d0117a305e9bca0ec158d4f)), closes [#30](https://github.com/capawesome-team/cli/issues/30)
+* **utils:** add error message for 403 status ([6922448](https://github.com/capawesome-team/cli/commit/69224483114190ff0b81e0dcfeb656e7ea208f54))
+
 ## [1.14.0](https://github.com/capawesome-team/cli/compare/v1.13.2...v1.14.0) (2025-08-11)
 
 
