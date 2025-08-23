@@ -7,12 +7,12 @@ All notable changes to this project will be documented in this file. See [commit
 
 ### ⚠ BREAKING CHANGES
 
-* You should now call the CLI using `@capawesome/cli` instead of just `capawesome`.
-* set npm minimum version to `8.0.0`
-* set Node.js minimum version to `16.0.0`
+* You should now call the CLI using `@capawesome/cli` instead of just `capawesome` (see `BREAKING.md`).
+* set npm minimum version to `8.0.0` (see `BREAKING.md`)
+* set Node.js minimum version to `18.0.0` (see `BREAKING.md`)
 
 * deprecate `capawesome` command ([d59ea30](https://github.com/capawesome-team/cli/commit/d59ea305b7bb873071162b2ef896fc2f87b7ea21))
-* set Node.js minimum version to `16.0.0` ([396688c](https://github.com/capawesome-team/cli/commit/396688c96b69131dc0433e79af2d79eca19ee7fe))
+* set Node.js minimum version to `18.0.0` ([396688c](https://github.com/capawesome-team/cli/commit/396688c96b69131dc0433e79af2d79eca19ee7fe))
 * set npm minimum version to `8.0.0` ([8c382fa](https://github.com/capawesome-team/cli/commit/8c382fab37c53b0df8d7efc18e6a0efbb45e1c39))
 
 
