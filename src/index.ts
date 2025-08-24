@@ -2,7 +2,7 @@
 import configService from '@/services/config.js';
 import updateService from '@/services/update.js';
 import { getMessageFromUnknownError } from '@/utils/error.js';
-import { defineConfig, processConfig } from '@robingenz/zli';
+import { defineConfig, processConfig, ZliError } from '@robingenz/zli';
 import * as Sentry from '@sentry/node';
 import consola from 'consola';
 import pkg from '../package.json' with { type: 'json' };
@@ -35,6 +35,11 @@ const config = defineConfig({
 });
 
 const captureException = async (error: unknown) => {
+  // Check if the error is from the CLI itself
+  if (error instanceof ZliError) {
+    // Ignore CLI errors like "No command found."
+    return;
+  }
   const environment = await configService.getValueForKey('ENVIRONMENT');
   if (environment !== 'production') {
     return;
