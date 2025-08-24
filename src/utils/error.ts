@@ -19,6 +19,10 @@ const getErrorMessageFromAxiosError = (error: AxiosError): string => {
     message = 'Your token is no longer valid. Please sign in again.';
   } else if (error.response?.status === 403) {
     message = 'You do not have permission to access this resource.';
+  } else if (error.response?.status === 500) {
+    message = 'An internal server error has occurred. Please try again later.';
+  } else if (error.response?.status === 503) {
+    message = 'The service is currently unavailable. Please try again later.';
   } else if ((error.response?.data as any)?.message) {
     message = (error.response?.data as any)?.message;
   } else if ((error.response?.data as any)?.error?.issues[0]?.message) {
