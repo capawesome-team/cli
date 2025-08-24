@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.0.1](https://github.com/capawesome-team/cli/compare/v2.0.0...v2.0.1) (2025-08-24)
+
+
+### Bug Fixes
+
+* do not capture CLI errors ([0eacbab](https://github.com/capawesome-team/cli/commit/0eacbab054b314ce953493e9fe71a17e872d1066))
+
 ## [2.0.0](https://github.com/capawesome-team/cli/compare/v1.14.0...v2.0.0) (2025-08-23)
 
 
