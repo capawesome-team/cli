@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.0.2](https://github.com/capawesome-team/cli/compare/v2.0.1...v2.0.2) (2025-08-24)
+
+
+### Bug Fixes
+
+* improve error messages for 500 and 503 status codes ([769ee5d](https://github.com/capawesome-team/cli/commit/769ee5dbd6535b7b58f516165bc02dbe9c40c531))
+
 ## [2.0.1](https://github.com/capawesome-team/cli/compare/v2.0.0...v2.0.1) (2025-08-24)
 
 
