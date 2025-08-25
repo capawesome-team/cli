@@ -4,6 +4,7 @@ import updateService from '@/services/update.js';
 import { getMessageFromUnknownError } from '@/utils/error.js';
 import { defineConfig, processConfig, ZliError } from '@robingenz/zli';
 import * as Sentry from '@sentry/node';
+import { AxiosError } from 'axios';
 import consola from 'consola';
 import pkg from '../package.json' with { type: 'json' };
 
@@ -35,9 +36,12 @@ const config = defineConfig({
 });
 
 const captureException = async (error: unknown) => {
-  // Check if the error is from the CLI itself
+  // Ignore errors from the CLI itself (e.g. "No command found.")
   if (error instanceof ZliError) {
-    // Ignore CLI errors like "No command found."
+    return;
+  }
+  // Ignore failed HTTP requests
+  if (error instanceof AxiosError) {
     return;
   }
   const environment = await configService.getValueForKey('ENVIRONMENT');
