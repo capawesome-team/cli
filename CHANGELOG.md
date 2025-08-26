@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.1.0](https://github.com/capawesome-team/cli/compare/v2.0.3...v2.1.0) (2025-08-26)
+
+
+### Features
+
+* retry failed http requests if status code is `5xx` ([4a2399f](https://github.com/capawesome-team/cli/commit/4a2399f8219edd35d4a5a6f79e3f4c5e15fa8659)), closes [#67](https://github.com/capawesome-team/cli/issues/67)
+
 ## [2.0.3](https://github.com/capawesome-team/cli/compare/v2.0.2...v2.0.3) (2025-08-26)
 
 
