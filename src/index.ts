@@ -50,6 +50,7 @@ const captureException = async (error: unknown) => {
   }
   Sentry.init({
     dsn: 'https://19f30f2ec4b91899abc33818568ceb42@o4507446340747264.ingest.de.sentry.io/4508506426966096',
+    release: pkg.version,
   });
   Sentry.captureException(error);
   await Sentry.close();
