@@ -14,10 +14,9 @@
     "prettier": "prettier \"**/*.{css,html,ts,js}\"",
     "sentry:releases:new": "sentry-cli releases new $npm_package_version --org genz-it-solutions-gmbh --project capawesome-team-cli",
     "sentry:releases:set-commits": "sentry-cli releases set-commits $npm_package_version --auto --org genz-it-solutions-gmbh --project capawesome-team-cli",
-    "sentry:sourcemaps:upload": "sentry-cli sourcemaps upload --release $npm_package_version --org genz-it-solutions-gmbh --project capawesome-team-cli ./dist",
     "sentry:releases:finalize": "sentry-cli releases finalize $npm_package_version --org genz-it-solutions-gmbh --project capawesome-team-cli",
     "release": "commit-and-tag-version",
-    "prepublishOnly": "npm run build && npm run sentry:releases:new && npm run sentry:releases:set-commits && npm run sentry:sourcemaps:upload",
+    "prepublishOnly": "npm run build && npm run sentry:releases:new && npm run sentry:releases:set-commits",
     "postpublish": "npm run sentry:releases:finalize"
   },
   "engines": {
