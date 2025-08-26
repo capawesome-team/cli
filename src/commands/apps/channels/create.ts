@@ -19,18 +19,33 @@ export default defineCommand({
         .describe(
           'Maximum number of bundles that can be assigned to the channel. If more bundles are assigned, the oldest bundles will be automatically deleted.',
         ),
+      expiresInDays: z.coerce
+        .number({
+          message: 'Expiration days must be an integer.',
+        })
+        .int({
+          message: 'Expiration days must be an integer.',
+        })
+        .optional()
+        .describe('The number of days until the channel is automatically deleted.'),
       ignoreErrors: z.boolean().optional().describe('Whether to ignore errors or not.'),
       name: z.string().optional().describe('Name of the channel.'),
     }),
   ),
   action: async (options, args) => {
-    let { appId, bundleLimit, ignoreErrors, name } = options;
+    let { appId, bundleLimit, expiresInDays, ignoreErrors, name } = options;
 
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command.');
       process.exit(1);
     }
-
+    // Calculate the expiration date
+    let expiresAt: string | undefined;
+    if (expiresInDays) {
+      const expiresAtDate = new Date();
+      expiresAtDate.setDate(expiresAtDate.getDate() + expiresInDays);
+      expiresAt = expiresAtDate.toISOString();
+    }
     // Validate the app ID
     if (!appId) {
       const organizations = await organizationsService.findAll();
@@ -72,6 +87,7 @@ export default defineCommand({
         appId,
         name,
         totalAppBundleLimit: bundleLimit,
+        expiresAt,
       });
       consola.success('Channel created successfully.');
       consola.info(`Channel ID: ${response.id}`);

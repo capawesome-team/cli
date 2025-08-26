@@ -11,10 +11,10 @@ import {
   createBufferFromString,
   isPrivateKeyContent,
 } from '@/utils/buffer.js';
-import { formatPrivateKey } from '@/utils/private-key.js';
 import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '@/utils/file.js';
 import { createHash } from '@/utils/hash.js';
 import { generateManifestJson } from '@/utils/manifest.js';
+import { formatPrivateKey } from '@/utils/private-key.js';
 import { prompt } from '@/utils/prompt.js';
 import { createSignature } from '@/utils/signature.js';
 import zip from '@/utils/zip.js';
@@ -125,7 +125,7 @@ export default defineCommand({
       consola.error('You must be logged in to run this command.');
       process.exit(1);
     }
-    // Validate the expiration days
+    // Calculate the expiration date
     let expiresAt: string | undefined;
     if (expiresInDays) {
       const expiresAtDate = new Date();
