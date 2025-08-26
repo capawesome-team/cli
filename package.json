@@ -12,8 +12,13 @@
     "lint": "npm run prettier -- --check",
     "fmt": "npm run prettier -- --write",
     "prettier": "prettier \"**/*.{css,html,ts,js}\"",
-    "prepublishOnly": "npm run build",
-    "release": "commit-and-tag-version"
+    "sentry:releases:new": "sentry-cli releases new $(git rev-parse HEAD) --org genz-it-solutions-gmbh --project capawesome-team-cli",
+    "sentry:releases:set-commits": "sentry-cli releases set-commits $(git rev-parse HEAD) --auto --org genz-it-solutions-gmbh --project capawesome-team-cli",
+    "sentry:sourcemaps:upload": "sentry-cli sourcemaps upload --release $(git rev-parse HEAD) --org genz-it-solutions-gmbh --project capawesome-team-cli ./dist",
+    "sentry:releases:finalize": "sentry-cli releases finalize $(git rev-parse HEAD) --org genz-it-solutions-gmbh --project capawesome-team-cli",
+    "release": "commit-and-tag-version",
+    "prepublishOnly": "npm run build && npm run sentry:releases:new && npm run sentry:releases:set-commits && npm run sentry:sourcemaps:upload",
+    "postpublish": "npm run sentry:releases:finalize"
   },
   "engines": {
     "npm": ">=8.0.0",
@@ -67,6 +72,7 @@
   },
   "devDependencies": {
     "@ionic/prettier-config": "4.0.0",
+    "@sentry/cli": "2.52.0",
     "@types/archiver": "6.0.3",
     "@types/mime": "3.0.4",
     "@types/node": "24.2.1",
