@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.1.2](https://github.com/capawesome-team/cli/compare/v2.1.1...v2.1.2) (2025-08-27)
+
+
+### Bug Fixes
+
+* remove deprecation warning ([5d8c2c0](https://github.com/capawesome-team/cli/commit/5d8c2c0b494d1c791bd2f02766202ab38321e48c))
+
 ## [2.1.1](https://github.com/capawesome-team/cli/compare/v2.1.0...v2.1.1) (2025-08-26)
 
 ## [2.1.0](https://github.com/capawesome-team/cli/compare/v2.0.3...v2.1.0) (2025-08-26)
