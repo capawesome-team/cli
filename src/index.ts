@@ -58,9 +58,6 @@ const captureException = async (error: unknown) => {
 };
 
 try {
-  if (!process.argv.includes('@capawesome/cli')) {
-    consola.warn('The `capawesome` command is deprecated. Please use `@capawesome/cli` instead.');
-  }
   const result = processConfig(config, process.argv.slice(2));
   await result.command.action(result.options, result.args);
 } catch (error) {
