@@ -6,6 +6,7 @@ import { defineConfig, processConfig, ZliError } from '@robingenz/zli';
 import * as Sentry from '@sentry/node';
 import { AxiosError } from 'axios';
 import consola from 'consola';
+import { ZodError } from 'zod';
 import pkg from '../package.json' with { type: 'json' };
 
 const config = defineConfig({
@@ -38,6 +39,10 @@ const config = defineConfig({
 const captureException = async (error: unknown) => {
   // Ignore errors from the CLI itself (e.g. "No command found.")
   if (error instanceof ZliError) {
+    return;
+  }
+  // Ignore validation errors
+  if (error instanceof ZodError) {
     return;
   }
   // Ignore failed HTTP requests
