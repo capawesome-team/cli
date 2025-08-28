@@ -57,7 +57,9 @@ const captureException = async (error: unknown) => {
     dsn: 'https://19f30f2ec4b91899abc33818568ceb42@o4507446340747264.ingest.de.sentry.io/4508506426966096',
     release: pkg.version,
   });
-  Sentry.setTag('cli_command', process.argv.slice(2).join(' '));
+  if (process.argv.slice(2).length > 0) {
+    Sentry.setTag('cli_command', process.argv.slice(2)[0]);
+  }
   Sentry.captureException(error);
   await Sentry.close();
 };
