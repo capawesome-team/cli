@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.1.3](https://github.com/capawesome-team/cli/compare/v2.1.2...v2.1.3) (2025-08-28)
+
+
+### Bug Fixes
+
+* capture only the first argument ([99d3892](https://github.com/capawesome-team/cli/commit/99d3892b99727ac95d3511da6c3dbfd39bad4ee4))
+* do not capture validation errors ([a8b89bc](https://github.com/capawesome-team/cli/commit/a8b89bcae7b9b2698857507a8ef030a6b443d711))
+
 ## [2.1.2](https://github.com/capawesome-team/cli/compare/v2.1.1...v2.1.2) (2025-08-27)
 
 
