@@ -1,7 +1,9 @@
+import { createRequire } from 'module';
 import { defineCommand } from '@robingenz/zli';
 import consola from 'consola';
 import systeminformation from 'systeminformation';
-import pkg from '../../package.json' with { type: 'json' };
+const require = createRequire(import.meta.url);
+const pkg = require('../../package.json');
 
 export default defineCommand({
   description: 'Prints out neccessary information for debugging',

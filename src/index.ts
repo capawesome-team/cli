@@ -7,7 +7,9 @@ import * as Sentry from '@sentry/node';
 import { AxiosError } from 'axios';
 import consola from 'consola';
 import { ZodError } from 'zod';
-import pkg from '../package.json' with { type: 'json' };
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const pkg = require('../package.json');
 
 const config = defineConfig({
   meta: {

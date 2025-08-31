@@ -1,7 +1,9 @@
+import { createRequire } from 'module';
 import configService from '@/services/config.js';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import axiosRetry from 'axios-retry';
-import pkg from '../../package.json' with { type: 'json' };
+const require = createRequire(import.meta.url);
+const pkg = require('../../package.json');
 
 // Register middleware to retry failed requests
 axiosRetry(axios, {
