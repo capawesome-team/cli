@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.1.4](https://github.com/capawesome-team/cli/compare/v2.1.3...v2.1.4) (2025-08-31)
+
+
+### Bug Fixes
+
+* `Unexpected token 'with'`error on Windows ([#75](https://github.com/capawesome-team/cli/issues/75)) ([1f20e43](https://github.com/capawesome-team/cli/commit/1f20e4318add70a7919468ddd9ad7742306b3e64))
+
 ## [2.1.3](https://github.com/capawesome-team/cli/compare/v2.1.2...v2.1.3) (2025-08-28)
 
 
