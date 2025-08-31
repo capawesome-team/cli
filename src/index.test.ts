@@ -1,6 +1,8 @@
+import { createRequire } from 'module';
 import { defineConfig, processConfig } from '@robingenz/zli';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import pkg from '../package.json' with { type: 'json' };
+const require = createRequire(import.meta.url);
+const pkg = require('../package.json');
 
 const config = defineConfig({
   meta: {
