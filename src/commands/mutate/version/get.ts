@@ -15,12 +15,12 @@ export default defineCommand({
       }
 
       const firstVersion = versions[0]!.version;
+      // Check only major.minor.patch synchronization
       const allInSync = versions.every((pv) => {
         return (
           pv.version.major === firstVersion.major &&
           pv.version.minor === firstVersion.minor &&
-          pv.version.patch === firstVersion.patch &&
-          pv.version.hotfix === firstVersion.hotfix
+          pv.version.patch === firstVersion.patch
         );
       });
 
@@ -28,15 +28,13 @@ export default defineCommand({
         consola.error('Versions are not synchronized across platforms:');
         versions.forEach((pv) => {
           const versionStr = versionToString(pv.version);
-          const hotfixStr = pv.version.hotfix > 0 ? ` (hotfix: ${pv.version.hotfix})` : '';
-          consola.log(`  ${pv.platform}: ${versionStr}${hotfixStr} (${pv.source})`);
+          consola.log(`  ${pv.platform}: ${versionStr} (${pv.source})`);
         });
         process.exit(1);
       }
 
       const versionStr = versionToString(firstVersion);
-      const hotfixStr = firstVersion.hotfix > 0 ? ` (hotfix: ${firstVersion.hotfix})` : '';
-      consola.success(`Version: ${versionStr}${hotfixStr}`);
+      consola.success(`Version: ${versionStr}`);
 
       versions.forEach((pv) => {
         consola.log(`  ${pv.platform}: ${pv.source}`);

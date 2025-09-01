@@ -10,15 +10,13 @@ export default defineCommand({
       const currentVersion = await versionService.ensureVersionsInSync();
       const newVersion = incrementHotfix(currentVersion);
 
-      const currentVersionStr = versionToString(currentVersion);
-      const newVersionStr = versionToString(newVersion);
-      const hotfixInfo = `(hotfix: ${currentVersion.hotfix} -> ${newVersion.hotfix})`;
+      const versionStr = versionToString(currentVersion);
 
-      consola.info(`Incrementing hotfix version from ${currentVersionStr} to ${newVersionStr} ${hotfixInfo}...`);
+      consola.info(`Incrementing hotfix for version ${versionStr}...`);
 
       await versionService.setVersion(newVersion);
 
-      consola.success(`Hotfix version incremented to ${newVersionStr} (hotfix: ${newVersion.hotfix})`);
+      consola.success(`Hotfix incremented for version ${versionStr}`);
     } catch (error) {
       consola.error(error instanceof Error ? error.message : String(error));
       process.exit(1);

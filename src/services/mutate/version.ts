@@ -1,6 +1,3 @@
-import { MobileProject } from '@trapezedev/project';
-import { existsSync, readFileSync } from 'fs';
-import { join } from 'path';
 import {
   Version,
   compareVersions,
@@ -8,8 +5,10 @@ import {
   parseVersion,
   versionToBuildNumber,
   versionToString,
-  versionsEqual,
 } from '@/utils/version.js';
+import { MobileProject } from '@trapezedev/project';
+import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
 
 export interface PlatformVersion {
   platform: 'ios' | 'android' | 'web';
@@ -130,7 +129,9 @@ export class VersionService {
         return null;
       }
 
+      // Web only has version string, no build number (hotfix will always be 0)
       const version = parseVersion(packageJson.version);
+
       return {
         platform: 'web',
         version,
@@ -188,6 +189,7 @@ export class VersionService {
     if (existsSync(packageJsonPath)) {
       const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
       packageJson.version = versionString;
+      // Web only stores version string, not build number
       const fs = await import('fs/promises');
       await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
     }
@@ -198,19 +200,27 @@ export class VersionService {
   async ensureVersionsInSync(): Promise<Version> {
     const versions = await this.getAllVersions();
 
-    if (versions.length === 0) {
+    const firstVersion = versions && versions[0] ? versions[0].version : null;
+    if (!firstVersion) {
       throw new Error('No platform versions found');
     }
 
-    const firstVersion = versions[0]!.version;
-    const allInSync = versions.every((pv) => versionsEqual(pv.version, firstVersion));
+    // Only check major.minor.patch synchronization, ignore hotfix
+    const allInSync = versions.every(
+      (pv) =>
+        pv.version.major === firstVersion.major &&
+        pv.version.minor === firstVersion.minor &&
+        pv.version.patch === firstVersion.patch,
+    );
 
     if (!allInSync) {
       const versionStrings = versions.map((pv) => `${pv.platform}: ${versionToString(pv.version)} (${pv.source})`);
       throw new Error(`Versions are not synchronized across platforms:\n${versionStrings.join('\n')}`);
     }
 
-    return firstVersion;
+    // Return the first version that has a hotfix (iOS or Android), or the first version
+    const versionWithHotfix = versions.find((pv) => pv.version.hotfix > 0);
+    return versionWithHotfix ? versionWithHotfix.version : firstVersion;
   }
 
   async getHighestVersion(): Promise<Version> {
