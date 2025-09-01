@@ -34,6 +34,13 @@ const config = defineConfig({
     'apps:channels:update': await import('@/commands/apps/channels/update.js').then((mod) => mod.default),
     'apps:devices:delete': await import('@/commands/apps/devices/delete.js').then((mod) => mod.default),
     'manifests:generate': await import('@/commands/manifests/generate.js').then((mod) => mod.default),
+    'mutate:version:get': await import('@/commands/mutate/version/get.js').then((mod) => mod.default),
+    'mutate:version:set': await import('@/commands/mutate/version/set.js').then((mod) => mod.default),
+    'mutate:version:major': await import('@/commands/mutate/version/major.js').then((mod) => mod.default),
+    'mutate:version:minor': await import('@/commands/mutate/version/minor.js').then((mod) => mod.default),
+    'mutate:version:patch': await import('@/commands/mutate/version/patch.js').then((mod) => mod.default),
+    'mutate:version:hotfix': await import('@/commands/mutate/version/hotfix.js').then((mod) => mod.default),
+    'mutate:version:sync': await import('@/commands/mutate/version/sync.js').then((mod) => mod.default),
     'organizations:create': await import('@/commands/organizations/create.js').then((mod) => mod.default),
   },
 });
