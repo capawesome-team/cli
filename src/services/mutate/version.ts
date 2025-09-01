@@ -6,9 +6,16 @@ import {
   versionToBuildNumber,
   versionToString,
 } from '@/utils/version.js';
-import { MobileProject } from '@trapezedev/project';
+import { MobileProject, Logger } from '@trapezedev/project';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
+
+// Disable Trapeze logging
+Logger.log = () => {};
+Logger.v = () => {};
+Logger.debug = () => {};
+Logger.warn = () => {};
+Logger.error = () => {};
 
 export interface PlatformVersion {
   platform: 'ios' | 'android' | 'web';
