@@ -1,3 +1,4 @@
+import { CliError } from '@/utils/error.js';
 import {
   Version,
   compareVersions,
@@ -209,7 +210,7 @@ export class VersionService {
 
     const firstVersion = versions && versions[0] ? versions[0].version : null;
     if (!firstVersion) {
-      throw new Error('No platform versions found');
+      throw new CliError('No platform versions found');
     }
 
     // Check major.minor.patch synchronization for all platforms
@@ -226,7 +227,7 @@ export class VersionService {
         const hotfixStr = pv.platform !== 'web' && pv.version.hotfix ? ` (hotfix: ${pv.version.hotfix})` : '';
         return `${pv.platform}: ${versionStr}${hotfixStr} (${pv.source})`;
       });
-      throw new Error(`Versions are not synchronized across platforms:\n${versionStrings.join('\n')}`);
+      throw new CliError(`Versions are not synchronized across platforms:\n${versionStrings.join('\n')}`);
     }
 
     // Check hotfix synchronization between iOS and Android only
@@ -238,7 +239,7 @@ export class VersionService {
       const androidHotfix = androidVersion.version.hotfix || 0;
 
       if (iosHotfix !== androidHotfix) {
-        throw new Error(
+        throw new CliError(
           `Hotfix versions are not synchronized between iOS and Android:\n` +
             `iOS: ${versionToString(iosVersion.version)} (hotfix: ${iosHotfix})\n` +
             `Android: ${versionToString(androidVersion.version)} (hotfix: ${androidHotfix})`,
@@ -257,7 +258,7 @@ export class VersionService {
     const versions = await this.getAllVersions();
 
     if (versions.length === 0) {
-      throw new Error('No platform versions found');
+      throw new CliError('No platform versions found');
     }
 
     let highest = versions[0]!;

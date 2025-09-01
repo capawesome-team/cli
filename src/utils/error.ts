@@ -1,9 +1,18 @@
 import { AxiosError } from 'axios';
 import { ZodError } from 'zod';
 
+export class CliError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'CliError';
+  }
+}
+
 export const getMessageFromUnknownError = (error: unknown): string => {
   let message = 'An unknown error has occurred.';
-  if (error instanceof AxiosError) {
+  if (error instanceof CliError) {
+    message = error.message;
+  } else if (error instanceof AxiosError) {
     message = getErrorMessageFromAxiosError(error);
   } else if (error instanceof ZodError) {
     message = getErrorMessageFromZodError(error);

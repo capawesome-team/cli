@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 import configService from '@/services/config.js';
 import updateService from '@/services/update.js';
-import { getMessageFromUnknownError } from '@/utils/error.js';
+import { CliError, getMessageFromUnknownError } from '@/utils/error.js';
 import { defineConfig, processConfig, ZliError } from '@robingenz/zli';
 import * as Sentry from '@sentry/node';
 import { AxiosError } from 'axios';
 import consola from 'consola';
-import { ZodError } from 'zod';
 import { createRequire } from 'module';
+import { ZodError } from 'zod';
 const require = createRequire(import.meta.url);
 const pkg = require('../package.json');
 
@@ -46,8 +46,11 @@ const config = defineConfig({
 });
 
 const captureException = async (error: unknown) => {
-  // Ignore errors from the CLI itself (e.g. "No command found.")
+  // Ignore expected CLI errors (e.g. "No command found.")
   if (error instanceof ZliError) {
+    return;
+  }
+  if (error instanceof CliError) {
     return;
   }
   // Ignore validation errors
