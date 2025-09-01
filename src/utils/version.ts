@@ -2,7 +2,7 @@ export interface Version {
   major: number;
   minor: number;
   patch: number;
-  hotfix: number;
+  hotfix?: number;
 }
 
 export const parseVersion = (versionString: string): Version => {
@@ -23,7 +23,7 @@ export const parseVersion = (versionString: string): Version => {
     throw new Error(`Invalid version format: ${versionString}. Version parts must be non-negative.`);
   }
 
-  return { major, minor, patch, hotfix: 0 };
+  return { major, minor, patch };
 };
 
 export const parseBuildNumber = (buildNumber: string | number): Version => {
@@ -54,7 +54,7 @@ export const versionToBuildNumber = (version: Version): number => {
   const majorStr = version.major.toString();
   const minor = version.minor.toString().padStart(3, '0');
   const patch = version.patch.toString().padStart(2, '0');
-  const hotfix = version.hotfix.toString().padStart(2, '0');
+  const hotfix = (version.hotfix || 0).toString().padStart(2, '0');
 
   if (version.minor > 999) {
     throw new Error(`Minor version ${version.minor} exceeds maximum value of 999`);
@@ -62,7 +62,7 @@ export const versionToBuildNumber = (version: Version): number => {
   if (version.patch > 99) {
     throw new Error(`Patch version ${version.patch} exceeds maximum value of 99`);
   }
-  if (version.hotfix > 99) {
+  if (version.hotfix && version.hotfix > 99) {
     throw new Error(`Hotfix version ${version.hotfix} exceeds maximum value of 99`);
   }
 
@@ -71,7 +71,7 @@ export const versionToBuildNumber = (version: Version): number => {
 
 export const incrementMajor = (version: Version): Version => {
   const newMajor = version.major + 1;
-  return { major: newMajor, minor: 0, patch: 0, hotfix: 0 };
+  return { major: newMajor, minor: 0, patch: 0 };
 };
 
 export const incrementMinor = (version: Version): Version => {
@@ -79,7 +79,7 @@ export const incrementMinor = (version: Version): Version => {
   if (newMinor > 999) {
     throw new Error(`Cannot increment minor version: would exceed maximum value of 999`);
   }
-  return { ...version, minor: newMinor, patch: 0, hotfix: 0 };
+  return { major: version.major, minor: newMinor, patch: 0 };
 };
 
 export const incrementPatch = (version: Version): Version => {
@@ -87,11 +87,12 @@ export const incrementPatch = (version: Version): Version => {
   if (newPatch > 99) {
     throw new Error(`Cannot increment patch version: would exceed maximum value of 99`);
   }
-  return { ...version, patch: newPatch, hotfix: 0 };
+  return { major: version.major, minor: version.minor, patch: newPatch };
 };
 
 export const incrementHotfix = (version: Version): Version => {
-  const newHotfix = version.hotfix + 1;
+  const currentHotfix = version.hotfix || 0;
+  const newHotfix = currentHotfix + 1;
   if (newHotfix > 99) {
     throw new Error(`Cannot increment hotfix version: would exceed maximum value of 99`);
   }
@@ -102,10 +103,15 @@ export const compareVersions = (v1: Version, v2: Version): number => {
   if (v1.major !== v2.major) return v1.major - v2.major;
   if (v1.minor !== v2.minor) return v1.minor - v2.minor;
   if (v1.patch !== v2.patch) return v1.patch - v2.patch;
-  if (v1.hotfix !== v2.hotfix) return v1.hotfix - v2.hotfix;
+  const h1 = v1.hotfix || 0;
+  const h2 = v2.hotfix || 0;
+  if (h1 !== h2) return h1 - h2;
   return 0;
 };
 
-export const versionsEqual = (v1: Version, v2: Version): boolean => {
+export const versionsEqual = (v1: Version, v2: Version, ignoreHotfix = false): boolean => {
+  if (ignoreHotfix) {
+    return v1.major === v2.major && v1.minor === v2.minor && v1.patch === v2.patch;
+  }
   return compareVersions(v1, v2) === 0;
 };

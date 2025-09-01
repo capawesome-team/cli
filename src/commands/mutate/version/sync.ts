@@ -19,16 +19,18 @@ export default defineCommand({
       consola.info('Current versions:');
       versions.forEach((pv) => {
         const versionStr = versionToString(pv.version);
-        consola.log(`  ${pv.platform}: ${versionStr}`);
+        const hotfixStr = pv.platform !== 'web' && pv.version.hotfix ? ` (hotfix: ${pv.version.hotfix})` : '';
+        consola.log(`  ${pv.platform}: ${versionStr}${hotfixStr}`);
       });
 
       const highestVersionStr = versionToString(highestVersion);
+      const hotfixStr = highestVersion.hotfix ? ` (hotfix: ${highestVersion.hotfix})` : '';
 
-      consola.info(`Syncing all platforms to highest version: ${highestVersionStr}...`);
+      consola.info(`Syncing all platforms to highest version: ${highestVersionStr}${hotfixStr}...`);
 
       await versionService.setVersion(highestVersion);
 
-      consola.success(`All platforms synced to version ${highestVersionStr}`);
+      consola.success(`All platforms synced to version ${highestVersionStr}${hotfixStr}`);
     } catch (error) {
       consola.error(error instanceof Error ? error.message : String(error));
       process.exit(1);

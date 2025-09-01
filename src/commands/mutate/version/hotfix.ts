@@ -11,12 +11,14 @@ export default defineCommand({
       const newVersion = incrementHotfix(currentVersion);
 
       const versionStr = versionToString(currentVersion);
+      const currentHotfix = currentVersion.hotfix || 0;
+      const newHotfix = newVersion.hotfix || 0;
 
-      consola.info(`Incrementing hotfix for version ${versionStr}...`);
+      consola.info(`Incrementing hotfix for version ${versionStr} (${currentHotfix} -> ${newHotfix})...`);
 
       await versionService.setVersion(newVersion);
 
-      consola.success(`Hotfix incremented for version ${versionStr}`);
+      consola.success(`Hotfix incremented for version ${versionStr} (now ${newHotfix})`);
     } catch (error) {
       consola.error(error instanceof Error ? error.message : String(error));
       process.exit(1);

@@ -62,7 +62,7 @@ export class VersionService {
         return null;
       }
 
-      const iosProject = await project.ios.getPbxProject();
+      const iosProject = project.ios.getPbxProject();
       if (!iosProject) {
         return null;
       }
@@ -205,21 +205,44 @@ export class VersionService {
       throw new Error('No platform versions found');
     }
 
-    // Only check major.minor.patch synchronization, ignore hotfix
-    const allInSync = versions.every(
+    // Check major.minor.patch synchronization for all platforms
+    const allVersionsInSync = versions.every(
       (pv) =>
         pv.version.major === firstVersion.major &&
         pv.version.minor === firstVersion.minor &&
         pv.version.patch === firstVersion.patch,
     );
 
-    if (!allInSync) {
-      const versionStrings = versions.map((pv) => `${pv.platform}: ${versionToString(pv.version)} (${pv.source})`);
+    if (!allVersionsInSync) {
+      const versionStrings = versions.map((pv) => {
+        const versionStr = versionToString(pv.version);
+        const hotfixStr = pv.platform !== 'web' && pv.version.hotfix ? ` (hotfix: ${pv.version.hotfix})` : '';
+        return `${pv.platform}: ${versionStr}${hotfixStr} (${pv.source})`;
+      });
       throw new Error(`Versions are not synchronized across platforms:\n${versionStrings.join('\n')}`);
     }
 
-    // Return the first version that has a hotfix (iOS or Android), or the first version
-    const versionWithHotfix = versions.find((pv) => pv.version.hotfix > 0);
+    // Check hotfix synchronization between iOS and Android only
+    const iosVersion = versions.find((pv) => pv.platform === 'ios');
+    const androidVersion = versions.find((pv) => pv.platform === 'android');
+
+    if (iosVersion && androidVersion) {
+      const iosHotfix = iosVersion.version.hotfix || 0;
+      const androidHotfix = androidVersion.version.hotfix || 0;
+
+      if (iosHotfix !== androidHotfix) {
+        throw new Error(
+          `Hotfix versions are not synchronized between iOS and Android:\n` +
+            `iOS: ${versionToString(iosVersion.version)} (hotfix: ${iosHotfix})\n` +
+            `Android: ${versionToString(androidVersion.version)} (hotfix: ${androidHotfix})`,
+        );
+      }
+    }
+
+    // Return version with hotfix from iOS or Android if available
+    const versionWithHotfix = versions.find(
+      (pv) => pv.platform !== 'web' && pv.version.hotfix && pv.version.hotfix > 0,
+    );
     return versionWithHotfix ? versionWithHotfix.version : firstVersion;
   }
 
