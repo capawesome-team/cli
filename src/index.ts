@@ -6,8 +6,8 @@ import { defineConfig, processConfig, ZliError } from '@robingenz/zli';
 import * as Sentry from '@sentry/node';
 import { AxiosError } from 'axios';
 import consola from 'consola';
-import { ZodError } from 'zod';
 import { createRequire } from 'module';
+import { ZodError } from 'zod';
 const require = createRequire(import.meta.url);
 const pkg = require('../package.json');
 
@@ -57,7 +57,7 @@ const captureException = async (error: unknown) => {
   }
   Sentry.init({
     dsn: 'https://19f30f2ec4b91899abc33818568ceb42@o4507446340747264.ingest.de.sentry.io/4508506426966096',
-    release: pkg.version,
+    release: `capawesome-team-cli@${pkg.version}`,
   });
   if (process.argv.slice(2).length > 0) {
     Sentry.setTag('cli_command', process.argv.slice(2)[0]);
