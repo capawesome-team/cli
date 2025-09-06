@@ -8,6 +8,7 @@ import { defineCommand, defineOptions } from '@robingenz/zli';
 import { AxiosError } from 'axios';
 import consola from 'consola';
 import open from 'open';
+import { isCI } from 'std-env';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -21,6 +22,10 @@ export default defineCommand({
     const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
     let { token: sessionIdOrToken } = options;
     if (sessionIdOrToken === undefined) {
+      if (isCI) {
+        consola.error('You must provide a token when running in CI mode.');
+        process.exit(1);
+      }
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
       const authenticationMethod = await prompt('How would you like to authenticate Capawesome CLI?', {
         type: 'select',
