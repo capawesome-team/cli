@@ -15,7 +15,15 @@ export const getMessageFromUnknownError = (error: unknown): string => {
 
 const getErrorMessageFromAxiosError = (error: AxiosError): string => {
   let message: string = 'An unknown network error has occurred.';
-  if (error.response?.status === 401) {
+  if (
+    !error.response &&
+    (error.code === 'ENOTFOUND' ||
+      error.code === 'ECONNREFUSED' ||
+      error.code === 'ENETUNREACH' ||
+      error.message.includes('Network Error'))
+  ) {
+    message = 'No connection could be established. Please check your internet connection and try again.';
+  } else if (error.response?.status === 401) {
     message = 'Your token is no longer valid. Please sign in again.';
   } else if (error.response?.status === 403) {
     message = 'You do not have permission to access this resource.';
