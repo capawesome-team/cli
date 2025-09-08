@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.1.5](https://github.com/capawesome-team/cli/compare/v2.1.4...v2.1.5) (2025-09-08)
+
+
+### Bug Fixes
+
+* **error:** improve network error handling ([500ed94](https://github.com/capawesome-team/cli/commit/500ed94eff85538531e1a16906a33f4af6437998))
+* **login:** throw error in CI if not token was provided ([#78](https://github.com/capawesome-team/cli/issues/78)) ([eda17c6](https://github.com/capawesome-team/cli/commit/eda17c691d807d1a4e76d83e91790f729c42385d))
+
 ## [2.1.4](https://github.com/capawesome-team/cli/compare/v2.1.3...v2.1.4) (2025-08-31)
 
 
