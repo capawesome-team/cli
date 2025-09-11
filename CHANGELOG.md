@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.0.0](https://github.com/capawesome-team/cli/compare/v2.1.5...v3.0.0) (2025-09-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* An error is now thrown when an unsupported option is used.
+
+### Features
+
+* throw error if option is unknown ([#80](https://github.com/capawesome-team/cli/issues/80)) ([faf5dfc](https://github.com/capawesome-team/cli/commit/faf5dfc6c5765a1a2fefb7b9f0ee57e76f463b85)), closes [#79](https://github.com/capawesome-team/cli/issues/79)
+
 ## [2.1.5](https://github.com/capawesome-team/cli/compare/v2.1.4...v2.1.5) (2025-09-08)
 
 
