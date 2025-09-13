@@ -11,6 +11,7 @@ export interface CreateAppChannelDto {
   appId: string;
   name: string;
   totalAppBundleLimit?: number;
+  expiresAt?: string;
 }
 
 export interface DeleteAppChannelDto {
