@@ -1,19 +1,17 @@
 name: Test
 
 on:
-  pull_request:
-    paths:
-      - .github/workflows/test.yml
-      - package.json
-  push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/test.yml
-      - package.json
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch:
+    inputs:
+      cli_version:
+        description: 'Capawesome CLI version'
+        required: false
+        default: 'latest'
+        type: string
+  release:
+    types: [published]
 
 env:
   BUNDLE_PATH: www
@@ -37,8 +35,8 @@ jobs:
         run: curl -sS -L ${{ env.BUNDLE_URL }} --output ${{ env.BUNDLE_PATH }}.zip
       - name: Unzip the bundle
         run: unzip ${{ env.BUNDLE_PATH }}.zip
-      - name: Install latest Capawesome CLI version
-        run: npm i -g @capawesome/cli@latest
+      - name: Install Capawesome CLI version
+        run: npm i -g @capawesome/cli@${{ inputs.cli_version || 'latest' }}
       - name: Login to Capawesome CLI
         run: capawesome login --token ${{ secrets.CAPAWESOME_CLOUD_TOKEN }}
       - name: Check who is logged in

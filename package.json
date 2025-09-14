@@ -1,6 +1,6 @@
 {
   "name": "@capawesome/cli",
-  "version": "1.14.0",
+  "version": "3.0.0",
   "description": "The Capawesome Cloud Command Line Interface (CLI) to manage Live Updates and more.",
   "type": "module",
   "scripts": {
@@ -12,12 +12,16 @@
     "lint": "npm run prettier -- --check",
     "fmt": "npm run prettier -- --write",
     "prettier": "prettier \"**/*.{css,html,ts,js}\"",
-    "prepublishOnly": "npm run build",
-    "release": "commit-and-tag-version"
+    "sentry:releases:new": "sentry-cli releases new capawesome-team-cli@$npm_package_version --org genz-it-solutions-gmbh --project capawesome-team-cli",
+    "sentry:releases:set-commits": "sentry-cli releases set-commits capawesome-team-cli@$npm_package_version --auto --org genz-it-solutions-gmbh --project capawesome-team-cli",
+    "sentry:releases:finalize": "sentry-cli releases finalize capawesome-team-cli@$npm_package_version --org genz-it-solutions-gmbh --project capawesome-team-cli",
+    "release": "commit-and-tag-version",
+    "prepublishOnly": "npm run build && npm run sentry:releases:new && npm run sentry:releases:set-commits",
+    "postpublish": "npm run sentry:releases:finalize"
   },
   "engines": {
     "npm": ">=8.0.0",
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "bin": {
     "capawesome": "./dist/index.js"
@@ -49,10 +53,11 @@
   ],
   "dependencies": {
     "@clack/prompts": "0.7.0",
-    "@robingenz/zli": "0.1.0",
+    "@robingenz/zli": "0.2.0",
     "@sentry/node": "8.55.0",
     "archiver": "7.0.1",
     "axios": "1.8.4",
+    "axios-retry": "4.5.0",
     "c12": "2.0.1",
     "consola": "3.3.0",
     "form-data": "4.0.4",
@@ -66,6 +71,7 @@
   },
   "devDependencies": {
     "@ionic/prettier-config": "4.0.0",
+    "@sentry/cli": "2.52.0",
     "@types/archiver": "6.0.3",
     "@types/mime": "3.0.4",
     "@types/node": "24.2.1",

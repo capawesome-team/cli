@@ -1,6 +1,22 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import pkg from '../../package.json' with { type: 'json' };
+import { createRequire } from 'module';
 import configService from '@/services/config.js';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axiosRetry from 'axios-retry';
+const require = createRequire(import.meta.url);
+const pkg = require('../../package.json');
+
+// Register middleware to retry failed requests
+axiosRetry(axios, {
+  retries: 3,
+  retryDelay: axiosRetry.exponentialDelay,
+  retryCondition: (error) => {
+    // Network errors and 5xx responses are retried
+    return (
+      axiosRetry.isNetworkOrIdempotentRequestError(error) ||
+      (error.response?.status !== undefined && error.response.status >= 500)
+    );
+  },
+});
 
 export interface HttpClient {
   delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>>;

@@ -2,6 +2,105 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.0.0](https://github.com/capawesome-team/cli/compare/v2.1.5...v3.0.0) (2025-09-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* An error is now thrown when an unsupported option is used.
+
+### Features
+
+* throw error if option is unknown ([#80](https://github.com/capawesome-team/cli/issues/80)) ([faf5dfc](https://github.com/capawesome-team/cli/commit/faf5dfc6c5765a1a2fefb7b9f0ee57e76f463b85)), closes [#79](https://github.com/capawesome-team/cli/issues/79)
+
+## [2.1.5](https://github.com/capawesome-team/cli/compare/v2.1.4...v2.1.5) (2025-09-08)
+
+
+### Bug Fixes
+
+* **error:** improve network error handling ([500ed94](https://github.com/capawesome-team/cli/commit/500ed94eff85538531e1a16906a33f4af6437998))
+* **login:** throw error in CI if not token was provided ([#78](https://github.com/capawesome-team/cli/issues/78)) ([eda17c6](https://github.com/capawesome-team/cli/commit/eda17c691d807d1a4e76d83e91790f729c42385d))
+
+## [2.1.4](https://github.com/capawesome-team/cli/compare/v2.1.3...v2.1.4) (2025-08-31)
+
+
+### Bug Fixes
+
+* `Unexpected token 'with'`error on Windows ([#75](https://github.com/capawesome-team/cli/issues/75)) ([1f20e43](https://github.com/capawesome-team/cli/commit/1f20e4318add70a7919468ddd9ad7742306b3e64))
+
+## [2.1.3](https://github.com/capawesome-team/cli/compare/v2.1.2...v2.1.3) (2025-08-28)
+
+
+### Bug Fixes
+
+* capture only the first argument ([99d3892](https://github.com/capawesome-team/cli/commit/99d3892b99727ac95d3511da6c3dbfd39bad4ee4))
+* do not capture validation errors ([a8b89bc](https://github.com/capawesome-team/cli/commit/a8b89bcae7b9b2698857507a8ef030a6b443d711))
+
+## [2.1.2](https://github.com/capawesome-team/cli/compare/v2.1.1...v2.1.2) (2025-08-27)
+
+
+### Bug Fixes
+
+* remove deprecation warning ([5d8c2c0](https://github.com/capawesome-team/cli/commit/5d8c2c0b494d1c791bd2f02766202ab38321e48c))
+
+## [2.1.1](https://github.com/capawesome-team/cli/compare/v2.1.0...v2.1.1) (2025-08-26)
+
+## [2.1.0](https://github.com/capawesome-team/cli/compare/v2.0.3...v2.1.0) (2025-08-26)
+
+
+### Features
+
+* retry failed http requests if status code is `5xx` ([4a2399f](https://github.com/capawesome-team/cli/commit/4a2399f8219edd35d4a5a6f79e3f4c5e15fa8659)), closes [#67](https://github.com/capawesome-team/cli/issues/67)
+
+## [2.0.3](https://github.com/capawesome-team/cli/compare/v2.0.2...v2.0.3) (2025-08-26)
+
+
+### Bug Fixes
+
+* `--version` was no longer supported ([526819b](https://github.com/capawesome-team/cli/commit/526819bebb2e5296380183fa4ec331b364376718))
+* do not capture HTTP errors ([83f93e2](https://github.com/capawesome-team/cli/commit/83f93e21fc706e3245f349891e76501385dea03b))
+
+## [2.0.2](https://github.com/capawesome-team/cli/compare/v2.0.1...v2.0.2) (2025-08-24)
+
+
+### Bug Fixes
+
+* improve error messages for 500 and 503 status codes ([769ee5d](https://github.com/capawesome-team/cli/commit/769ee5dbd6535b7b58f516165bc02dbe9c40c531))
+
+## [2.0.1](https://github.com/capawesome-team/cli/compare/v2.0.0...v2.0.1) (2025-08-24)
+
+
+### Bug Fixes
+
+* do not capture CLI errors ([0eacbab](https://github.com/capawesome-team/cli/commit/0eacbab054b314ce953493e9fe71a17e872d1066))
+
+## [2.0.0](https://github.com/capawesome-team/cli/compare/v1.14.0...v2.0.0) (2025-08-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* You should now call the CLI using `@capawesome/cli` instead of just `capawesome` (see `BREAKING.md`).
+* set npm minimum version to `8.0.0` (see `BREAKING.md`)
+* set Node.js minimum version to `18.0.0` (see `BREAKING.md`)
+
+* deprecate `capawesome` command ([d59ea30](https://github.com/capawesome-team/cli/commit/d59ea305b7bb873071162b2ef896fc2f87b7ea21))
+* set Node.js minimum version to `18.0.0` ([396688c](https://github.com/capawesome-team/cli/commit/396688c96b69131dc0433e79af2d79eca19ee7fe))
+* set npm minimum version to `8.0.0` ([8c382fa](https://github.com/capawesome-team/cli/commit/8c382fab37c53b0df8d7efc18e6a0efbb45e1c39))
+
+
+### Features
+
+* add `organizations:create` command ([a3b5855](https://github.com/capawesome-team/cli/commit/a3b5855a84f0c58cc0463b40c9965811837d92bb))
+* add link to report bugs ([#64](https://github.com/capawesome-team/cli/issues/64)) ([9eb95b2](https://github.com/capawesome-team/cli/commit/9eb95b2d1e8b47cb0f13f26aae6cccb50ec401e0)), closes [#56](https://github.com/capawesome-team/cli/issues/56)
+* **apps:bundles:create:** support private key as plain text or file path ([#62](https://github.com/capawesome-team/cli/issues/62)) ([1db77a2](https://github.com/capawesome-team/cli/commit/1db77a2aa665f8f28e459598112a37e22c391944)), closes [#25](https://github.com/capawesome-team/cli/issues/25)
+
+
+### Bug Fixes
+
+* add missing authorization token checks to commands ([6699b1e](https://github.com/capawesome-team/cli/commit/6699b1e6993cc8f4ff5cdcd5ebef64de53a93b0e))
+* handle private keys without line breaks ([#66](https://github.com/capawesome-team/cli/issues/66)) ([d1b8d2f](https://github.com/capawesome-team/cli/commit/d1b8d2f69e64b9c97d0117a305e9bca0ec158d4f)), closes [#30](https://github.com/capawesome-team/cli/issues/30)
+* **utils:** add error message for 403 status ([6922448](https://github.com/capawesome-team/cli/commit/69224483114190ff0b81e0dcfeb656e7ea208f54))
+
 ## [1.14.0](https://github.com/capawesome-team/cli/compare/v1.13.2...v1.14.0) (2025-08-11)
 
 

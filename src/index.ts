@@ -2,10 +2,14 @@
 import configService from '@/services/config.js';
 import updateService from '@/services/update.js';
 import { getMessageFromUnknownError } from '@/utils/error.js';
-import { defineConfig, processConfig } from '@robingenz/zli';
+import { defineConfig, processConfig, ZliError } from '@robingenz/zli';
 import * as Sentry from '@sentry/node';
+import { AxiosError } from 'axios';
 import consola from 'consola';
-import pkg from '../package.json' with { type: 'json' };
+import { createRequire } from 'module';
+import { ZodError } from 'zod';
+const require = createRequire(import.meta.url);
+const pkg = require('../package.json');
 
 const config = defineConfig({
   meta: {
@@ -36,21 +40,34 @@ const config = defineConfig({
 });
 
 const captureException = async (error: unknown) => {
+  // Ignore errors from the CLI itself (e.g. "No command found.")
+  if (error instanceof ZliError) {
+    return;
+  }
+  // Ignore validation errors
+  if (error instanceof ZodError) {
+    return;
+  }
+  // Ignore failed HTTP requests
+  if (error instanceof AxiosError) {
+    return;
+  }
   const environment = await configService.getValueForKey('ENVIRONMENT');
   if (environment !== 'production') {
     return;
   }
   Sentry.init({
     dsn: 'https://19f30f2ec4b91899abc33818568ceb42@o4507446340747264.ingest.de.sentry.io/4508506426966096',
+    release: `capawesome-team-cli@${pkg.version}`,
   });
+  if (process.argv.slice(2).length > 0) {
+    Sentry.setTag('cli_command', process.argv.slice(2)[0]);
+  }
   Sentry.captureException(error);
   await Sentry.close();
 };
 
 try {
-  if (!process.argv.includes('@capawesome/cli')) {
-    consola.warn('The `capawesome` command is deprecated. Please use `@capawesome/cli` instead.');
-  }
   const result = processConfig(config, process.argv.slice(2));
   await result.command.action(result.options, result.args);
 } catch (error) {

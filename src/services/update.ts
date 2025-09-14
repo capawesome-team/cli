@@ -1,6 +1,8 @@
+import { createRequire } from 'module';
 import consola from 'consola';
 import * as semver from 'semver';
-import pkg from '../../package.json' with { type: 'json' };
+const require = createRequire(import.meta.url);
+const pkg = require('../../package.json');
 import { NpmPackageDto } from '@/types/npm-package.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
 

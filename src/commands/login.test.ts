@@ -18,6 +18,9 @@ vi.mock('@/services/config.js');
 vi.mock('open');
 vi.mock('consola');
 vi.mock('@/utils/prompt.js');
+vi.mock('std-env', () => ({
+  isCI: false,
+}));
 
 describe('login', () => {
   const mockUserConfig = vi.mocked(userConfig);
