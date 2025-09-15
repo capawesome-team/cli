@@ -69,6 +69,8 @@ export default defineCommand({
         }
         sessionIdOrToken = sessionId;
       } else {
+        consola.info(`You can create a token at ${consoleBaseUrl}/settings/tokens.`);
+        // Prompt the user to enter their token
         sessionIdOrToken = await prompt('Please provide your authentication token:', {
           type: 'text',
         });
