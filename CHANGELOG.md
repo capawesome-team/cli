@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.1.0](https://github.com/capawesome-team/cli/compare/v3.0.0...v3.1.0) (2025-09-17)
+
+
+### Features
+
+* **login:** provide token creation info ([37bb72d](https://github.com/capawesome-team/cli/commit/37bb72da29036daf9cabcc761a8edb811bc6e50a))
+
+
+### Bug Fixes
+
+* **utils:** remove 403 status message ([#82](https://github.com/capawesome-team/cli/issues/82)) ([c1637d3](https://github.com/capawesome-team/cli/commit/c1637d33dd30e3940e99a2523d137ff2228b710b))
+
 ## [3.0.0](https://github.com/capawesome-team/cli/compare/v2.1.5...v3.0.0) (2025-09-11)
 
 
