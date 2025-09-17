@@ -25,8 +25,6 @@ const getErrorMessageFromAxiosError = (error: AxiosError): string => {
     message = 'No connection could be established. Please check your internet connection and try again.';
   } else if (error.response?.status === 401) {
     message = 'Your token is no longer valid. Please sign in again.';
-  } else if (error.response?.status === 403) {
-    message = 'You do not have permission to access this resource.';
   } else if (error.response?.status === 500) {
     message = 'An internal server error has occurred. Please try again later.';
   } else if (error.response?.status === 503) {
