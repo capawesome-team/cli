@@ -1,6 +1,6 @@
 import { DEFAULT_API_BASE_URL } from '@/config/consts.js';
 import authorizationService from '@/services/authorization-service.js';
-import { fileExistsAtPath, isDirectory } from '@/utils/file.js';
+import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '@/utils/file.js';
 import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
 import nock from 'nock';
@@ -22,6 +22,7 @@ describe('apps-bundles-create', () => {
   const mockUserConfig = vi.mocked(userConfig);
   const mockAuthorizationService = vi.mocked(authorizationService);
   const mockFileExistsAtPath = vi.mocked(fileExistsAtPath);
+  const mockGetFilesInDirectoryAndSubdirectories = vi.mocked(getFilesInDirectoryAndSubdirectories);
   const mockIsDirectory = vi.mocked(isDirectory);
   const mockConsola = vi.mocked(consola);
 
@@ -126,6 +127,10 @@ describe('apps-bundles-create', () => {
 
     mockFileExistsAtPath.mockResolvedValue(true);
     mockIsDirectory.mockResolvedValue(false);
+
+    // Mock zip utility to return true so path validation passes
+    const mockZip = await import('@/utils/zip.js');
+    vi.mocked(mockZip.default.isZipped).mockReturnValue(true);
 
     await expect(createBundleCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
@@ -307,6 +312,8 @@ describe('apps-bundles-create', () => {
       if (path === privateKeyPath) return Promise.resolve(false);
       return Promise.resolve(true);
     });
+    mockIsDirectory.mockResolvedValue(true);
+    mockGetFilesInDirectoryAndSubdirectories.mockResolvedValue([{ href: 'index.html' }]);
 
     // Mock utility functions
     const mockBuffer = await import('@/utils/buffer.js');
@@ -331,6 +338,10 @@ describe('apps-bundles-create', () => {
 
     mockFileExistsAtPath.mockResolvedValue(true);
     mockIsDirectory.mockResolvedValue(false);
+
+    // Mock zip utility to pass path validation
+    const mockZip = await import('@/utils/zip.js');
+    vi.mocked(mockZip.default.isZipped).mockReturnValue(true);
 
     // Mock utility functions
     const mockBuffer = await import('@/utils/buffer.js');
