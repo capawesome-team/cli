@@ -313,7 +313,9 @@ describe('apps-bundles-create', () => {
       return Promise.resolve(true);
     });
     mockIsDirectory.mockResolvedValue(true);
-    mockGetFilesInDirectoryAndSubdirectories.mockResolvedValue([{ href: 'index.html' }]);
+    mockGetFilesInDirectoryAndSubdirectories.mockResolvedValue([
+      { href: 'index.html', mimeType: 'text/html', name: 'index.html', path: 'index.html' },
+    ]);
 
     // Mock utility functions
     const mockBuffer = await import('@/utils/buffer.js');
