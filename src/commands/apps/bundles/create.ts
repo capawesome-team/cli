@@ -11,10 +11,10 @@ import {
   createBufferFromString,
   isPrivateKeyContent,
 } from '@/utils/buffer.js';
-import { formatPrivateKey } from '@/utils/private-key.js';
 import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '@/utils/file.js';
 import { createHash } from '@/utils/hash.js';
 import { generateManifestJson } from '@/utils/manifest.js';
+import { formatPrivateKey } from '@/utils/private-key.js';
 import { prompt } from '@/utils/prompt.js';
 import { createSignature } from '@/utils/signature.js';
 import zip from '@/utils/zip.js';
@@ -158,6 +158,11 @@ export default defineCommand({
           consola.error('The directory must contain an `index.html` file.');
           process.exit(1);
         }
+      } else if (zip.isZipped(path)) {
+        // No-op
+      } else {
+        consola.error('The path must be either a folder or a zip file.');
+        process.exit(1);
       }
     }
     // Check that the path is a directory when creating a bundle with an artifact type
