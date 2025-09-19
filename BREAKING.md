@@ -4,7 +4,14 @@ This is a comprehensive list of the breaking changes introduced in the major ver
 
 ## Versions
 
+- [Version 3.x.x](#version-3xx)
 - [Version 2.x.x](#version-2xx)
+
+## Version 3.x.x
+
+### Unsupported Options
+
+The CLI will now throw an error if you use an unsupported option. This change helps to ensure that users are aware of deprecated or invalid options and encourages the use of supported features.
 
 ## Version 2.x.x
 
