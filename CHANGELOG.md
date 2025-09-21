@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.2.0](https://github.com/capawesome-team/cli/compare/v3.1.0...v3.2.0) (2025-09-21)
+
+
+### Features
+
+* **apps:channels:create:** add `--expires-in-days` option ([#69](https://github.com/capawesome-team/cli/issues/69)) ([ef2dd36](https://github.com/capawesome-team/cli/commit/ef2dd3638653e35a3ee3390ad336f39d368cd7ca))
+
+
+### Bug Fixes
+
+* **apps:bundles:create:** add error handling for invalid path types ([1fae8c6](https://github.com/capawesome-team/cli/commit/1fae8c6a831bdc0f5bb1e80f2dea4fa3a981e625))
+
 ## [3.1.0](https://github.com/capawesome-team/cli/compare/v3.0.0...v3.1.0) (2025-09-17)
 
 
