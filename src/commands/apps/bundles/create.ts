@@ -125,7 +125,7 @@ export default defineCommand({
       consola.error('You must be logged in to run this command.');
       process.exit(1);
     }
-    // Validate the expiration days
+    // Calculate the expiration date
     let expiresAt: string | undefined;
     if (expiresInDays) {
       const expiresAtDate = new Date();
