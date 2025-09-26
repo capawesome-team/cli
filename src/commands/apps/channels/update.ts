@@ -5,6 +5,7 @@ import organizationsService from '@/services/organizations.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
+import { isCI } from 'std-env';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -29,8 +30,12 @@ export default defineCommand({
       consola.error('You must be logged in to run this command.');
       process.exit(1);
     }
-
+    // Prompt app ID if not provided
     if (!appId) {
+      if (isCI) {
+        consola.error('You must provide an app ID when running in CI mode.');
+        process.exit(1);
+      }
       const organizations = await organizationsService.findAll();
       if (organizations.length === 0) {
         consola.error('You must create an organization before updating a channel.');
@@ -61,12 +66,16 @@ export default defineCommand({
         options: apps.map((app) => ({ label: app.name, value: app.id })),
       });
     }
+    // Prompt for channel ID if not provided
     if (!channelId) {
+      if (isCI) {
+        consola.error('You must provide the channel ID when running in CI mode.');
+        process.exit(1);
+      }
       channelId = await prompt('Enter the channel ID:', {
         type: 'text',
       });
     }
-
     // Update channel
     await appChannelsService.update({
       appId,

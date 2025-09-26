@@ -6,6 +6,7 @@ import { getMessageFromUnknownError } from '@/utils/error.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
+import { isCI } from 'std-env';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -48,6 +49,10 @@ export default defineCommand({
     }
     // Validate the app ID
     if (!appId) {
+      if (isCI) {
+        consola.error('You must provide an app ID when running in CI mode.');
+        process.exit(1);
+      }
       const organizations = await organizationsService.findAll();
       if (organizations.length === 0) {
         consola.error('You must create an organization before creating a channel.');
@@ -80,6 +85,10 @@ export default defineCommand({
     }
     // Validate the channel name
     if (!name) {
+      if (isCI) {
+        consola.error('You must provide the channel name when running in CI mode.');
+        process.exit(1);
+      }
       name = await prompt('Enter the name of the channel:', { type: 'text' });
     }
     try {

@@ -10,6 +10,9 @@ vi.mock('@/utils/file.js');
 vi.mock('@/utils/manifest.js');
 vi.mock('@/utils/prompt.js');
 vi.mock('consola');
+vi.mock('std-env', () => ({
+  isCI: false,
+}));
 
 describe('manifests-generate', () => {
   const mockFileExistsAtPath = vi.mocked(fileExistsAtPath);

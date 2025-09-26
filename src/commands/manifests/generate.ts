@@ -1,9 +1,10 @@
-import { defineCommand, defineOptions } from '@robingenz/zli';
-import consola from 'consola';
-import { z } from 'zod';
 import { fileExistsAtPath } from '@/utils/file.js';
 import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
+import { defineCommand, defineOptions } from '@robingenz/zli';
+import consola from 'consola';
+import { isCI } from 'std-env';
+import { z } from 'zod';
 
 export default defineCommand({
   description: 'Generate a manifest file.',
@@ -16,6 +17,10 @@ export default defineCommand({
     let path = options.path;
 
     if (!path) {
+      if (isCI) {
+        consola.error('You must provide the path to the web assets folder when running in CI mode.');
+        process.exit(1);
+      }
       path = await prompt('Enter the path to the web assets folder:', {
         type: 'text',
       });
