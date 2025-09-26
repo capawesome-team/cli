@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.2.1](https://github.com/capawesome-team/cli/compare/v3.2.0...v3.2.1) (2025-09-26)
+
+
+### Bug Fixes
+
+* add missing CI checks ([#84](https://github.com/capawesome-team/cli/issues/84)) ([617e89c](https://github.com/capawesome-team/cli/commit/617e89c6b69c907573b61b5e685a2f05cdab2d62))
+* **apps:bundles:create:** add CI check for channel prompt ([5d89cff](https://github.com/capawesome-team/cli/commit/5d89cffad756b6d5b9017c8797dc8c2e8cd2d5f8))
+* **apps:bundles:create:** add CI checks for path and app ID prompts ([e96f567](https://github.com/capawesome-team/cli/commit/e96f5674293a01a8d87eb293dffdf06b4a59f43f))
+
 ## [3.2.0](https://github.com/capawesome-team/cli/compare/v3.1.0...v3.2.0) (2025-09-21)
 
 
