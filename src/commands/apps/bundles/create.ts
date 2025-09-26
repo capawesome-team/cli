@@ -21,6 +21,7 @@ import zip from '@/utils/zip.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { createReadStream } from 'fs';
+import { isCI } from 'std-env';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -212,7 +213,7 @@ export default defineCommand({
         process.exit(1);
       }
     }
-    if (!channel) {
+    if (!channel && !isCI) {
       const promptChannel = await prompt('Do you want to deploy to a specific channel?', {
         type: 'select',
         options: ['Yes', 'No'],
