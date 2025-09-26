@@ -32,6 +32,10 @@ export default defineCommand({
     }
 
     if (!appId) {
+      if (isCI) {
+        consola.error('You must provide an app ID when running in CI mode.');
+        process.exit(1);
+      }
       const organizations = await organizationsService.findAll();
       if (organizations.length === 0) {
         consola.error('You must create an organization before deleting a channel.');
@@ -62,11 +66,17 @@ export default defineCommand({
         options: apps.map((app) => ({ label: app.name, value: app.id })),
       });
     }
+    // Prompt for channel ID or name if neither is provided
     if (!channelId && !name) {
+      if (isCI) {
+        consola.error('You must provide either the channel ID or name when running in CI mode.');
+        process.exit(1);
+      }
       name = await prompt('Enter the channel name:', {
         type: 'text',
       });
     }
+    // Confirm deletion
     if (!isCI) {
       const confirmed = await prompt('Are you sure you want to delete this channel?', {
         type: 'confirm',
@@ -75,6 +85,7 @@ export default defineCommand({
         return;
       }
     }
+    // Delete channel
     await appChannelsService.delete({
       appId,
       id: channelId,

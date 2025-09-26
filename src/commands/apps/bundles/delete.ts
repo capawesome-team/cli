@@ -5,6 +5,7 @@ import organizationsService from '@/services/organizations.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
+import { isCI } from 'std-env';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -25,6 +26,10 @@ export default defineCommand({
 
     // Prompt for missing arguments
     if (!appId) {
+      if (isCI) {
+        consola.error('You must provide an app ID when running in CI mode.');
+        process.exit(1);
+      }
       const organizations = await organizationsService.findAll();
       if (organizations.length === 0) {
         consola.error('You must create an organization before deleting a bundle.');
@@ -56,17 +61,23 @@ export default defineCommand({
       });
     }
     if (!bundleId) {
+      if (isCI) {
+        consola.error('You must provide the bundle ID when running in CI mode.');
+        process.exit(1);
+      }
       bundleId = await prompt('Enter the bundle ID:', {
         type: 'text',
       });
     }
 
     // Confirm deletion
-    const confirmed = await prompt('Are you sure you want to delete this bundle?', {
-      type: 'confirm',
-    });
-    if (!confirmed) {
-      return;
+    if (!isCI) {
+      const confirmed = await prompt('Are you sure you want to delete this bundle?', {
+        type: 'confirm',
+      });
+      if (!confirmed) {
+        return;
+      }
     }
 
     // Delete bundle
