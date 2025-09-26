@@ -12,6 +12,9 @@ vi.mock('@/utils/user-config.js');
 vi.mock('@/utils/prompt.js');
 vi.mock('@/services/authorization-service.js');
 vi.mock('consola');
+vi.mock('std-env', () => ({
+  isCI: false,
+}));
 
 describe('apps-delete', () => {
   const mockUserConfig = vi.mocked(userConfig);
