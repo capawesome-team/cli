@@ -135,12 +135,17 @@ export default defineCommand({
     }
     // Check that either a path or a url is provided
     if (!path && !url) {
-      path = await prompt('Enter the path to the app bundle:', {
-        type: 'text',
-      });
-      if (!path) {
-        consola.error('You must provide a path to the app bundle.');
+      if (isCI) {
+        consola.error('You must provide either a path or a url when running in CI mode.');
         process.exit(1);
+      } else {
+        path = await prompt('Enter the path to the app bundle:', {
+          type: 'text',
+        });
+        if (!path) {
+          consola.error('You must provide a path to the app bundle.');
+          process.exit(1);
+        }
       }
     }
     if (path) {
@@ -182,6 +187,10 @@ export default defineCommand({
       process.exit(1);
     }
     if (!appId) {
+      if (isCI) {
+        consola.error('You must provide an app ID when running in CI mode.');
+        process.exit(1);
+      }
       const organizations = await organizationsService.findAll();
       if (organizations.length === 0) {
         consola.error('You must create an organization before creating a bundle.');
