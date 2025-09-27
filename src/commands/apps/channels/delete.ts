@@ -5,7 +5,7 @@ import organizationsService from '@/services/organizations.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
-import { isCI } from 'std-env';
+import { hasTTY } from 'std-env';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -32,8 +32,8 @@ export default defineCommand({
     }
 
     if (!appId) {
-      if (isCI) {
-        consola.error('You must provide an app ID when running in CI mode.');
+      if (!hasTTY) {
+        consola.error('You must provide an app ID when running in non-interactive mode.');
         process.exit(1);
       }
       const organizations = await organizationsService.findAll();
@@ -68,8 +68,8 @@ export default defineCommand({
     }
     // Prompt for channel ID or name if neither is provided
     if (!channelId && !name) {
-      if (isCI) {
-        consola.error('You must provide either the channel ID or name when running in CI mode.');
+      if (!hasTTY) {
+        consola.error('You must provide either the channel ID or name when running in non-interactive mode.');
         process.exit(1);
       }
       name = await prompt('Enter the channel name:', {
@@ -77,7 +77,7 @@ export default defineCommand({
       });
     }
     // Confirm deletion
-    if (!isCI) {
+    if (hasTTY) {
       const confirmed = await prompt('Are you sure you want to delete this channel?', {
         type: 'confirm',
       });

@@ -13,7 +13,7 @@ vi.mock('@/utils/prompt.js');
 vi.mock('@/services/authorization-service.js');
 vi.mock('consola');
 vi.mock('std-env', () => ({
-  isCI: false,
+  hasTTY: true,
 }));
 
 describe('apps-bundles-update', () => {

@@ -2,13 +2,13 @@ name: Test
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: '0 0 * * *'
   workflow_dispatch:
     inputs:
       cli_version:
-        description: "Capawesome CLI version"
+        description: 'Capawesome CLI version'
         required: false
-        default: "latest"
+        default: 'latest'
         type: string
   release:
     types: [published]
@@ -21,21 +21,31 @@ env:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Set up Node.js 22
+      - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: ${{ matrix.node-version }}
       - name: Download sample bundle
         run: curl -sS -L ${{ env.BUNDLE_URL }} --output ${{ env.BUNDLE_PATH }}.zip
       - name: Unzip the bundle
         run: unzip ${{ env.BUNDLE_PATH }}.zip
       - name: Install Capawesome CLI version
-        run: npm i -g @capawesome/cli@3.2.1-dev.edc7dde.1759002886
+        run: npm i -g @capawesome/cli@${{ inputs.cli_version || 'latest' }}
       - name: Login to Capawesome CLI
         run: capawesome login --token ${{ secrets.CAPAWESOME_CLOUD_TOKEN }}
       - name: Check who is logged in
         run: npx capawesome whoami
+      - name: Create a channel
+        run: npx capawesome apps:channels:create --app-id ${{ env.CAPAWESOME_CLOUD_APP_ID }} --name test-${{ matrix.os }}-${{ matrix.node-version }} --ignore-errors
+      - name: Generate a manifest file
+        run: npx capawesome manifests:generate --path ${{ env.BUNDLE_PATH }}
       - name: Create a bundle
-        run: npx capawesome apps:bundles:create --app-id ${{ env.CAPAWESOME_CLOUD_APP_ID }} --path ${{ env.BUNDLE_PATH }}
+        run: npx capawesome apps:bundles:create --app-id ${{ env.CAPAWESOME_CLOUD_APP_ID }} --channel test-${{ matrix.os }}-${{ matrix.node-version }} --path ${{ env.BUNDLE_PATH }}
+      - name: Delete the channel
+        run: npx capawesome apps:channels:delete --app-id ${{ env.CAPAWESOME_CLOUD_APP_ID }} --name test-${{ matrix.os }}-${{ matrix.node-version }}

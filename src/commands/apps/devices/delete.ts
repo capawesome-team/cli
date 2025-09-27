@@ -5,7 +5,7 @@ import organizationsService from '@/services/organizations.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
-import { isCI } from 'std-env';
+import { hasTTY } from 'std-env';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -25,8 +25,8 @@ export default defineCommand({
     }
     // Prompt for app ID if not provided
     if (!appId) {
-      if (isCI) {
-        consola.error('You must provide an app ID when running in CI mode.');
+      if (!hasTTY) {
+        consola.error('You must provide an app ID when running in non-interactive mode.');
         process.exit(1);
       }
       const organizations = await organizationsService.findAll();
@@ -61,8 +61,8 @@ export default defineCommand({
     }
     // Prompt for device ID if not provided
     if (!deviceId) {
-      if (isCI) {
-        consola.error('You must provide the device ID when running in CI mode.');
+      if (!hasTTY) {
+        consola.error('You must provide the device ID when running in non-interactive mode.');
         process.exit(1);
       }
       deviceId = await prompt('Enter the device ID:', {
@@ -70,7 +70,7 @@ export default defineCommand({
       });
     }
     // Confirm deletion
-    if (!isCI) {
+    if (hasTTY) {
       const confirmed = await prompt('Are you sure you want to delete this device?', {
         type: 'confirm',
       });
