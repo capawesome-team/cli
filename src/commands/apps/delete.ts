@@ -53,7 +53,7 @@ export default defineCommand({
         options: apps.map((app) => ({ label: app.name, value: app.id })),
       });
     }
-    if (!hasTTY) {
+    if (hasTTY) {
       const confirmed = await prompt('Are you sure you want to delete this app?', {
         type: 'confirm',
       });
