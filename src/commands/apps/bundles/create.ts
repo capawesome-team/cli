@@ -222,6 +222,8 @@ export default defineCommand({
         process.exit(1);
       }
     }
+    console.log('is CI: ', isCI);
+    console.log('has TTY: ', hasTTY);
     if (!channel && hasTTY) {
       const promptChannel = await prompt('Do you want to deploy to a specific channel?', {
         type: 'select',
