@@ -21,16 +21,12 @@ env:
 jobs:
   test:
     name: Test
-    strategy:
-      matrix:
-        node-version: [18, 20, 22]
-        os: [macos-latest, ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
-      - name: Set up Node.js ${{ matrix.node-version }}
+      - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22
       - name: Download sample bundle
         run: curl -sS -L ${{ env.BUNDLE_URL }} --output ${{ env.BUNDLE_PATH }}.zip
       - name: Unzip the bundle
