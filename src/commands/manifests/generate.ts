@@ -18,7 +18,9 @@ export default defineCommand({
 
     if (!path) {
       if (!hasTTY) {
-        consola.error('You must provide the path to the web assets folder when running in non-interactive mode.');
+        consola.error(
+          'You must provide the path to the web assets folder when running in non-interactive environment.',
+        );
         process.exit(1);
       }
       path = await prompt('Enter the path to the web assets folder:', {

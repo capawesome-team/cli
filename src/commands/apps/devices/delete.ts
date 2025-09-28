@@ -26,7 +26,7 @@ export default defineCommand({
     // Prompt for app ID if not provided
     if (!appId) {
       if (!hasTTY) {
-        consola.error('You must provide an app ID when running in non-interactive mode.');
+        consola.error('You must provide an app ID when running in non-interactive environment.');
         process.exit(1);
       }
       const organizations = await organizationsService.findAll();
@@ -62,7 +62,7 @@ export default defineCommand({
     // Prompt for device ID if not provided
     if (!deviceId) {
       if (!hasTTY) {
-        consola.error('You must provide the device ID when running in non-interactive mode.');
+        consola.error('You must provide the device ID when running in non-interactive environment.');
         process.exit(1);
       }
       deviceId = await prompt('Enter the device ID:', {

@@ -23,7 +23,7 @@ export default defineCommand({
     }
     if (!appId) {
       if (!hasTTY) {
-        consola.error('You must provide the app ID when running in non-interactive mode.');
+        consola.error('You must provide the app ID when running in non-interactive environment.');
         process.exit(1);
       }
       const organizations = await organizationsService.findAll();

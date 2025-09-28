@@ -27,7 +27,7 @@ export default defineCommand({
     // Prompt for missing arguments
     if (!appId) {
       if (!hasTTY) {
-        consola.error('You must provide an app ID when running in non-interactive mode.');
+        consola.error('You must provide an app ID when running in non-interactive environment.');
         process.exit(1);
       }
       const organizations = await organizationsService.findAll();
@@ -62,7 +62,7 @@ export default defineCommand({
     }
     if (!bundleId) {
       if (!hasTTY) {
-        consola.error('You must provide the bundle ID when running in non-interactive mode.');
+        consola.error('You must provide the bundle ID when running in non-interactive environment.');
         process.exit(1);
       }
       bundleId = await prompt('Enter the bundle ID:', {

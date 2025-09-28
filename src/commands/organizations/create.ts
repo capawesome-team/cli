@@ -22,7 +22,7 @@ export default defineCommand({
     }
     if (!name) {
       if (!hasTTY) {
-        consola.error('You must provide the organization name when running in non-interactive mode.');
+        consola.error('You must provide the organization name when running in non-interactive environment.');
         process.exit(1);
       }
       name = await prompt('Enter the name of the organization:', { type: 'text' });

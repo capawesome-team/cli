@@ -23,7 +23,7 @@ export default defineCommand({
     let { token: sessionIdOrToken } = options;
     if (sessionIdOrToken === undefined) {
       if (!hasTTY) {
-        consola.error('You must provide a token when running in non-interactive mode.');
+        consola.error('You must provide a token when running in non-interactive environment.');
         process.exit(1);
       }
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged

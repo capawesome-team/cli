@@ -136,7 +136,7 @@ export default defineCommand({
     // Check that either a path or a url is provided
     if (!path && !url) {
       if (!hasTTY) {
-        consola.error('You must provide either a path or a url when running in non-interactive mode.');
+        consola.error('You must provide either a path or a url when running in non-interactive environment.');
         process.exit(1);
       } else {
         path = await prompt('Enter the path to the app bundle:', {
@@ -188,7 +188,7 @@ export default defineCommand({
     }
     if (!appId) {
       if (!hasTTY) {
-        consola.error('You must provide an app ID when running in non-interactive mode.');
+        consola.error('You must provide an app ID when running in non-interactive environment.');
         process.exit(1);
       }
       const organizations = await organizationsService.findAll();

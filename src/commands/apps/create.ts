@@ -24,7 +24,7 @@ export default defineCommand({
     }
     if (!organizationId) {
       if (!hasTTY) {
-        consola.error('You must provide the organization ID when running in non-interactive mode.');
+        consola.error('You must provide the organization ID when running in non-interactive environment.');
         process.exit(1);
       }
       const organizations = await organizationsService.findAll();
@@ -44,7 +44,7 @@ export default defineCommand({
     }
     if (!name) {
       if (!hasTTY) {
-        consola.error('You must provide the app name when running in non-interactive mode.');
+        consola.error('You must provide the app name when running in non-interactive environment.');
         process.exit(1);
       }
       name = await prompt('Enter the name of the app:', { type: 'text' });
