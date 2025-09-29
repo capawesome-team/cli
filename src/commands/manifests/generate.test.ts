@@ -11,7 +11,7 @@ vi.mock('@/utils/manifest.js');
 vi.mock('@/utils/prompt.js');
 vi.mock('consola');
 vi.mock('std-env', () => ({
-  isCI: false,
+  hasTTY: true,
 }));
 
 describe('manifests-generate', () => {

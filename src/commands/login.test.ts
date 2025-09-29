@@ -19,10 +19,10 @@ vi.mock('open');
 vi.mock('consola');
 vi.mock('@/utils/prompt.js');
 vi.mock('std-env', () => ({
-  isCI: false,
+  hasTTY: true,
 }));
 vi.mock('std-env', () => ({
-  isCI: false,
+  hasTTY: true,
 }));
 
 describe('login', () => {

@@ -3,7 +3,7 @@ import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
-import { isCI } from 'std-env';
+import { hasTTY } from 'std-env';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -17,8 +17,10 @@ export default defineCommand({
     let path = options.path;
 
     if (!path) {
-      if (isCI) {
-        consola.error('You must provide the path to the web assets folder when running in CI mode.');
+      if (!hasTTY) {
+        consola.error(
+          'You must provide the path to the web assets folder when running in non-interactive environment.',
+        );
         process.exit(1);
       }
       path = await prompt('Enter the path to the web assets folder:', {

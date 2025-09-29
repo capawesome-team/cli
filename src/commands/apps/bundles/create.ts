@@ -21,7 +21,7 @@ import zip from '@/utils/zip.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { createReadStream } from 'fs';
-import { isCI } from 'std-env';
+import { hasTTY } from 'std-env';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -135,8 +135,8 @@ export default defineCommand({
     }
     // Check that either a path or a url is provided
     if (!path && !url) {
-      if (isCI) {
-        consola.error('You must provide either a path or a url when running in CI mode.');
+      if (!hasTTY) {
+        consola.error('You must provide either a path or a url when running in non-interactive environment.');
         process.exit(1);
       } else {
         path = await prompt('Enter the path to the app bundle:', {
@@ -187,8 +187,8 @@ export default defineCommand({
       process.exit(1);
     }
     if (!appId) {
-      if (isCI) {
-        consola.error('You must provide an app ID when running in CI mode.');
+      if (!hasTTY) {
+        consola.error('You must provide an app ID when running in non-interactive environment.');
         process.exit(1);
       }
       const organizations = await organizationsService.findAll();
@@ -222,7 +222,7 @@ export default defineCommand({
         process.exit(1);
       }
     }
-    if (!channel && !isCI) {
+    if (!channel && hasTTY) {
       const promptChannel = await prompt('Do you want to deploy to a specific channel?', {
         type: 'select',
         options: ['Yes', 'No'],
