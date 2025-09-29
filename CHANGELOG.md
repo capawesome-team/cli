@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.2.2](https://github.com/capawesome-team/cli/compare/v3.2.1...v3.2.2) (2025-09-29)
+
+
+### Bug Fixes
+
+* check for interactive terminal interface before prompt ([#86](https://github.com/capawesome-team/cli/issues/86)) ([ed8b6b0](https://github.com/capawesome-team/cli/commit/ed8b6b07d5ddedb10541472cf769176095c24645)), closes [#85](https://github.com/capawesome-team/cli/issues/85)
+
 ## [3.2.1](https://github.com/capawesome-team/cli/compare/v3.2.0...v3.2.1) (2025-09-26)
 
 
