@@ -20,6 +20,10 @@ export default defineCommand({
         .string()
         .optional()
         .describe('The minimum Android version code (`versionCode`) that the bundle supports.'),
+      androidEq: z
+        .string()
+        .optional()
+        .describe('The exact Android version code (`versionCode`) that the bundle should not support.'),
       appId: z.string().optional().describe('ID of the app.'),
       bundleId: z.string().optional().describe('ID of the bundle.'),
       rollout: z.coerce
@@ -38,10 +42,14 @@ export default defineCommand({
         .string()
         .optional()
         .describe('The minimum iOS bundle version (`CFBundleVersion`) that the bundle supports.'),
+      iosEq: z
+        .string()
+        .optional()
+        .describe('The exact iOS bundle version (`CFBundleVersion`) that the bundle should not support.'),
     }),
   ),
   action: async (options, args) => {
-    let { androidMax, androidMin, appId, bundleId, rollout, iosMax, iosMin } = options;
+    let { androidMax, androidMin, androidEq, appId, bundleId, rollout, iosMax, iosMin, iosEq } = options;
 
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command.');
@@ -99,6 +107,8 @@ export default defineCommand({
       maxIosAppVersionCode: iosMax,
       minAndroidAppVersionCode: androidMin,
       minIosAppVersionCode: iosMin,
+      eqAndroidAppVersionCode: androidEq,
+      eqIosAppVersionCode: iosEq,
       rolloutPercentage: rollout,
     });
     consola.success('Bundle updated successfully.');

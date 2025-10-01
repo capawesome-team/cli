@@ -37,5 +37,7 @@ export interface UpdateAppBundleDto {
   maxIosAppVersionCode?: string;
   minAndroidAppVersionCode?: string;
   minIosAppVersionCode?: string;
+  eqAndroidAppVersionCode?: string;
+  eqIosAppVersionCode?: string;
   rolloutPercentage?: number;
 }
