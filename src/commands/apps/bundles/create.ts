@@ -36,6 +36,10 @@ export default defineCommand({
         .string()
         .optional()
         .describe('The minimum Android version code (`versionCode`) that the bundle supports.'),
+      androidEq: z.coerce
+        .string()
+        .optional()
+        .describe('The exact Android version code (`versionCode`) that the bundle should not support.'),
       appId: z
         .string({
           message: 'App ID must be a UUID.',
@@ -79,6 +83,10 @@ export default defineCommand({
         .string()
         .optional()
         .describe('The minimum iOS bundle version (`CFBundleVersion`) that the bundle supports.'),
+      iosEq: z
+        .string()
+        .optional()
+        .describe('The exact iOS bundle version (`CFBundleVersion`) that the bundle should not support.'),
       path: z
         .string()
         .optional()
@@ -105,6 +113,7 @@ export default defineCommand({
     let {
       androidMax,
       androidMin,
+      androidEq,
       appId,
       artifactType,
       channel,
@@ -115,6 +124,7 @@ export default defineCommand({
       expiresInDays,
       iosMax,
       iosMin,
+      iosEq,
       path,
       privateKey,
       rollout,
@@ -297,6 +307,8 @@ export default defineCommand({
         maxIosAppVersionCode: iosMax,
         minAndroidAppVersionCode: androidMin,
         minIosAppVersionCode: iosMin,
+        eqAndroidAppVersionCode: androidEq,
+        eqIosAppVersionCode: iosEq,
         rolloutPercentage: rollout,
         signature,
       });

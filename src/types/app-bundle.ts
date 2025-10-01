@@ -17,6 +17,8 @@ export interface CreateAppBundleDto {
   maxIosAppVersionCode?: string;
   minAndroidAppVersionCode?: string;
   minIosAppVersionCode?: string;
+  eqAndroidAppVersionCode?: string;
+  eqIosAppVersionCode?: string;
   rolloutPercentage?: number;
   signature?: string;
 }
