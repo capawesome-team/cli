@@ -7,6 +7,8 @@ export interface CreateAppBundleDto {
   artifactType: 'manifest' | 'zip';
   channelName?: string;
   checksum?: string;
+  eqAndroidAppVersionCode?: string;
+  eqIosAppVersionCode?: string;
   gitCommitMessage?: string;
   gitCommitRef?: string;
   gitCommitSha?: string;
@@ -17,8 +19,6 @@ export interface CreateAppBundleDto {
   maxIosAppVersionCode?: string;
   minAndroidAppVersionCode?: string;
   minIosAppVersionCode?: string;
-  eqAndroidAppVersionCode?: string;
-  eqIosAppVersionCode?: string;
   rolloutPercentage?: number;
   signature?: string;
 }
