@@ -1,9 +1,10 @@
 import authorizationService from '@/services/authorization-service.js';
-import { AppBuildDto, CreateAppBuildDto } from '@/types/app-build.js';
+import { AppBuildDto, CreateAppBuildDto, FindOneAppBuildDto } from '@/types/app-build.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
 
 export interface AppBuildsService {
   create(dto: CreateAppBuildDto): Promise<AppBuildDto>;
+  findOne(dto: FindOneAppBuildDto): Promise<AppBuildDto>;
 }
 
 class AppBuildsServiceImpl implements AppBuildsService {
@@ -16,6 +17,16 @@ class AppBuildsServiceImpl implements AppBuildsService {
   async create(dto: CreateAppBuildDto): Promise<AppBuildDto> {
     const { appId, ...bodyData } = dto;
     const response = await this.httpClient.post<AppBuildDto>(`/v1/apps/${appId}/builds`, bodyData, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+      },
+    });
+    return response.data;
+  }
+
+  async findOne(dto: FindOneAppBuildDto): Promise<AppBuildDto> {
+    const { appId, appBuildId } = dto;
+    const response = await this.httpClient.get<AppBuildDto>(`/v1/apps/${appId}/builds/${appBuildId}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },

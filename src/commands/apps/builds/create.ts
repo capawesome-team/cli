@@ -140,22 +140,18 @@ export default defineCommand({
       process.exit(1);
     }
 
-    try {
-      // Create the app build
-      consola.start('Creating build...');
-      const response = await appBuildsService.create({
-        appCertificateName: certificate,
-        appEnvironmentName: environment,
-        appId,
-        gitRef,
-        platform,
-        type,
-      });
-      consola.success('Build successfully created.');
-      consola.info(`Build ID: ${response.id}`);
-      consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
-    } catch (error) {
-      throw error;
-    }
+    // Create the app build
+    consola.start('Creating build...');
+    const response = await appBuildsService.create({
+      appCertificateName: certificate,
+      appEnvironmentName: environment,
+      appId,
+      gitRef,
+      platform,
+      type,
+    });
+    consola.success('Build successfully created.');
+    consola.info(`Build ID: ${response.id}`);
+    consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
   },
 });

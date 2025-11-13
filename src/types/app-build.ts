@@ -20,3 +20,8 @@ export interface CreateAppBuildDto {
   platform: 'ios' | 'android';
   type: string;
 }
+
+export interface FindOneAppBuildDto {
+  appId: string;
+  appBuildId: string;
+}
