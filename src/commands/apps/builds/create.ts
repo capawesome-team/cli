@@ -151,6 +151,7 @@ export default defineCommand({
       type,
     });
     consola.success('Build successfully created.');
+    consola.info(`Build Number: ${response.number}`);
     consola.info(`Build ID: ${response.id}`);
     consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
   },

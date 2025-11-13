@@ -25,3 +25,7 @@ export interface FindOneAppBuildDto {
   appId: string;
   appBuildId: string;
 }
+
+export interface FindAllAppBuildsDto {
+  appId: string;
+}
