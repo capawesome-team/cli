@@ -36,11 +36,16 @@ class AppBuildsServiceImpl implements AppBuildsService {
   }
 
   async findOne(dto: FindOneAppBuildDto): Promise<AppBuildDto> {
-    const { appId, appBuildId } = dto;
+    const { appId, appBuildId, relations } = dto;
+    const params: Record<string, string> = {};
+    if (relations) {
+      params.relations = relations;
+    }
     const response = await this.httpClient.get<AppBuildDto>(`/v1/apps/${appId}/builds/${appBuildId}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
+      params,
     });
     return response.data;
   }

@@ -5,7 +5,9 @@ import appEnvironmentsService from '@/services/app-environments.js';
 import appsService from '@/services/apps.js';
 import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
+import { unescapeAnsi } from '@/utils/ansi.js';
 import { prompt } from '@/utils/prompt.js';
+import { wait } from '@/utils/wait.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { hasTTY } from 'std-env';
@@ -39,6 +41,7 @@ export default defineCommand({
       gitRef: z.string().optional().describe('The Git reference (branch, tag, or commit SHA) to build.'),
       environment: z.string().optional().describe('The name of the environment to use for the build.'),
       certificate: z.string().optional().describe('The name of the certificate to use for the build.'),
+      wait: z.boolean().optional().describe('Wait for the build to complete and stream logs.'),
     }),
   ),
   action: async (options) => {
@@ -98,8 +101,8 @@ export default defineCommand({
       platform = await prompt('Select the platform for the build:', {
         type: 'select',
         options: [
-          { label: 'iOS', value: 'ios' },
           { label: 'Android', value: 'android' },
+          { label: 'iOS', value: 'ios' },
         ],
       });
       if (!platform) {
@@ -194,9 +197,92 @@ export default defineCommand({
       platform,
       type,
     });
-    consola.success('Build successfully created.');
-    consola.info(`Build Number: ${response.number}`);
-    consola.info(`Build ID: ${response.id}`);
-    consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
+
+    // Wait for build job to complete if --wait flag is set
+    if (options.wait) {
+      let lastPrintedLogNumber = 0;
+      let isWaitingForStart = true;
+
+      // Poll build status until completion
+      while (true) {
+        try {
+          const build = await appBuildsService.findOne({
+            appId,
+            appBuildId: response.id,
+            relations: 'job,job.jobLogs',
+          });
+
+          if (!build.job) {
+            await wait(3000);
+            continue;
+          }
+
+          const jobStatus = build.job.status;
+
+          // Show spinner while queued or pending
+          if (jobStatus === 'queued' || jobStatus === 'pending') {
+            if (isWaitingForStart) {
+              consola.start(`Waiting for build to start (status: ${jobStatus})...`);
+            }
+            await wait(3000);
+            continue;
+          }
+
+          // Stop spinner when job moves to in_progress
+          if (isWaitingForStart && jobStatus === 'in_progress') {
+            isWaitingForStart = false;
+            consola.success('Build started, streaming logs...');
+          }
+
+          // Print new logs
+          if (build.job.jobLogs && build.job.jobLogs.length > 0) {
+            const newLogs = build.job.jobLogs
+              .filter((log) => log.number > lastPrintedLogNumber)
+              .sort((a, b) => a.number - b.number);
+
+            for (const log of newLogs) {
+              console.log(unescapeAnsi(log.payload));
+              lastPrintedLogNumber = log.number;
+            }
+          }
+
+          // Handle terminal states
+          if (
+            jobStatus === 'completed' ||
+            jobStatus === 'failed' ||
+            jobStatus === 'canceled' ||
+            jobStatus === 'rejected' ||
+            jobStatus === 'timed_out'
+          ) {
+            console.log();
+            if (jobStatus === 'completed') {
+              consola.success('Build completed successfully.');
+              process.exit(0);
+            } else if (jobStatus === 'failed') {
+              consola.error('Build failed.');
+              process.exit(1);
+            } else if (jobStatus === 'canceled') {
+              consola.warn('Build was canceled.');
+              process.exit(1);
+            } else if (jobStatus === 'rejected') {
+              consola.error('Build was rejected.');
+              process.exit(1);
+            } else if (jobStatus === 'timed_out') {
+              consola.error('Build timed out.');
+              process.exit(1);
+            }
+            consola.info(`Build Number: ${response.number}`);
+            consola.info(`Build ID: ${response.id}`);
+            consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
+          }
+
+          // Wait before next poll (3 seconds)
+          await wait(3000);
+        } catch (error) {
+          consola.error('Error polling build status:', error);
+          process.exit(1);
+        }
+      }
+    }
   },
 });

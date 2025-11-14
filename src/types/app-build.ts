@@ -1,3 +1,5 @@
+import { JobDto } from './job.js';
+
 export interface AppBuildDto {
   id: string;
   appId: string;
@@ -8,6 +10,9 @@ export interface AppBuildDto {
   appCertificateId?: string;
   jobId: string;
   number: string;
+  createdAt?: number;
+  createdBy?: string;
+  job?: JobDto;
 }
 
 export interface CreateAppBuildDto {
@@ -22,6 +27,7 @@ export interface CreateAppBuildDto {
 export interface FindOneAppBuildDto {
   appId: string;
   appBuildId: string;
+  relations?: string;
 }
 
 export interface FindAllAppBuildsDto {
