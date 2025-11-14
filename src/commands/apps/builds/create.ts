@@ -1,5 +1,7 @@
 import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appBuildsService from '@/services/app-builds.js';
+import appCertificatesService from '@/services/app-certificates.js';
+import appEnvironmentsService from '@/services/app-environments.js';
 import appsService from '@/services/apps.js';
 import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
@@ -138,6 +140,48 @@ export default defineCommand({
         `Invalid build type for Android. Supported values are: ${ANDROID_BUILD_TYPES.map((t) => `\`${t}\``).join(', ')}.`,
       );
       process.exit(1);
+    }
+
+    // Prompt for environment if not provided
+    if (!environment && hasTTY) {
+      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+      const selectEnvironment = await prompt('Do you want to select an environment?', {
+        type: 'confirm',
+        initial: false,
+      });
+      if (selectEnvironment) {
+        const environments = await appEnvironmentsService.findAll({ appId });
+        if (environments.length === 0) {
+          consola.warn('No environments found for this app.');
+        } else {
+          // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+          environment = await prompt('Select the environment for the build:', {
+            type: 'select',
+            options: environments.map((env) => ({ label: env.name, value: env.name })),
+          });
+        }
+      }
+    }
+
+    // Prompt for certificate if not provided
+    if (!certificate && hasTTY) {
+      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+      const selectCertificate = await prompt('Do you want to select a certificate?', {
+        type: 'confirm',
+        initial: false,
+      });
+      if (selectCertificate) {
+        const certificates = await appCertificatesService.findAll({ appId });
+        if (certificates.length === 0) {
+          consola.warn('No certificates found for this app.');
+        } else {
+          // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+          certificate = await prompt('Select the certificate for the build:', {
+            type: 'select',
+            options: certificates.map((cert) => ({ label: cert.name, value: cert.name })),
+          });
+        }
+      }
     }
 
     // Create the app build
