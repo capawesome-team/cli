@@ -5,11 +5,14 @@ import appEnvironmentsService from '@/services/app-environments.js';
 import appsService from '@/services/apps.js';
 import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
+import { AppBuildArtifactDto } from '@/types/app-build.js';
 import { unescapeAnsi } from '@/utils/ansi.js';
 import { prompt } from '@/utils/prompt.js';
 import { wait } from '@/utils/wait.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
+import fs from 'fs/promises';
+import path from 'path';
 import { hasTTY } from 'std-env';
 import { z } from 'zod';
 
@@ -42,6 +45,18 @@ export default defineCommand({
       environment: z.string().optional().describe('The name of the environment to use for the build.'),
       certificate: z.string().optional().describe('The name of the certificate to use for the build.'),
       wait: z.boolean().optional().describe('Wait for the build to complete and stream logs.'),
+      apk: z
+        .union([z.boolean(), z.string()])
+        .optional()
+        .describe('Download the generated APK file (Android only, requires --wait). Optionally provide a file path.'),
+      aab: z
+        .union([z.boolean(), z.string()])
+        .optional()
+        .describe('Download the generated AAB file (Android only, requires --wait). Optionally provide a file path.'),
+      ipa: z
+        .union([z.boolean(), z.string()])
+        .optional()
+        .describe('Download the generated IPA file (iOS only, requires --wait). Optionally provide a file path.'),
     }),
   ),
   action: async (options) => {
@@ -50,6 +65,20 @@ export default defineCommand({
     // Check if the user is logged in
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command.');
+      process.exit(1);
+    }
+
+    // Validate artifact download flags require --wait
+    if (options.apk && !options.wait) {
+      consola.error('The --apk flag requires the --wait flag to be set.');
+      process.exit(1);
+    }
+    if (options.aab && !options.wait) {
+      consola.error('The --aab flag requires the --wait flag to be set.');
+      process.exit(1);
+    }
+    if (options.ipa && !options.wait) {
+      consola.error('The --ipa flag requires the --wait flag to be set.');
       process.exit(1);
     }
 
@@ -197,6 +226,10 @@ export default defineCommand({
       platform,
       type,
     });
+    consola.success(`Build created successfully.`);
+    consola.info(`Build Number: ${response.number}`);
+    consola.info(`Build ID: ${response.id}`);
+    consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
 
     // Wait for build job to complete if --wait flag is set
     if (options.wait) {
@@ -209,7 +242,7 @@ export default defineCommand({
           const build = await appBuildsService.findOne({
             appId,
             appBuildId: response.id,
-            relations: 'job,job.jobLogs',
+            relations: 'appBuildArtifacts,job,job.jobLogs',
           });
 
           if (!build.job) {
@@ -254,9 +287,38 @@ export default defineCommand({
             jobStatus === 'rejected' ||
             jobStatus === 'timed_out'
           ) {
-            console.log();
+            console.log(); // New line for better readability
             if (jobStatus === 'completed') {
               consola.success('Build completed successfully.');
+
+              // Download artifacts if flags are set
+              if (options.apk && platform === 'android') {
+                await handleArtifactDownload({
+                  appId,
+                  buildId: response.id,
+                  buildArtifacts: build.appBuildArtifacts,
+                  artifactType: 'apk',
+                  filePath: typeof options.apk === 'string' ? options.apk : undefined,
+                });
+              }
+              if (options.aab && platform === 'android') {
+                await handleArtifactDownload({
+                  appId,
+                  buildId: response.id,
+                  buildArtifacts: build.appBuildArtifacts,
+                  artifactType: 'aab',
+                  filePath: typeof options.aab === 'string' ? options.aab : undefined,
+                });
+              }
+              if (options.ipa && platform === 'ios') {
+                await handleArtifactDownload({
+                  appId,
+                  buildId: response.id,
+                  buildArtifacts: build.appBuildArtifacts,
+                  artifactType: 'ipa',
+                  filePath: typeof options.ipa === 'string' ? options.ipa : undefined,
+                });
+              }
               process.exit(0);
             } else if (jobStatus === 'failed') {
               consola.error('Build failed.');
@@ -271,9 +333,6 @@ export default defineCommand({
               consola.error('Build timed out.');
               process.exit(1);
             }
-            consola.info(`Build Number: ${response.number}`);
-            consola.info(`Build ID: ${response.id}`);
-            consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
           }
 
           // Wait before next poll (3 seconds)
@@ -286,3 +345,58 @@ export default defineCommand({
     }
   },
 });
+
+/**
+ * Download a build artifact (APK, AAB, or IPA).
+ */
+const handleArtifactDownload = async (options: {
+  appId: string;
+  buildId: string;
+  buildArtifacts: AppBuildArtifactDto[] | undefined;
+  artifactType: 'apk' | 'aab' | 'ipa';
+  filePath?: string;
+}): Promise<void> => {
+  const { appId, buildId, buildArtifacts, artifactType, filePath } = options;
+
+  try {
+    const artifactTypeUpper = artifactType.toUpperCase();
+    consola.start(`Downloading ${artifactTypeUpper}...`);
+
+    // Find the artifact
+    const artifact = buildArtifacts?.find((artifact) => artifact.type === artifactType);
+
+    if (!artifact) {
+      consola.warn(`No ${artifactTypeUpper} artifact found for this build.`);
+      return;
+    }
+
+    if (artifact.status !== 'ready') {
+      consola.warn(`${artifactTypeUpper} artifact is not ready (status: ${artifact.status}).`);
+      return;
+    }
+
+    // Download the artifact
+    const artifactData = await appBuildsService.downloadArtifact({
+      appId,
+      appBuildId: buildId,
+      artifactId: artifact.id,
+    });
+
+    // Determine the file path
+    let outputPath: string;
+    if (filePath) {
+      // Use provided path (can be relative or absolute)
+      outputPath = path.resolve(filePath);
+    } else {
+      // Default to current working directory with build ID as filename
+      outputPath = path.resolve(`${buildId}.${artifactType}`);
+    }
+
+    // Save the file
+    await fs.writeFile(outputPath, Buffer.from(artifactData));
+
+    consola.success(`${artifactTypeUpper} downloaded successfully: ${outputPath}`);
+  } catch (error) {
+    consola.error(`Failed to download ${artifactType.toUpperCase()}:`, error);
+  }
+};

@@ -54,10 +54,13 @@ export default defineCommand({
         process.exit(1);
       }
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      const organizationId = await prompt('Select the organization of the app for which you want to create a deployment.', {
-        type: 'select',
-        options: organizations.map((organization) => ({ label: organization.name, value: organization.id })),
-      });
+      const organizationId = await prompt(
+        'Select the organization of the app for which you want to create a deployment.',
+        {
+          type: 'select',
+          options: organizations.map((organization) => ({ label: organization.name, value: organization.id })),
+        },
+      );
       if (!organizationId) {
         consola.error('You must select the organization of an app for which you want to create a deployment.');
         process.exit(1);
@@ -143,6 +146,9 @@ export default defineCommand({
       appBuildId: buildId,
       appDestinationName: destination,
     });
+    consola.success('Deployment created successfully.');
+    consola.info(`Deployment ID: ${response.id}`);
+    consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.id}`);
 
     // Wait for deployment job to complete if --wait flag is set
     if (options.wait) {
@@ -200,7 +206,7 @@ export default defineCommand({
             jobStatus === 'rejected' ||
             jobStatus === 'timed_out'
           ) {
-            console.log();
+            console.log(); // New line for better readability
             if (jobStatus === 'completed') {
               consola.success('Deployment completed successfully.');
               process.exit(0);
@@ -217,8 +223,6 @@ export default defineCommand({
               consola.error('Deployment timed out.');
               process.exit(1);
             }
-            consola.info(`Deployment ID: ${response.id}`);
-            consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.id}`);
           }
 
           // Wait before next poll (3 seconds)
