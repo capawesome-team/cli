@@ -4,12 +4,20 @@ export interface AppDeploymentDto {
   appBuildId: string;
   appDestinationId?: string;
   appDestinationName?: string;
-  createdAt?: number;
-  createdBy?: string;
+  jobId: string;
 }
 
 export interface CreateAppDeploymentDto {
   appId: string;
   appBuildId: string;
   appDestinationName?: string;
+}
+
+export interface FindOneAppDeploymentDto {
+  appId: string;
+  appDeploymentId: string;
+}
+
+export interface FindAllAppDeploymentsDto {
+  appId: string;
 }

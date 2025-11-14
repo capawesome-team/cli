@@ -6,10 +6,8 @@ export interface AppBuildDto {
   gitRef: string;
   appEnvironmentId?: string;
   appCertificateId?: string;
-  jobId?: string;
-  number?: string;
-  createdAt?: number;
-  createdBy?: string;
+  jobId: string;
+  number: string;
 }
 
 export interface CreateAppBuildDto {

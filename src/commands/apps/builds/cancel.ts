@@ -103,11 +103,6 @@ export default defineCommand({
     consola.start('Fetching build details...');
     const build = await appBuildsService.findOne({ appId, appBuildId: buildId });
 
-    if (!build.jobId) {
-      consola.error('Build does not have an associated job ID.');
-      process.exit(1);
-    }
-
     // Cancel the job
     consola.start('Canceling build...');
     await jobsService.update({
