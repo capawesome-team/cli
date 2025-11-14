@@ -1,3 +1,5 @@
+import { JobDto } from './job.js';
+
 export interface AppDeploymentDto {
   id: string;
   appId: string;
@@ -5,6 +7,7 @@ export interface AppDeploymentDto {
   appDestinationId?: string;
   appDestinationName?: string;
   jobId: string;
+  job?: JobDto;
 }
 
 export interface CreateAppDeploymentDto {
@@ -16,6 +19,7 @@ export interface CreateAppDeploymentDto {
 export interface FindOneAppDeploymentDto {
   appId: string;
   appDeploymentId: string;
+  relations?: string;
 }
 
 export interface FindAllAppDeploymentsDto {

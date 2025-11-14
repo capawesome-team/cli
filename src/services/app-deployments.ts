@@ -47,13 +47,18 @@ class AppDeploymentsServiceImpl implements AppDeploymentsService {
   }
 
   async findOne(dto: FindOneAppDeploymentDto): Promise<AppDeploymentDto> {
-    const { appId, appDeploymentId } = dto;
+    const { appId, appDeploymentId, relations } = dto;
+    const params: Record<string, string> = {};
+    if (relations) {
+      params.relations = relations;
+    }
     const response = await this.httpClient.get<AppDeploymentDto>(
       `/v1/apps/${appId}/deployments/${appDeploymentId}`,
       {
         headers: {
           Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
         },
+        params,
       },
     );
     return response.data;
