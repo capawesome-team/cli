@@ -200,14 +200,14 @@ export default defineCommand({
 
           // Handle terminal states
           if (
-            jobStatus === 'completed' ||
+            jobStatus === 'succeeded' ||
             jobStatus === 'failed' ||
             jobStatus === 'canceled' ||
             jobStatus === 'rejected' ||
             jobStatus === 'timed_out'
           ) {
             console.log(); // New line for better readability
-            if (jobStatus === 'completed') {
+            if (jobStatus === 'succeeded') {
               consola.success('Deployment completed successfully.');
               process.exit(0);
             } else if (jobStatus === 'failed') {
