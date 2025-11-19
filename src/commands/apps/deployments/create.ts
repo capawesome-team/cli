@@ -30,7 +30,10 @@ export default defineCommand({
         .optional()
         .describe('Build ID to deploy.'),
       destination: z.string().optional().describe('The name of the destination to deploy to.'),
-      wait: z.boolean().optional().describe('Wait for the deployment to complete and stream logs.'),
+      detached: z
+        .boolean()
+        .optional()
+        .describe('Exit immediately after creating the build without waiting for completion.'),
     }),
   ),
   action: async (options) => {
@@ -98,7 +101,7 @@ export default defineCommand({
       buildId = await prompt('Which build do you want to deploy:', {
         type: 'select',
         options: builds.map((build) => ({
-          label: `Build #${build.number} (${build.platform} - ${build.type})`,
+          label: `Build #${build.numberAsString} (${build.platform} - ${build.type})`,
           value: build.id,
         })),
       });
@@ -150,8 +153,9 @@ export default defineCommand({
     consola.info(`Deployment ID: ${response.id}`);
     consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.id}`);
 
-    // Wait for deployment job to complete if --wait flag is set
-    if (options.wait) {
+    // Wait for deployment job to complete by default, unless --detached flag is set
+    const shouldWait = !options.detached;
+    if (shouldWait) {
       let lastPrintedLogNumber = 0;
       let isWaitingForStart = true;
 
@@ -183,7 +187,7 @@ export default defineCommand({
           // Stop spinner when job moves to in_progress
           if (isWaitingForStart && jobStatus === 'in_progress') {
             isWaitingForStart = false;
-            consola.success('Deployment started, streaming logs...');
+            consola.success('Deployment started...');
           }
 
           // Print new logs
@@ -232,10 +236,6 @@ export default defineCommand({
           process.exit(1);
         }
       }
-    } else {
-      consola.success('Deployment successfully created.');
-      consola.info(`Deployment ID: ${response.id}`);
-      consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.id}`);
     }
   },
 });

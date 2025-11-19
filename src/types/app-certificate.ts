@@ -8,4 +8,5 @@ export interface AppCertificateDto {
 
 export interface FindAllAppCertificatesDto {
   appId: string;
+  platform?: 'android' | 'ios';
 }

@@ -12,18 +12,18 @@ export interface AppBuildArtifactDto {
 
 export interface AppBuildDto {
   id: string;
+  appBuildArtifacts?: AppBuildArtifactDto[];
+  appCertificateId?: string;
+  appEnvironmentId?: string;
   appId: string;
+  gitRef: string;
+  job?: JobDto;
+  jobId: string;
+  numberAsString: string;
   platform: 'ios' | 'android';
   type: string;
-  gitRef: string;
-  appEnvironmentId?: string;
-  appCertificateId?: string;
-  jobId: string;
-  number: string;
   createdAt?: number;
   createdBy?: string;
-  job?: JobDto;
-  appBuildArtifacts?: AppBuildArtifactDto[];
 }
 
 export interface CreateAppBuildDto {

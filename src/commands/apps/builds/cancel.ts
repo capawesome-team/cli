@@ -89,7 +89,7 @@ export default defineCommand({
       buildId = await prompt('Which build do you want to cancel:', {
         type: 'select',
         options: builds.map((build) => ({
-          label: `Build #${build.number || build.id} (${build.platform} - ${build.type})`,
+          label: `Build #${build.numberAsString || build.id} (${build.platform} - ${build.type})`,
           value: build.id,
         })),
       });

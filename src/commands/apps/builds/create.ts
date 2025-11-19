@@ -23,12 +23,31 @@ export default defineCommand({
   description: 'Create a new app build.',
   options: defineOptions(
     z.object({
+      aab: z
+        .union([z.boolean(), z.string()])
+        .optional()
+        .describe('Download the generated AAB file (Android only). Optionally provide a file path.'),
+      apk: z
+        .union([z.boolean(), z.string()])
+        .optional()
+        .describe('Download the generated APK file (Android only). Optionally provide a file path.'),
       appId: z
         .uuid({
           message: 'App ID must be a UUID.',
         })
         .optional()
         .describe('App ID to create the build for.'),
+      certificate: z.string().optional().describe('The name of the certificate to use for the build.'),
+      detached: z
+        .boolean()
+        .optional()
+        .describe('Exit immediately after creating the build without waiting for completion.'),
+      environment: z.string().optional().describe('The name of the environment to use for the build.'),
+      gitRef: z.string().optional().describe('The Git reference (branch, tag, or commit SHA) to build.'),
+      ipa: z
+        .union([z.boolean(), z.string()])
+        .optional()
+        .describe('Download the generated IPA file (iOS only). Optionally provide a file path.'),
       platform: z
         .enum(['ios', 'android'], {
           message: 'Platform must be either `ios` or `android`.',
@@ -41,22 +60,6 @@ export default defineCommand({
         .describe(
           'The type of build. For iOS, supported values are `simulator`, `development`, `ad-hoc`, `app-store`, and `enterprise`. For Android, supported values are `debug` and `release`.',
         ),
-      gitRef: z.string().optional().describe('The Git reference (branch, tag, or commit SHA) to build.'),
-      environment: z.string().optional().describe('The name of the environment to use for the build.'),
-      certificate: z.string().optional().describe('The name of the certificate to use for the build.'),
-      wait: z.boolean().optional().describe('Wait for the build to complete and stream logs.'),
-      apk: z
-        .union([z.boolean(), z.string()])
-        .optional()
-        .describe('Download the generated APK file (Android only, requires --wait). Optionally provide a file path.'),
-      aab: z
-        .union([z.boolean(), z.string()])
-        .optional()
-        .describe('Download the generated AAB file (Android only, requires --wait). Optionally provide a file path.'),
-      ipa: z
-        .union([z.boolean(), z.string()])
-        .optional()
-        .describe('Download the generated IPA file (iOS only, requires --wait). Optionally provide a file path.'),
     }),
   ),
   action: async (options) => {
@@ -68,17 +71,9 @@ export default defineCommand({
       process.exit(1);
     }
 
-    // Validate artifact download flags require --wait
-    if (options.apk && !options.wait) {
-      consola.error('The --apk flag requires the --wait flag to be set.');
-      process.exit(1);
-    }
-    if (options.aab && !options.wait) {
-      consola.error('The --aab flag requires the --wait flag to be set.');
-      process.exit(1);
-    }
-    if (options.ipa && !options.wait) {
-      consola.error('The --ipa flag requires the --wait flag to be set.');
+    // Validate that detached flag cannot be used with artifact flags
+    if (options.detached && (options.apk || options.aab || options.ipa)) {
+      consola.error('The --detached flag cannot be used with --apk, --aab, or --ipa flags.');
       process.exit(1);
     }
 
@@ -203,7 +198,7 @@ export default defineCommand({
         initial: false,
       });
       if (selectCertificate) {
-        const certificates = await appCertificatesService.findAll({ appId });
+        const certificates = await appCertificatesService.findAll({ appId, platform });
         if (certificates.length === 0) {
           consola.warn('No certificates found for this app.');
         } else {
@@ -227,12 +222,13 @@ export default defineCommand({
       type,
     });
     consola.success(`Build created successfully.`);
-    consola.info(`Build Number: ${response.number}`);
+    consola.info(`Build Number: ${response.numberAsString}`);
     consola.info(`Build ID: ${response.id}`);
     consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
 
-    // Wait for build job to complete if --wait flag is set
-    if (options.wait) {
+    // Wait for build job to complete by default, unless --detached flag is set
+    const shouldWait = !options.detached;
+    if (shouldWait) {
       let lastPrintedLogNumber = 0;
       let isWaitingForStart = true;
 
@@ -264,7 +260,7 @@ export default defineCommand({
           // Stop spinner when job moves to in_progress
           if (isWaitingForStart && jobStatus === 'in_progress') {
             isWaitingForStart = false;
-            consola.success('Build started, streaming logs...');
+            consola.success('Build started...');
           }
 
           // Print new logs
