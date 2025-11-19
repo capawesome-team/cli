@@ -52,15 +52,12 @@ class AppDeploymentsServiceImpl implements AppDeploymentsService {
     if (relations) {
       params.relations = relations;
     }
-    const response = await this.httpClient.get<AppDeploymentDto>(
-      `/v1/apps/${appId}/deployments/${appDeploymentId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
-        },
-        params,
+    const response = await this.httpClient.get<AppDeploymentDto>(`/v1/apps/${appId}/deployments/${appDeploymentId}`, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
-    );
+      params,
+    });
     return response.data;
   }
 }
