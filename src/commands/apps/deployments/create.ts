@@ -33,7 +33,7 @@ export default defineCommand({
       detached: z
         .boolean()
         .optional()
-        .describe('Exit immediately after creating the build without waiting for completion.'),
+        .describe('Exit immediately after creating the deployment without waiting for completion.'),
     }),
   ),
   action: async (options) => {
