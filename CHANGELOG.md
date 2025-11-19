@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.4.0](https://github.com/capawesome-team/cli/compare/v3.3.0...v3.4.0) (2025-11-19)
+
+
+### Features
+
+* support builds and deployments ([#89](https://github.com/capawesome-team/cli/issues/89)) ([71be7b0](https://github.com/capawesome-team/cli/commit/71be7b0b69c59bd5d7e123fe37b30044a47f7afc))
+
 ## [3.3.0](https://github.com/capawesome-team/cli/compare/v3.2.2...v3.3.0) (2025-10-03)
 
 
