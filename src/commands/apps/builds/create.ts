@@ -290,6 +290,7 @@ export default defineCommand({
             console.log(); // New line for better readability
             if (jobStatus === 'succeeded') {
               consola.success('Build completed successfully.');
+              console.log(); // New line for better readability
 
               // Download artifacts if flags are set
               if (options.apk && platform === 'android') {
