@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.4.1](https://github.com/capawesome-team/cli/compare/v3.4.0...v3.4.1) (2025-11-20)
+
+
+### Security
+
+* update axios to 1.13.2 to fix GHSA-4hjh-wcwx-xvwj ([CVE-2025-58754](https://github.com/advisories/GHSA-4hjh-wcwx-xvwj))
+
 ## [3.4.0](https://github.com/capawesome-team/cli/compare/v3.3.0...v3.4.0) (2025-11-19)
 
 
