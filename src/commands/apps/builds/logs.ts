@@ -4,6 +4,7 @@ import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
 import { unescapeAnsi } from '@/utils/ansi.js';
 import { prompt } from '@/utils/prompt.js';
+import { wait } from '@/utils/wait.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { hasTTY } from 'std-env';
@@ -107,9 +108,31 @@ export default defineCommand({
     }
     console.log(`Fetching logs for build ${buildId} of app ${appId}...`);
 
-    const appBuildDto = await appBuildsService.findOne({ appId, appBuildId: buildId!, relations: 'job,job.jobLogs' })
-    for (const logEntry of appBuildDto.job?.jobLogs || []) {
-      console.log(`${logEntry.number.toString().padStart(4, '0')} ${formatDate(new Date(logEntry.timestamp))} ${unescapeAnsi(logEntry.payload)}`);
+    let appBuildDto = await appBuildsService.findOne({ appId, appBuildId: buildId!, relations: 'job,job.jobLogs' })
+    let isFinished = !!appBuildDto.job?.finishedAt
+    let lastLogNumber = 0;
+
+    if (isFinished) {
+      const logs = appBuildDto.job?.jobLogs || [];
+      for (const logEntry of logs) {
+        console.log(`${logEntry.number.toString().padStart(4, '0')} ${formatDate(new Date(logEntry.timestamp))} ${unescapeAnsi(logEntry.payload)}`);
+      }
+    } else {
+      while (!isFinished) {
+        appBuildDto = await appBuildsService.findOne({ appId, appBuildId: buildId!, relations: 'job,job.jobLogs' })
+        isFinished = !!appBuildDto.job?.finishedAt;
+        const logs = appBuildDto.job?.jobLogs || [];
+
+        const newLogs = logs.filter(log => log.number > lastLogNumber);
+        for (const logEntry of newLogs) {
+          console.log(`${logEntry.number.toString().padStart(4, '0')} ${formatDate(new Date(logEntry.timestamp))} ${unescapeAnsi(logEntry.payload)}`);
+          lastLogNumber = logEntry.number;
+        }
+
+        if (!isFinished) {
+          await wait(3000);
+        }
+      }
     }
   },
 });
