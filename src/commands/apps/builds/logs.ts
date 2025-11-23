@@ -21,6 +21,10 @@ function formatDate(date: Date): string {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
+function printLogEntry(logEntry: { number: number; timestamp: number; payload: string }): void {
+  console.log(`${logEntry.number.toString().padStart(4, '0')} ${formatDate(new Date(logEntry.timestamp))} ${unescapeAnsi(logEntry.payload)}`);
+}
+
 export default defineCommand({
   description: 'Show logs of an app build.',
   options: defineOptions(
@@ -115,7 +119,7 @@ export default defineCommand({
     if (isFinished) {
       const logs = appBuildDto.job?.jobLogs || [];
       for (const logEntry of logs) {
-        console.log(`${logEntry.number.toString().padStart(4, '0')} ${formatDate(new Date(logEntry.timestamp))} ${unescapeAnsi(logEntry.payload)}`);
+        printLogEntry(logEntry);
       }
     } else {
       while (!isFinished) {
@@ -125,7 +129,7 @@ export default defineCommand({
 
         const newLogs = logs.filter(log => log.number > lastLogNumber);
         for (const logEntry of newLogs) {
-          console.log(`${logEntry.number.toString().padStart(4, '0')} ${formatDate(new Date(logEntry.timestamp))} ${unescapeAnsi(logEntry.payload)}`);
+          printLogEntry(logEntry);
           lastLogNumber = logEntry.number;
         }
 
