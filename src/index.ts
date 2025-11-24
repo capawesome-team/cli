@@ -36,6 +36,7 @@ const config = defineConfig({
     'apps:channels:update': await import('@/commands/apps/channels/update.js').then((mod) => mod.default),
     'apps:deployments:create': await import('@/commands/apps/deployments/create.js').then((mod) => mod.default),
     'apps:deployments:cancel': await import('@/commands/apps/deployments/cancel.js').then((mod) => mod.default),
+    'apps:deployments:logs': await import('@/commands/apps/deployments/logs.js').then((mod) => mod.default),
     'apps:devices:delete': await import('@/commands/apps/devices/delete.js').then((mod) => mod.default),
     'manifests:generate': await import('@/commands/manifests/generate.js').then((mod) => mod.default),
     'organizations:create': await import('@/commands/organizations/create.js').then((mod) => mod.default),
