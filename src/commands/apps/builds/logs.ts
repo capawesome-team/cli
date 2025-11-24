@@ -10,21 +10,6 @@ import consola from 'consola';
 import { hasTTY } from 'std-env';
 import { z } from 'zod';
 
-function formatDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
-
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
-
-function printLogEntry(logEntry: { number: number; timestamp: number; payload: string }): void {
-  console.log(`${logEntry.number.toString().padStart(4, '0')} ${formatDate(new Date(logEntry.timestamp))} ${unescapeAnsi(logEntry.payload)}`);
-}
-
 export default defineCommand({
   description: 'Show logs of an app build.',
   options: defineOptions(
@@ -119,7 +104,7 @@ export default defineCommand({
     if (isFinished) {
       const logs = appBuildDto.job?.jobLogs || [];
       for (const logEntry of logs) {
-        printLogEntry(logEntry);
+        console.log(unescapeAnsi(logEntry.payload));
       }
     } else {
       while (!isFinished) {
@@ -129,7 +114,7 @@ export default defineCommand({
 
         const newLogs = logs.filter(log => log.number > lastLogNumber);
         for (const logEntry of newLogs) {
-          printLogEntry(logEntry);
+          console.log(unescapeAnsi(logEntry.payload));
           lastLogNumber = logEntry.number;
         }
 
