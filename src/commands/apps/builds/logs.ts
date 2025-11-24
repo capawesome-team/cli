@@ -49,10 +49,13 @@ export default defineCommand({
         process.exit(1);
       }
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      const organizationId = await prompt('Select the organization of the app for which you want to view the build logs.', {
-        type: 'select',
-        options: organizations.map((organization) => ({ label: organization.name, value: organization.id })),
-      });
+      const organizationId = await prompt(
+        'Select the organization of the app for which you want to view the build logs.',
+        {
+          type: 'select',
+          options: organizations.map((organization) => ({ label: organization.name, value: organization.id })),
+        },
+      );
       if (!organizationId) {
         consola.error('You must select the organization of an app for which you want to view the build logs.');
         process.exit(1);
@@ -81,7 +84,7 @@ export default defineCommand({
         consola.error('You must provide a platform when running in non-interactive environment.');
         process.exit(1);
       }
-      const appBuilds = await appBuildsService.findAll({ appId })
+      const appBuilds = await appBuildsService.findAll({ appId });
       if (appBuilds.length === 0) {
         consola.error('You must create a build before viewing the logs.');
         process.exit(1);
@@ -97,8 +100,8 @@ export default defineCommand({
     }
     console.log(`Fetching logs for build ${buildId} of app ${appId}...`);
 
-    let appBuildDto = await appBuildsService.findOne({ appId, appBuildId: buildId!, relations: 'job,job.jobLogs' })
-    let isFinished = !!appBuildDto.job?.finishedAt
+    let appBuildDto = await appBuildsService.findOne({ appId, appBuildId: buildId!, relations: 'job,job.jobLogs' });
+    let isFinished = !!appBuildDto.job?.finishedAt;
     let lastLogNumber = 0;
 
     if (isFinished) {
@@ -108,11 +111,11 @@ export default defineCommand({
       }
     } else {
       while (!isFinished) {
-        appBuildDto = await appBuildsService.findOne({ appId, appBuildId: buildId!, relations: 'job,job.jobLogs' })
+        appBuildDto = await appBuildsService.findOne({ appId, appBuildId: buildId!, relations: 'job,job.jobLogs' });
         isFinished = !!appBuildDto.job?.finishedAt;
         const logs = appBuildDto.job?.jobLogs || [];
 
-        const newLogs = logs.filter(log => log.number > lastLogNumber);
+        const newLogs = logs.filter((log) => log.number > lastLogNumber);
         for (const logEntry of newLogs) {
           console.log(unescapeAnsi(logEntry.payload));
           lastLogNumber = logEntry.number;
