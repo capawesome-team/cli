@@ -98,7 +98,6 @@ export default defineCommand({
         process.exit(1);
       }
     }
-    console.log(`Fetching logs for build ${buildId} of app ${appId}...`);
 
     let appBuildDto = await appBuildsService.findOne({ appId, appBuildId: buildId!, relations: 'job,job.jobLogs' });
     let isFinished = !!appBuildDto.job?.finishedAt;
