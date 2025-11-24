@@ -91,7 +91,10 @@ export default defineCommand({
       }
       buildId = await prompt('Select the build of the app for which you want to view the logs.', {
         type: 'select',
-        options: appBuilds.map((appBuild) => ({ label: appBuild.id, value: appBuild.id })),
+        options: appBuilds.map((build) => ({
+          label: `Build #${build.numberAsString} (${build.platform} - ${build.type})`,
+          value: build.id,
+        })),
       });
       if (!buildId) {
         consola.error('You must select the build of an app for which you want to view the logs.');
