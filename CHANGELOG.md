@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.5.0](https://github.com/capawesome-team/cli/compare/v3.4.2...v3.5.0) (2025-11-24)
+
+
+### Features
+
+* add `apps:builds:download` command ([#98](https://github.com/capawesome-team/cli/issues/98)) ([5f9ba10](https://github.com/capawesome-team/cli/commit/5f9ba1068afc835aacb2e6a356abbc90d7ebd70c))
+* add `apps:builds:logs` command ([#96](https://github.com/capawesome-team/cli/issues/96)) ([30ebd7e](https://github.com/capawesome-team/cli/commit/30ebd7e0159c53772f8ab80a9757e8ed957036ba))
+* add `apps:deployments:logs` command ([#97](https://github.com/capawesome-team/cli/issues/97)) ([9c91fd1](https://github.com/capawesome-team/cli/commit/9c91fd1ca6d3e6a31465e0671ced534f1f5fa138))
+
 ## [3.4.2](https://github.com/capawesome-team/cli/compare/v3.4.1...v3.4.2) (2025-11-22)
 
 ## [3.4.1](https://github.com/capawesome-team/cli/compare/v3.4.0...v3.4.1) (2025-11-20)
