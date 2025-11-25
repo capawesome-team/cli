@@ -5,7 +5,7 @@ export interface AppBuildArtifactDto {
   fileMimeType: string;
   fileName: string;
   fileSizeInBytes: number;
-  status: 'expired' | 'pending' | 'ready';
+  status: 'pending' | 'ready';
   type: 'apk' | 'aab' | 'ipa';
   createdAt: number;
 }
