@@ -34,6 +34,8 @@ npx @capawesome/cli --help
 
 ## Development
 
+### Getting Started
+
 Run the following commands to get started with development:
 
 1. Clone the repository:
@@ -56,6 +58,26 @@ Run the following commands to get started with development:
     ```
 
     **Note:** The `--` is required to pass arguments to the script.
+
+### Testing Proxy Support
+
+To test HTTP/HTTPS proxy functionality locally:
+
+1. Start Squid proxy in a separate terminal:
+    ```bash
+    docker run --rm --name squid-proxy -p 3128:3128 -v $(pwd)/squid.conf:/etc/squid/squid.conf:ro sameersbn/squid:latest
+    ```
+
+2. Set proxy environment variables and run the CLI:
+    ```bash
+    export https_proxy=http://localhost:3128
+    npm run build && node ./dist/index.js login
+    ```
+
+3. To see debug output:
+    ```bash
+    DEBUG=https-proxy-agent node ./dist/index.js login
+    ```
 
 ## Changelog
 
