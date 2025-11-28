@@ -59,8 +59,8 @@ class HttpClientImpl implements HttpClient {
     const axiosConfig: AxiosRequestConfig = {
       ...config,
       headers: { ...this.baseHeaders, ...config?.headers },
-      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent } : {}),
-      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent } : {}),
+      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
+      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
     };
     return axios.delete<T>(urlWithHost, axiosConfig);
   }
@@ -72,8 +72,8 @@ class HttpClientImpl implements HttpClient {
     const axiosConfig: AxiosRequestConfig = {
       ...config,
       headers: { ...this.baseHeaders, ...config?.headers },
-      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent } : {}),
-      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent } : {}),
+      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
+      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
     };
     return axios.get<T>(urlWithHost, axiosConfig);
   }
@@ -85,8 +85,8 @@ class HttpClientImpl implements HttpClient {
     const axiosConfig: AxiosRequestConfig = {
       ...config,
       headers: { ...this.baseHeaders, ...config?.headers },
-      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent } : {}),
-      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent } : {}),
+      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
+      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
     };
     return axios.patch<T>(urlWithHost, data, axiosConfig);
   }
@@ -98,8 +98,8 @@ class HttpClientImpl implements HttpClient {
     const axiosConfig: AxiosRequestConfig = {
       ...config,
       headers: { ...this.baseHeaders, ...config?.headers },
-      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent } : {}),
-      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent } : {}),
+      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
+      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
     };
     return axios.post<T>(urlWithHost, data, axiosConfig);
   }
@@ -111,8 +111,8 @@ class HttpClientImpl implements HttpClient {
     const axiosConfig: AxiosRequestConfig = {
       ...config,
       headers: { ...this.baseHeaders, ...config?.headers },
-      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent } : {}),
-      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent } : {}),
+      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
+      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
     };
     return axios.put<T>(urlWithHost, data, axiosConfig);
   }
