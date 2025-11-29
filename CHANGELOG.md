@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.6.0](https://github.com/capawesome-team/cli/compare/v3.5.0...v3.6.0) (2025-11-29)
+
+
+### Features
+
+* add proxy support for HTTP and HTTPS requests ([#99](https://github.com/capawesome-team/cli/issues/99)) ([5a6e627](https://github.com/capawesome-team/cli/commit/5a6e627a85634628ea9c365d4e7b25cc69fbe11d))
+
 ## [3.5.0](https://github.com/capawesome-team/cli/compare/v3.4.2...v3.5.0) (2025-11-24)
 
 
