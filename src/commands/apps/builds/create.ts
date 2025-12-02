@@ -48,6 +48,7 @@ export default defineCommand({
         .union([z.boolean(), z.string()])
         .optional()
         .describe('Download the generated IPA file (iOS only). Optionally provide a file path.'),
+      json: z.boolean().optional().describe('Output in JSON format.'),
       platform: z
         .enum(['ios', 'android'], {
           message: 'Platform must be either `ios` or `android`.',
@@ -63,7 +64,7 @@ export default defineCommand({
     }),
   ),
   action: async (options) => {
-    let { appId, platform, type, gitRef, environment, certificate } = options;
+    let { appId, platform, type, gitRef, environment, certificate, json } = options;
 
     // Check if the user is logged in
     if (!authorizationService.hasAuthorizationToken()) {
@@ -212,7 +213,9 @@ export default defineCommand({
     }
 
     // Create the app build
-    consola.start('Creating build...');
+    if (!json) {
+      consola.start('Creating build...');
+    }
     const response = await appBuildsService.create({
       appCertificateName: certificate,
       appEnvironmentName: environment,
@@ -221,10 +224,12 @@ export default defineCommand({
       platform,
       type,
     });
-    consola.success(`Build created successfully.`);
-    consola.info(`Build Number: ${response.numberAsString}`);
-    consola.info(`Build ID: ${response.id}`);
-    consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
+    if (!json) {
+      consola.success(`Build created successfully.`);
+      consola.info(`Build Number: ${response.numberAsString}`);
+      consola.info(`Build ID: ${response.id}`);
+      consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
+    }
 
     // Wait for build job to complete by default, unless --detached flag is set
     const shouldWait = !options.detached;
@@ -250,7 +255,7 @@ export default defineCommand({
 
           // Show spinner while queued or pending
           if (jobStatus === 'queued' || jobStatus === 'pending') {
-            if (isWaitingForStart) {
+            if (isWaitingForStart && !json) {
               consola.start(`Waiting for build to start (status: ${jobStatus})...`);
             }
             await wait(3000);
@@ -260,11 +265,13 @@ export default defineCommand({
           // Stop spinner when job moves to in_progress
           if (isWaitingForStart && jobStatus === 'in_progress') {
             isWaitingForStart = false;
-            consola.success('Build started...');
+            if (!json) {
+              consola.success('Build started...');
+            }
           }
 
           // Print new logs
-          if (build.job.jobLogs && build.job.jobLogs.length > 0) {
+          if (!json && build.job.jobLogs && build.job.jobLogs.length > 0) {
             const newLogs = build.job.jobLogs
               .filter((log) => log.number > lastPrintedLogNumber)
               .sort((a, b) => a.number - b.number);
@@ -283,10 +290,14 @@ export default defineCommand({
             jobStatus === 'rejected' ||
             jobStatus === 'timed_out'
           ) {
-            console.log(); // New line for better readability
-            if (jobStatus === 'succeeded') {
-              consola.success('Build completed successfully.');
+            if (!json) {
               console.log(); // New line for better readability
+            }
+            if (jobStatus === 'succeeded') {
+              if (!json) {
+                consola.success('Build completed successfully.');
+                console.log(); // New line for better readability
+              }
 
               // Download artifacts if flags are set
               if (options.apk && platform === 'android') {
@@ -296,6 +307,7 @@ export default defineCommand({
                   buildArtifacts: build.appBuildArtifacts,
                   artifactType: 'apk',
                   filePath: typeof options.apk === 'string' ? options.apk : undefined,
+                  json,
                 });
               }
               if (options.aab && platform === 'android') {
@@ -305,6 +317,7 @@ export default defineCommand({
                   buildArtifacts: build.appBuildArtifacts,
                   artifactType: 'aab',
                   filePath: typeof options.aab === 'string' ? options.aab : undefined,
+                  json,
                 });
               }
               if (options.ipa && platform === 'ios') {
@@ -314,8 +327,23 @@ export default defineCommand({
                   buildArtifacts: build.appBuildArtifacts,
                   artifactType: 'ipa',
                   filePath: typeof options.ipa === 'string' ? options.ipa : undefined,
+                  json,
                 });
               }
+              // Output JSON if json flag is set
+              if (json) {
+                console.log(
+                  JSON.stringify(
+                    {
+                      id: response.id,
+                      numberAsString: response.numberAsString,
+                    },
+                    null,
+                    2,
+                  ),
+                );
+              }
+              // Exit successfully
               process.exit(0);
             } else if (jobStatus === 'failed') {
               consola.error('Build failed.');
@@ -339,6 +367,19 @@ export default defineCommand({
           process.exit(1);
         }
       }
+    } else {
+      if (json) {
+        console.log(
+          JSON.stringify(
+            {
+              id: response.id,
+              numberAsString: response.numberAsString,
+            },
+            null,
+            2,
+          ),
+        );
+      }
     }
   },
 });
@@ -352,23 +393,30 @@ const handleArtifactDownload = async (options: {
   buildArtifacts: AppBuildArtifactDto[] | undefined;
   artifactType: 'apk' | 'aab' | 'ipa';
   filePath?: string;
+  json?: boolean;
 }): Promise<void> => {
-  const { appId, buildId, buildArtifacts, artifactType, filePath } = options;
+  const { appId, buildId, buildArtifacts, artifactType, filePath, json } = options;
 
   try {
     const artifactTypeUpper = artifactType.toUpperCase();
-    consola.start(`Downloading ${artifactTypeUpper}...`);
+    if (!json) {
+      consola.start(`Downloading ${artifactTypeUpper}...`);
+    }
 
     // Find the artifact
     const artifact = buildArtifacts?.find((artifact) => artifact.type === artifactType);
 
     if (!artifact) {
-      consola.warn(`No ${artifactTypeUpper} artifact found for this build.`);
+      if (!json) {
+        consola.warn(`No ${artifactTypeUpper} artifact found for this build.`);
+      }
       return;
     }
 
     if (artifact.status !== 'ready') {
-      consola.warn(`${artifactTypeUpper} artifact is not ready (status: ${artifact.status}).`);
+      if (!json) {
+        consola.warn(`${artifactTypeUpper} artifact is not ready (status: ${artifact.status}).`);
+      }
       return;
     }
 
@@ -392,7 +440,9 @@ const handleArtifactDownload = async (options: {
     // Save the file
     await fs.writeFile(outputPath, Buffer.from(artifactData));
 
-    consola.success(`${artifactTypeUpper} downloaded successfully: ${outputPath}`);
+    if (!json) {
+      consola.success(`${artifactTypeUpper} downloaded successfully: ${outputPath}`);
+    }
   } catch (error) {
     consola.error(`Failed to download ${artifactType.toUpperCase()}:`, error);
   }
