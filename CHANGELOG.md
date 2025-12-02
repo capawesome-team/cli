@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.7.0](https://github.com/capawesome-team/cli/compare/v3.6.0...v3.7.0) (2025-12-02)
+
+
+### Features
+
+* **apps:builds:create:** add JSON output option ([#101](https://github.com/capawesome-team/cli/issues/101)) ([32797f9](https://github.com/capawesome-team/cli/commit/32797f93229848fc23565e89f245772e3e509500))
+
 ## [3.6.0](https://github.com/capawesome-team/cli/compare/v3.5.0...v3.6.0) (2025-11-29)
 
 
