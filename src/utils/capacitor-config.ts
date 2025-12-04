@@ -93,7 +93,7 @@ export const getWebDirFromConfig = async (configPath: string): Promise<string | 
  * @param configPath The path to the config file.
  * @returns The appId, or undefined if not found.
  */
-export const getLiveUpdateAppIdFromConfig = async (configPath: string): Promise<string | undefined> => {
+export const getCapawesomeCloudAppIdFromConfig = async (configPath: string): Promise<string | undefined> => {
   const config = await readCapacitorConfig(configPath);
   return config?.plugins?.LiveUpdate?.appId;
 };

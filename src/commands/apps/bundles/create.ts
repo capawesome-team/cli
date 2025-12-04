@@ -13,7 +13,7 @@ import {
 } from '@/utils/buffer.js';
 import {
   findCapacitorConfigPath,
-  getLiveUpdateAppIdFromConfig,
+  getCapawesomeCloudAppIdFromConfig,
   getWebDirFromConfig,
 } from '@/utils/capacitor-config.js';
 import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '@/utils/file.js';
@@ -28,6 +28,7 @@ import { defineCommand, defineOptions } from '@robingenz/zli';
 import { exec } from 'child_process';
 import consola from 'consola';
 import { createReadStream } from 'fs';
+import pathModule from 'path';
 import { hasTTY } from 'std-env';
 import { promisify } from 'util';
 import { z } from 'zod';
@@ -160,12 +161,13 @@ export default defineCommand({
       if (capacitorConfigPath) {
         const webDir = await getWebDirFromConfig(capacitorConfigPath);
         if (webDir) {
+          consola.info(`Auto-detected web asset directory "${webDir}" from Capacitor config.`);
           path = webDir;
         } else {
-          consola.warn('No webDir found in Capacitor config.');
+          consola.warn('No web asset directory found in Capacitor config (`webDir`).');
         }
       } else {
-        consola.warn('No Capacitor config found to auto-detect webDir.');
+        consola.warn('No Capacitor config found to auto-detect web asset directory.');
       }
       // If still no path, prompt the user
       if (!path) {
@@ -193,7 +195,7 @@ export default defineCommand({
         if (!buildScript) {
           consola.warn('No build script found in package.json.');
         } else if (hasTTY) {
-          const shouldBuild = await prompt('Do you want to rebuild your web assets before creating the bundle?', {
+          const shouldBuild = await prompt('Do you want to rebuild your web assets before proceeding?', {
             type: 'select',
             options: ['Yes', 'No'],
           });
@@ -265,14 +267,15 @@ export default defineCommand({
       // Try to auto-detect appId from Capacitor config
       const capacitorConfigPath = await findCapacitorConfigPath();
       if (capacitorConfigPath) {
-        const configAppId = await getLiveUpdateAppIdFromConfig(capacitorConfigPath);
+        const configAppId = await getCapawesomeCloudAppIdFromConfig(capacitorConfigPath);
         if (configAppId) {
+          console.info(`Auto-detected Capawesome Cloud app ID "${configAppId}" from Capacitor config.`);
           appId = configAppId;
         } else {
-          consola.warn('No LiveUpdate appId found in Capacitor config.');
+          consola.warn('No Capawesome Cloud app ID found in Capacitor config (`plugins.LiveUpdate.appId`).');
         }
       } else {
-        consola.warn('No Capacitor config found to auto-detect appId.');
+        consola.warn('No Capacitor config found to auto-detect Capawesome Cloud app ID.');
       }
       // If still no appId, prompt the user
       if (!appId) {
@@ -359,8 +362,9 @@ export default defineCommand({
     const appName = app.name;
     // Final confirmation before creating bundle
     if (path && hasTTY) {
+      const relativePath = pathModule.relative(process.cwd(), path);
       const confirmed = await prompt(
-        `Are you sure you want to create a bundle from path ${path} for app "${appName}"?`,
+        `Are you sure you want to create a bundle from path ${relativePath} for app "${appName}"?`,
         {
           type: 'confirm',
         },
