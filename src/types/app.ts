@@ -15,3 +15,7 @@ export interface DeleteAppDto {
 export interface FindAllAppsDto {
   organizationId: string;
 }
+
+export interface FindOneAppDto {
+  appId: string;
+}
