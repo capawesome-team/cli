@@ -52,7 +52,7 @@ export default defineCommand({
     let { androidMax, androidMin, androidEq, appId, bundleId, rollout, iosMax, iosMin, iosEq } = options;
 
     if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command.');
+      consola.error('You must be logged in to run this command. Please run the `login` command first.');
       process.exit(1);
     }
 

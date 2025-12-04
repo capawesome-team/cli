@@ -51,7 +51,9 @@ describe('apps-bundles-create', () => {
 
     await expect(createBundleCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
-    expect(mockConsola.error).toHaveBeenCalledWith('You must be logged in to run this command.');
+    expect(mockConsola.error).toHaveBeenCalledWith(
+      'You must be logged in to run this command. Please run the `login` command first.',
+    );
   });
 
   it('should create bundle with self-hosted URL', async () => {

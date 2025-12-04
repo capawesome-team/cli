@@ -44,7 +44,9 @@ describe('apps-channels-list', () => {
 
     await expect(listChannelsCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
-    expect(mockConsola.error).toHaveBeenCalledWith('You must be logged in to run this command.');
+    expect(mockConsola.error).toHaveBeenCalledWith(
+      'You must be logged in to run this command. Please run the `login` command first.',
+    );
   });
 
   it('should require appId', async () => {

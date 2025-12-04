@@ -18,7 +18,7 @@ export default defineCommand({
     let { appId } = options;
 
     if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command.');
+      consola.error('You must be logged in to run this command. Please run the `login` command first.');
       process.exit(1);
     }
     if (!appId) {
