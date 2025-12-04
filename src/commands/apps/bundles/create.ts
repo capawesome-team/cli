@@ -159,10 +159,11 @@ export default defineCommand({
       // Try to auto-detect webDir from Capacitor config
       const capacitorConfigPath = await findCapacitorConfigPath();
       if (capacitorConfigPath) {
-        const webDir = await getWebDirFromConfig(capacitorConfigPath);
-        if (webDir) {
-          consola.info(`Auto-detected web asset directory "${webDir}" from Capacitor config.`);
-          path = webDir;
+        const webDirPath = await getWebDirFromConfig(capacitorConfigPath);
+        if (webDirPath) {
+          const relativeWebDirPath = pathModule.relative(process.cwd(), webDirPath);
+          consola.success(`Auto-detected web asset directory "${relativeWebDirPath}" from Capacitor config.`);
+          path = webDirPath;
         } else {
           consola.warn('No web asset directory found in Capacitor config (`webDir`).');
         }
@@ -269,7 +270,7 @@ export default defineCommand({
       if (capacitorConfigPath) {
         const configAppId = await getCapawesomeCloudAppIdFromConfig(capacitorConfigPath);
         if (configAppId) {
-          console.info(`Auto-detected Capawesome Cloud app ID "${configAppId}" from Capacitor config.`);
+          consola.success(`Auto-detected Capawesome Cloud app ID "${configAppId}" from Capacitor config.`);
           appId = configAppId;
         } else {
           consola.warn('No Capawesome Cloud app ID found in Capacitor config (`plugins.LiveUpdate.appId`).');
@@ -364,7 +365,7 @@ export default defineCommand({
     if (path && hasTTY) {
       const relativePath = pathModule.relative(process.cwd(), path);
       const confirmed = await prompt(
-        `Are you sure you want to create a bundle from path ${relativePath} for app "${appName}"?`,
+        `Are you sure you want to create a bundle from path "${relativePath}" for app "${appName}" (${appId})?`,
         {
           type: 'confirm',
         },
