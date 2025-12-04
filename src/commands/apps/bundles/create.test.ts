@@ -1,6 +1,8 @@
 import { DEFAULT_API_BASE_URL } from '@/config/consts.js';
 import authorizationService from '@/services/authorization-service.js';
+import { findCapacitorConfigPath } from '@/utils/capacitor-config.js';
 import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '@/utils/file.js';
+import { findPackageJsonPath } from '@/utils/package-json.js';
 import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
 import nock from 'nock';
@@ -16,6 +18,8 @@ vi.mock('@/utils/buffer.js');
 vi.mock('@/utils/private-key.js');
 vi.mock('@/utils/hash.js');
 vi.mock('@/utils/signature.js');
+vi.mock('@/utils/capacitor-config.js');
+vi.mock('@/utils/package-json.js');
 vi.mock('consola');
 
 describe('apps-bundles-create', () => {
@@ -24,6 +28,8 @@ describe('apps-bundles-create', () => {
   const mockFileExistsAtPath = vi.mocked(fileExistsAtPath);
   const mockGetFilesInDirectoryAndSubdirectories = vi.mocked(getFilesInDirectoryAndSubdirectories);
   const mockIsDirectory = vi.mocked(isDirectory);
+  const mockFindCapacitorConfigPath = vi.mocked(findCapacitorConfigPath);
+  const mockFindPackageJsonPath = vi.mocked(findPackageJsonPath);
   const mockConsola = vi.mocked(consola);
 
   beforeEach(() => {
@@ -32,6 +38,8 @@ describe('apps-bundles-create', () => {
     mockUserConfig.read.mockReturnValue({ token: 'test-token' });
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(true);
     mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue('test-token');
+    mockFindCapacitorConfigPath.mockResolvedValue(undefined);
+    mockFindPackageJsonPath.mockResolvedValue(undefined);
 
     vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
       throw new Error(`Process exited with code ${code}`);
@@ -85,7 +93,12 @@ describe('apps-bundles-create', () => {
     vi.mocked(mockBuffer.createBufferFromPath).mockResolvedValue(testBuffer);
     vi.mocked(mockHash.createHash).mockResolvedValue(testHash);
 
-    const scope = nock(DEFAULT_API_BASE_URL)
+    const appScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
+
+    const bundleScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/bundles`, {
         appId,
         url: bundleUrl,
@@ -98,7 +111,8 @@ describe('apps-bundles-create', () => {
 
     await createBundleCommand.action(options, undefined);
 
-    expect(scope.isDone()).toBe(true);
+    expect(appScope.isDone()).toBe(true);
+    expect(bundleScope.isDone()).toBe(true);
     expect(mockConsola.success).toHaveBeenCalledWith('Bundle successfully created.');
     expect(mockConsola.info).toHaveBeenCalledWith(`Bundle ID: ${bundleId}`);
   });
@@ -171,14 +185,20 @@ describe('apps-bundles-create', () => {
       rollout: 1,
     };
 
-    const scope = nock(DEFAULT_API_BASE_URL)
+    const appScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
+
+    const bundleScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/bundles`)
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(400, { message: 'Invalid bundle data' });
 
     await expect(createBundleCommand.action(options, undefined)).rejects.toThrow();
 
-    expect(scope.isDone()).toBe(true);
+    expect(appScope.isDone()).toBe(true);
+    expect(bundleScope.isDone()).toBe(true);
   });
 
   it('should handle private key file path', async () => {
@@ -223,7 +243,12 @@ describe('apps-bundles-create', () => {
     vi.mocked(mockHash.createHash).mockResolvedValue(testHash);
     vi.mocked(mockSignature.createSignature).mockResolvedValue(testSignature);
 
-    const scope = nock(DEFAULT_API_BASE_URL)
+    const appScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
+
+    const bundleScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/bundles`, {
         appId,
         url: bundleUrl,
@@ -237,7 +262,8 @@ describe('apps-bundles-create', () => {
 
     await createBundleCommand.action(options, undefined);
 
-    expect(scope.isDone()).toBe(true);
+    expect(appScope.isDone()).toBe(true);
+    expect(bundleScope.isDone()).toBe(true);
     expect(mockConsola.success).toHaveBeenCalledWith('Bundle successfully created.');
   });
 
@@ -280,7 +306,12 @@ describe('apps-bundles-create', () => {
     vi.mocked(mockHash.createHash).mockResolvedValue(testHash);
     vi.mocked(mockSignature.createSignature).mockResolvedValue(testSignature);
 
-    const scope = nock(DEFAULT_API_BASE_URL)
+    const appScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
+
+    const bundleScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/bundles`, {
         appId,
         url: bundleUrl,
@@ -294,7 +325,8 @@ describe('apps-bundles-create', () => {
 
     await createBundleCommand.action(options, undefined);
 
-    expect(scope.isDone()).toBe(true);
+    expect(appScope.isDone()).toBe(true);
+    expect(bundleScope.isDone()).toBe(true);
     expect(mockConsola.success).toHaveBeenCalledWith('Bundle successfully created.');
   });
 

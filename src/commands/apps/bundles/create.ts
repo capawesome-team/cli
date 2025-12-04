@@ -33,6 +33,7 @@ import { hasTTY } from 'std-env';
 import { promisify } from 'util';
 import { z } from 'zod';
 
+// Promisified exec for running build scripts
 const execAsync = promisify(exec);
 
 export default defineCommand({
@@ -154,10 +155,11 @@ export default defineCommand({
       expiresAtDate.setDate(expiresAtDate.getDate() + expiresInDays);
       expiresAt = expiresAtDate.toISOString();
     }
+    // Try to auto-detect webDir from Capacitor config
+    const capacitorConfigPath = await findCapacitorConfigPath();
     // Check that either a path or a url is provided
     if (!path && !url) {
       // Try to auto-detect webDir from Capacitor config
-      const capacitorConfigPath = await findCapacitorConfigPath();
       if (capacitorConfigPath) {
         const webDirPath = await getWebDirFromConfig(capacitorConfigPath);
         if (webDirPath) {
@@ -266,7 +268,6 @@ export default defineCommand({
     }
     if (!appId) {
       // Try to auto-detect appId from Capacitor config
-      const capacitorConfigPath = await findCapacitorConfigPath();
       if (capacitorConfigPath) {
         const configAppId = await getCapawesomeCloudAppIdFromConfig(capacitorConfigPath);
         if (configAppId) {
