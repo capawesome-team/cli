@@ -138,7 +138,9 @@ export default defineCommand({
           const capacitorMajorVersion = await getCapacitorMajorVersion(packageJsonPath);
           if (capacitorMajorVersion) {
             packageName = `@capawesome/capacitor-live-update@^${capacitorMajorVersion}.0.0`;
-            consola.info(`Installing plugin version ${capacitorMajorVersion} to match Capacitor ${capacitorMajorVersion}`);
+            consola.info(
+              `Installing plugin version ${capacitorMajorVersion} to match Capacitor ${capacitorMajorVersion}`,
+            );
           }
         }
 
@@ -164,13 +166,10 @@ export default defineCommand({
 
     if (!hasPublicKey) {
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      const shouldSetupSigning = await prompt(
-        'Do you want to set up code signing? (Recommended for production, optional for testing)',
-        {
-          type: 'confirm',
-          initial: false,
-        },
-      );
+      const shouldSetupSigning = await prompt('Do you want to set up code signing? (Can be configured later)', {
+        type: 'confirm',
+        initial: false,
+      });
 
       if (shouldSetupSigning) {
         // Check OpenSSL
@@ -236,27 +235,21 @@ export default defineCommand({
     config = await readCapacitorConfig(capacitorConfigPath);
     const hasReadyTimeout = config?.plugins?.LiveUpdate?.readyTimeout !== undefined;
 
+    if (hasReadyTimeout) {
+      consola.info(
+        `Automatic rollback is already configured with timeout: ${config?.plugins?.LiveUpdate?.readyTimeout}ms`,
+      );
+    }
+
     if (!hasReadyTimeout) {
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      const shouldSetupRollback = await prompt(
-        'Do you want to set up automatic rollbacks? (Recommended for production, optional for testing)',
-        {
-          type: 'confirm',
-          initial: false,
-        },
-      );
+      const shouldSetupRollback = await prompt('Do you want to set up automatic rollbacks? (Can be configured later)', {
+        type: 'confirm',
+        initial: false,
+      });
 
       if (shouldSetupRollback) {
-        const timeoutStr = await prompt('Enter ready timeout in milliseconds (recommended: 10000):', {
-          type: 'text',
-          initial: '10000',
-        });
-
-        const readyTimeout = parseInt(timeoutStr as string, 10);
-        if (isNaN(readyTimeout) || readyTimeout <= 0) {
-          consola.error('Invalid timeout value. Must be a positive number.');
-          process.exit(1);
-        }
+        const readyTimeout = 10000;
 
         // Update config
         await updateCapacitorConfig(capacitorConfigPath, {
@@ -270,22 +263,44 @@ export default defineCommand({
 
         // Show code snippet
         console.log(); // Blank line
-        consola.box(
-          `IMPORTANT: Add this code to your app!\n\n` +
-            `Call this as soon as possible during app startup:\n\n` +
-            `import { LiveUpdate } from '@capawesome/capacitor-live-update';\n\n` +
-            `LiveUpdate.ready();`,
-        );
+        consola.info('Add this code to your app as soon as possible during app startup:');
+        console.log(); // Blank line
+        const readyCode =
+          `import { LiveUpdate } from '@capawesome/capacitor-live-update';\n\n` +
+          `const ready = async () => {\n` +
+          `  // Notify that the app is ready\n` +
+          `  await LiveUpdate.ready();\n` +
+          `};`;
+        consola.box(readyCode);
+
+        // Ask if user wants to copy to clipboard
+        // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+        const shouldCopyReady = await prompt('Do you want to copy this code to your clipboard?', {
+          type: 'confirm',
+          initial: true,
+        });
+
+        if (shouldCopyReady) {
+          try {
+            await copyToClipboard(readyCode);
+            consola.success('Code copied to clipboard!');
+          } catch (error) {
+            consola.warn('Failed to copy to clipboard. Please copy the code manually.');
+          }
+        }
+
+        // Wait for user to apply the code
+        // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+        await prompt('Press Enter to continue once you have added this code to your app...', {
+          type: 'confirm',
+          initial: true,
+        });
       }
     }
 
-    // Step 7: Final Message
+    // Step 7: Show sync code snippet
     console.log(); // Blank line
-    consola.success('Live Updates setup completed!');
-    consola.info('Next steps:');
-    consola.info('1. Sync your Capacitor project: `npx cap sync`');
-    consola.info('2. Create your first bundle: `npx @capawesome/cli apps:bundles:create`');
-    consola.info('3. Download and apply the latest bundle in your app by calling the `sync(...)` method:');
+    consola.info('Download and apply the latest live update in your app using the `sync(...)` method:');
     console.log(); // Blank line
     const syncCode =
       `import { LiveUpdate } from '@capawesome/capacitor-live-update';\n\n` +
@@ -301,12 +316,12 @@ export default defineCommand({
 
     // Ask if user wants to copy to clipboard
     // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-    const shouldCopy = await prompt('Do you want to copy this code to your clipboard?', {
+    const shouldCopySync = await prompt('Do you want to copy this code to your clipboard?', {
       type: 'confirm',
       initial: true,
     });
 
-    if (shouldCopy) {
+    if (shouldCopySync) {
       try {
         await copyToClipboard(syncCode);
         consola.success('Code copied to clipboard!');
@@ -314,6 +329,22 @@ export default defineCommand({
         consola.warn('Failed to copy to clipboard. Please copy the code manually.');
       }
     }
+
+    // Wait for user to apply the code
+    // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+    await prompt('Press Enter to continue once you have added this code to your app...', {
+      type: 'confirm',
+      initial: true,
+    });
+
+    // Step 8: Final message and next steps
+    console.log(); // Blank line
+    consola.success('Live Updates setup completed!');
+    console.log(); // Blank line
+    consola.info('Next steps:');
+    consola.log('  1. Create a new web assets build and sync the Capacitor platforms: `npm run build && npx cap sync`');
+    consola.log('  2. Deploy your first live update: `npx @capawesome/cli apps:bundles:create`');
+    consola.log('  3. Run the app and test the live update functionality: `npx cap run <platform>`');
 
     // Show helpful resources
     console.log(); // Blank line

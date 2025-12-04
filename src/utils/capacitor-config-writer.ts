@@ -77,10 +77,7 @@ const toJSObjectString = (value: any, indent: number = 0): string => {
 /**
  * Write a Capacitor config to a JSON file.
  */
-export const writeCapacitorConfigJson = async (
-  configPath: string,
-  config: CapacitorConfig,
-): Promise<void> => {
+export const writeCapacitorConfigJson = async (configPath: string, config: CapacitorConfig): Promise<void> => {
   const jsonContent = JSON.stringify(config, null, 2);
   await writeFile(configPath, jsonContent);
 };
@@ -122,10 +119,7 @@ export const writeCapacitorConfigTs = async (configPath: string, config: Capacit
  * Update a Capacitor config file with partial updates.
  * Performs a deep merge with existing config.
  */
-export const updateCapacitorConfig = async (
-  configPath: string,
-  updates: Partial<CapacitorConfig>,
-): Promise<void> => {
+export const updateCapacitorConfig = async (configPath: string, updates: Partial<CapacitorConfig>): Promise<void> => {
   // Read current config
   let currentConfig = await readCapacitorConfig(configPath);
   if (!currentConfig) {
