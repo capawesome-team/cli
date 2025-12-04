@@ -158,6 +158,9 @@ export default defineCommand({
     }
     // Try to auto-detect webDir from Capacitor configuration
     const capacitorConfigPath = await findCapacitorConfigPath();
+    if (!capacitorConfigPath) {
+      consola.warn('No Capacitor configuration found to auto-detect web asset directory or app ID.');
+    }
     // Check that either a path or a url is provided
     if (!path && !url) {
       // Try to auto-detect webDir from Capacitor configuration
@@ -170,8 +173,6 @@ export default defineCommand({
         } else {
           consola.warn('No web asset directory found in Capacitor configuration (`webDir`).');
         }
-      } else {
-        consola.warn('No Capacitor configuration found to auto-detect web asset directory.');
       }
       // If still no path, prompt the user
       if (!path) {
@@ -199,11 +200,14 @@ export default defineCommand({
         if (!buildScript) {
           consola.warn('No build script (`capawesome:build` or `build`) found in package.json.');
         } else if (hasTTY) {
-          const shouldBuild = await prompt('Do you want to rebuild your web assets before proceeding?', {
-            type: 'select',
-            options: ['Yes', 'No'],
-          });
-          if (shouldBuild === 'Yes') {
+          const shouldBuild = await prompt(
+            'Do you want to run the build script before creating the bundle to ensure the latest assets are included?',
+            {
+              type: 'confirm',
+              initial: true,
+            },
+          );
+          if (shouldBuild) {
             try {
               consola.start(`Running \`${buildScript.name}\` script...`);
               const { stdout, stderr } = await execAsync(`npm run ${buildScript.name}`);
@@ -278,8 +282,6 @@ export default defineCommand({
         } else {
           consola.warn('No Capawesome Cloud app ID found in Capacitor configuration (`plugins.LiveUpdate.appId`).');
         }
-      } else {
-        consola.warn('No Capacitor configuration found to auto-detect Capawesome Cloud app ID.');
       }
       // If still no appId, prompt the user
       if (!appId) {
@@ -323,11 +325,11 @@ export default defineCommand({
       }
     }
     if (!channel && hasTTY) {
-      const promptChannel = await prompt('Do you want to deploy to a specific channel?', {
-        type: 'select',
-        options: ['Yes', 'No'],
+      const shouldDeployToChannel = await prompt('Do you want to deploy to a specific channel?', {
+        type: 'confirm',
+        initial: false,
       });
-      if (promptChannel === 'Yes') {
+      if (shouldDeployToChannel) {
         channel = await prompt('Enter the channel name:', {
           type: 'text',
         });
