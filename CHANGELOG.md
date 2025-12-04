@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.8.0](https://github.com/capawesome-team/cli/compare/v3.7.0...v3.8.0) (2025-12-04)
+
+
+### Features
+
+* **apps:bundles:create:** auto-detect app ID and web assets directory ([#102](https://github.com/capawesome-team/cli/issues/102)) ([0e60df6](https://github.com/capawesome-team/cli/commit/0e60df66fcbe1effcb406b24e5a751a21badfa9d))
+* **apps:bundles:create:** print warning if private key is missing ([ae29ad9](https://github.com/capawesome-team/cli/commit/ae29ad96ba85db353c81b85be2bee4c6ac928dc0))
+
+
+### Bug Fixes
+
+* update error message to guide users to login first ([e5ea710](https://github.com/capawesome-team/cli/commit/e5ea710208df82d918e6f191d256d377569350f8))
+
 ## [3.7.0](https://github.com/capawesome-team/cli/compare/v3.6.0...v3.7.0) (2025-12-02)
 
 
