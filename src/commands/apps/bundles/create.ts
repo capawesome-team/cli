@@ -370,7 +370,7 @@ export default defineCommand({
           type: 'confirm',
         },
       );
-      if (confirmed) {
+      if (!confirmed) {
         consola.info('Bundle creation cancelled.');
         process.exit(0);
       }
