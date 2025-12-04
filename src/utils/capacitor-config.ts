@@ -7,6 +7,7 @@ export interface CapacitorConfig {
   plugins?: {
     LiveUpdate?: {
       appId?: string;
+      publicKey?: string;
     };
   };
 }
@@ -49,15 +50,17 @@ export const readCapacitorConfig = async (configPath: string): Promise<Capacitor
       // Extract webDir using regex
       const webDirMatch = content.match(/webDir:\s*['"]([^'"]+)['"]/);
       const appIdMatch = content.match(/LiveUpdate:\s*{[^}]*appId:\s*['"]([^'"]+)['"]/s);
+      const publicKeyMatch = content.match(/LiveUpdate:\s*{[^}]*publicKey:\s*['"]([^'"]+)['"]/s);
 
       const config: CapacitorConfig = {};
       if (webDirMatch) {
         config.webDir = webDirMatch[1];
       }
-      if (appIdMatch) {
+      if (appIdMatch || publicKeyMatch) {
         config.plugins = {
           LiveUpdate: {
-            appId: appIdMatch[1],
+            ...(appIdMatch && { appId: appIdMatch[1] }),
+            ...(publicKeyMatch && { publicKey: publicKeyMatch[1] }),
           },
         };
       }
@@ -93,7 +96,18 @@ export const getWebDirFromConfig = async (configPath: string): Promise<string | 
  * @param configPath The path to the config file.
  * @returns The appId, or undefined if not found.
  */
-export const getCapawesomeCloudAppIdFromConfig = async (configPath: string): Promise<string | undefined> => {
+export const getLiveUpdatePluginAppIdFromConfig = async (configPath: string): Promise<string | undefined> => {
   const config = await readCapacitorConfig(configPath);
   return config?.plugins?.LiveUpdate?.appId;
+};
+
+/**
+ * Get the LiveUpdate publicKey from the Capacitor config.
+ *
+ * @param configPath The path to the config file.
+ * @returns The publicKey, or undefined if not found.
+ */
+export const getLiveUpdatePluginPublicKeyFromConfig = async (configPath: string): Promise<string | undefined> => {
+  const config = await readCapacitorConfig(configPath);
+  return config?.plugins?.LiveUpdate?.publicKey;
 };

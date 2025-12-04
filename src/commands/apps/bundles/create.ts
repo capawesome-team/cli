@@ -13,7 +13,8 @@ import {
 } from '@/utils/buffer.js';
 import {
   findCapacitorConfigPath,
-  getCapawesomeCloudAppIdFromConfig,
+  getLiveUpdatePluginAppIdFromConfig,
+  getLiveUpdatePluginPublicKeyFromConfig,
   getWebDirFromConfig,
 } from '@/utils/capacitor-config.js';
 import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '@/utils/file.js';
@@ -155,22 +156,22 @@ export default defineCommand({
       expiresAtDate.setDate(expiresAtDate.getDate() + expiresInDays);
       expiresAt = expiresAtDate.toISOString();
     }
-    // Try to auto-detect webDir from Capacitor config
+    // Try to auto-detect webDir from Capacitor configuration
     const capacitorConfigPath = await findCapacitorConfigPath();
     // Check that either a path or a url is provided
     if (!path && !url) {
-      // Try to auto-detect webDir from Capacitor config
+      // Try to auto-detect webDir from Capacitor configuration
       if (capacitorConfigPath) {
         const webDirPath = await getWebDirFromConfig(capacitorConfigPath);
         if (webDirPath) {
           const relativeWebDirPath = pathModule.relative(process.cwd(), webDirPath);
-          consola.success(`Auto-detected web asset directory "${relativeWebDirPath}" from Capacitor config.`);
+          consola.success(`Auto-detected web asset directory "${relativeWebDirPath}" from Capacitor configuration.`);
           path = webDirPath;
         } else {
-          consola.warn('No web asset directory found in Capacitor config (`webDir`).');
+          consola.warn('No web asset directory found in Capacitor configuration (`webDir`).');
         }
       } else {
-        consola.warn('No Capacitor config found to auto-detect web asset directory.');
+        consola.warn('No Capacitor configuration found to auto-detect web asset directory.');
       }
       // If still no path, prompt the user
       if (!path) {
@@ -266,18 +267,19 @@ export default defineCommand({
       );
       process.exit(1);
     }
+    // Track if we found a Capacitor configuration but no app ID (for showing setup hint later)
     if (!appId) {
-      // Try to auto-detect appId from Capacitor config
+      // Try to auto-detect appId from Capacitor configuration
       if (capacitorConfigPath) {
-        const configAppId = await getCapawesomeCloudAppIdFromConfig(capacitorConfigPath);
+        const configAppId = await getLiveUpdatePluginAppIdFromConfig(capacitorConfigPath);
         if (configAppId) {
-          consola.success(`Auto-detected Capawesome Cloud app ID "${configAppId}" from Capacitor config.`);
+          consola.success(`Auto-detected Capawesome Cloud app ID "${configAppId}" from Capacitor configuration.`);
           appId = configAppId;
         } else {
-          consola.warn('No Capawesome Cloud app ID found in Capacitor config (`plugins.LiveUpdate.appId`).');
+          consola.warn('No Capawesome Cloud app ID found in Capacitor configuration (`plugins.LiveUpdate.appId`).');
         }
       } else {
-        consola.warn('No Capacitor config found to auto-detect Capawesome Cloud app ID.');
+        consola.warn('No Capacitor configuration found to auto-detect Capawesome Cloud app ID.');
       }
       // If still no appId, prompt the user
       if (!appId) {
@@ -333,6 +335,15 @@ export default defineCommand({
           consola.error('The channel name must be at least one character long.');
           process.exit(1);
         }
+      }
+    }
+    // Check if public key is configured but no private key was provided
+    if (!privateKey && capacitorConfigPath) {
+      const publicKey = await getLiveUpdatePluginPublicKeyFromConfig(capacitorConfigPath);
+      if (publicKey) {
+        consola.warn(
+          'A public key for verifying the integrity of the bundles is configured in your Capacitor configuration, but no private key has been provided for signing this bundle.',
+        );
       }
     }
     // Create the private key buffer
