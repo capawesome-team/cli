@@ -6,6 +6,7 @@ import { findCapacitorConfigPath, readCapacitorConfig } from '@/utils/capacitor-
 import { copyToClipboard } from '@/utils/clipboard.js';
 import { fileExistsAtPath } from '@/utils/file.js';
 import { checkOpensslInstalled, generateKeyPair, readPublicKey } from '@/utils/openssl.js';
+import { findPackageJsonPath, getCapacitorMajorVersion, isPackageInstalled } from '@/utils/package-json.js';
 import { installPackage, PackageManager } from '@/utils/package-manager.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
@@ -113,25 +114,47 @@ export default defineCommand({
     }
 
     // Step 4: Install SDK (Optional)
-    // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-    const shouldInstall = await prompt('Do you want to install the Live Update SDK?', {
-      type: 'confirm',
-      initial: true,
-    });
+    const packageJsonPath = await findPackageJsonPath();
+    let sdkInstalled = false;
 
-    if (shouldInstall) {
+    if (packageJsonPath) {
+      sdkInstalled = await isPackageInstalled(packageJsonPath, '@capawesome/capacitor-live-update');
+      if (sdkInstalled) {
+        consola.info('Live Update SDK is already installed.');
+      }
+    }
+
+    if (!sdkInstalled) {
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      const packageManager: PackageManager = await prompt('Select your package manager:', {
-        type: 'select',
-        options: [
-          { label: 'npm', value: 'npm' },
-          { label: 'yarn', value: 'yarn' },
-          { label: 'pnpm', value: 'pnpm' },
-        ],
+      const shouldInstall = await prompt('Do you want to install the Live Update SDK?', {
+        type: 'confirm',
+        initial: true,
       });
 
-      await installPackage('@capawesome/capacitor-live-update', packageManager);
-      consola.success('Live Update SDK installed successfully.');
+      if (shouldInstall) {
+        // Get Capacitor version to install matching plugin version
+        let packageName = '@capawesome/capacitor-live-update';
+        if (packageJsonPath) {
+          const capacitorMajorVersion = await getCapacitorMajorVersion(packageJsonPath);
+          if (capacitorMajorVersion) {
+            packageName = `@capawesome/capacitor-live-update@^${capacitorMajorVersion}.0.0`;
+            consola.info(`Installing plugin version ${capacitorMajorVersion} to match Capacitor ${capacitorMajorVersion}`);
+          }
+        }
+
+        // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+        const packageManager: PackageManager = await prompt('Select your package manager:', {
+          type: 'select',
+          options: [
+            { label: 'npm', value: 'npm' },
+            { label: 'yarn', value: 'yarn' },
+            { label: 'pnpm', value: 'pnpm' },
+          ],
+        });
+
+        await installPackage(packageName, packageManager);
+        consola.success('Live Update SDK installed successfully.');
+      }
     }
 
     // Step 5: Set Up Code Signing (Optional)

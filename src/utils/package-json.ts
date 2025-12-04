@@ -6,6 +6,12 @@ export interface PackageJson {
   scripts?: {
     [key: string]: string;
   };
+  dependencies?: {
+    [key: string]: string;
+  };
+  devDependencies?: {
+    [key: string]: string;
+  };
 }
 
 /**
@@ -66,6 +72,51 @@ export const getBuildScript = async (
       name: 'build',
       command: packageJson.scripts['build'],
     };
+  }
+
+  return undefined;
+};
+
+/**
+ * Check if a package is installed.
+ * Checks both dependencies and devDependencies.
+ *
+ * @param packageJsonPath The path to the package.json file.
+ * @param packageName The name of the package to check.
+ * @returns True if the package is installed, false otherwise.
+ */
+export const isPackageInstalled = async (packageJsonPath: string, packageName: string): Promise<boolean> => {
+  const packageJson = await readPackageJson(packageJsonPath);
+  if (!packageJson) {
+    return false;
+  }
+
+  return !!(packageJson.dependencies?.[packageName] || packageJson.devDependencies?.[packageName]);
+};
+
+/**
+ * Get the Capacitor CLI version from package.json.
+ *
+ * @param packageJsonPath The path to the package.json file.
+ * @returns The Capacitor major version number, or undefined if not found.
+ */
+export const getCapacitorMajorVersion = async (packageJsonPath: string): Promise<number | undefined> => {
+  const packageJson = await readPackageJson(packageJsonPath);
+  if (!packageJson) {
+    return undefined;
+  }
+
+  const capacitorVersion =
+    packageJson.dependencies?.['@capacitor/core'] || packageJson.devDependencies?.['@capacitor/core'];
+
+  if (!capacitorVersion) {
+    return undefined;
+  }
+
+  // Extract major version from version string (e.g., "^5.0.0" -> 5, "~6.1.0" -> 6)
+  const match = capacitorVersion.match(/(\d+)/);
+  if (match && match[1]) {
+    return parseInt(match[1], 10);
   }
 
   return undefined;
