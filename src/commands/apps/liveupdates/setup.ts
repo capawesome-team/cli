@@ -46,7 +46,7 @@ export default defineCommand({
     // Try to get from config first
     if (!appId && config?.plugins?.LiveUpdate?.appId) {
       appId = config.plugins.LiveUpdate.appId;
-      consola.success(`Using existing app ID from Capacitor configuration: ${appId}`);
+      consola.info(`Found existing Capawesome Cloud app ID in Capacitor configuration: ${appId}`);
     }
 
     // Prompt if still not found
@@ -100,15 +100,17 @@ export default defineCommand({
       }
     }
 
-    // Update config with app ID
-    await updateCapacitorConfig(capacitorConfigPath, {
-      plugins: {
-        LiveUpdate: {
-          appId,
+    if (!config?.plugins?.LiveUpdate?.appId) {
+      // Update config with app ID
+      await updateCapacitorConfig(capacitorConfigPath, {
+        plugins: {
+          LiveUpdate: {
+            appId,
+          },
         },
-      },
-    });
-    consola.success(`Updated Capacitor configuration with app ID: ${appId}`);
+      });
+      consola.success(`Updated Capacitor configuration with Capawesome Cloud app ID: ${appId}`);
+    }
 
     // Step 4: Install SDK (Optional)
     // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
