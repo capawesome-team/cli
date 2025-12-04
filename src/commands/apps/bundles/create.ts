@@ -194,7 +194,7 @@ export default defineCommand({
       } else {
         const buildScript = await getBuildScript(packageJsonPath);
         if (!buildScript) {
-          consola.warn('No build script found in package.json.');
+          consola.warn('No build script (`capawesome:build` or `build`) found in package.json.');
         } else if (hasTTY) {
           const shouldBuild = await prompt('Do you want to rebuild your web assets before proceeding?', {
             type: 'select',
@@ -202,7 +202,7 @@ export default defineCommand({
           });
           if (shouldBuild === 'Yes') {
             try {
-              consola.start(`Running ${buildScript.name} script...`);
+              consola.start(`Running \`${buildScript.name}\` script...`);
               const { stdout, stderr } = await execAsync(`npm run ${buildScript.name}`);
               if (stdout) {
                 console.log(stdout);
