@@ -11,18 +11,30 @@ import {
   createBufferFromString,
   isPrivateKeyContent,
 } from '@/utils/buffer.js';
+import {
+  findCapacitorConfigPath,
+  getCapawesomeCloudAppIdFromConfig,
+  getWebDirFromConfig,
+} from '@/utils/capacitor-config.js';
 import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '@/utils/file.js';
 import { createHash } from '@/utils/hash.js';
 import { generateManifestJson } from '@/utils/manifest.js';
+import { findPackageJsonPath, getBuildScript } from '@/utils/package-json.js';
 import { formatPrivateKey } from '@/utils/private-key.js';
 import { prompt } from '@/utils/prompt.js';
 import { createSignature } from '@/utils/signature.js';
 import zip from '@/utils/zip.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
+import { exec } from 'child_process';
 import consola from 'consola';
 import { createReadStream } from 'fs';
+import pathModule from 'path';
 import { hasTTY } from 'std-env';
+import { promisify } from 'util';
 import { z } from 'zod';
+
+// Promisified exec for running build scripts
+const execAsync = promisify(exec);
 
 export default defineCommand({
   description: 'Create a new app bundle.',
@@ -143,21 +155,79 @@ export default defineCommand({
       expiresAtDate.setDate(expiresAtDate.getDate() + expiresInDays);
       expiresAt = expiresAtDate.toISOString();
     }
+    // Try to auto-detect webDir from Capacitor config
+    const capacitorConfigPath = await findCapacitorConfigPath();
     // Check that either a path or a url is provided
     if (!path && !url) {
-      if (!hasTTY) {
-        consola.error('You must provide either a path or a url when running in non-interactive environment.');
-        process.exit(1);
+      // Try to auto-detect webDir from Capacitor config
+      if (capacitorConfigPath) {
+        const webDirPath = await getWebDirFromConfig(capacitorConfigPath);
+        if (webDirPath) {
+          const relativeWebDirPath = pathModule.relative(process.cwd(), webDirPath);
+          consola.success(`Auto-detected web asset directory "${relativeWebDirPath}" from Capacitor config.`);
+          path = webDirPath;
+        } else {
+          consola.warn('No web asset directory found in Capacitor config (`webDir`).');
+        }
       } else {
-        path = await prompt('Enter the path to the app bundle:', {
-          type: 'text',
-        });
-        if (!path) {
-          consola.error('You must provide a path to the app bundle.');
+        consola.warn('No Capacitor config found to auto-detect web asset directory.');
+      }
+      // If still no path, prompt the user
+      if (!path) {
+        if (!hasTTY) {
+          consola.error('You must provide either a path or a url when running in non-interactive environment.');
           process.exit(1);
+        } else {
+          path = await prompt('Enter the path to the app bundle:', {
+            type: 'text',
+          });
+          if (!path) {
+            consola.error('You must provide a path to the app bundle.');
+            process.exit(1);
+          }
         }
       }
     }
+    // Check for build scripts if a path is provided or detected
+    if (path && !url) {
+      const packageJsonPath = await findPackageJsonPath();
+      if (!packageJsonPath) {
+        consola.warn('No package.json file found.');
+      } else {
+        const buildScript = await getBuildScript(packageJsonPath);
+        if (!buildScript) {
+          consola.warn('No build script (`capawesome:build` or `build`) found in package.json.');
+        } else if (hasTTY) {
+          const shouldBuild = await prompt('Do you want to rebuild your web assets before proceeding?', {
+            type: 'select',
+            options: ['Yes', 'No'],
+          });
+          if (shouldBuild === 'Yes') {
+            try {
+              consola.start(`Running \`${buildScript.name}\` script...`);
+              const { stdout, stderr } = await execAsync(`npm run ${buildScript.name}`);
+              if (stdout) {
+                console.log(stdout);
+              }
+              if (stderr) {
+                console.error(stderr);
+              }
+              consola.success('Build completed successfully.');
+            } catch (error: any) {
+              consola.error('Build failed.');
+              if (error.stdout) {
+                console.log(error.stdout);
+              }
+              if (error.stderr) {
+                console.error(error.stderr);
+              }
+              process.exit(1);
+            }
+          }
+        }
+      }
+    }
+    // Validate the provided path
     if (path) {
       // Check if the path exists when a path is provided
       const pathExists = await fileExistsAtPath(path);
@@ -197,39 +267,57 @@ export default defineCommand({
       process.exit(1);
     }
     if (!appId) {
-      if (!hasTTY) {
-        consola.error('You must provide an app ID when running in non-interactive environment.');
-        process.exit(1);
+      // Try to auto-detect appId from Capacitor config
+      if (capacitorConfigPath) {
+        const configAppId = await getCapawesomeCloudAppIdFromConfig(capacitorConfigPath);
+        if (configAppId) {
+          consola.success(`Auto-detected Capawesome Cloud app ID "${configAppId}" from Capacitor config.`);
+          appId = configAppId;
+        } else {
+          consola.warn('No Capawesome Cloud app ID found in Capacitor config (`plugins.LiveUpdate.appId`).');
+        }
+      } else {
+        consola.warn('No Capacitor config found to auto-detect Capawesome Cloud app ID.');
       }
-      const organizations = await organizationsService.findAll();
-      if (organizations.length === 0) {
-        consola.error('You must create an organization before creating a bundle.');
-        process.exit(1);
-      }
-      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      const organizationId = await prompt('Select the organization of the app for which you want to create a bundle.', {
-        type: 'select',
-        options: organizations.map((organization) => ({ label: organization.name, value: organization.id })),
-      });
-      if (!organizationId) {
-        consola.error('You must select the organization of an app for which you want to create a bundle.');
-        process.exit(1);
-      }
-      const apps = await appsService.findAll({
-        organizationId,
-      });
-      if (apps.length === 0) {
-        consola.error('You must create an app before creating a bundle.');
-        process.exit(1);
-      }
-      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      appId = await prompt('Which app do you want to deploy to:', {
-        type: 'select',
-        options: apps.map((app) => ({ label: app.name, value: app.id })),
-      });
+      // If still no appId, prompt the user
       if (!appId) {
-        consola.error('You must select an app to deploy to.');
-        process.exit(1);
+        if (!hasTTY) {
+          consola.error('You must provide an app ID when running in non-interactive environment.');
+          process.exit(1);
+        }
+        const organizations = await organizationsService.findAll();
+        if (organizations.length === 0) {
+          consola.error('You must create an organization before creating a bundle.');
+          process.exit(1);
+        }
+        // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+        const organizationId = await prompt(
+          'Select the organization of the app for which you want to create a bundle.',
+          {
+            type: 'select',
+            options: organizations.map((organization) => ({ label: organization.name, value: organization.id })),
+          },
+        );
+        if (!organizationId) {
+          consola.error('You must select the organization of an app for which you want to create a bundle.');
+          process.exit(1);
+        }
+        const apps = await appsService.findAll({
+          organizationId,
+        });
+        if (apps.length === 0) {
+          consola.error('You must create an app before creating a bundle.');
+          process.exit(1);
+        }
+        // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+        appId = await prompt('Which app do you want to deploy to:', {
+          type: 'select',
+          options: apps.map((app) => ({ label: app.name, value: app.id })),
+        });
+        if (!appId) {
+          consola.error('You must select an app to deploy to.');
+          process.exit(1);
+        }
       }
     }
     if (!channel && hasTTY) {
@@ -271,10 +359,26 @@ export default defineCommand({
         process.exit(1);
       }
     }
-
+    // Get app details for confirmation
+    const app = await appsService.findOne({ appId });
+    const appName = app.name;
+    // Final confirmation before creating bundle
+    if (path && hasTTY) {
+      const relativePath = pathModule.relative(process.cwd(), path);
+      const confirmed = await prompt(
+        `Are you sure you want to create a bundle from path "${relativePath}" for app "${appName}" (${appId})?`,
+        {
+          type: 'confirm',
+        },
+      );
+      if (!confirmed) {
+        consola.info('Bundle creation cancelled.');
+        process.exit(0);
+      }
+    }
+    // Create the app bundle
     let appBundleId: string | undefined;
     try {
-      // Create the app bundle
       consola.start('Creating bundle...');
       let checksum: string | undefined;
       let signature: string | undefined;

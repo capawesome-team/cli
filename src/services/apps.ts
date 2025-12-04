@@ -1,11 +1,12 @@
 import authorizationService from '@/services/authorization-service.js';
-import { AppDto, CreateAppDto, DeleteAppDto, FindAllAppsDto } from '@/types/app.js';
+import { AppDto, CreateAppDto, DeleteAppDto, FindAllAppsDto, FindOneAppDto } from '@/types/app.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
 
 export interface AppsService {
   create(dto: CreateAppDto): Promise<AppDto>;
   delete(dto: DeleteAppDto): Promise<void>;
   findAll(dto: FindAllAppsDto): Promise<AppDto[]>;
+  findOne(dto: FindOneAppDto): Promise<AppDto>;
 }
 
 class AppsServiceImpl implements AppsService {
@@ -37,6 +38,15 @@ class AppsServiceImpl implements AppsService {
   async findAll(dto: FindAllAppsDto): Promise<AppDto[]> {
     const params = new URLSearchParams({ organizationId: dto.organizationId });
     const response = await this.httpClient.get<AppDto[]>(`/v1/apps?${params.toString()}`, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+      },
+    });
+    return response.data;
+  }
+
+  async findOne(dto: FindOneAppDto): Promise<AppDto> {
+    const response = await this.httpClient.get<AppDto>(`/v1/apps/${dto.appId}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
