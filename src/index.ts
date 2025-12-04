@@ -40,6 +40,7 @@ const config = defineConfig({
     'apps:deployments:cancel': await import('@/commands/apps/deployments/cancel.js').then((mod) => mod.default),
     'apps:deployments:logs': await import('@/commands/apps/deployments/logs.js').then((mod) => mod.default),
     'apps:devices:delete': await import('@/commands/apps/devices/delete.js').then((mod) => mod.default),
+    'apps:liveupdates:setup': await import('@/commands/apps/liveupdates/setup.js').then((mod) => mod.default),
     'manifests:generate': await import('@/commands/manifests/generate.js').then((mod) => mod.default),
     'organizations:create': await import('@/commands/organizations/create.js').then((mod) => mod.default),
   },

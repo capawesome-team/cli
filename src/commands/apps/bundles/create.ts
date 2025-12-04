@@ -268,6 +268,7 @@ export default defineCommand({
       process.exit(1);
     }
     // Track if we found a Capacitor configuration but no app ID (for showing setup hint later)
+    let hasCapacitorConfigWithoutAppId = false;
     if (!appId) {
       // Try to auto-detect appId from Capacitor configuration
       if (capacitorConfigPath) {
@@ -276,6 +277,7 @@ export default defineCommand({
           consola.success(`Auto-detected Capawesome Cloud app ID "${configAppId}" from Capacitor configuration.`);
           appId = configAppId;
         } else {
+          hasCapacitorConfigWithoutAppId = true;
           consola.warn('No Capawesome Cloud app ID found in Capacitor configuration (`plugins.LiveUpdate.appId`).');
         }
       } else {
@@ -453,6 +455,11 @@ export default defineCommand({
       }
       consola.success('Bundle successfully created.');
       consola.info(`Bundle ID: ${response.id}`);
+      // Show setup hint if Capacitor configuration exists but no app ID was configured
+      if (hasCapacitorConfigWithoutAppId) {
+        console.log(); // New line for better readability
+        consola.info('To set up the Live Update SDK in your Capacitor app, run the `apps:liveupdates:setup` command.');
+      }
     } catch (error) {
       if (appBundleId) {
         await appBundlesService.delete({ appId, appBundleId }).catch(() => {

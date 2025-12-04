@@ -8,6 +8,7 @@ export interface CapacitorConfig {
     LiveUpdate?: {
       appId?: string;
       publicKey?: string;
+      readyTimeout?: number;
     };
   };
 }
