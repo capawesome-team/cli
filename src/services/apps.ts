@@ -6,6 +6,7 @@ export interface AppsService {
   create(dto: CreateAppDto): Promise<AppDto>;
   delete(dto: DeleteAppDto): Promise<void>;
   findAll(dto: FindAllAppsDto): Promise<AppDto[]>;
+  findOne(dto: { appId: string }): Promise<AppDto>;
 }
 
 class AppsServiceImpl implements AppsService {
@@ -37,6 +38,15 @@ class AppsServiceImpl implements AppsService {
   async findAll(dto: FindAllAppsDto): Promise<AppDto[]> {
     const params = new URLSearchParams({ organizationId: dto.organizationId });
     const response = await this.httpClient.get<AppDto[]>(`/v1/apps?${params.toString()}`, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+      },
+    });
+    return response.data;
+  }
+
+  async findOne(dto: { appId: string }): Promise<AppDto> {
+    const response = await this.httpClient.get<AppDto>(`/v1/apps/${dto.appId}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
