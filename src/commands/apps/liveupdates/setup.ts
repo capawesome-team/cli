@@ -82,7 +82,9 @@ export default defineCommand({
       // Prompt for app
       const apps = await appsService.findAll({ organizationId });
       if (apps.length === 0) {
-        consola.error('You must create an app before setting up Live Updates.');
+        consola.error(
+          'You must create an app before setting up Live Updates. Please run the `apps:create` command first.',
+        );
         process.exit(1);
       }
 
