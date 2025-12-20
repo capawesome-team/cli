@@ -55,6 +55,12 @@ export default defineCommand({
         })
         .optional()
         .describe('The platform for the build. Supported values are `ios` and `android`.'),
+      stack: z
+        .enum(['macos-sequoia', 'macos-tahoe'], {
+          message: 'Build stack must be either `macos-sequoia` or `macos-tahoe`.',
+        })
+        .optional()
+        .describe('The build stack to use for the build process.'),
       type: z
         .string()
         .optional()
@@ -64,7 +70,7 @@ export default defineCommand({
     }),
   ),
   action: async (options) => {
-    let { appId, platform, type, gitRef, environment, certificate, json } = options;
+    let { appId, platform, type, gitRef, environment, certificate, json, stack } = options;
 
     // Check if the user is logged in
     if (!authorizationService.hasAuthorizationToken()) {
@@ -220,6 +226,7 @@ export default defineCommand({
       appCertificateName: certificate,
       appEnvironmentName: environment,
       appId,
+      stack,
       gitRef,
       platform,
       type,
