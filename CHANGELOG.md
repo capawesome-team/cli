@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.9.0](https://github.com/capawesome-team/cli/compare/v3.8.0...v3.9.0) (2025-12-20)
+
+
+### Features
+
+* **apps:builds:create:** add `--stack` option ([#106](https://github.com/capawesome-team/cli/issues/106)) ([1b2fa91](https://github.com/capawesome-team/cli/commit/1b2fa9154305b4f73ca3253a84f131ff8fc74263))
+
 ## [3.8.0](https://github.com/capawesome-team/cli/compare/v3.7.0...v3.8.0) (2025-12-04)
 
 
