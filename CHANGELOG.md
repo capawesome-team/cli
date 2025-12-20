@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.10.0](https://github.com/capawesome-team/cli/compare/v3.9.0...v3.10.0) (2025-12-20)
+
+
+### Features
+
+* add `apps:liveupdates:generatesigningkey` command ([#104](https://github.com/capawesome-team/cli/issues/104)) ([d0bceef](https://github.com/capawesome-team/cli/commit/d0bceefb0db3977484cde600ea084b52986ccf3d))
+
 ## [3.9.0](https://github.com/capawesome-team/cli/compare/v3.8.0...v3.9.0) (2025-12-20)
 
 
