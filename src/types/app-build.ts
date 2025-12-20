@@ -30,6 +30,7 @@ export interface CreateAppBuildDto {
   appCertificateName?: string;
   appEnvironmentName?: string;
   appId: string;
+  stack?: 'macos-sequoia' | 'macos-tahoe';
   gitRef: string;
   platform: 'ios' | 'android';
   type: string;
