@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.10.1](https://github.com/capawesome-team/cli/compare/v3.10.0...v3.10.1) (2025-12-29)
+
+
+### Bug Fixes
+
+* **apps:bundles:create:** adjust multipart upload threshold to 50 MB to prevent OOM issues ([ad0958c](https://github.com/capawesome-team/cli/commit/ad0958cc615bb5b5e97f8d04a55d4906c46418e1))
+
 ## [3.10.0](https://github.com/capawesome-team/cli/compare/v3.9.0...v3.10.0) (2025-12-20)
 
 
