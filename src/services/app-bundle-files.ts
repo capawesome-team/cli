@@ -1,8 +1,8 @@
-import FormData from 'form-data';
 import { MAX_CONCURRENT_UPLOADS } from '@/config/index.js';
+import authorizationService from '@/services/authorization-service.js';
 import { AppBundleFileDto, CreateAppBundleFileDto } from '@/types/app-bundle-file.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
-import authorizationService from '@/services/authorization-service.js';
+import FormData from 'form-data';
 
 export interface AppBundleFilesService {
   create(dto: CreateAppBundleFileDto): Promise<AppBundleFileDto>;
@@ -17,7 +17,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
 
   async create(dto: CreateAppBundleFileDto): Promise<AppBundleFileDto> {
     const sizeInBytes = dto.buffer.byteLength;
-    const useMultipartUpload = sizeInBytes >= 100 * 1024 * 1024; // 100 MB
+    const useMultipartUpload = sizeInBytes >= 50 * 1024 * 1024; // 50 MB
     const formData = new FormData();
     formData.append('checksum', dto.checksum);
     if (!useMultipartUpload) {
