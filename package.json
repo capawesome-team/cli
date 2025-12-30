@@ -67,7 +67,7 @@
     "open": "10.2.0",
     "rc9": "2.1.2",
     "semver": "7.6.3",
-    "systeminformation": "5.25.11",
+    "systeminformation": "5.28.5",
     "zod": "4.0.17"
   },
   "devDependencies": {
