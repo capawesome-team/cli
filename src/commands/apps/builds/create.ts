@@ -13,7 +13,7 @@ import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import fs from 'fs/promises';
 import path from 'path';
-import { hasTTY } from 'std-env';
+import { isInteractive } from '@/utils/environment.js';
 import { z } from 'zod';
 
 const IOS_BUILD_TYPES = ['simulator', 'development', 'ad-hoc', 'app-store', 'enterprise'] as const;
@@ -86,7 +86,7 @@ export default defineCommand({
 
     // Prompt for app ID if not provided
     if (!appId) {
-      if (!hasTTY) {
+      if (!isInteractive()) {
         consola.error('You must provide an app ID when running in non-interactive environment.');
         process.exit(1);
       }
@@ -124,7 +124,7 @@ export default defineCommand({
 
     // Prompt for platform if not provided
     if (!platform) {
-      if (!hasTTY) {
+      if (!isInteractive()) {
         consola.error('You must provide a platform when running in non-interactive environment.');
         process.exit(1);
       }
@@ -144,7 +144,7 @@ export default defineCommand({
 
     // Prompt for git ref if not provided
     if (!gitRef) {
-      if (!hasTTY) {
+      if (!isInteractive()) {
         consola.error('You must provide a git ref when running in non-interactive environment.');
         process.exit(1);
       }
@@ -177,7 +177,7 @@ export default defineCommand({
     }
 
     // Prompt for environment if not provided
-    if (!environment && hasTTY) {
+    if (!environment && isInteractive()) {
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
       const selectEnvironment = await prompt('Do you want to select an environment?', {
         type: 'confirm',
@@ -198,7 +198,7 @@ export default defineCommand({
     }
 
     // Prompt for certificate if not provided
-    if (!certificate && hasTTY) {
+    if (!certificate && isInteractive()) {
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
       const selectCertificate = await prompt('Do you want to select a certificate?', {
         type: 'confirm',

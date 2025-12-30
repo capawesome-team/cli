@@ -5,7 +5,7 @@ import organizationsService from '@/services/organizations.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
-import { hasTTY } from 'std-env';
+import { isInteractive } from '@/utils/environment.js';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -26,7 +26,7 @@ export default defineCommand({
 
     // Prompt for missing arguments
     if (!appId) {
-      if (!hasTTY) {
+      if (!isInteractive()) {
         consola.error('You must provide an app ID when running in non-interactive environment.');
         process.exit(1);
       }
@@ -61,7 +61,7 @@ export default defineCommand({
       });
     }
     if (!bundleId) {
-      if (!hasTTY) {
+      if (!isInteractive()) {
         consola.error('You must provide the bundle ID when running in non-interactive environment.');
         process.exit(1);
       }
@@ -71,7 +71,7 @@ export default defineCommand({
     }
 
     // Confirm deletion
-    if (hasTTY) {
+    if (isInteractive()) {
       const confirmed = await prompt('Are you sure you want to delete this bundle?', {
         type: 'confirm',
       });

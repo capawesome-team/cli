@@ -30,9 +30,9 @@ import { exec } from 'child_process';
 import consola from 'consola';
 import { createReadStream } from 'fs';
 import pathModule from 'path';
-import { hasTTY } from 'std-env';
 import { promisify } from 'util';
 import { z } from 'zod';
+import { isInteractive } from '@/utils/environment.js';
 
 // Promisified exec for running build scripts
 const execAsync = promisify(exec);
@@ -176,7 +176,7 @@ export default defineCommand({
       }
       // If still no path, prompt the user
       if (!path) {
-        if (!hasTTY) {
+        if (!isInteractive()) {
           consola.error('You must provide either a path or a url when running in non-interactive environment.');
           process.exit(1);
         } else {
@@ -199,7 +199,7 @@ export default defineCommand({
         const buildScript = await getBuildScript(packageJsonPath);
         if (!buildScript) {
           consola.warn('No build script (`capawesome:build` or `build`) found in package.json.');
-        } else if (hasTTY) {
+        } else if (isInteractive()) {
           const shouldBuild = await prompt(
             'Do you want to run the build script before creating the bundle to ensure the latest assets are included?',
             {
@@ -285,7 +285,7 @@ export default defineCommand({
       }
       // If still no appId, prompt the user
       if (!appId) {
-        if (!hasTTY) {
+        if (!isInteractive()) {
           consola.error('You must provide an app ID when running in non-interactive environment.');
           process.exit(1);
         }
@@ -324,7 +324,7 @@ export default defineCommand({
         }
       }
     }
-    if (!channel && hasTTY) {
+    if (!channel && isInteractive()) {
       const shouldDeployToChannel = await prompt('Do you want to deploy to a specific channel?', {
         type: 'confirm',
         initial: false,
@@ -376,7 +376,7 @@ export default defineCommand({
     const app = await appsService.findOne({ appId });
     const appName = app.name;
     // Final confirmation before creating bundle
-    if (path && hasTTY) {
+    if (path && isInteractive()) {
       const relativePath = pathModule.relative(process.cwd(), path);
       const confirmed = await prompt(
         `Are you sure you want to create a bundle from path "${relativePath}" for app "${appName}" (${appId})?`,

@@ -18,11 +18,11 @@ vi.mock('@/services/config.js');
 vi.mock('open');
 vi.mock('consola');
 vi.mock('@/utils/prompt.js');
-vi.mock('std-env', () => ({
-  hasTTY: true,
+vi.mock('@/utils/environment.js', () => ({
+  isInteractive: () => true,
 }));
-vi.mock('std-env', () => ({
-  hasTTY: true,
+vi.mock('@/utils/environment.js', () => ({
+  isInteractive: () => true,
 }));
 
 describe('login', () => {

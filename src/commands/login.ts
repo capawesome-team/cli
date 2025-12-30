@@ -2,13 +2,13 @@ import configService from '@/services/config.js';
 import sessionCodesService from '@/services/session-code.js';
 import sessionsService from '@/services/sessions.js';
 import usersService from '@/services/users.js';
+import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
 import userConfig from '@/utils/user-config.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import { AxiosError } from 'axios';
 import consola from 'consola';
 import open from 'open';
-import { hasTTY } from 'std-env';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -22,7 +22,7 @@ export default defineCommand({
     const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
     let { token: sessionIdOrToken } = options;
     if (sessionIdOrToken === undefined) {
-      if (!hasTTY) {
+      if (!isInteractive()) {
         consola.error('You must provide a token when running in non-interactive environment.');
         process.exit(1);
       }

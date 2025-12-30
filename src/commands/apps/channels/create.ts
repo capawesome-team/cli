@@ -6,7 +6,7 @@ import { getMessageFromUnknownError } from '@/utils/error.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
-import { hasTTY } from 'std-env';
+import { isInteractive } from '@/utils/environment.js';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -49,7 +49,7 @@ export default defineCommand({
     }
     // Validate the app ID
     if (!appId) {
-      if (!hasTTY) {
+      if (!isInteractive()) {
         consola.error('You must provide an app ID when running in non-interactive environment.');
         process.exit(1);
       }
@@ -85,7 +85,7 @@ export default defineCommand({
     }
     // Validate the channel name
     if (!name) {
-      if (!hasTTY) {
+      if (!isInteractive()) {
         consola.error('You must provide the channel name when running in non-interactive environment.');
         process.exit(1);
       }
