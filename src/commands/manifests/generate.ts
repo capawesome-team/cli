@@ -3,7 +3,7 @@ import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
-import { hasTTY } from 'std-env';
+import { isInteractive } from '@/utils/environment.js';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -17,7 +17,7 @@ export default defineCommand({
     let path = options.path;
 
     if (!path) {
-      if (!hasTTY) {
+      if (!isInteractive()) {
         consola.error(
           'You must provide the path to the web assets folder when running in non-interactive environment.',
         );

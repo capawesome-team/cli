@@ -10,8 +10,8 @@ vi.mock('@/utils/file.js');
 vi.mock('@/utils/manifest.js');
 vi.mock('@/utils/prompt.js');
 vi.mock('consola');
-vi.mock('std-env', () => ({
-  hasTTY: true,
+vi.mock('@/utils/environment.js', () => ({
+  isInteractive: () => true,
 }));
 
 describe('manifests-generate', () => {

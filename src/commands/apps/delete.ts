@@ -1,10 +1,10 @@
 import appsService from '@/services/apps.js';
 import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
+import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
-import { hasTTY } from 'std-env';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -22,7 +22,7 @@ export default defineCommand({
       process.exit(1);
     }
     if (!appId) {
-      if (!hasTTY) {
+      if (!isInteractive()) {
         consola.error('You must provide the app ID when running in non-interactive environment.');
         process.exit(1);
       }
@@ -53,7 +53,7 @@ export default defineCommand({
         options: apps.map((app) => ({ label: app.name, value: app.id })),
       });
     }
-    if (hasTTY) {
+    if (isInteractive()) {
       const confirmed = await prompt('Are you sure you want to delete this app?', {
         type: 'confirm',
       });

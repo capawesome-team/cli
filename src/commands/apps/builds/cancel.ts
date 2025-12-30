@@ -6,7 +6,7 @@ import organizationsService from '@/services/organizations.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
-import { hasTTY } from 'std-env';
+import { isInteractive } from '@/utils/environment.js';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -38,7 +38,7 @@ export default defineCommand({
 
     // Prompt for app ID if not provided
     if (!appId) {
-      if (!hasTTY) {
+      if (!isInteractive()) {
         consola.error('You must provide an app ID when running in non-interactive environment.');
         process.exit(1);
       }
@@ -76,7 +76,7 @@ export default defineCommand({
 
     // Prompt for build ID if not provided
     if (!buildId) {
-      if (!hasTTY) {
+      if (!isInteractive()) {
         consola.error('You must provide a build ID when running in non-interactive environment.');
         process.exit(1);
       }

@@ -12,8 +12,8 @@ vi.mock('@/utils/user-config.js');
 vi.mock('@/utils/prompt.js');
 vi.mock('@/services/authorization-service.js');
 vi.mock('consola');
-vi.mock('std-env', () => ({
-  hasTTY: true,
+vi.mock('@/utils/environment.js', () => ({
+  isInteractive: () => true,
 }));
 
 describe('apps-delete', () => {
