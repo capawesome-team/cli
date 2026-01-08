@@ -72,9 +72,17 @@ export default defineCommand({
         consola.error('You must provide either the channel ID or name when running in non-interactive environment.');
         process.exit(1);
       }
-      name = await prompt('Enter the channel name:', {
-        type: 'text',
+      const channels = await appChannelsService.findAll({ appId });
+      if (!channels.length) {
+        consola.error('No channels found for this app. Create one first.');
+        process.exit(1);
+      }
+      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+      const selectedChannelId = await prompt('Select the channel to delete:', {
+        type: 'select',
+        options: channels.map((channel) => ({ label: channel.name, value: channel.id })),
       });
+      channelId = selectedChannelId;
     }
     // Confirm deletion
     if (isInteractive()) {

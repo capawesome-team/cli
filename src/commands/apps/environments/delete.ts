@@ -68,9 +68,17 @@ export default defineCommand({
         );
         process.exit(1);
       }
-      name = await prompt('Enter the environment name:', {
-        type: 'text',
+      const environments = await appEnvironmentsService.findAll({ appId });
+      if (!environments.length) {
+        consola.error('No environments found for this app. Create one first.');
+        process.exit(1);
+      }
+      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+      const selectedEnvironmentId = await prompt('Select the environment to delete:', {
+        type: 'select',
+        options: environments.map((env) => ({ label: env.name, value: env.id })),
       });
+      environmentId = selectedEnvironmentId;
     }
 
     if (isInteractive()) {
