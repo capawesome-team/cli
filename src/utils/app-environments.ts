@@ -24,8 +24,8 @@ export function parseKeyValuePairs(content: string): Array<{ key: string; value:
     if (separatorIndex === -1) {
       continue;
     }
-    const key = trimmed.slice(0, Math.max(0, separatorIndex)).trim();
-    const value = trimmed.slice(Math.max(0, separatorIndex + 1)).trim();
+    const key = trimmed.slice(0, separatorIndex).trim();
+    const value = trimmed.slice(separatorIndex + 1).trim();
     if (key && value) {
       items.push({ key, value });
     }
