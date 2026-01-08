@@ -1,6 +1,6 @@
 {
   "name": "@capawesome/cli",
-  "version": "3.10.2",
+  "version": "3.11.0",
   "description": "The Capawesome Cloud Command Line Interface (CLI) to manage Live Updates and more.",
   "type": "module",
   "scripts": {

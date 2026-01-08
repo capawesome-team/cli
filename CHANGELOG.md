@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.11.0](https://github.com/capawesome-team/cli/compare/v3.10.2...v3.11.0) (2026-01-08)
+
+
+### Features
+
+* **apps:** add commands for managing environments ([#109](https://github.com/capawesome-team/cli/issues/109)) ([2d548f3](https://github.com/capawesome-team/cli/commit/2d548f380e536e94a38b6908dadb31566eac449e))
+
 ## [3.10.2](https://github.com/capawesome-team/cli/compare/v3.10.1...v3.10.2) (2025-12-30)
 
 ## [3.10.1](https://github.com/capawesome-team/cli/compare/v3.10.0...v3.10.1) (2025-12-29)
