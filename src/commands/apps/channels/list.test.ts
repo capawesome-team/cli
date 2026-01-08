@@ -54,7 +54,9 @@ describe('apps-channels-list', () => {
 
     await expect(listChannelsCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
-    expect(mockConsola.error).toHaveBeenCalledWith('You must provide an app ID.');
+    expect(mockConsola.error).toHaveBeenCalledWith(
+      'You must provide an app ID when running in non-interactive environment.',
+    );
   });
 
   it('should list channels and display table format', async () => {

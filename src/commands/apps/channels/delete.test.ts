@@ -139,27 +139,43 @@ describe('apps-channels-delete', () => {
     expect(mockConsola.success).toHaveBeenCalledWith('Channel deleted successfully.');
   });
 
-  it('should prompt for channel name when neither channelId nor name provided', async () => {
+  it('should prompt for channel selection when channelId and name not provided', async () => {
     const appId = 'app-123';
+    const channelId = 'channel-456';
     const channelName = 'development';
     const testToken = 'test-token';
 
     const options = { appId };
 
-    const scope = nock(DEFAULT_API_BASE_URL)
-      .delete(`/v1/apps/${appId}/channels`)
-      .query({ name: channelName })
+    const channelsListScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}/channels`)
+      .query(true)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, [
+        {
+          id: channelId,
+          name: channelName,
+          appId,
+        },
+      ]);
+
+    const deleteScope = nock(DEFAULT_API_BASE_URL)
+      .delete(`/v1/apps/${appId}/channels/${channelId}`)
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(200);
 
     mockPrompt
-      .mockResolvedValueOnce(channelName) // channel name input
+      .mockResolvedValueOnce(channelId) // channel selection
       .mockResolvedValueOnce(true); // confirmation
 
     await deleteChannelCommand.action(options, undefined);
 
-    expect(scope.isDone()).toBe(true);
-    expect(mockPrompt).toHaveBeenCalledWith('Enter the channel name:', { type: 'text' });
+    expect(channelsListScope.isDone()).toBe(true);
+    expect(deleteScope.isDone()).toBe(true);
+    expect(mockPrompt).toHaveBeenCalledWith('Select the channel to delete:', {
+      type: 'select',
+      options: [{ label: channelName, value: channelId }],
+    });
     expect(mockConsola.success).toHaveBeenCalledWith('Channel deleted successfully.');
   });
 
