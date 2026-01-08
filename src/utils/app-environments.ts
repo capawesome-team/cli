@@ -7,14 +7,14 @@
  * - Lines without = are skipped
  * - Keys and values are trimmed
  * - Values can contain = characters
- * - Lines with empty keys or values are skipped
+ * - Lines with empty keys are skipped
  *
  * @param content - Content string to parse
  * @returns Array of key-value pairs
  */
 export function parseKeyValuePairs(content: string): Array<{ key: string; value: string }> {
   const lines = content.split('\n');
-  const items: Array<{ key: string; value: string }> = [];
+  const pairs: Array<{ key: string; value: string }> = [];
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith('#')) {
@@ -26,9 +26,9 @@ export function parseKeyValuePairs(content: string): Array<{ key: string; value:
     }
     const key = trimmed.slice(0, separatorIndex).trim();
     const value = trimmed.slice(separatorIndex + 1).trim();
-    if (key && value) {
-      items.push({ key, value });
+    if (key) {
+      pairs.push({ key, value });
     }
   }
-  return items;
+  return pairs;
 }
