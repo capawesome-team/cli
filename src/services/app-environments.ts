@@ -68,14 +68,11 @@ class AppEnvironmentsServiceImpl implements AppEnvironmentsService {
     const url = queryString
       ? `/v1/apps/${dto.appId}/environments?${queryString}`
       : `/v1/apps/${dto.appId}/environments`;
-    const response = await this.httpClient.get<AppEnvironmentDto[]>(
-      url,
-      {
-        headers: {
-          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
-        },
+    const response = await this.httpClient.get<AppEnvironmentDto[]>(url, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
-    );
+    });
     return response.data;
   }
 
