@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseKeyValuePairs } from './env-file.js';
+import { parseKeyValuePairs } from './app-environments.js';
 
 describe('parseKeyValuePairs', () => {
   it('should parse valid key-value pairs', () => {

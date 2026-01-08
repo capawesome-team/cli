@@ -2,7 +2,7 @@ import appEnvironmentsService from '@/services/app-environments.js';
 import appsService from '@/services/apps.js';
 import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
-import { parseKeyValuePairs } from '@/utils/env-file.js';
+import { parseKeyValuePairs } from '@/utils/app-environments.js
 import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
