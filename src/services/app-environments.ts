@@ -64,8 +64,12 @@ class AppEnvironmentsServiceImpl implements AppEnvironmentsService {
     if (dto.offset) {
       queryParams.append('offset', dto.offset.toString());
     }
+    const queryString = queryParams.toString();
+    const url = queryString
+      ? `/v1/apps/${dto.appId}/environments?${queryString}`
+      : `/v1/apps/${dto.appId}/environments`;
     const response = await this.httpClient.get<AppEnvironmentDto[]>(
-      `/v1/apps/${dto.appId}/environments?${queryParams}`,
+      url,
       {
         headers: {
           Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
