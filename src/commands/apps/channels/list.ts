@@ -66,8 +66,8 @@ export default defineCommand({
     });
     const logData = foundChannels.map((channel) => ({
       id: channel.id,
+      forceAppBuildArtifactSignature: channel.forceAppBuildArtifactSignature,
       name: channel.name,
-      totalAppBundleLimit: channel.totalAppBundleLimit,
       appId: channel.appId,
       createdAt: channel.createdAt,
       updatedAt: channel.updatedAt,

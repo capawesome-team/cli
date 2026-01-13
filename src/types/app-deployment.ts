@@ -6,6 +6,7 @@ export interface AppDeploymentDto {
   appBuildId: string;
   appDestinationId?: string;
   appDestinationName?: string;
+  appChannelName?: string;
   jobId: string;
   job?: JobDto;
 }
@@ -14,6 +15,7 @@ export interface CreateAppDeploymentDto {
   appId: string;
   appBuildId: string;
   appDestinationName?: string;
+  appChannelName?: string;
 }
 
 export interface FindOneAppDeploymentDto {

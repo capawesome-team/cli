@@ -38,6 +38,10 @@ export default defineCommand({
         .union([z.boolean(), z.string()])
         .optional()
         .describe('Download the IPA artifact. Optionally provide a file path.'),
+      zip: z
+        .union([z.boolean(), z.string()])
+        .optional()
+        .describe('Download the ZIP artifact. Optionally provide a file path.'),
     }),
   ),
   action: async (options) => {
@@ -131,17 +135,22 @@ export default defineCommand({
       consola.error('Cannot download APK or AAB artifacts for an iOS build.');
       process.exit(1);
     }
+    if (build.platform === 'web' && (options.apk || options.aab || options.ipa)) {
+      consola.error('Cannot download APK, AAB, or IPA artifacts for a Web build.');
+      process.exit(1);
+    }
 
     // Determine which artifacts to download
     let downloadApk = options.apk;
     let downloadAab = options.aab;
     let downloadIpa = options.ipa;
+    let downloadZip = options.zip;
 
     // Prompt for artifact types if none were provided
-    if (!downloadApk && !downloadAab && !downloadIpa) {
+    if (!downloadApk && !downloadAab && !downloadIpa && !downloadZip) {
       if (!isInteractive()) {
         consola.error(
-          'You must specify at least one artifact type (--apk, --aab, or --ipa) when running in non-interactive environment.',
+          'You must specify at least one artifact type (--apk, --aab, --ipa, or --zip) when running in non-interactive environment.',
         );
         process.exit(1);
       }
@@ -169,6 +178,10 @@ export default defineCommand({
         if (availableArtifacts.includes('ipa')) {
           artifactOptions.push({ label: 'IPA', value: 'ipa' });
         }
+      } else if (build.platform === 'web') {
+        if (availableArtifacts.includes('zip')) {
+          artifactOptions.push({ label: 'ZIP', value: 'zip' });
+        }
       }
 
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
@@ -186,6 +199,7 @@ export default defineCommand({
       downloadApk = (selectedArtifacts as string[]).includes('apk');
       downloadAab = (selectedArtifacts as string[]).includes('aab');
       downloadIpa = (selectedArtifacts as string[]).includes('ipa');
+      downloadZip = (selectedArtifacts as string[]).includes('zip');
     }
 
     // Download artifacts if flags are set
@@ -216,17 +230,26 @@ export default defineCommand({
         filePath: typeof options.ipa === 'string' ? options.ipa : undefined,
       });
     }
+    if (downloadZip) {
+      await handleArtifactDownload({
+        appId,
+        buildId: buildId!,
+        buildArtifacts: build.appBuildArtifacts,
+        artifactType: 'zip',
+        filePath: typeof options.zip === 'string' ? options.zip : undefined,
+      });
+    }
   },
 });
 
 /**
- * Download a build artifact (APK, AAB, or IPA).
+ * Download a build artifact (APK, AAB, IPA, or ZIP).
  */
 const handleArtifactDownload = async (options: {
   appId: string;
   buildId: string;
   buildArtifacts: any[] | undefined;
-  artifactType: 'apk' | 'aab' | 'ipa';
+  artifactType: 'apk' | 'aab' | 'ipa' | 'zip';
   filePath?: string;
 }): Promise<void> => {
   const { appId, buildId, buildArtifacts, artifactType, filePath } = options;

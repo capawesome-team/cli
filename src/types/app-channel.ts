@@ -1,16 +1,16 @@
 export interface AppChannelDto {
   id: string;
   appId: string;
+  forceAppBuildArtifactSignature: boolean;
   name: string;
-  totalAppBundleLimit: number;
   createdAt: number;
   updatedAt: number;
 }
 
 export interface CreateAppChannelDto {
   appId: string;
+  forceAppBuildArtifactSignature?: boolean;
   name: string;
-  totalAppBundleLimit?: number;
   expiresAt?: string;
 }
 

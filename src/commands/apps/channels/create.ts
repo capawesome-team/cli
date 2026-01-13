@@ -2,11 +2,11 @@ import appChannelsService from '@/services/app-channels.js';
 import appsService from '@/services/apps.js';
 import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
+import { isInteractive } from '@/utils/environment.js';
 import { getMessageFromUnknownError } from '@/utils/error.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
-import { isInteractive } from '@/utils/environment.js';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -14,12 +14,6 @@ export default defineCommand({
   options: defineOptions(
     z.object({
       appId: z.string().optional().describe('ID of the app.'),
-      bundleLimit: z.coerce
-        .number()
-        .optional()
-        .describe(
-          'Maximum number of bundles that can be assigned to the channel. If more bundles are assigned, the oldest bundles will be automatically deleted.',
-        ),
       expiresInDays: z.coerce
         .number({
           message: 'Expiration days must be an integer.',
@@ -29,12 +23,13 @@ export default defineCommand({
         })
         .optional()
         .describe('The number of days until the channel is automatically deleted.'),
+      forceSignature: z.boolean().optional().describe('Whether to allow unsigned app deployments or not.'),
       ignoreErrors: z.boolean().optional().describe('Whether to ignore errors or not.'),
       name: z.string().optional().describe('Name of the channel.'),
     }),
   ),
   action: async (options, args) => {
-    let { appId, bundleLimit, expiresInDays, ignoreErrors, name } = options;
+    let { appId, expiresInDays, forceSignature, ignoreErrors, name } = options;
 
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command. Please run the `login` command first.');
@@ -94,8 +89,8 @@ export default defineCommand({
     try {
       const response = await appChannelsService.create({
         appId,
+        forceAppBuildArtifactSignature: forceSignature,
         name,
-        totalAppBundleLimit: bundleLimit,
         expiresAt,
       });
       consola.success('Channel created successfully.');

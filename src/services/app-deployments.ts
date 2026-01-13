@@ -21,12 +21,15 @@ class AppDeploymentsServiceImpl implements AppDeploymentsService {
   }
 
   async create(dto: CreateAppDeploymentDto): Promise<AppDeploymentDto> {
-    const { appId, appBuildId, appDestinationName } = dto;
-    const bodyData: { appBuildId: string; appDestinationName?: string } = {
+    const { appId, appBuildId, appDestinationName, appChannelName } = dto;
+    const bodyData: { appBuildId: string; appDestinationName?: string; appChannelName?: string } = {
       appBuildId,
     };
     if (appDestinationName) {
       bodyData.appDestinationName = appDestinationName;
+    }
+    if (appChannelName) {
+      bodyData.appChannelName = appChannelName;
     }
     const response = await this.httpClient.post<AppDeploymentDto>(`/v1/apps/${appId}/deployments`, bodyData, {
       headers: {
