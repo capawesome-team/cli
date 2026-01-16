@@ -21,17 +21,7 @@ class AppDeploymentsServiceImpl implements AppDeploymentsService {
   }
 
   async create(dto: CreateAppDeploymentDto): Promise<AppDeploymentDto> {
-    const { appId, appBuildId, appDestinationName, appChannelName } = dto;
-    const bodyData: { appBuildId: string; appDestinationName?: string; appChannelName?: string } = {
-      appBuildId,
-    };
-    if (appDestinationName) {
-      bodyData.appDestinationName = appDestinationName;
-    }
-    if (appChannelName) {
-      bodyData.appChannelName = appChannelName;
-    }
-    const response = await this.httpClient.post<AppDeploymentDto>(`/v1/apps/${appId}/deployments`, bodyData, {
+    const response = await this.httpClient.post<AppDeploymentDto>(`/v1/apps/${dto.appId}/deployments`, dto, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
@@ -40,27 +30,33 @@ class AppDeploymentsServiceImpl implements AppDeploymentsService {
   }
 
   async findAll(dto: FindAllAppDeploymentsDto): Promise<AppDeploymentDto[]> {
-    const { appId } = dto;
-    const response = await this.httpClient.get<AppDeploymentDto[]>(`/v1/apps/${appId}/deployments`, {
-      headers: {
-        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
-      },
-    });
-    return response.data;
-  }
-
-  async findOne(dto: FindOneAppDeploymentDto): Promise<AppDeploymentDto> {
-    const { appId, appDeploymentId, relations } = dto;
     const params: Record<string, string> = {};
-    if (relations) {
-      params.relations = relations;
+    if (dto.jobStatuses) {
+      params.jobStatuses = dto.jobStatuses.join(',');
     }
-    const response = await this.httpClient.get<AppDeploymentDto>(`/v1/apps/${appId}/deployments/${appDeploymentId}`, {
+    const response = await this.httpClient.get<AppDeploymentDto[]>(`/v1/apps/${dto.appId}/deployments`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
       params,
     });
+    return response.data;
+  }
+
+  async findOne(dto: FindOneAppDeploymentDto): Promise<AppDeploymentDto> {
+    const params: Record<string, string> = {};
+    if (dto.relations) {
+      params.relations = dto.relations;
+    }
+    const response = await this.httpClient.get<AppDeploymentDto>(
+      `/v1/apps/${dto.appId}/deployments/${dto.appDeploymentId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
+        params,
+      },
+    );
     return response.data;
   }
 }

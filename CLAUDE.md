@@ -10,6 +10,11 @@ Don't be shy to asked questions -- I'm here to help you!
 
 If i send you a URL, you MUST immediately fetch it's content and read it carefully, before your do anything else.
 
+## Plan Mode
+
+- Make the plan extremely concise. Sacrifice grammar for the sake of conciseness.
+- At the end of each plan, give me a list of unresolved questions to answer, if any.
+
 ## Dependencies
 
 This project uses the following dependencies, among others:
