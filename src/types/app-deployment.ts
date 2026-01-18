@@ -26,14 +26,4 @@ export interface FindOneAppDeploymentDto {
 
 export interface FindAllAppDeploymentsDto {
   appId: string;
-  jobStatuses?: (
-    | 'queued'
-    | 'pending'
-    | 'in_progress'
-    | 'succeeded'
-    | 'failed'
-    | 'canceled'
-    | 'rejected'
-    | 'timed_out'
-  )[];
 }

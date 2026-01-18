@@ -34,9 +34,6 @@ class AppBuildsServiceImpl implements AppBuildsService {
 
   async findAll(dto: FindAllAppBuildsDto): Promise<AppBuildDto[]> {
     const params: Record<string, string> = {};
-    if (dto.jobStatuses) {
-      params.jobStatuses = dto.jobStatuses.join(',');
-    }
     if (dto.platform) {
       params.platform = dto.platform;
     }

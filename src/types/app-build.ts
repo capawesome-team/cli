@@ -44,15 +44,5 @@ export interface FindOneAppBuildDto {
 
 export interface FindAllAppBuildsDto {
   appId: string;
-  jobStatuses?: (
-    | 'queued'
-    | 'pending'
-    | 'in_progress'
-    | 'succeeded'
-    | 'failed'
-    | 'canceled'
-    | 'rejected'
-    | 'timed_out'
-  )[];
   platform?: 'android' | 'ios' | 'web';
 }
