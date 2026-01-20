@@ -47,3 +47,8 @@ export interface PauseAppChannelDto {
   appId: string;
   channelId: string;
 }
+
+export interface ResumeAppChannelDto {
+  appId: string;
+  channelId: string;
+}

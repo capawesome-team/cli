@@ -5,6 +5,7 @@ import {
   FindAllAppChannelsDto,
   FindOneAppChannelByIdDto,
   PauseAppChannelDto,
+  ResumeAppChannelDto,
   UpdateAppChannelDto,
 } from '@/types/index.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
@@ -16,6 +17,7 @@ export interface AppChannelsService {
   findAll(dto: FindAllAppChannelsDto): Promise<AppChannelDto[]>;
   findOneById(dto: FindOneAppChannelByIdDto): Promise<AppChannelDto>;
   pause(dto: PauseAppChannelDto): Promise<void>;
+  resume(dto: ResumeAppChannelDto): Promise<void>;
   update(dto: UpdateAppChannelDto): Promise<AppChannelDto>;
 }
 
@@ -88,11 +90,27 @@ class AppChannelsServiceImpl implements AppChannelsService {
   }
 
   async pause(dto: PauseAppChannelDto): Promise<void> {
-    await this.httpClient.post(`/v1/apps/${dto.appId}/channels/${dto.channelId}/pause`, {}, {
-      headers: {
-        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+    await this.httpClient.post(
+      `/v1/apps/${dto.appId}/channels/${dto.channelId}/pause`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
       },
-    });
+    );
+  }
+
+  async resume(dto: ResumeAppChannelDto): Promise<void> {
+    await this.httpClient.post(
+      `/v1/apps/${dto.appId}/channels/${dto.channelId}/resume`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
+      },
+    );
   }
 
   async update(dto: UpdateAppChannelDto): Promise<AppChannelDto> {
