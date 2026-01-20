@@ -20,8 +20,8 @@
     "postpublish": "npm run sentry:releases:finalize"
   },
   "engines": {
-    "npm": ">=8.0.0",
-    "node": ">=18.0.0"
+    "npm": ">=10.0.0",
+    "node": ">=20.0.0"
   },
   "bin": {
     "capawesome": "./dist/index.js"

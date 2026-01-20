@@ -14,6 +14,14 @@ This is a comprehensive list of the breaking changes introduced in the major ver
 
 The `--bundle-limit` parameter has been removed from the `apps:channels:create` and `apps:channels:update` commands as it is no longer necessary. Channels only support a single active build at a time, making this parameter redundant.
 
+### Minimum Node.js Version
+
+The minimum required Node.js version has been updated to **20.0.0**. Please ensure that your environment meets this requirement before using the CLI. You can still use the CLI with older Node.js versions, but it is no longer officially supported.
+
+### Minimum npm Version
+
+The minimum required npm version has been updated to **10.0.0**. Please ensure that your environment meets this requirement before using the CLI. You can still use the CLI with older npm versions, but it is no longer officially supported.
+
 ## Version 3.x.x
 
 ### Unsupported Options
