@@ -104,16 +104,37 @@ export default defineCommand({
         consola.error('You must provide a build ID when running in non-interactive environment.');
         process.exit(1);
       }
-      const builds = await appBuildsService.findAll({ appId });
+      // Prompt for platform selection
+      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+      const platform = await prompt('Select the platform of the build you want to deploy:', {
+        type: 'select',
+        options: [
+          { label: 'Android', value: 'android' },
+          { label: 'iOS', value: 'ios' },
+          { label: 'Web', value: 'web' },
+        ],
+      });
+      if (!platform) {
+        consola.error('You must select a platform.');
+        process.exit(1);
+      }
+      if (platform !== 'android' && platform !== 'ios' && platform !== 'web') {
+        consola.error('Invalid platform selected.');
+        process.exit(1);
+      }
+      const builds = await appBuildsService.findAll({ appId, platform: platform });
       if (builds.length === 0) {
         consola.error('You must create a build before creating a deployment.');
         process.exit(1);
       }
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      buildId = await prompt('Which build do you want to deploy:', {
+      buildId = await prompt('Select the build you want to deploy:', {
         type: 'select',
         options: builds.map((build) => ({
-          label: `Build #${build.numberAsString} (${build.platform} - ${build.type})`,
+          label:
+            build.platform === 'web'
+              ? `Build #${build.numberAsString}`
+              : `Build #${build.numberAsString} (${build.type})`,
           value: build.id,
         })),
       });
