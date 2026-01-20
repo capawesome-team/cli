@@ -1,8 +1,10 @@
+import { AppBuildDto } from './app-build.js';
 import { JobDto } from './job.js';
 
 export interface AppDeploymentDto {
   id: string;
   appId: string;
+  appBuild?: AppBuildDto;
   appBuildId: string;
   appDestinationId?: string;
   appDestinationName?: string;
@@ -26,4 +28,7 @@ export interface FindOneAppDeploymentDto {
 
 export interface FindAllAppDeploymentsDto {
   appId: string;
+  appChannelId?: string;
+  limit?: number;
+  relations?: string;
 }

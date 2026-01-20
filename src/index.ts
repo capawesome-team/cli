@@ -48,6 +48,7 @@ const config = defineConfig({
     'apps:liveupdates:generatesigningkey': await import('@/commands/apps/liveupdates/generate-signing-key.js').then(
       (mod) => mod.default,
     ),
+    'apps:liveupdates:rollback': await import('@/commands/apps/liveupdates/rollback.js').then((mod) => mod.default),
     'manifests:generate': await import('@/commands/manifests/generate.js').then((mod) => mod.default),
     'organizations:create': await import('@/commands/organizations/create.js').then((mod) => mod.default),
   },

@@ -30,10 +30,21 @@ class AppDeploymentsServiceImpl implements AppDeploymentsService {
   }
 
   async findAll(dto: FindAllAppDeploymentsDto): Promise<AppDeploymentDto[]> {
+    const params: Record<string, string> = {};
+    if (dto.appChannelId) {
+      params.appChannelId = dto.appChannelId;
+    }
+    if (dto.limit) {
+      params.limit = dto.limit.toString();
+    }
+    if (dto.relations) {
+      params.relations = dto.relations;
+    }
     const response = await this.httpClient.get<AppDeploymentDto[]>(`/v1/apps/${dto.appId}/deployments`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
+      params,
     });
     return response.data;
   }
