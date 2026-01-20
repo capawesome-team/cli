@@ -11,6 +11,7 @@ export interface AppDeploymentDto {
   appChannelName?: string;
   jobId: string;
   job?: JobDto;
+  rolloutPercentage?: number;
 }
 
 export interface CreateAppDeploymentDto {
@@ -31,4 +32,10 @@ export interface FindAllAppDeploymentsDto {
   appChannelId?: string;
   limit?: number;
   relations?: string;
+}
+
+export interface UpdateAppDeploymentDto {
+  appId: string;
+  appDeploymentId: string;
+  rolloutPercentage?: number;
 }

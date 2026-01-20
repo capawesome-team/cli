@@ -49,6 +49,7 @@ const config = defineConfig({
       (mod) => mod.default,
     ),
     'apps:liveupdates:rollback': await import('@/commands/apps/liveupdates/rollback.js').then((mod) => mod.default),
+    'apps:liveupdates:rollout': await import('@/commands/apps/liveupdates/rollout.js').then((mod) => mod.default),
     'manifests:generate': await import('@/commands/manifests/generate.js').then((mod) => mod.default),
     'organizations:create': await import('@/commands/organizations/create.js').then((mod) => mod.default),
   },

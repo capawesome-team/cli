@@ -72,10 +72,15 @@ class AppChannelsServiceImpl implements AppChannelsService {
   }
 
   async findOneById(data: FindOneAppChannelByIdDto): Promise<AppChannelDto> {
+    const params: Record<string, string> = {};
+    if (data.relations) {
+      params.relations = data.relations;
+    }
     const response = await this.httpClient.get<AppChannelDto>(`/v1/apps/${data.appId}/channels/${data.id}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
+      params,
     });
     return response.data;
   }

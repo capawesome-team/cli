@@ -1,5 +1,9 @@
+import { AppDeploymentDto } from './app-deployment.js';
+
 export interface AppChannelDto {
   id: string;
+  appDeployment?: AppDeploymentDto | null;
+  appDeploymentId: string | null;
   appId: string;
   forceAppBuildArtifactSignature: boolean;
   name: string;
@@ -23,6 +27,7 @@ export interface DeleteAppChannelDto {
 export interface FindOneAppChannelByIdDto {
   appId: string;
   id: string;
+  relations?: string;
 }
 
 export interface FindAllAppChannelsDto {
