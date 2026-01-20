@@ -8,6 +8,7 @@
  * - Keys and values are trimmed
  * - Values can contain = characters
  * - Lines with empty keys are skipped
+ * - Lines with empty values are skipped
  *
  * @param content - Content string to parse
  * @returns Array of key-value pairs
@@ -26,7 +27,7 @@ export function parseKeyValuePairs(content: string): Array<{ key: string; value:
     }
     const key = trimmed.slice(0, separatorIndex).trim();
     const value = trimmed.slice(separatorIndex + 1).trim();
-    if (key) {
+    if (key && value) {
       pairs.push({ key, value });
     }
   }

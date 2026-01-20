@@ -66,7 +66,7 @@ describe('apps-channels-list', () => {
       {
         id: 'channel-1',
         name: 'production',
-        totalAppBundleLimit: 10,
+        forceAppBuildArtifactSignature: undefined,
         appId,
         createdAt: '2023-01-01T00:00:00Z',
         updatedAt: '2023-01-01T00:00:00Z',
@@ -74,7 +74,7 @@ describe('apps-channels-list', () => {
       {
         id: 'channel-2',
         name: 'staging',
-        totalAppBundleLimit: 5,
+        forceAppBuildArtifactSignature: undefined,
         appId,
         createdAt: '2023-01-02T00:00:00Z',
         updatedAt: '2023-01-02T00:00:00Z',
@@ -102,7 +102,6 @@ describe('apps-channels-list', () => {
       {
         id: 'channel-1',
         name: 'production',
-        totalAppBundleLimit: 10,
         appId,
         createdAt: '2023-01-01T00:00:00Z',
         updatedAt: '2023-01-01T00:00:00Z',

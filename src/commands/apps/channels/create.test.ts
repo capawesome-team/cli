@@ -42,17 +42,17 @@ describe('apps-channels-create', () => {
   it('should create channel with provided options', async () => {
     const appId = 'app-123';
     const channelName = 'production';
-    const bundleLimit = 5;
+    const forceSignature = true;
     const channelId = 'channel-456';
     const testToken = 'test-token';
 
-    const options = { appId, name: channelName, bundleLimit };
+    const options = { appId, name: channelName, forceSignature };
 
     const scope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/channels`, {
         appId,
         name: channelName,
-        totalAppBundleLimit: bundleLimit,
+        forceAppBuildArtifactSignature: forceSignature,
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(201, { id: channelId, name: channelName });
@@ -88,7 +88,7 @@ describe('apps-channels-create', () => {
       .post(`/v1/apps/${appId}/channels`, {
         appId,
         name: channelName,
-        totalAppBundleLimit: undefined,
+        forceAppBuildArtifactSignature: undefined,
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(201, { id: channelId, name: channelName });
@@ -112,7 +112,7 @@ describe('apps-channels-create', () => {
       .post('/v1/apps/app-123/channels', {
         appId: 'app-123',
         name: 'development',
-        totalAppBundleLimit: undefined,
+        forceAppBuildArtifactSignature: undefined,
       })
       .matchHeader('Authorization', 'Bearer test-token')
       .reply(201, { id: 'channel-456', name: 'development' });
@@ -175,7 +175,7 @@ describe('apps-channels-create', () => {
         return (
           body.appId === appId &&
           body.name === channelName &&
-          body.totalAppBundleLimit === undefined &&
+          body.forceAppBuildArtifactSignature === undefined &&
           timeDiff < oneMinute
         );
       })
