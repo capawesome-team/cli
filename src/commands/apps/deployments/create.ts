@@ -29,6 +29,7 @@ export default defineCommand({
         })
         .optional()
         .describe('Build ID to deploy.'),
+      buildNumber: z.string().optional().describe('Build number to deploy (e.g., "1", "42").'),
       channel: z.string().optional().describe('The name of the channel to deploy to (Web only).'),
       destination: z.string().optional().describe('The name of the destination to deploy to (Android/iOS only).'),
       detached: z
@@ -38,7 +39,7 @@ export default defineCommand({
     }),
   ),
   action: async (options) => {
-    let { appId, buildId, channel, destination } = options;
+    let { appId, buildId, buildNumber, channel, destination } = options;
 
     // Check if the user is logged in
     if (!authorizationService.hasAuthorizationToken()) {
@@ -85,6 +86,16 @@ export default defineCommand({
         consola.error('You must select an app to create a deployment for.');
         process.exit(1);
       }
+    }
+
+    // Convert build number to build ID if provided
+    if (!buildId && buildNumber) {
+      const builds = await appBuildsService.findAll({ appId, numberAsString: buildNumber });
+      if (builds.length === 0) {
+        consola.error(`Build #${buildNumber} not found.`);
+        process.exit(1);
+      }
+      buildId = builds[0].id;
     }
 
     // Prompt for build ID if not provided

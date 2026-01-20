@@ -44,5 +44,6 @@ export interface FindOneAppBuildDto {
 
 export interface FindAllAppBuildsDto {
   appId: string;
+  numberAsString?: string;
   platform?: 'android' | 'ios' | 'web';
 }

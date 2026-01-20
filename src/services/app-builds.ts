@@ -37,6 +37,9 @@ class AppBuildsServiceImpl implements AppBuildsService {
     if (dto.platform) {
       params.platform = dto.platform;
     }
+    if (dto.numberAsString) {
+      params.numberAsString = dto.numberAsString;
+    }
     const response = await this.httpClient.get<AppBuildDto[]>(`/v1/apps/${dto.appId}/builds`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
