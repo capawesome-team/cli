@@ -4,6 +4,7 @@ import {
   CreateAppDeploymentDto,
   FindAllAppDeploymentsDto,
   FindOneAppDeploymentDto,
+  UpdateAppDeploymentDto,
 } from '@/types/app-deployment.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
 
@@ -11,6 +12,7 @@ export interface AppDeploymentsService {
   create(dto: CreateAppDeploymentDto): Promise<AppDeploymentDto>;
   findAll(dto: FindAllAppDeploymentsDto): Promise<AppDeploymentDto[]>;
   findOne(dto: FindOneAppDeploymentDto): Promise<AppDeploymentDto>;
+  update(dto: UpdateAppDeploymentDto): Promise<AppDeploymentDto>;
 }
 
 class AppDeploymentsServiceImpl implements AppDeploymentsService {
@@ -61,6 +63,19 @@ class AppDeploymentsServiceImpl implements AppDeploymentsService {
           Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
         },
         params,
+      },
+    );
+    return response.data;
+  }
+
+  async update(dto: UpdateAppDeploymentDto): Promise<AppDeploymentDto> {
+    const response = await this.httpClient.patch<AppDeploymentDto>(
+      `/v1/apps/${dto.appId}/deployments/${dto.appDeploymentId}`,
+      dto,
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
       },
     );
     return response.data;
