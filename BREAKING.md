@@ -4,8 +4,15 @@ This is a comprehensive list of the breaking changes introduced in the major ver
 
 ## Versions
 
+- [Version 4.x.x](#version-4xx)
 - [Version 3.x.x](#version-3xx)
 - [Version 2.x.x](#version-2xx)
+
+## Version 4.x.x
+
+### Removed `--bundle-limit` parameter
+
+The `--bundle-limit` parameter has been removed from the `apps:channels:create` command as it is no longer necessary. Channels only support a single active build at a time, making this parameter redundant.
 
 ## Version 3.x.x
 
