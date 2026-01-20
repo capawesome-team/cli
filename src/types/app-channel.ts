@@ -42,3 +42,8 @@ export interface UpdateAppChannelDto {
   appChannelId: string;
   name?: string;
 }
+
+export interface PauseAppChannelDto {
+  appId: string;
+  channelId: string;
+}

@@ -35,6 +35,7 @@ const config = defineConfig({
     'apps:channels:delete': await import('@/commands/apps/channels/delete.js').then((mod) => mod.default),
     'apps:channels:get': await import('@/commands/apps/channels/get.js').then((mod) => mod.default),
     'apps:channels:list': await import('@/commands/apps/channels/list.js').then((mod) => mod.default),
+    'apps:channels:pause': await import('@/commands/apps/channels/pause.js').then((mod) => mod.default),
     'apps:channels:update': await import('@/commands/apps/channels/update.js').then((mod) => mod.default),
     'apps:environments:create': await import('@/commands/apps/environments/create.js').then((mod) => mod.default),
     'apps:environments:delete': await import('@/commands/apps/environments/delete.js').then((mod) => mod.default),

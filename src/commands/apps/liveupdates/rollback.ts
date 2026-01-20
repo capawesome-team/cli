@@ -105,7 +105,7 @@ export default defineCommand({
     // Fetch channel by name
     const appChannels = await appChannelsService.findAll({ appId, name: channel });
     if (appChannels.length === 0) {
-      consola.error(`Channel '${channel}' not found.`);
+      consola.error('Channel not found.');
       process.exit(1);
     }
     const appChannelId = appChannels[0]?.id;

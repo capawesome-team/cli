@@ -4,6 +4,7 @@ import {
   DeleteAppChannelDto,
   FindAllAppChannelsDto,
   FindOneAppChannelByIdDto,
+  PauseAppChannelDto,
   UpdateAppChannelDto,
 } from '@/types/index.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
@@ -14,6 +15,7 @@ export interface AppChannelsService {
   delete(dto: DeleteAppChannelDto): Promise<void>;
   findAll(dto: FindAllAppChannelsDto): Promise<AppChannelDto[]>;
   findOneById(dto: FindOneAppChannelByIdDto): Promise<AppChannelDto>;
+  pause(dto: PauseAppChannelDto): Promise<void>;
   update(dto: UpdateAppChannelDto): Promise<AppChannelDto>;
 }
 
@@ -83,6 +85,14 @@ class AppChannelsServiceImpl implements AppChannelsService {
       params,
     });
     return response.data;
+  }
+
+  async pause(dto: PauseAppChannelDto): Promise<void> {
+    await this.httpClient.post(`/v1/apps/${dto.appId}/channels/${dto.channelId}/pause`, {}, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+      },
+    });
   }
 
   async update(dto: UpdateAppChannelDto): Promise<AppChannelDto> {
