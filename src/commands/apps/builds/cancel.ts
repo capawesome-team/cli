@@ -3,10 +3,10 @@ import appsService from '@/services/apps.js';
 import authorizationService from '@/services/authorization-service.js';
 import jobsService from '@/services/jobs.js';
 import organizationsService from '@/services/organizations.js';
+import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
-import { isInteractive } from '@/utils/environment.js';
 import { z } from 'zod';
 
 export default defineCommand({

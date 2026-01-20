@@ -6,7 +6,7 @@ export interface AppBuildArtifactDto {
   fileName: string;
   fileSizeInBytes: number;
   status: 'pending' | 'ready';
-  type: 'apk' | 'aab' | 'ipa';
+  type: 'apk' | 'aab' | 'ipa' | 'zip';
   createdAt: number;
 }
 
@@ -20,7 +20,7 @@ export interface AppBuildDto {
   job?: JobDto;
   jobId: string;
   numberAsString: string;
-  platform: 'ios' | 'android';
+  platform: 'ios' | 'android' | 'web';
   type: string;
   createdAt?: number;
   createdBy?: string;
@@ -32,8 +32,8 @@ export interface CreateAppBuildDto {
   appId: string;
   stack?: 'macos-sequoia' | 'macos-tahoe';
   gitRef: string;
-  platform: 'ios' | 'android';
-  type: string;
+  platform: 'ios' | 'android' | 'web';
+  type?: string;
 }
 
 export interface FindOneAppBuildDto {
@@ -44,4 +44,5 @@ export interface FindOneAppBuildDto {
 
 export interface FindAllAppBuildsDto {
   appId: string;
+  platform?: 'android' | 'ios' | 'web';
 }

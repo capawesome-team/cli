@@ -7,13 +7,13 @@ import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
 import { AppBuildArtifactDto } from '@/types/app-build.js';
 import { unescapeAnsi } from '@/utils/ansi.js';
+import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
 import { wait } from '@/utils/wait.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import fs from 'fs/promises';
 import path from 'path';
-import { isInteractive } from '@/utils/environment.js';
 import { z } from 'zod';
 
 const IOS_BUILD_TYPES = ['simulator', 'development', 'ad-hoc', 'app-store', 'enterprise'] as const;
@@ -50,11 +50,11 @@ export default defineCommand({
         .describe('Download the generated IPA file (iOS only). Optionally provide a file path.'),
       json: z.boolean().optional().describe('Output in JSON format.'),
       platform: z
-        .enum(['ios', 'android'], {
-          message: 'Platform must be either `ios` or `android`.',
+        .enum(['ios', 'android', 'web'], {
+          message: 'Platform must be either `ios`, `android`, or `web`.',
         })
         .optional()
-        .describe('The platform for the build. Supported values are `ios` and `android`.'),
+        .describe('The platform for the build. Supported values are `ios`, `android`, and `web`.'),
       stack: z
         .enum(['macos-sequoia', 'macos-tahoe'], {
           message: 'Build stack must be either `macos-sequoia` or `macos-tahoe`.',
@@ -65,8 +65,12 @@ export default defineCommand({
         .string()
         .optional()
         .describe(
-          'The type of build. For iOS, supported values are `simulator`, `development`, `ad-hoc`, `app-store`, and `enterprise`. For Android, supported values are `debug` and `release`.',
+          'The type of build. For iOS, supported values are `simulator`, `development`, `ad-hoc`, `app-store`, and `enterprise`. For Android, supported values are `debug` and `release`. For Web, no type is required.',
         ),
+      zip: z
+        .union([z.boolean(), z.string()])
+        .optional()
+        .describe('Download the generated ZIP file (Web only). Optionally provide a file path.'),
     }),
   ),
   action: async (options) => {
@@ -79,8 +83,8 @@ export default defineCommand({
     }
 
     // Validate that detached flag cannot be used with artifact flags
-    if (options.detached && (options.apk || options.aab || options.ipa)) {
-      consola.error('The --detached flag cannot be used with --apk, --aab, or --ipa flags.');
+    if (options.detached && (options.apk || options.aab || options.ipa || options.zip)) {
+      consola.error('The --detached flag cannot be used with --apk, --aab, --ipa, or --zip flags.');
       process.exit(1);
     }
 
@@ -134,6 +138,7 @@ export default defineCommand({
         options: [
           { label: 'Android', value: 'android' },
           { label: 'iOS', value: 'ios' },
+          { label: 'Web', value: 'web' },
         ],
       });
       if (!platform) {
@@ -159,7 +164,11 @@ export default defineCommand({
 
     // Set default type based on platform if not provided
     if (!type) {
-      type = platform === 'android' ? 'debug' : 'simulator';
+      if (platform === 'android') {
+        type = 'debug';
+      } else if (platform === 'ios') {
+        type = 'simulator';
+      }
     }
 
     // Validate type based on platform
@@ -197,8 +206,8 @@ export default defineCommand({
       }
     }
 
-    // Prompt for certificate if not provided
-    if (!certificate && isInteractive()) {
+    // Prompt for certificate if not provided (skip for web platform)
+    if (!certificate && isInteractive() && platform !== 'web') {
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
       const selectCertificate = await prompt('Do you want to select a certificate?', {
         type: 'confirm',
@@ -337,6 +346,16 @@ export default defineCommand({
                   json,
                 });
               }
+              if (options.zip && platform === 'web') {
+                await handleArtifactDownload({
+                  appId,
+                  buildId: response.id,
+                  buildArtifacts: build.appBuildArtifacts,
+                  artifactType: 'zip',
+                  filePath: typeof options.zip === 'string' ? options.zip : undefined,
+                  json,
+                });
+              }
               // Output JSON if json flag is set
               if (json) {
                 console.log(
@@ -392,13 +411,13 @@ export default defineCommand({
 });
 
 /**
- * Download a build artifact (APK, AAB, or IPA).
+ * Download a build artifact (APK, AAB, IPA, or ZIP).
  */
 const handleArtifactDownload = async (options: {
   appId: string;
   buildId: string;
   buildArtifacts: AppBuildArtifactDto[] | undefined;
-  artifactType: 'apk' | 'aab' | 'ipa';
+  artifactType: 'apk' | 'aab' | 'ipa' | 'zip';
   filePath?: string;
   json?: boolean;
 }): Promise<void> => {

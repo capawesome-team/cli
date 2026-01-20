@@ -54,8 +54,8 @@ export default defineCommand({
         JSON.stringify(
           {
             id: channel.id,
+            forceAppBuildArtifactSignature: channel.forceAppBuildArtifactSignature,
             name: channel.name,
-            totalAppBundleLimit: channel.totalAppBundleLimit,
             appId: channel.appId,
           },
           null,
@@ -65,8 +65,8 @@ export default defineCommand({
     } else {
       console.table({
         id: channel.id,
+        forceAppBuildArtifactSignature: channel.forceAppBuildArtifactSignature,
         name: channel.name,
-        totalAppBundleLimit: channel.totalAppBundleLimit,
         appId: channel.appId,
       });
       consola.success('Channel retrieved successfully.');

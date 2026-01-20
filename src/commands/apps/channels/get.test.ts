@@ -81,7 +81,7 @@ describe('apps-channels-get', () => {
     const channel = {
       id: channelId,
       name: 'production',
-      totalAppBundleLimit: 10,
+      forceAppBuildArtifactSignature: undefined,
       appId,
     };
 
@@ -106,7 +106,6 @@ describe('apps-channels-get', () => {
     const channel = {
       id: 'channel-789',
       name: channelName,
-      totalAppBundleLimit: 5,
       appId,
     };
 

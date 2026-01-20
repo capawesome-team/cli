@@ -21,14 +21,7 @@ class AppDeploymentsServiceImpl implements AppDeploymentsService {
   }
 
   async create(dto: CreateAppDeploymentDto): Promise<AppDeploymentDto> {
-    const { appId, appBuildId, appDestinationName } = dto;
-    const bodyData: { appBuildId: string; appDestinationName?: string } = {
-      appBuildId,
-    };
-    if (appDestinationName) {
-      bodyData.appDestinationName = appDestinationName;
-    }
-    const response = await this.httpClient.post<AppDeploymentDto>(`/v1/apps/${appId}/deployments`, bodyData, {
+    const response = await this.httpClient.post<AppDeploymentDto>(`/v1/apps/${dto.appId}/deployments`, dto, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
@@ -37,8 +30,7 @@ class AppDeploymentsServiceImpl implements AppDeploymentsService {
   }
 
   async findAll(dto: FindAllAppDeploymentsDto): Promise<AppDeploymentDto[]> {
-    const { appId } = dto;
-    const response = await this.httpClient.get<AppDeploymentDto[]>(`/v1/apps/${appId}/deployments`, {
+    const response = await this.httpClient.get<AppDeploymentDto[]>(`/v1/apps/${dto.appId}/deployments`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
@@ -47,17 +39,19 @@ class AppDeploymentsServiceImpl implements AppDeploymentsService {
   }
 
   async findOne(dto: FindOneAppDeploymentDto): Promise<AppDeploymentDto> {
-    const { appId, appDeploymentId, relations } = dto;
     const params: Record<string, string> = {};
-    if (relations) {
-      params.relations = relations;
+    if (dto.relations) {
+      params.relations = dto.relations;
     }
-    const response = await this.httpClient.get<AppDeploymentDto>(`/v1/apps/${appId}/deployments/${appDeploymentId}`, {
-      headers: {
-        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+    const response = await this.httpClient.get<AppDeploymentDto>(
+      `/v1/apps/${dto.appId}/deployments/${dto.appDeploymentId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
+        params,
       },
-      params,
-    });
+    );
     return response.data;
   }
 }
