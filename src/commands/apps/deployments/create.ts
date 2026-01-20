@@ -95,7 +95,7 @@ export default defineCommand({
         consola.error(`Build #${buildNumber} not found.`);
         process.exit(1);
       }
-      buildId = builds[0].id;
+      buildId = builds[0]?.id;
     }
 
     // Prompt for build ID if not provided
