@@ -2,10 +2,10 @@ import appChannelsService from '@/services/app-channels.js';
 import appsService from '@/services/apps.js';
 import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
+import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
-import { isInteractive } from '@/utils/environment.js';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -14,17 +14,11 @@ export default defineCommand({
     z.object({
       appId: z.string().optional().describe('ID of the app.'),
       channelId: z.string().optional().describe('ID of the channel.'),
-      bundleLimit: z.coerce
-        .number()
-        .optional()
-        .describe(
-          'Maximum number of bundles that can be assigned to the channel. If more bundles are assigned, the oldest bundles will be automatically deleted.',
-        ),
       name: z.string().optional().describe('Name of the channel.'),
     }),
   ),
   action: async (options, args) => {
-    let { appId, channelId, bundleLimit, name } = options;
+    let { appId, channelId, name } = options;
 
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command. Please run the `login` command first.');
@@ -81,7 +75,6 @@ export default defineCommand({
       appId,
       appChannelId: channelId,
       name,
-      totalAppBundleLimit: bundleLimit,
     });
     consola.success('Channel updated successfully.');
   },

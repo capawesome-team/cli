@@ -1,6 +1,5 @@
 import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appBuildsService from '@/services/app-builds.js';
-import appChannelsService from '@/services/app-channels.js';
 import appDeploymentsService from '@/services/app-deployments.js';
 import appDestinationsService from '@/services/app-destinations.js';
 import appsService from '@/services/apps.js';
@@ -124,21 +123,11 @@ export default defineCommand({
           consola.error('You must provide a channel when running in non-interactive environment.');
           process.exit(1);
         }
-        const channels = await appChannelsService.findAll({ appId });
-        if (channels.length === 0) {
-          consola.error('You must create a channel before creating a web deployment.');
-          process.exit(1);
-        }
-        // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-        channel = await prompt('Which channel do you want to deploy to:', {
-          type: 'select',
-          options: channels.map((ch) => ({
-            label: ch.name,
-            value: ch.name,
-          })),
+        channel = await prompt('Enter the channel name to deploy to:', {
+          type: 'text',
         });
         if (!channel) {
-          consola.error('You must select a channel to deploy to.');
+          consola.error('You must enter a channel name to deploy to.');
           process.exit(1);
         }
       }

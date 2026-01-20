@@ -58,17 +58,15 @@ describe('apps-channels-update', () => {
     const appId = 'app-123';
     const channelId = 'channel-456';
     const channelName = 'updated-production';
-    const bundleLimit = 15;
     const testToken = 'test-token';
 
-    const options = { appId, channelId, name: channelName, bundleLimit };
+    const options = { appId, channelId, name: channelName };
 
     const scope = nock(DEFAULT_API_BASE_URL)
       .patch(`/v1/apps/${appId}/channels/${channelId}`, {
         appId,
         appChannelId: channelId,
         name: channelName,
-        totalAppBundleLimit: bundleLimit,
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(200, { id: channelId, name: channelName });
@@ -87,7 +85,7 @@ describe('apps-channels-update', () => {
     const organization = { id: orgId, name: 'Org 1' };
     const app = { id: appId, name: 'App 1' };
 
-    const options = { channelId, bundleLimit: 10 };
+    const options = { channelId };
 
     const orgsScope = nock(DEFAULT_API_BASE_URL)
       .get('/v1/organizations')
