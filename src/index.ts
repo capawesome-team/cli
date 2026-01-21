@@ -47,6 +47,7 @@ const config = defineConfig({
     'apps:deployments:cancel': await import('@/commands/apps/deployments/cancel.js').then((mod) => mod.default),
     'apps:deployments:logs': await import('@/commands/apps/deployments/logs.js').then((mod) => mod.default),
     'apps:devices:delete': await import('@/commands/apps/devices/delete.js').then((mod) => mod.default),
+    'apps:liveupdates:bundle': await import('@/commands/apps/liveupdates/bundle.js').then((mod) => mod.default),
     'apps:liveupdates:generatesigningkey': await import('@/commands/apps/liveupdates/generate-signing-key.js').then(
       (mod) => mod.default,
     ),
