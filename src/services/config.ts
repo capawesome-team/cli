@@ -17,6 +17,7 @@ class ConfigServiceImpl implements ConfigService {
   }
 
   private async loadConfig(): Promise<UserInputConfig> {
+    const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true';
     const { config } = await loadConfig({
       defaults: {
         API_BASE_URL: DEFAULT_API_BASE_URL,
@@ -24,6 +25,7 @@ class ConfigServiceImpl implements ConfigService {
         ENVIRONMENT: 'production',
       },
       name: 'capawesome',
+      rcFile: isTestEnvironment ? false : undefined,
     });
     return config;
   }

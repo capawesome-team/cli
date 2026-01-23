@@ -44,7 +44,7 @@ describe('apps-liveupdates-register', () => {
   it('should require authentication', async () => {
     const appId = 'app-123';
     const bundleUrl = 'https://example.com/bundle.zip';
-    const options = { appId, url: bundleUrl, rollout: 1 };
+    const options = { appId, url: bundleUrl, rolloutPercentage: 1 };
 
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(false);
 
@@ -64,7 +64,7 @@ describe('apps-liveupdates-register', () => {
     const options = {
       appId,
       url: bundleUrl,
-      rollout: 1,
+      rolloutPercentage: 1,
     };
 
     const bundleScope = nock(DEFAULT_API_BASE_URL)
@@ -72,7 +72,7 @@ describe('apps-liveupdates-register', () => {
         appId,
         url: bundleUrl,
         artifactType: 'zip',
-        rolloutPercentage: 1,
+        rolloutPercentage: 0.01,
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(201, { id: bundleId, appBuildId: 'build-789' });
@@ -94,7 +94,7 @@ describe('apps-liveupdates-register', () => {
     const options = {
       appId,
       url: bundleUrl,
-      rollout: 1,
+      rolloutPercentage: 1,
       gitRef,
     };
 
@@ -104,7 +104,7 @@ describe('apps-liveupdates-register', () => {
         url: bundleUrl,
         artifactType: 'zip',
         gitRef,
-        rolloutPercentage: 1,
+        rolloutPercentage: 0.01,
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(201, { id: bundleId, appBuildId: 'build-789' });
@@ -129,7 +129,7 @@ describe('apps-liveupdates-register', () => {
       appId,
       url: bundleUrl,
       path: bundlePath,
-      rollout: 1,
+      rolloutPercentage: 1,
     };
 
     mockFileExistsAtPath.mockResolvedValue(true);
@@ -149,7 +149,7 @@ describe('apps-liveupdates-register', () => {
         url: bundleUrl,
         checksum: testHash,
         artifactType: 'zip',
-        rolloutPercentage: 1,
+        rolloutPercentage: 0.01,
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(201, { id: bundleId, appBuildId: 'build-789' });
@@ -177,7 +177,7 @@ describe('apps-liveupdates-register', () => {
       url: bundleUrl,
       path: bundlePath,
       privateKey: privateKeyPath,
-      rollout: 1,
+      rolloutPercentage: 1,
     };
 
     mockFileExistsAtPath.mockImplementation((path: string) => {
@@ -208,7 +208,7 @@ describe('apps-liveupdates-register', () => {
         checksum: testHash,
         signature: testSignature,
         artifactType: 'zip',
-        rolloutPercentage: 1,
+        rolloutPercentage: 0.01,
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(201, { id: bundleId, appBuildId: 'build-789' });
@@ -237,7 +237,7 @@ describe('apps-liveupdates-register', () => {
       url: bundleUrl,
       path: bundlePath,
       privateKey: privateKeyContent,
-      rollout: 1,
+      rolloutPercentage: 1,
     };
 
     mockFileExistsAtPath.mockResolvedValue(true);
@@ -264,7 +264,7 @@ describe('apps-liveupdates-register', () => {
         checksum: testHash,
         signature: testSignature,
         artifactType: 'zip',
-        rolloutPercentage: 1,
+        rolloutPercentage: 0.01,
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(201, { id: bundleId, appBuildId: 'build-789' });
@@ -287,7 +287,7 @@ describe('apps-liveupdates-register', () => {
       url: bundleUrl,
       path: bundlePath,
       privateKey: privateKeyPath,
-      rollout: 1,
+      rolloutPercentage: 1,
     };
 
     mockFileExistsAtPath.mockImplementation((path: string) => {
@@ -315,7 +315,7 @@ describe('apps-liveupdates-register', () => {
       appId,
       url: bundleUrl,
       path: bundlePath,
-      rollout: 1,
+      rolloutPercentage: 1,
     };
 
     mockFileExistsAtPath.mockResolvedValue(true);
@@ -337,7 +337,7 @@ describe('apps-liveupdates-register', () => {
     const options = {
       appId,
       url: bundleUrl,
-      rollout: 1,
+      rolloutPercentage: 1,
     };
 
     const bundleScope = nock(DEFAULT_API_BASE_URL)
