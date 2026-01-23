@@ -186,10 +186,10 @@ export default defineCommand({
       appChannelName: channel,
     });
 
+    consola.info(`Deployment ID: ${response.id}`);
+    consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.id}`);
     consola.success(
       `Rolled back to Build #${selectedAppDeployment.appBuild?.numberAsString} (${selectedIndex} step${selectedIndex === 1 ? '' : 's'} back).`,
     );
-    consola.info(`Deployment ID: ${response.id}`);
-    consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.id}`);
   },
 });

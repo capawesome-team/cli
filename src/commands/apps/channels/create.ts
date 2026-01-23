@@ -93,8 +93,8 @@ export default defineCommand({
         name,
         expiresAt,
       });
-      consola.success('Channel created successfully.');
       consola.info(`Channel ID: ${response.id}`);
+      consola.success('Channel created successfully.');
     } catch (error) {
       if (ignoreErrors) {
         const message = getMessageFromUnknownError(error);

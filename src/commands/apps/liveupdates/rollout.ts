@@ -30,7 +30,7 @@ export default defineCommand({
           message: 'Percentage must be at least 0.',
         })
         .max(100, {
-          message: 'Percentage cannot exceed 100.',
+          message: 'Percentage must be at most 100.',
         })
         .optional()
         .describe('Rollout percentage (0-100).'),
@@ -148,19 +148,17 @@ export default defineCommand({
       }
     }
 
-    // Convert percentage from 0-100 to 0-1 for API
-    const rolloutPercentage = percentage / 100;
-
     // Update deployment rollout percentage
     consola.start('Updating rollout percentage...');
     const response = await appDeploymentsService.update({
       appId,
       appDeploymentId: appChannel.appDeployment.id,
-      rolloutPercentage,
+      // Convert percentage from 0-100 to 0-1 for API
+      rolloutPercentage: percentage / 100,
     });
 
-    consola.success(`Rolled out to ${percentage}%.`);
     consola.info(`Deployment ID: ${response.id}`);
     consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.id}`);
+    consola.success(`Rolled out to ${percentage}%.`);
   },
 });

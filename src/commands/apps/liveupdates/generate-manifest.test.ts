@@ -3,7 +3,7 @@ import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
 import consola from 'consola';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import generateManifestCommand from './generate.js';
+import generateManifestCommand from './generate-manifest.js';
 
 // Mock dependencies
 vi.mock('@/utils/file.js');
@@ -14,7 +14,7 @@ vi.mock('@/utils/environment.js', () => ({
   isInteractive: () => true,
 }));
 
-describe('manifests-generate', () => {
+describe('apps-liveupdates-generatemanifest', () => {
   const mockFileExistsAtPath = vi.mocked(fileExistsAtPath);
   const mockGenerateManifestJson = vi.mocked(generateManifestJson);
   const mockPrompt = vi.mocked(prompt);

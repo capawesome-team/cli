@@ -50,7 +50,7 @@ export default defineCommand({
       name = await prompt('Enter the name of the app:', { type: 'text' });
     }
     const response = await appsService.create({ name, organizationId });
-    consola.success('App created successfully.');
     consola.info(`App ID: ${response.id}`);
+    consola.success('App created successfully.');
   },
 });

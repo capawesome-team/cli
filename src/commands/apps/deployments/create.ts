@@ -203,9 +203,9 @@ export default defineCommand({
       appDestinationName: build.platform === 'web' ? undefined : destination,
       appChannelName: build.platform === 'web' ? channel : undefined,
     });
-    consola.success('Deployment created successfully.');
     consola.info(`Deployment ID: ${response.id}`);
     consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.id}`);
+    consola.success('Deployment created successfully.');
 
     // Wait for deployment job to complete by default, unless --detached flag is set
     const shouldWait = !options.detached;
