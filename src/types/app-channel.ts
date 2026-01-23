@@ -40,6 +40,7 @@ export interface FindAllAppChannelsDto {
 export interface UpdateAppChannelDto {
   appId: string;
   appChannelId: string;
+  forceAppBuildArtifactSignature?: boolean;
   name?: string;
 }
 

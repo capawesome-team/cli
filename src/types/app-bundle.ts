@@ -1,5 +1,6 @@
 export interface AppBundleDto {
   id: string;
+  appDeploymentId: string;
 }
 
 export interface CreateAppBundleDto {
@@ -12,6 +13,7 @@ export interface CreateAppBundleDto {
   gitCommitMessage?: string;
   gitCommitRef?: string;
   gitCommitSha?: string;
+  gitRef?: string;
   customProperties?: Record<string, string>;
   expiresAt?: string;
   url?: string;

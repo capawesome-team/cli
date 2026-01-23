@@ -1,11 +1,5 @@
-import appBundlesService from '@/services/app-bundles.js';
-import appsService from '@/services/apps.js';
-import authorizationService from '@/services/authorization-service.js';
-import organizationsService from '@/services/organizations.js';
-import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
-import { isInteractive } from '@/utils/environment.js';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -49,68 +43,8 @@ export default defineCommand({
     }),
   ),
   action: async (options, args) => {
-    let { androidMax, androidMin, androidEq, appId, bundleId, rollout, iosMax, iosMin, iosEq } = options;
-
-    if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command. Please run the `login` command first.');
-      process.exit(1);
-    }
-
-    // Prompt for missing arguments
-    if (!appId) {
-      if (!isInteractive()) {
-        consola.error('You must provide an app ID when running in non-interactive environment.');
-        process.exit(1);
-      }
-      const organizations = await organizationsService.findAll();
-      if (organizations.length === 0) {
-        consola.error('You must create an organization before updating a bundle.');
-        process.exit(1);
-      }
-      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      const organizationId = await prompt('Select the organization of the app for which you want to update a bundle.', {
-        type: 'select',
-        options: organizations.map((organization) => ({ label: organization.name, value: organization.id })),
-      });
-      if (!organizationId) {
-        consola.error('You must select the organization of an app for which you want to update a bundle.');
-        process.exit(1);
-      }
-      const apps = await appsService.findAll({
-        organizationId,
-      });
-      if (!apps.length) {
-        consola.error('You must create an app before updating a bundle.');
-        process.exit(1);
-      }
-      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      appId = await prompt('Which app do you want to update the bundle for?', {
-        type: 'select',
-        options: apps.map((app) => ({ label: app.name, value: app.id })),
-      });
-    }
-    if (!bundleId) {
-      if (!isInteractive()) {
-        consola.error('You must provide the bundle ID when running in non-interactive environment.');
-        process.exit(1);
-      }
-      bundleId = await prompt('Enter the bundle ID:', {
-        type: 'text',
-      });
-    }
-
-    // Update bundle
-    await appBundlesService.update({
-      appId,
-      appBundleId: bundleId,
-      maxAndroidAppVersionCode: androidMax,
-      maxIosAppVersionCode: iosMax,
-      minAndroidAppVersionCode: androidMin,
-      minIosAppVersionCode: iosMin,
-      eqAndroidAppVersionCode: androidEq,
-      eqIosAppVersionCode: iosEq,
-      rolloutPercentage: rollout,
-    });
-    consola.success('Bundle updated successfully.');
+    consola.warn('The `apps:bundles:update` command has been deprecated and will be removed in future versions.');
+    consola.info('Please refer to the official documentation for alternative approaches.');
+    process.exit(0);
   },
 });

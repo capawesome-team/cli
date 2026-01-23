@@ -28,7 +28,7 @@ export default defineCommand({
       name = await prompt('Enter the name of the organization:', { type: 'text' });
     }
     const response = await organizationsService.create({ name });
-    consola.success('Organization created successfully.');
     consola.info(`Organization ID: ${response.id}`);
+    consola.success('Organization created successfully.');
   },
 });

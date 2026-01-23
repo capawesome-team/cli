@@ -72,7 +72,7 @@ export default defineCommand({
       appId,
       name,
     });
-    consola.success('Environment created successfully.');
     consola.info(`Environment ID: ${response.id}`);
+    consola.success('Environment created successfully.');
   },
 });
