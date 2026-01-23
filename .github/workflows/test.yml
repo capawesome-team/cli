@@ -2,13 +2,13 @@ name: Test
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       cli_version:
-        description: 'Capawesome CLI version'
+        description: "Capawesome CLI version"
         required: false
-        default: 'latest'
+        default: "latest"
         type: string
   release:
     types: [published]
@@ -46,6 +46,6 @@ jobs:
       - name: Generate a manifest file
         run: npx capawesome apps:liveupdates:generatemanifest --path ${{ env.BUNDLE_PATH }}
       - name: Create a bundle
-        run: npx capawesome apps:bundles:create --app-id ${{ env.CAPAWESOME_CLOUD_APP_ID }} --channel test-${{ matrix.os }}-${{ matrix.node-version }} --path ${{ env.BUNDLE_PATH }}
+        run: npx capawesome apps:liveupdates:upload --app-id ${{ env.CAPAWESOME_CLOUD_APP_ID }} --channel test-${{ matrix.os }}-${{ matrix.node-version }} --path ${{ env.BUNDLE_PATH }}
       - name: Delete the channel
         run: npx capawesome apps:channels:delete --app-id ${{ env.CAPAWESOME_CLOUD_APP_ID }} --name test-${{ matrix.os }}-${{ matrix.node-version }}

@@ -310,7 +310,6 @@ export default defineCommand({
     }
 
     // Create the app bundle
-    let appBundleId: string | undefined;
     consola.start('Creating bundle...');
     const response = await appBundlesService.create({
       appId,
@@ -331,7 +330,6 @@ export default defineCommand({
       // Convert percentage from 0-100 to 0-1 for API
       rolloutPercentage: (rolloutPercentage ?? 100) / 100,
     });
-    appBundleId = response.id;
 
     let appBundleFileId: string | undefined;
     // Upload the app bundle files
