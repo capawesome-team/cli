@@ -228,9 +228,7 @@ export default defineCommand({
     }
 
     // Create the app build
-    if (!json) {
-      consola.start('Creating build...');
-    }
+    consola.start('Creating build...');
     const response = await appBuildsService.create({
       appCertificateName: certificate,
       appEnvironmentName: environment,
@@ -240,12 +238,10 @@ export default defineCommand({
       platform,
       type,
     });
-    if (!json) {
-      consola.info(`Build Number: ${response.numberAsString}`);
-      consola.info(`Build ID: ${response.id}`);
-      consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
-      consola.success(`Build created successfully.`);
-    }
+    consola.info(`Build ID: ${response.id}`);
+    consola.info(`Build Number: ${response.numberAsString}`);
+    consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
+    consola.success('Build created successfully.');
 
     // Wait for build job to complete by default, unless --detached flag is set
     const shouldWait = !options.detached;
@@ -271,7 +267,7 @@ export default defineCommand({
 
           // Show spinner while queued or pending
           if (jobStatus === 'queued' || jobStatus === 'pending') {
-            if (isWaitingForStart && !json) {
+            if (isWaitingForStart) {
               consola.start(`Waiting for build to start (status: ${jobStatus})...`);
             }
             await wait(3000);
@@ -281,13 +277,11 @@ export default defineCommand({
           // Stop spinner when job moves to in_progress
           if (isWaitingForStart && jobStatus === 'in_progress') {
             isWaitingForStart = false;
-            if (!json) {
-              consola.success('Build started...');
-            }
+            consola.success('Build started...');
           }
 
           // Print new logs
-          if (!json && build.job.jobLogs && build.job.jobLogs.length > 0) {
+          if (build.job.jobLogs && build.job.jobLogs.length > 0) {
             const newLogs = build.job.jobLogs
               .filter((log) => log.number > lastPrintedLogNumber)
               .sort((a, b) => a.number - b.number);
@@ -306,14 +300,13 @@ export default defineCommand({
             jobStatus === 'rejected' ||
             jobStatus === 'timed_out'
           ) {
-            if (!json) {
-              console.log(); // New line for better readability
-            }
+            console.log(); // New line for better readability
             if (jobStatus === 'succeeded') {
-              if (!json) {
-                consola.success('Build completed successfully.');
-                console.log(); // New line for better readability
-              }
+              consola.info(`Build ID: ${response.id}`);
+              consola.info(`Build Number: ${response.numberAsString}`);
+              consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
+              consola.success('Build completed successfully.');
+              console.log(); // New line for better readability
 
               // Download artifacts if flags are set
               if (options.apk && platform === 'android') {
@@ -323,7 +316,6 @@ export default defineCommand({
                   buildArtifacts: build.appBuildArtifacts,
                   artifactType: 'apk',
                   filePath: typeof options.apk === 'string' ? options.apk : undefined,
-                  json,
                 });
               }
               if (options.aab && platform === 'android') {
@@ -333,7 +325,6 @@ export default defineCommand({
                   buildArtifacts: build.appBuildArtifacts,
                   artifactType: 'aab',
                   filePath: typeof options.aab === 'string' ? options.aab : undefined,
-                  json,
                 });
               }
               if (options.ipa && platform === 'ios') {
@@ -343,7 +334,6 @@ export default defineCommand({
                   buildArtifacts: build.appBuildArtifacts,
                   artifactType: 'ipa',
                   filePath: typeof options.ipa === 'string' ? options.ipa : undefined,
-                  json,
                 });
               }
               if (options.zip && platform === 'web') {
@@ -353,7 +343,6 @@ export default defineCommand({
                   buildArtifacts: build.appBuildArtifacts,
                   artifactType: 'zip',
                   filePath: typeof options.zip === 'string' ? options.zip : undefined,
-                  json,
                 });
               }
               // Output JSON if json flag is set
@@ -405,6 +394,11 @@ export default defineCommand({
             2,
           ),
         );
+      } else {
+        consola.info(`Build ID: ${response.id}`);
+        consola.info(`Build Number: ${response.numberAsString}`);
+        consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
+        consola.success(`Build completed successfully.`);
       }
     }
   },
@@ -419,30 +413,23 @@ const handleArtifactDownload = async (options: {
   buildArtifacts: AppBuildArtifactDto[] | undefined;
   artifactType: 'apk' | 'aab' | 'ipa' | 'zip';
   filePath?: string;
-  json?: boolean;
 }): Promise<void> => {
-  const { appId, buildId, buildArtifacts, artifactType, filePath, json } = options;
+  const { appId, buildId, buildArtifacts, artifactType, filePath } = options;
 
   try {
     const artifactTypeUpper = artifactType.toUpperCase();
-    if (!json) {
-      consola.start(`Downloading ${artifactTypeUpper}...`);
-    }
+    consola.start(`Downloading ${artifactTypeUpper}...`);
 
     // Find the artifact
     const artifact = buildArtifacts?.find((artifact) => artifact.type === artifactType);
 
     if (!artifact) {
-      if (!json) {
-        consola.warn(`No ${artifactTypeUpper} artifact found for this build.`);
-      }
+      consola.warn(`No ${artifactTypeUpper} artifact found for this build.`);
       return;
     }
 
     if (artifact.status !== 'ready') {
-      if (!json) {
-        consola.warn(`${artifactTypeUpper} artifact is not ready (status: ${artifact.status}).`);
-      }
+      consola.warn(`${artifactTypeUpper} artifact is not ready (status: ${artifact.status}).`);
       return;
     }
 
@@ -466,9 +453,7 @@ const handleArtifactDownload = async (options: {
     // Save the file
     await fs.writeFile(outputPath, Buffer.from(artifactData));
 
-    if (!json) {
-      consola.success(`${artifactTypeUpper} downloaded successfully: ${outputPath}`);
-    }
+    consola.success(`${artifactTypeUpper} downloaded successfully: ${outputPath}`);
   } catch (error) {
     consola.error(`Failed to download ${artifactType.toUpperCase()}:`, error);
   }
