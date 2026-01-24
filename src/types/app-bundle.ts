@@ -1,6 +1,6 @@
 export interface AppBundleDto {
   id: string;
-  appDeploymentId: string;
+  appDeploymentId?: string | null;
 }
 
 export interface CreateAppBundleDto {

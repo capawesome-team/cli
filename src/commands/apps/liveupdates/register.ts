@@ -294,7 +294,9 @@ export default defineCommand({
     });
 
     consola.info(`Bundle Artifact ID: ${response.id}`);
-    consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.appDeploymentId}`);
+    if (response.appDeploymentId) {
+      consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.appDeploymentId}`);
+    }
     consola.success('Live Update successfully registered.');
   },
 });

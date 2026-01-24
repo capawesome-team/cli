@@ -350,7 +350,9 @@ export default defineCommand({
     });
 
     consola.info(`Build Artifact ID: ${response.id}`);
-    consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.appDeploymentId}`);
+    if (response.appDeploymentId) {
+      consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.appDeploymentId}`);
+    }
     consola.success('Live Update successfully uploaded.');
   },
 });
