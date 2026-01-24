@@ -124,7 +124,9 @@ export default defineCommand({
         })
         .optional()
         .describe('The percentage of devices to deploy the bundle to. Must be an integer between 0 and 100.'),
+      yes: z.boolean().optional().describe('Skip confirmation prompt.'),
     }),
+    { y: 'yes' },
   ),
   action: async (options, args) => {
     let {
@@ -249,7 +251,7 @@ export default defineCommand({
     }
 
     // Prompt for channel if interactive
-    if (!channel && isInteractive()) {
+    if (!channel && !options.yes && isInteractive()) {
       const shouldDeployToChannel = await prompt('Do you want to deploy to a specific channel?', {
         type: 'confirm',
         initial: false,
@@ -295,7 +297,7 @@ export default defineCommand({
     const appName = app.name;
 
     // Final confirmation before creating bundle
-    if (isInteractive()) {
+    if (!options.yes && isInteractive()) {
       const relativePath = pathModule.relative(process.cwd(), path);
       const confirmed = await prompt(
         `Are you sure you want to create a bundle from path "${relativePath}" for app "${appName}" (${appId})?`,

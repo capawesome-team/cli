@@ -21,7 +21,9 @@ export default defineCommand({
         .string()
         .optional()
         .describe('Name of the channel. Either the ID or name of the channel must be provided.'),
+      yes: z.boolean().optional().describe('Skip confirmation prompt.'),
     }),
+    { y: 'yes' },
   ),
   action: async (options, args) => {
     let { appId, channelId, name } = options;
@@ -85,7 +87,7 @@ export default defineCommand({
       channelId = selectedChannelId;
     }
     // Confirm deletion
-    if (isInteractive()) {
+    if (!options.yes && isInteractive()) {
       const confirmed = await prompt('Are you sure you want to delete this channel?', {
         type: 'confirm',
       });

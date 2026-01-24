@@ -12,7 +12,9 @@ export default defineCommand({
   options: defineOptions(
     z.object({
       appId: z.string().optional().describe('ID of the app.'),
+      yes: z.boolean().optional().describe('Skip confirmation prompt.'),
     }),
+    { y: 'yes' },
   ),
   action: async (options, args) => {
     let { appId } = options;
@@ -53,7 +55,7 @@ export default defineCommand({
         options: apps.map((app) => ({ label: app.name, value: app.id })),
       });
     }
-    if (isInteractive()) {
+    if (!options.yes && isInteractive()) {
       const confirmed = await prompt('Are you sure you want to delete this app?', {
         type: 'confirm',
       });

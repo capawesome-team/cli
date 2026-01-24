@@ -15,7 +15,9 @@ export default defineCommand({
       appId: z.string().optional().describe('ID of the app.'),
       environmentId: z.string().optional().describe('ID of the environment. Either the ID or name must be provided.'),
       name: z.string().optional().describe('Name of the environment. Either the ID or name must be provided.'),
+      yes: z.boolean().optional().describe('Skip confirmation prompt.'),
     }),
+    { y: 'yes' },
   ),
   action: async (options, args) => {
     let { appId, environmentId, name } = options;
@@ -81,7 +83,7 @@ export default defineCommand({
       environmentId = selectedEnvironmentId;
     }
 
-    if (isInteractive()) {
+    if (!options.yes && isInteractive()) {
       const confirmed = await prompt('Are you sure you want to delete this environment?', {
         type: 'confirm',
       });

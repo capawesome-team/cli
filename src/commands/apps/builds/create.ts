@@ -71,7 +71,9 @@ export default defineCommand({
         .union([z.boolean(), z.string()])
         .optional()
         .describe('Download the generated ZIP file (Web only). Optionally provide a file path.'),
+      yes: z.boolean().optional().describe('Skip confirmation prompts.'),
     }),
+    { y: 'yes' },
   ),
   action: async (options) => {
     let { appId, platform, type, gitRef, environment, certificate, json, stack } = options;
@@ -186,7 +188,7 @@ export default defineCommand({
     }
 
     // Prompt for environment if not provided
-    if (!environment && isInteractive()) {
+    if (!environment && !options.yes && isInteractive()) {
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
       const selectEnvironment = await prompt('Do you want to select an environment?', {
         type: 'confirm',
@@ -207,7 +209,7 @@ export default defineCommand({
     }
 
     // Prompt for certificate if not provided (skip for web platform)
-    if (!certificate && isInteractive() && platform !== 'web') {
+    if (!certificate && !options.yes && isInteractive() && platform !== 'web') {
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
       const selectCertificate = await prompt('Do you want to select a certificate?', {
         type: 'confirm',

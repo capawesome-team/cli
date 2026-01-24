@@ -105,7 +105,9 @@ export default defineCommand({
         .optional()
         .describe('The percentage of devices to deploy the bundle to. Must be an integer between 0 and 100.'),
       url: z.string().optional().describe('The url to the self-hosted bundle file.'),
+      yes: z.boolean().optional().describe('Skip confirmation prompts.'),
     }),
+    { y: 'yes' },
   ),
   action: async (options, args) => {
     let {
@@ -201,7 +203,7 @@ export default defineCommand({
     }
 
     // Prompt for channel if interactive
-    if (!channel && isInteractive()) {
+    if (!channel && !options.yes && isInteractive()) {
       const shouldDeployToChannel = await prompt('Do you want to deploy to a specific channel?', {
         type: 'confirm',
         initial: false,
@@ -266,6 +268,24 @@ export default defineCommand({
 
         // Sign the bundle
         signature = await createSignature(privateKeyBuffer, fileBuffer);
+      }
+    }
+
+    // Get app details for confirmation
+    const app = await appsService.findOne({ appId });
+    const appName = app.name;
+
+    // Final confirmation before registering bundle
+    if (!options.yes && isInteractive()) {
+      const confirmed = await prompt(
+        `Are you sure you want to register bundle from URL "${url}" for app "${appName}" (${appId})?`,
+        {
+          type: 'confirm',
+        },
+      );
+      if (!confirmed) {
+        consola.info('Bundle registration cancelled.');
+        process.exit(0);
       }
     }
 

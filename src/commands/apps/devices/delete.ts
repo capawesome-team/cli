@@ -14,7 +14,9 @@ export default defineCommand({
     z.object({
       appId: z.string().optional().describe('ID of the app.'),
       deviceId: z.string().optional().describe('ID of the device.'),
+      yes: z.boolean().optional().describe('Skip confirmation prompt.'),
     }),
+    { y: 'yes' },
   ),
   action: async (options, args) => {
     let { appId, deviceId } = options;
@@ -70,7 +72,7 @@ export default defineCommand({
       });
     }
     // Confirm deletion
-    if (isInteractive()) {
+    if (!options.yes && isInteractive()) {
       const confirmed = await prompt('Are you sure you want to delete this device?', {
         type: 'confirm',
       });
