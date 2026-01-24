@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.0](https://github.com/capawesome-team/cli/compare/v3.11.0...v4.0.0) (2026-01-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* Deprecate `apps:bundles:*` and `manifests:generate` commands.
+* update node and npm engine requirements
+* The `--bundle-limit` parameter has been removed from the `apps:channels:create` and `apps:channels:update` commands (see `BREAKING.md`).
+
+* update node and npm engine requirements ([32bd55c](https://github.com/capawesome-team/cli/commit/32bd55c59833cda478f5302e99b47f4a9efd5416))
+
+
+### Features
+
+* add `--yes` option for non-interactive environments ([8edda58](https://github.com/capawesome-team/cli/commit/8edda5830195b0d1a5b823ed49153c65748c203f))
+* add `apps:channels:pause` command ([00318a9](https://github.com/capawesome-team/cli/commit/00318a985bbca29374437666cb750a0406ac5e79))
+* add `apps:channels:resume` command ([6b9eb29](https://github.com/capawesome-team/cli/commit/6b9eb29a6f2e7a3452e63fab9a5075b0cc93f0c0))
+* add `apps:liveupdates:bundle` command ([5985e13](https://github.com/capawesome-team/cli/commit/5985e13483f8dd1b2cfbb8d3ef833cf6d8b5df87))
+* add `apps:liveupdates:rollback` command ([b4504d0](https://github.com/capawesome-team/cli/commit/b4504d0128211f179b1f057da4738f2a25932b32))
+* add `apps:liveupdates:rollout` command ([#112](https://github.com/capawesome-team/cli/issues/112)) ([40a105f](https://github.com/capawesome-team/cli/commit/40a105fc3795d8ae210c322c22e6879789be809e))
+* add `apps:liveupdates:upload`, `apps:liveupdates:register` and `apps:liveupdates:generatemanifest` commands ([#113](https://github.com/capawesome-team/cli/issues/113)) ([1cd339e](https://github.com/capawesome-team/cli/commit/1cd339e6c3b9bbac42efdccac35b3cb9e065de44))
+* **apps:channels:create:** add `protect` option ([efc2910](https://github.com/capawesome-team/cli/commit/efc291083e4d081e87a44121de2a0c560af206c9))
+* **apps:deployments:create:** add `--build-number` option ([cdc7f63](https://github.com/capawesome-team/cli/commit/cdc7f63abd9692b9160a46d8d15f58ead5266d07))
+* **apps:deployments:create:** add platform selection prompt for deployment ([c4db421](https://github.com/capawesome-team/cli/commit/c4db42120fa12173ac6489ed41c985a2af7c072e))
+* **apps:liveupdates:** add warnings for web asset paths ([962d5d3](https://github.com/capawesome-team/cli/commit/962d5d3e69ffe1c9640b39b0410ce5af696c4a91))
+* support web builds ([#111](https://github.com/capawesome-team/cli/issues/111)) ([7405088](https://github.com/capawesome-team/cli/commit/7405088fecfb8b1a5d5301145f7002808d57878f))
+
 ## [3.11.0](https://github.com/capawesome-team/cli/compare/v3.10.2...v3.11.0) (2026-01-08)
 
 
