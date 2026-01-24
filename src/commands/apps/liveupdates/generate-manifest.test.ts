@@ -54,7 +54,7 @@ describe('apps-liveupdates-generatemanifest', () => {
 
     await generateManifestCommand.action(options, undefined);
 
-    expect(mockPrompt).toHaveBeenCalledWith('Enter the path to the web assets folder:', {
+    expect(mockPrompt).toHaveBeenCalledWith('Enter the path to the web assets folder (e.g., `dist` or `www`):', {
       type: 'text',
     });
     expect(mockFileExistsAtPath).toHaveBeenCalledWith('./www');
