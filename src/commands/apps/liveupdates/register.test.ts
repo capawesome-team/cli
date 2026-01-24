@@ -65,7 +65,13 @@ describe('apps-liveupdates-register', () => {
       appId,
       url: bundleUrl,
       rolloutPercentage: 1,
+      yes: true,
     };
+
+    const appScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
 
     const bundleScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/bundles`, {
@@ -79,6 +85,7 @@ describe('apps-liveupdates-register', () => {
 
     await registerCommand.action(options, undefined);
 
+    expect(appScope.isDone()).toBe(true);
     expect(bundleScope.isDone()).toBe(true);
     expect(mockConsola.info).toHaveBeenCalledWith(`Bundle Artifact ID: ${bundleId}`);
     expect(mockConsola.success).toHaveBeenCalledWith('Live Update successfully registered.');
@@ -96,7 +103,13 @@ describe('apps-liveupdates-register', () => {
       url: bundleUrl,
       rolloutPercentage: 1,
       gitRef,
+      yes: true,
     };
+
+    const appScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
 
     const bundleScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/bundles`, {
@@ -111,6 +124,7 @@ describe('apps-liveupdates-register', () => {
 
     await registerCommand.action(options, undefined);
 
+    expect(appScope.isDone()).toBe(true);
     expect(bundleScope.isDone()).toBe(true);
     expect(mockConsola.info).toHaveBeenCalledWith(`Bundle Artifact ID: ${bundleId}`);
     expect(mockConsola.success).toHaveBeenCalledWith('Live Update successfully registered.');
@@ -130,6 +144,7 @@ describe('apps-liveupdates-register', () => {
       url: bundleUrl,
       path: bundlePath,
       rolloutPercentage: 1,
+      yes: true,
     };
 
     mockFileExistsAtPath.mockResolvedValue(true);
@@ -142,6 +157,11 @@ describe('apps-liveupdates-register', () => {
     vi.mocked(mockZip.default.isZipped).mockReturnValue(true);
     vi.mocked(mockBuffer.createBufferFromPath).mockResolvedValue(testBuffer);
     vi.mocked(mockHash.createHash).mockResolvedValue(testHash);
+
+    const appScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
 
     const bundleScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/bundles`, {
@@ -156,6 +176,7 @@ describe('apps-liveupdates-register', () => {
 
     await registerCommand.action(options, undefined);
 
+    expect(appScope.isDone()).toBe(true);
     expect(bundleScope.isDone()).toBe(true);
     expect(mockConsola.info).toHaveBeenCalledWith(`Bundle Artifact ID: ${bundleId}`);
     expect(mockConsola.success).toHaveBeenCalledWith('Live Update successfully registered.');
@@ -178,6 +199,7 @@ describe('apps-liveupdates-register', () => {
       path: bundlePath,
       privateKey: privateKeyPath,
       rolloutPercentage: 1,
+      yes: true,
     };
 
     mockFileExistsAtPath.mockImplementation((path: string) => {
@@ -201,6 +223,11 @@ describe('apps-liveupdates-register', () => {
     vi.mocked(mockHash.createHash).mockResolvedValue(testHash);
     vi.mocked(mockSignature.createSignature).mockResolvedValue(testSignature);
 
+    const appScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
+
     const bundleScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/bundles`, {
         appId,
@@ -215,6 +242,7 @@ describe('apps-liveupdates-register', () => {
 
     await registerCommand.action(options, undefined);
 
+    expect(appScope.isDone()).toBe(true);
     expect(bundleScope.isDone()).toBe(true);
     expect(mockConsola.info).toHaveBeenCalledWith(`Bundle Artifact ID: ${bundleId}`);
     expect(mockConsola.success).toHaveBeenCalledWith('Live Update successfully registered.');
@@ -238,6 +266,7 @@ describe('apps-liveupdates-register', () => {
       path: bundlePath,
       privateKey: privateKeyContent,
       rolloutPercentage: 1,
+      yes: true,
     };
 
     mockFileExistsAtPath.mockResolvedValue(true);
@@ -257,6 +286,11 @@ describe('apps-liveupdates-register', () => {
     vi.mocked(mockHash.createHash).mockResolvedValue(testHash);
     vi.mocked(mockSignature.createSignature).mockResolvedValue(testSignature);
 
+    const appScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
+
     const bundleScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/bundles`, {
         appId,
@@ -271,6 +305,7 @@ describe('apps-liveupdates-register', () => {
 
     await registerCommand.action(options, undefined);
 
+    expect(appScope.isDone()).toBe(true);
     expect(bundleScope.isDone()).toBe(true);
     expect(mockConsola.info).toHaveBeenCalledWith(`Bundle Artifact ID: ${bundleId}`);
     expect(mockConsola.success).toHaveBeenCalledWith('Live Update successfully registered.');
@@ -338,7 +373,13 @@ describe('apps-liveupdates-register', () => {
       appId,
       url: bundleUrl,
       rolloutPercentage: 1,
+      yes: true,
     };
+
+    const appScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
 
     const bundleScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/bundles`)
@@ -347,6 +388,7 @@ describe('apps-liveupdates-register', () => {
 
     await expect(registerCommand.action(options, undefined)).rejects.toThrow();
 
+    expect(appScope.isDone()).toBe(true);
     expect(bundleScope.isDone()).toBe(true);
   });
 });
