@@ -1,9 +1,9 @@
+import { isInteractive } from '@/utils/environment.js';
 import { fileExistsAtPath } from '@/utils/file.js';
 import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
-import { isInteractive } from '@/utils/environment.js';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -23,7 +23,8 @@ export default defineCommand({
         );
         process.exit(1);
       }
-      path = await prompt('Enter the path to the web assets folder:', {
+      consola.warn('Make sure you have built your web assets before generating the manifest (e.g., `npm run build`).');
+      path = await prompt('Enter the path to the web assets folder (e.g., `dist` or `www`):', {
         type: 'text',
       });
       if (!path) {

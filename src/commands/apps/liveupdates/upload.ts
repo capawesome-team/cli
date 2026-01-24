@@ -169,14 +169,14 @@ export default defineCommand({
       if (!isInteractive()) {
         consola.error('You must provide a path when running in non-interactive environment.');
         process.exit(1);
-      } else {
-        path = await prompt('Enter the path to the app bundle:', {
-          type: 'text',
-        });
-        if (!path) {
-          consola.error('You must provide a path to the app bundle.');
-          process.exit(1);
-        }
+      }
+      consola.warn('Make sure you have built your web assets before uploading (e.g., `npm run build`).');
+      path = await prompt('Enter the path to the web assets directory (e.g., `dist` or `www`):', {
+        type: 'text',
+      });
+      if (!path) {
+        consola.error('You must provide a path to the app bundle.');
+        process.exit(1);
       }
     }
 
@@ -296,17 +296,17 @@ export default defineCommand({
     const app = await appsService.findOne({ appId });
     const appName = app.name;
 
-    // Final confirmation before creating bundle
+    // Final confirmation before uploading
     if (!options.yes && isInteractive()) {
       const relativePath = pathModule.relative(process.cwd(), path);
       const confirmed = await prompt(
-        `Are you sure you want to create a bundle from path "${relativePath}" for app "${appName}" (${appId})?`,
+        `Are you sure you want to upload a bundle from path "${relativePath}" for app "${appName}" (${appId})?`,
         {
           type: 'confirm',
         },
       );
       if (!confirmed) {
-        consola.info('Bundle creation cancelled.');
+        consola.info('Bundle upload cancelled.');
         process.exit(0);
       }
     }

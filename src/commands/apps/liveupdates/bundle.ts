@@ -36,7 +36,8 @@ export default defineCommand({
         consola.error('You must provide an input path when running in non-interactive environment.');
         process.exit(1);
       }
-      const response = await prompt('Enter the path to the web assets directory:', {
+      consola.warn('Make sure you have built your web assets before creating a bundle (e.g., `npm run build`).');
+      const response = await prompt('Enter the path to the web assets directory (e.g., `dist` or `www`):', {
         type: 'text',
       });
       inputPath = response as string;
