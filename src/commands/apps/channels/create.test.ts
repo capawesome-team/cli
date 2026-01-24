@@ -42,17 +42,17 @@ describe('apps-channels-create', () => {
   it('should create channel with provided options', async () => {
     const appId = 'app-123';
     const channelName = 'production';
-    const forceSignature = true;
+    const protectedFlag = true;
     const channelId = 'channel-456';
     const testToken = 'test-token';
 
-    const options = { appId, name: channelName, protect: forceSignature };
+    const options = { appId, name: channelName, protected: protectedFlag };
 
     const scope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/channels`, {
         appId,
         name: channelName,
-        protected: forceSignature,
+        protected: protectedFlag,
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(201, { id: channelId, name: channelName });

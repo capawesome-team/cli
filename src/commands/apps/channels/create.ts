@@ -25,11 +25,11 @@ export default defineCommand({
         .describe('The number of days until the channel is automatically deleted.'),
       ignoreErrors: z.boolean().optional().describe('Whether to ignore errors or not.'),
       name: z.string().optional().describe('Name of the channel.'),
-      protect: z.boolean().optional().describe('Whether to protect the channel or not. Default is `false`.'),
+      protected: z.boolean().optional().describe('Whether to protect the channel or not. Default is `false`.'),
     }),
   ),
   action: async (options, args) => {
-    let { appId, expiresInDays, ignoreErrors, name, protect } = options;
+    let { appId, expiresInDays, ignoreErrors, name, protected: _protected } = options;
 
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command. Please run the `login` command first.');
@@ -89,7 +89,7 @@ export default defineCommand({
     try {
       const response = await appChannelsService.create({
         appId,
-        protected: protect,
+        protected: _protected,
         name,
         expiresAt,
       });

@@ -15,11 +15,11 @@ export default defineCommand({
       appId: z.string().optional().describe('ID of the app.'),
       channelId: z.string().optional().describe('ID of the channel.'),
       name: z.string().optional().describe('Name of the channel.'),
-      protect: z.boolean().optional().describe('Whether to protect the channel or not.'),
+      protected: z.boolean().optional().describe('Whether to protect the channel or not.'),
     }),
   ),
   action: async (options, args) => {
-    let { appId, channelId, name, protect } = options;
+    let { appId, channelId, name, protected: _protected } = options;
 
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command. Please run the `login` command first.');
@@ -76,7 +76,7 @@ export default defineCommand({
       appId,
       appChannelId: channelId,
       name,
-      protected: protect,
+      protected: _protected,
     });
     consola.success('Channel updated successfully.');
   },
