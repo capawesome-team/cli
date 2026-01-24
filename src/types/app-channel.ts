@@ -5,16 +5,17 @@ export interface AppChannelDto {
   appDeployment?: AppDeploymentDto | null;
   appDeploymentId: string | null;
   appId: string;
-  forceAppBuildArtifactSignature: boolean;
   name: string;
+  expiresAt?: string | null;
+  protectedAt?: number | null;
   createdAt: number;
   updatedAt: number;
 }
 
 export interface CreateAppChannelDto {
   appId: string;
-  forceAppBuildArtifactSignature?: boolean;
   name: string;
+  protected?: boolean;
   expiresAt?: string;
 }
 
@@ -40,8 +41,8 @@ export interface FindAllAppChannelsDto {
 export interface UpdateAppChannelDto {
   appId: string;
   appChannelId: string;
-  forceAppBuildArtifactSignature?: boolean;
   name?: string;
+  protected?: boolean;
 }
 
 export interface PauseAppChannelDto {

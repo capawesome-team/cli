@@ -50,25 +50,9 @@ export default defineCommand({
       process.exit(1);
     }
     if (json) {
-      console.log(
-        JSON.stringify(
-          {
-            id: channel.id,
-            forceAppBuildArtifactSignature: channel.forceAppBuildArtifactSignature,
-            name: channel.name,
-            appId: channel.appId,
-          },
-          null,
-          2,
-        ),
-      );
+      console.log(JSON.stringify(channel, null, 2));
     } else {
-      console.table({
-        id: channel.id,
-        forceAppBuildArtifactSignature: channel.forceAppBuildArtifactSignature,
-        name: channel.name,
-        appId: channel.appId,
-      });
+      console.table(channel);
       consola.success('Channel retrieved successfully.');
     }
   },

@@ -64,18 +64,10 @@ export default defineCommand({
       limit,
       offset,
     });
-    const logData = foundChannels.map((channel) => ({
-      id: channel.id,
-      forceAppBuildArtifactSignature: channel.forceAppBuildArtifactSignature,
-      name: channel.name,
-      appId: channel.appId,
-      createdAt: channel.createdAt,
-      updatedAt: channel.updatedAt,
-    }));
     if (json) {
-      console.log(JSON.stringify(logData, null, 2));
+      console.log(JSON.stringify(foundChannels, null, 2));
     } else {
-      console.table(logData);
+      console.table(foundChannels);
       consola.success('Channels retrieved successfully.');
     }
   },

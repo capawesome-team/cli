@@ -14,12 +14,12 @@ export default defineCommand({
     z.object({
       appId: z.string().optional().describe('ID of the app.'),
       channelId: z.string().optional().describe('ID of the channel.'),
-      forceSignature: z.boolean().optional().describe('Whether to allow unsigned app deployments or not.'),
       name: z.string().optional().describe('Name of the channel.'),
+      protect: z.boolean().optional().describe('Whether to protect the channel or not.'),
     }),
   ),
   action: async (options, args) => {
-    let { appId, channelId, forceSignature, name } = options;
+    let { appId, channelId, name, protect } = options;
 
     if (!authorizationService.hasAuthorizationToken()) {
       consola.error('You must be logged in to run this command. Please run the `login` command first.');
@@ -75,8 +75,8 @@ export default defineCommand({
     await appChannelsService.update({
       appId,
       appChannelId: channelId,
-      forceAppBuildArtifactSignature: forceSignature,
       name,
+      protected: protect,
     });
     consola.success('Channel updated successfully.');
   },

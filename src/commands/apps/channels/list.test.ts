@@ -66,7 +66,7 @@ describe('apps-channels-list', () => {
       {
         id: 'channel-1',
         name: 'production',
-        forceAppBuildArtifactSignature: undefined,
+        protectedAt: null,
         appId,
         createdAt: '2023-01-01T00:00:00Z',
         updatedAt: '2023-01-01T00:00:00Z',
@@ -74,7 +74,7 @@ describe('apps-channels-list', () => {
       {
         id: 'channel-2',
         name: 'staging',
-        forceAppBuildArtifactSignature: undefined,
+        protectedAt: null,
         appId,
         createdAt: '2023-01-02T00:00:00Z',
         updatedAt: '2023-01-02T00:00:00Z',

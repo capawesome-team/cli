@@ -81,7 +81,7 @@ describe('apps-channels-get', () => {
     const channel = {
       id: channelId,
       name: 'production',
-      forceAppBuildArtifactSignature: undefined,
+      protectedAt: null,
       appId,
     };
 
