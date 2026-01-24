@@ -173,10 +173,7 @@ describe('apps-channels-create', () => {
         const oneMinute = 60 * 1000;
 
         return (
-          body.appId === appId &&
-          body.name === channelName &&
-          body.protected === undefined &&
-          timeDiff < oneMinute
+          body.appId === appId && body.name === channelName && body.protected === undefined && timeDiff < oneMinute
         );
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
