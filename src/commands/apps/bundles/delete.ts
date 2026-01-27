@@ -13,6 +13,6 @@ export default defineCommand({
   action: async (options, args) => {
     consola.warn('The `apps:bundles:delete` command has been deprecated and will be removed in future versions.');
     consola.info('Please refer to the official documentation for alternative approaches.');
-    process.exit(0);
+    process.exit(1);
   },
 });

@@ -13,6 +13,6 @@ export default defineCommand({
     consola.warn(
       'The `manifests:generate` command has been deprecated. Please use `apps:liveupdates:generatemanifest` instead.',
     );
-    process.exit(0);
+    process.exit(1);
   },
 });

@@ -92,6 +92,6 @@ export default defineCommand({
     consola.info('Please use one of the following commands instead:');
     consola.info('  - `apps:liveupdates:upload` to upload a bundle to Capawesome Cloud');
     consola.info('  - `apps:liveupdates:register` to register a self-hosted bundle URL');
-    process.exit(0);
+    process.exit(1);
   },
 });
