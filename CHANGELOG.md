@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.1](https://github.com/capawesome-team/cli/compare/v4.0.0...v4.0.1) (2026-01-27)
+
+
+### Bug Fixes
+
+* change exit code to indicate errors for deprecated commands ([78cd785](https://github.com/capawesome-team/cli/commit/78cd785714309f3acbba2ca19a17b8bd85194cc6))
+
 ## [4.0.0](https://github.com/capawesome-team/cli/compare/v3.11.0...v4.0.0) (2026-01-24)
 
 
