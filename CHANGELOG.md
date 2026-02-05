@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.3](https://github.com/capawesome-team/cli/compare/v4.0.2...v4.0.3) (2026-02-05)
+
+
+### Bug Fixes
+
+* **deps:** npm audit fix ([f962f1d](https://github.com/capawesome-team/cli/commit/f962f1d1853932b987a61f26c89b3f18d7ae121a))
+
 ## [4.0.2](https://github.com/capawesome-team/cli/compare/v4.0.1...v4.0.2) (2026-02-03)
 
 ## [4.0.1](https://github.com/capawesome-team/cli/compare/v4.0.0...v4.0.1) (2026-01-27)
