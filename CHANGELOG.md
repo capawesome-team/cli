@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.4](https://github.com/capawesome-team/cli/compare/v4.0.3...v4.0.4) (2026-02-05)
+
+
+### Bug Fixes
+
+* **apps:deployments:create:** prevent waiting for deployment on web platform ([acb7a1f](https://github.com/capawesome-team/cli/commit/acb7a1f83774a922c05ae655a75d0854da67af81))
+
 ## [4.0.3](https://github.com/capawesome-team/cli/compare/v4.0.2...v4.0.3) (2026-02-05)
 
 
