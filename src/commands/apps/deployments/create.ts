@@ -208,7 +208,7 @@ export default defineCommand({
     consola.success('Deployment created successfully.');
 
     // Wait for deployment job to complete by default, unless --detached flag is set
-    const shouldWait = !options.detached;
+    const shouldWait = !options.detached && build.platform !== 'web';
     if (shouldWait) {
       let lastPrintedLogNumber = 0;
       let isWaitingForStart = true;
