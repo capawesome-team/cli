@@ -55,6 +55,9 @@ const config = defineConfig({
     'apps:liveupdates:rollout': await import('@/commands/apps/liveupdates/rollout.js').then((mod) => mod.default),
     'apps:liveupdates:upload': await import('@/commands/apps/liveupdates/upload.js').then((mod) => mod.default),
     'apps:liveupdates:register': await import('@/commands/apps/liveupdates/register.js').then((mod) => mod.default),
+    'apps:liveupdates:setnativeversions': await import('@/commands/apps/liveupdates/set-native-versions.js').then(
+      (mod) => mod.default,
+    ),
     'apps:liveupdates:generatemanifest': await import('@/commands/apps/liveupdates/generate-manifest.js').then(
       (mod) => mod.default,
     ),

@@ -42,6 +42,17 @@ export interface FindOneAppBuildDto {
   relations?: string;
 }
 
+export interface UpdateAppBuildDto {
+  appId: string;
+  appBuildId: string;
+  eqAndroidAppVersionCode?: string;
+  maxAndroidAppVersionCode?: string;
+  minAndroidAppVersionCode?: string;
+  eqIosAppVersionCode?: string;
+  maxIosAppVersionCode?: string;
+  minIosAppVersionCode?: string;
+}
+
 export interface FindAllAppBuildsDto {
   appId: string;
   numberAsString?: string;

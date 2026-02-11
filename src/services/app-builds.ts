@@ -1,5 +1,11 @@
 import authorizationService from '@/services/authorization-service.js';
-import { AppBuildDto, CreateAppBuildDto, FindAllAppBuildsDto, FindOneAppBuildDto } from '@/types/app-build.js';
+import {
+  AppBuildDto,
+  CreateAppBuildDto,
+  FindAllAppBuildsDto,
+  FindOneAppBuildDto,
+  UpdateAppBuildDto,
+} from '@/types/app-build.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
 
 export interface DownloadArtifactDto {
@@ -12,6 +18,7 @@ export interface AppBuildsService {
   create(dto: CreateAppBuildDto): Promise<AppBuildDto>;
   findAll(dto: FindAllAppBuildsDto): Promise<AppBuildDto[]>;
   findOne(dto: FindOneAppBuildDto): Promise<AppBuildDto>;
+  update(dto: UpdateAppBuildDto): Promise<AppBuildDto>;
   downloadArtifact(dto: DownloadArtifactDto): Promise<ArrayBuffer>;
 }
 
@@ -60,6 +67,16 @@ class AppBuildsServiceImpl implements AppBuildsService {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
       params,
+    });
+    return response.data;
+  }
+
+  async update(dto: UpdateAppBuildDto): Promise<AppBuildDto> {
+    const { appId, appBuildId, ...bodyData } = dto;
+    const response = await this.httpClient.patch<AppBuildDto>(`/v1/apps/${appId}/builds/${appBuildId}`, bodyData, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+      },
     });
     return response.data;
   }
