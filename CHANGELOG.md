@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.5](https://github.com/capawesome-team/cli/compare/v4.0.4...v4.0.5) (2026-02-12)
+
+
+### Bug Fixes
+
+* **deps:** update `axios` to `1.13.5` ([62494c2](https://github.com/capawesome-team/cli/commit/62494c2a9cbdce08736ca37ba284bbf5d64145a0))
+
 ## [4.0.4](https://github.com/capawesome-team/cli/compare/v4.0.3...v4.0.4) (2026-02-05)
 
 
