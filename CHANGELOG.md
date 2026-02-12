@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.1.0](https://github.com/capawesome-team/cli/compare/v4.0.5...v4.1.0) (2026-02-12)
+
+
+### Features
+
+* add `apps:liveupdates:setnativeversions` command ([#114](https://github.com/capawesome-team/cli/issues/114)) ([1aaf740](https://github.com/capawesome-team/cli/commit/1aaf740fc99a0ecb90c8f5b5444a88da0fdd265e))
+
 ## [4.0.5](https://github.com/capawesome-team/cli/compare/v4.0.4...v4.0.5) (2026-02-12)
 
 
