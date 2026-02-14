@@ -16,11 +16,12 @@ export interface AppBuildDto {
   appCertificateId?: string;
   appEnvironmentId?: string;
   appId: string;
-  gitRef: string;
+  gitRef?: string;
   job?: JobDto;
   jobId: string;
   numberAsString: string;
   platform: 'ios' | 'android' | 'web';
+  sourceUrl?: string;
   type: string;
   createdAt?: number;
   createdBy?: string;
@@ -31,8 +32,9 @@ export interface CreateAppBuildDto {
   appEnvironmentName?: string;
   appId: string;
   stack?: 'macos-sequoia' | 'macos-tahoe';
-  gitRef: string;
+  gitRef?: string;
   platform: 'ios' | 'android' | 'web';
+  sourceUrl?: string;
   type?: string;
 }
 

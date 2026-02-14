@@ -44,6 +44,10 @@ export default defineCommand({
         .describe('Exit immediately after creating the build without waiting for completion.'),
       environment: z.string().optional().describe('The name of the environment to use for the build.'),
       gitRef: z.string().optional().describe('The Git reference (branch, tag, or commit SHA) to build.'),
+      sourceUrl: z
+        .string()
+        .optional()
+        .describe('The URL to a hosted zip file containing the source code for the build.'),
       ipa: z
         .union([z.boolean(), z.string()])
         .optional()
@@ -76,7 +80,7 @@ export default defineCommand({
     { y: 'yes' },
   ),
   action: async (options) => {
-    let { appId, platform, type, gitRef, environment, certificate, json, stack } = options;
+    let { appId, platform, type, gitRef, sourceUrl, environment, certificate, json, stack } = options;
 
     // Check if the user is logged in
     if (!authorizationService.hasAuthorizationToken()) {
@@ -87,6 +91,12 @@ export default defineCommand({
     // Validate that detached flag cannot be used with artifact flags
     if (options.detached && (options.apk || options.aab || options.ipa || options.zip)) {
       consola.error('The --detached flag cannot be used with --apk, --aab, --ipa, or --zip flags.');
+      process.exit(1);
+    }
+
+    // Validate that gitRef and sourceUrl are mutually exclusive
+    if (gitRef && sourceUrl) {
+      consola.error('The --gitRef and --sourceUrl flags are mutually exclusive. Please provide only one.');
       process.exit(1);
     }
 
@@ -149,10 +159,10 @@ export default defineCommand({
       }
     }
 
-    // Prompt for git ref if not provided
-    if (!gitRef) {
+    // Prompt for git ref if not provided and sourceUrl is not set
+    if (!gitRef && !sourceUrl) {
       if (!isInteractive()) {
-        consola.error('You must provide a git ref when running in non-interactive environment.');
+        consola.error('You must provide a git ref or source URL when running in non-interactive environment.');
         process.exit(1);
       }
       gitRef = await prompt('Enter the Git reference (branch, tag, or commit SHA):', {
@@ -238,6 +248,7 @@ export default defineCommand({
       stack,
       gitRef,
       platform,
+      sourceUrl,
       type,
     });
     consola.info(`Build ID: ${response.id}`);
