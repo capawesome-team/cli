@@ -1,4 +1,5 @@
 import authorizationService from '@/services/authorization-service.js';
+import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
 import consola from 'consola';
 
@@ -7,6 +8,12 @@ export function withAuth<O, A>(
 ): (options: O, args: A) => Promise<void> {
   return async (options, args) => {
     if (!authorizationService.hasAuthorizationToken()) {
+      if (!isInteractive()) {
+        consola.error(
+          'You must be logged in to run this command. Set the `CAPAWESOME_TOKEN` environment variable or use the `--token` option.',
+        );
+        process.exit(1);
+      }
       consola.error('You must be logged in to run this command.');
       const shouldLogin = await prompt('Do you want to login now?', {
         type: 'confirm',
