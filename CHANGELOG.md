@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.2.0](https://github.com/capawesome-team/cli/compare/v4.1.0...v4.2.0) (2026-02-20)
+
+
+### Features
+
+* add interactive login prompt to all authenticated commands ([#116](https://github.com/capawesome-team/cli/issues/116)) ([4360b2f](https://github.com/capawesome-team/cli/commit/4360b2fca0e4d49eaa14b0d09b5702a0e9675be8))
+* add interactive org/app selection prompt ([#117](https://github.com/capawesome-team/cli/issues/117)) ([15e7813](https://github.com/capawesome-team/cli/commit/15e781363e4a8d5eeb25ca39e9d52bc5300e3a35))
+
+
+### Bug Fixes
+
+* **deps:** add overrides for glob and minimatch versions ([abf0888](https://github.com/capawesome-team/cli/commit/abf08882a6c8938db8d1e9dc2b132d1f44e65888))
+* parse private key before signing for OpenSSL 3.x compatibility ([#115](https://github.com/capawesome-team/cli/issues/115)) ([1f8e26f](https://github.com/capawesome-team/cli/commit/1f8e26f0453d9360ff0664c76098e92c5a709a98))
+
 ## [4.1.0](https://github.com/capawesome-team/cli/compare/v4.0.5...v4.1.0) (2026-02-12)
 
 
