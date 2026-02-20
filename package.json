@@ -51,6 +51,10 @@
       "url": "https://opencollective.com/capawesome"
     }
   ],
+  "overrides": {
+    "glob": "13.0.6",
+    "minimatch": "10.2.2"
+  },
   "dependencies": {
     "@clack/prompts": "0.7.0",
     "@robingenz/zli": "0.2.0",
