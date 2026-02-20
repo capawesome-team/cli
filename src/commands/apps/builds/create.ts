@@ -3,10 +3,10 @@ import appBuildsService from '@/services/app-builds.js';
 import appCertificatesService from '@/services/app-certificates.js';
 import appEnvironmentsService from '@/services/app-environments.js';
 import appsService from '@/services/apps.js';
-import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
 import { AppBuildArtifactDto } from '@/types/app-build.js';
 import { unescapeAnsi } from '@/utils/ansi.js';
+import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
 import { wait } from '@/utils/wait.js';
@@ -75,14 +75,8 @@ export default defineCommand({
     }),
     { y: 'yes' },
   ),
-  action: async (options) => {
+  action: withAuth(async (options) => {
     let { appId, platform, type, gitRef, environment, certificate, json, stack } = options;
-
-    // Check if the user is logged in
-    if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command. Please run the `login` command first.');
-      process.exit(1);
-    }
 
     // Validate that detached flag cannot be used with artifact flags
     if (options.detached && (options.apk || options.aab || options.ipa || options.zip)) {
@@ -403,7 +397,7 @@ export default defineCommand({
         consola.success(`Build completed successfully.`);
       }
     }
-  },
+  }),
 });
 
 /**

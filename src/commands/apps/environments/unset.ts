@@ -1,7 +1,7 @@
 import appEnvironmentsService from '@/services/app-environments.js';
 import appsService from '@/services/apps.js';
-import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
+import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
@@ -24,13 +24,8 @@ export default defineCommand({
         .describe('Key of the environment secret to unset. Can be specified multiple times.'),
     }),
   ),
-  action: async (options, args) => {
+  action: withAuth(async (options, args) => {
     let { appId, environmentId, variable: variableKeys, secret: secretKeys } = options;
-
-    if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command. Please run the `login` command first.');
-      process.exit(1);
-    }
 
     if (!appId) {
       if (!isInteractive()) {
@@ -109,5 +104,5 @@ export default defineCommand({
     }
 
     consola.success('Environment variables and secrets unset successfully.');
-  },
+  }),
 });

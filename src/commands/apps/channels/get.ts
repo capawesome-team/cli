@@ -1,6 +1,6 @@
 import appChannelsService from '@/services/app-channels.js';
-import authorizationService from '@/services/authorization-service.js';
 import { AppChannelDto } from '@/types/index.js';
+import { withAuth } from '@/utils/auth.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { z } from 'zod';
@@ -15,13 +15,8 @@ export default defineCommand({
       name: z.string().optional().describe('Name of the channel.'),
     }),
   ),
-  action: async (options, args) => {
+  action: withAuth(async (options, args) => {
     let { appId, channelId, json, name } = options;
-
-    if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command. Please run the `login` command first.');
-      process.exit(1);
-    }
 
     if (!appId) {
       consola.error('You must provide an app ID.');
@@ -55,5 +50,5 @@ export default defineCommand({
       console.table(channel);
       consola.success('Channel retrieved successfully.');
     }
-  },
+  }),
 });

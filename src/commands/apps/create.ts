@@ -1,6 +1,6 @@
 import appsService from '@/services/apps.js';
-import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
+import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
@@ -15,13 +15,9 @@ export default defineCommand({
       organizationId: z.string().optional().describe('ID of the organization to create the app in.'),
     }),
   ),
-  action: async (options, args) => {
+  action: withAuth(async (options, args) => {
     let { name, organizationId } = options;
 
-    if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command. Please run the `login` command first.');
-      process.exit(1);
-    }
     if (!organizationId) {
       if (!isInteractive()) {
         consola.error('You must provide the organization ID when running in non-interactive environment.');
@@ -52,5 +48,5 @@ export default defineCommand({
     const response = await appsService.create({ name, organizationId });
     consola.info(`App ID: ${response.id}`);
     consola.success('App created successfully.');
-  },
+  }),
 });

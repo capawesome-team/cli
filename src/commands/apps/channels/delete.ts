@@ -1,7 +1,7 @@
 import appChannelsService from '@/services/app-channels.js';
 import appsService from '@/services/apps.js';
-import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
+import { withAuth } from '@/utils/auth.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
@@ -25,13 +25,8 @@ export default defineCommand({
     }),
     { y: 'yes' },
   ),
-  action: async (options, args) => {
+  action: withAuth(async (options, args) => {
     let { appId, channelId, name } = options;
-
-    if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command. Please run the `login` command first.');
-      process.exit(1);
-    }
 
     if (!appId) {
       if (!isInteractive()) {
@@ -102,5 +97,5 @@ export default defineCommand({
       name,
     });
     consola.success('Channel deleted successfully.');
-  },
+  }),
 });

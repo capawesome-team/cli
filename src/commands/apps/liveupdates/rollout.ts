@@ -2,8 +2,8 @@ import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appChannelsService from '@/services/app-channels.js';
 import appDeploymentsService from '@/services/app-deployments.js';
 import appsService from '@/services/apps.js';
-import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
+import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
@@ -36,14 +36,8 @@ export default defineCommand({
         .describe('Rollout percentage (0-100).'),
     }),
   ),
-  action: async (options) => {
+  action: withAuth(async (options) => {
     let { appId, channel, percentage } = options;
-
-    // Check if the user is logged in
-    if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command. Please run the `login` command first.');
-      process.exit(1);
-    }
 
     // Prompt for app ID if not provided
     if (!appId) {
@@ -160,5 +154,5 @@ export default defineCommand({
     consola.info(`Deployment ID: ${response.id}`);
     consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.id}`);
     consola.success(`Rolled out to ${percentage}%.`);
-  },
+  }),
 });

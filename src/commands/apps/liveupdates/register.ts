@@ -1,8 +1,8 @@
 import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appBundlesService from '@/services/app-bundles.js';
 import appsService from '@/services/apps.js';
-import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
+import { withAuth } from '@/utils/auth.js';
 import { createBufferFromPath, createBufferFromString, isPrivateKeyContent } from '@/utils/buffer.js';
 import { isInteractive } from '@/utils/environment.js';
 import { fileExistsAtPath } from '@/utils/file.js';
@@ -109,7 +109,7 @@ export default defineCommand({
     }),
     { y: 'yes' },
   ),
-  action: async (options, args) => {
+  action: withAuth(async (options, args) => {
     let {
       androidEq,
       androidMax,
@@ -130,12 +130,6 @@ export default defineCommand({
       rolloutPercentage,
       url,
     } = options;
-
-    // Check if the user is logged in
-    if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command. Please run the `login` command first.');
-      process.exit(1);
-    }
 
     // Calculate the expiration date
     let expiresAt: string | undefined;
@@ -318,7 +312,7 @@ export default defineCommand({
       consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.appDeploymentId}`);
     }
     consola.success('Live Update successfully registered.');
-  },
+  }),
 });
 
 const parseCustomProperties = (customProperty: string[] | undefined): Record<string, string> | undefined => {

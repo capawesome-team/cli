@@ -2,9 +2,9 @@ import { DEFAULT_CONSOLE_BASE_URL, MAX_CONCURRENT_UPLOADS } from '@/config/index
 import appBundleFilesService from '@/services/app-bundle-files.js';
 import appBundlesService from '@/services/app-bundles.js';
 import appsService from '@/services/apps.js';
-import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
 import { AppBundleFileDto } from '@/types/app-bundle-file.js';
+import { withAuth } from '@/utils/auth.js';
 import {
   createBufferFromPath,
   createBufferFromReadStream,
@@ -128,7 +128,7 @@ export default defineCommand({
     }),
     { y: 'yes' },
   ),
-  action: async (options, args) => {
+  action: withAuth(async (options, args) => {
     let {
       androidEq,
       androidMax,
@@ -149,12 +149,6 @@ export default defineCommand({
       privateKey,
       rolloutPercentage,
     } = options;
-
-    // Check if the user is logged in
-    if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command. Please run the `login` command first.');
-      process.exit(1);
-    }
 
     // Calculate the expiration date
     let expiresAt: string | undefined;
@@ -356,7 +350,7 @@ export default defineCommand({
       consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.appDeploymentId}`);
     }
     consola.success('Live Update successfully uploaded.');
-  },
+  }),
 });
 
 const uploadFile = async (options: {
