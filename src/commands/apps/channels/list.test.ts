@@ -1,5 +1,6 @@
 import { DEFAULT_API_BASE_URL } from '@/config/consts.js';
 import authorizationService from '@/services/authorization-service.js';
+import { prompt } from '@/utils/prompt.js';
 import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
 import nock from 'nock';
@@ -8,11 +9,13 @@ import listChannelsCommand from './list.js';
 
 // Mock dependencies
 vi.mock('@/utils/user-config.js');
+vi.mock('@/utils/prompt.js');
 vi.mock('@/services/authorization-service.js');
 vi.mock('consola');
 
 describe('apps-channels-list', () => {
   const mockUserConfig = vi.mocked(userConfig);
+  const mockPrompt = vi.mocked(prompt);
   const mockConsola = vi.mocked(consola);
   const mockAuthorizationService = vi.mocked(authorizationService);
 
@@ -41,12 +44,12 @@ describe('apps-channels-list', () => {
     const options = { appId };
 
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(false);
+    mockPrompt.mockResolvedValueOnce(false);
 
     await expect(listChannelsCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
-    expect(mockConsola.error).toHaveBeenCalledWith(
-      'You must be logged in to run this command. Please run the `login` command first.',
-    );
+    expect(mockConsola.error).toHaveBeenCalledWith('You must be logged in to run this command.');
+    expect(mockConsola.error).toHaveBeenCalledWith('Please run the `login` command first.');
   });
 
   it('should require appId', async () => {

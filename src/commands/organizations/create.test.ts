@@ -85,12 +85,12 @@ describe('organizations-create', () => {
     const options = { name: organizationName };
 
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(false);
+    mockPrompt.mockResolvedValueOnce(false);
 
     await expect(createOrganizationCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
-    expect(mockConsola.error).toHaveBeenCalledWith(
-      'You must be logged in to run this command. Please run the `login` command first.',
-    );
+    expect(mockConsola.error).toHaveBeenCalledWith('You must be logged in to run this command.');
+    expect(mockConsola.error).toHaveBeenCalledWith('Please run the `login` command first.');
   });
 
   it('should handle API error during creation', async () => {

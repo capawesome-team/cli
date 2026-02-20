@@ -10,6 +10,7 @@ import uploadCommand from './upload.js';
 
 // Mock dependencies
 vi.mock('@/utils/user-config.js');
+vi.mock('@/utils/prompt.js');
 vi.mock('@/services/authorization-service.js');
 vi.mock('@/utils/file.js');
 vi.mock('@/utils/zip.js');
@@ -53,12 +54,12 @@ describe('apps-liveupdates-upload', () => {
     const options = { appId, path: './dist', artifactType: 'zip' as const, rollout: 1 };
 
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(false);
+    vi.mocked((await import('@/utils/prompt.js')).prompt).mockResolvedValueOnce(false);
 
     await expect(uploadCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
-    expect(mockConsola.error).toHaveBeenCalledWith(
-      'You must be logged in to run this command. Please run the `login` command first.',
-    );
+    expect(mockConsola.error).toHaveBeenCalledWith('You must be logged in to run this command.');
+    expect(mockConsola.error).toHaveBeenCalledWith('Please run the `login` command first.');
   });
 
   it('should handle path validation errors', async () => {

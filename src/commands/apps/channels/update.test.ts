@@ -46,12 +46,12 @@ describe('apps-channels-update', () => {
     const options = { appId, channelId };
 
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(false);
+    mockPrompt.mockResolvedValueOnce(false);
 
     await expect(updateChannelCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
-    expect(mockConsola.error).toHaveBeenCalledWith(
-      'You must be logged in to run this command. Please run the `login` command first.',
-    );
+    expect(mockConsola.error).toHaveBeenCalledWith('You must be logged in to run this command.');
+    expect(mockConsola.error).toHaveBeenCalledWith('Please run the `login` command first.');
   });
 
   it('should update channel with provided options', async () => {
