@@ -1,7 +1,7 @@
 import appChannelsService from '@/services/app-channels.js';
 import appsService from '@/services/apps.js';
-import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
+import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
@@ -18,13 +18,8 @@ export default defineCommand({
       offset: z.coerce.number().optional().describe('Offset for pagination.'),
     }),
   ),
-  action: async (options, args) => {
+  action: withAuth(async (options, args) => {
     let { appId, json, limit, offset } = options;
-
-    if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command. Please run the `login` command first.');
-      process.exit(1);
-    }
 
     if (!appId) {
       if (!isInteractive()) {
@@ -70,5 +65,5 @@ export default defineCommand({
       console.table(foundChannels);
       consola.success('Channels retrieved successfully.');
     }
-  },
+  }),
 });

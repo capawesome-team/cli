@@ -2,8 +2,8 @@ import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appChannelsService from '@/services/app-channels.js';
 import appDeploymentsService from '@/services/app-deployments.js';
 import appsService from '@/services/apps.js';
-import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
+import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
 import { formatTimeAgo } from '@/utils/time-format.js';
@@ -37,14 +37,8 @@ export default defineCommand({
         .describe('Number of deployments to go back (1-5).'),
     }),
   ),
-  action: async (options) => {
+  action: withAuth(async (options) => {
     let { appId, channel, steps } = options;
-
-    // Check if the user is logged in
-    if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command. Please run the `login` command first.');
-      process.exit(1);
-    }
 
     // Prompt for app ID if not provided
     if (!appId) {
@@ -191,5 +185,5 @@ export default defineCommand({
     consola.success(
       `Rolled back to Build #${selectedAppDeployment.appBuild?.numberAsString} (${selectedIndex} step${selectedIndex === 1 ? '' : 's'} back).`,
     );
-  },
+  }),
 });

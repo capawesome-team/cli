@@ -1,7 +1,7 @@
 import appChannelsService from '@/services/app-channels.js';
 import appsService from '@/services/apps.js';
-import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
+import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { getMessageFromUnknownError } from '@/utils/error.js';
 import { prompt } from '@/utils/prompt.js';
@@ -28,13 +28,9 @@ export default defineCommand({
       protected: z.boolean().optional().describe('Whether to protect the channel or not. Default is `false`.'),
     }),
   ),
-  action: async (options, args) => {
+  action: withAuth(async (options, args) => {
     let { appId, expiresInDays, ignoreErrors, name, protected: _protected } = options;
 
-    if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command. Please run the `login` command first.');
-      process.exit(1);
-    }
     // Calculate the expiration date
     let expiresAt: string | undefined;
     if (expiresInDays) {
@@ -104,5 +100,5 @@ export default defineCommand({
         throw error;
       }
     }
-  },
+  }),
 });

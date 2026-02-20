@@ -1,5 +1,5 @@
 import appBuildsService from '@/services/app-builds.js';
-import authorizationService from '@/services/authorization-service.js';
+import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
@@ -53,13 +53,8 @@ export default defineCommand({
         .describe('The minimum iOS bundle version (`CFBundleVersion`) that the build supports.'),
     }),
   ),
-  action: async (options) => {
+  action: withAuth(async (options) => {
     const { appId, buildId, androidEq, androidMax, androidMin, iosEq, iosMax, iosMin } = options;
-
-    if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command. Please run the `login` command first.');
-      process.exit(1);
-    }
 
     if (!appId) {
       if (!isInteractive()) {
@@ -92,5 +87,5 @@ export default defineCommand({
     });
 
     consola.success('Native version constraints set successfully.');
-  },
+  }),
 });

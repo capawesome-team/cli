@@ -1,8 +1,8 @@
 import appBuildsService from '@/services/app-builds.js';
 import appsService from '@/services/apps.js';
-import authorizationService from '@/services/authorization-service.js';
 import organizationsService from '@/services/organizations.js';
 import { unescapeAnsi } from '@/utils/ansi.js';
+import { withAuth } from '@/utils/auth.js';
 import { prompt } from '@/utils/prompt.js';
 import { wait } from '@/utils/wait.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
@@ -28,14 +28,8 @@ export default defineCommand({
         .describe('Build ID to display the build logs for.'),
     }),
   ),
-  action: async (options) => {
+  action: withAuth(async (options) => {
     let { appId, buildId } = options;
-
-    // Check if the user is logged in
-    if (!authorizationService.hasAuthorizationToken()) {
-      consola.error('You must be logged in to run this command. Please run the `login` command first.');
-      process.exit(1);
-    }
 
     // Prompt for app ID if not provided
     if (!appId) {
@@ -128,5 +122,5 @@ export default defineCommand({
         }
       }
     }
-  },
+  }),
 });
