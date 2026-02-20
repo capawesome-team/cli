@@ -1,11 +1,9 @@
 import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appChannelsService from '@/services/app-channels.js';
 import appDeploymentsService from '@/services/app-deployments.js';
-import appsService from '@/services/apps.js';
-import organizationsService from '@/services/organizations.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
-import { prompt } from '@/utils/prompt.js';
+import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { z } from 'zod';
@@ -45,41 +43,8 @@ export default defineCommand({
         consola.error('You must provide an app ID when running in non-interactive environment.');
         process.exit(1);
       }
-      const organizations = await organizationsService.findAll();
-      if (organizations.length === 0) {
-        consola.error('You must create an organization before updating a rollout percentage.');
-        process.exit(1);
-      }
-      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      const organizationId = await prompt(
-        'Select the organization of the app for which you want to update the rollout percentage.',
-        {
-          type: 'select',
-          options: organizations.map((organization) => ({ label: organization.name, value: organization.id })),
-        },
-      );
-      if (!organizationId) {
-        consola.error(
-          'You must select the organization of an app for which you want to update the rollout percentage.',
-        );
-        process.exit(1);
-      }
-      const apps = await appsService.findAll({
-        organizationId,
-      });
-      if (apps.length === 0) {
-        consola.error('You must create an app before updating a rollout percentage.');
-        process.exit(1);
-      }
-      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      appId = await prompt('Which app do you want to update the rollout percentage for:', {
-        type: 'select',
-        options: apps.map((app) => ({ label: app.name, value: app.id })),
-      });
-      if (!appId) {
-        consola.error('You must select an app to update the rollout percentage for.');
-        process.exit(1);
-      }
+      const organizationId = await promptOrganizationSelection();
+      appId = await promptAppSelection(organizationId);
     }
 
     // Prompt for channel name if not provided

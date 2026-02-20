@@ -1,6 +1,6 @@
 import { DEFAULT_API_BASE_URL } from '@/config/consts.js';
 import authorizationService from '@/services/authorization-service.js';
-import { prompt } from '@/utils/prompt.js';
+import { prompt, promptOrganizationSelection } from '@/utils/prompt.js';
 import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
 import nock from 'nock';
@@ -19,6 +19,7 @@ vi.mock('@/utils/environment.js', () => ({
 describe('apps-create', () => {
   const mockUserConfig = vi.mocked(userConfig);
   const mockPrompt = vi.mocked(prompt);
+  const mockPromptOrganizationSelection = vi.mocked(promptOrganizationSelection);
   const mockConsola = vi.mocked(consola);
   const mockAuthorizationService = vi.mocked(authorizationService);
 
@@ -61,40 +62,24 @@ describe('apps-create', () => {
 
   it('should prompt for organization when not provided', async () => {
     const appName = 'Test App';
-    const orgId1 = 'org-1';
-    const orgId2 = 'org-2';
+    const orgId = 'org-1';
     const appId = 'app-456';
     const testToken = 'test-token';
-    const organizations = [
-      { id: orgId1, name: 'Org 1' },
-      { id: orgId2, name: 'Org 2' },
-    ];
 
     const options = { name: appName };
 
-    const orgsScope = nock(DEFAULT_API_BASE_URL)
-      .get('/v1/organizations')
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, organizations);
-
     const createScope = nock(DEFAULT_API_BASE_URL)
-      .post(`/v1/apps?organizationId=${orgId1}`, { name: appName })
+      .post(`/v1/apps?organizationId=${orgId}`, { name: appName })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(201, { id: appId, name: appName });
 
-    mockPrompt.mockResolvedValueOnce(orgId1);
+    mockPromptOrganizationSelection.mockResolvedValueOnce(orgId);
 
     await createAppCommand.action(options, undefined);
 
-    expect(orgsScope.isDone()).toBe(true);
     expect(createScope.isDone()).toBe(true);
-    expect(mockPrompt).toHaveBeenCalledWith('Which organization do you want to create the app in?', {
-      type: 'select',
-      options: [
-        { label: 'Org 1', value: orgId1 },
-        { label: 'Org 2', value: orgId2 },
-      ],
-    });
+    expect(mockPromptOrganizationSelection).toHaveBeenCalled();
+    expect(mockConsola.success).toHaveBeenCalledWith('App created successfully.');
   });
 
   it('should prompt for app name when not provided', async () => {
@@ -118,21 +103,15 @@ describe('apps-create', () => {
     expect(mockPrompt).toHaveBeenCalledWith('Enter the name of the app:', { type: 'text' });
   });
 
-  it('should handle error when no organizations exist', async () => {
-    const appName = 'Test App';
-    const testToken = 'test-token';
+  it('should exit when promptOrganizationSelection exits', async () => {
+    const options = { name: 'Test App' };
 
-    const options = { name: appName };
-
-    const scope = nock(DEFAULT_API_BASE_URL)
-      .get('/v1/organizations')
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, []);
+    mockPromptOrganizationSelection.mockImplementation(() => {
+      process.exit(1);
+      return Promise.resolve('');
+    });
 
     await expect(createAppCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
-
-    expect(scope.isDone()).toBe(true);
-    expect(mockConsola.error).toHaveBeenCalledWith('You must create an organization before creating an app.');
   });
 
   it('should handle API error during creation', async () => {

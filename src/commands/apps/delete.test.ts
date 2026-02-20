@@ -1,6 +1,6 @@
 import { DEFAULT_API_BASE_URL } from '@/config/consts.js';
 import authorizationService from '@/services/authorization-service.js';
-import { prompt } from '@/utils/prompt.js';
+import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
 import nock from 'nock';
@@ -19,6 +19,8 @@ vi.mock('@/utils/environment.js', () => ({
 describe('apps-delete', () => {
   const mockUserConfig = vi.mocked(userConfig);
   const mockPrompt = vi.mocked(prompt);
+  const mockPromptOrganizationSelection = vi.mocked(promptOrganizationSelection);
+  const mockPromptAppSelection = vi.mocked(promptAppSelection);
   const mockConsola = vi.mocked(consola);
   const mockAuthorizationService = vi.mocked(authorizationService);
 
@@ -80,63 +82,33 @@ describe('apps-delete', () => {
     const orgId = 'org-1';
     const appId = 'app-1';
     const testToken = 'test-token';
-    const organization = { id: orgId, name: 'Org 1' };
-    const app = { id: appId, name: 'App 1' };
 
     const options = {};
-
-    const orgsScope = nock(DEFAULT_API_BASE_URL)
-      .get('/v1/organizations')
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, [organization]);
-
-    const appsScope = nock(DEFAULT_API_BASE_URL)
-      .get('/v1/apps')
-      .query({ organizationId: orgId })
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, [app]);
 
     const deleteScope = nock(DEFAULT_API_BASE_URL)
       .delete(`/v1/apps/${appId}`)
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(200);
 
-    mockPrompt
-      .mockResolvedValueOnce(orgId) // organization selection
-      .mockResolvedValueOnce(appId) // app selection
-      .mockResolvedValueOnce(true); // confirmation
+    mockPromptOrganizationSelection.mockResolvedValueOnce(orgId);
+    mockPromptAppSelection.mockResolvedValueOnce(appId);
+    mockPrompt.mockResolvedValueOnce(true); // confirmation
 
     await deleteAppCommand.action(options, undefined);
 
-    expect(orgsScope.isDone()).toBe(true);
-    expect(appsScope.isDone()).toBe(true);
     expect(deleteScope.isDone()).toBe(true);
     expect(mockConsola.success).toHaveBeenCalledWith('App deleted successfully.');
   });
 
-  it('should handle error when no organizations exist', async () => {
-    const testToken = 'test-token';
-
+  it('should exit when promptOrganizationSelection exits', async () => {
     const options = {};
 
-    const scope = nock(DEFAULT_API_BASE_URL)
-      .get('/v1/organizations')
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, []);
-
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
-      throw new Error(`process.exit called with code ${code}`);
+    mockPromptOrganizationSelection.mockImplementation(() => {
+      process.exit(1);
+      return Promise.resolve('');
     });
 
-    try {
-      await deleteAppCommand.action(options, undefined);
-    } catch (error: any) {
-      expect(error.message).toBe('process.exit called with code 1');
-    }
-
-    expect(scope.isDone()).toBe(true);
-    expect(mockConsola.error).toHaveBeenCalledWith('You must create an organization before deleting an app.');
-    expect(exitSpy).toHaveBeenCalledWith(1);
+    await expect(deleteAppCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
   });
 
   it('should handle API error during deletion', async () => {
