@@ -31,7 +31,9 @@ describe('apps-devices-delete', () => {
     mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue('test-token');
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(true);
 
-    vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
+      throw new Error(`Process exited with code ${code}`);
+    });
   });
 
   afterEach(() => {
@@ -132,17 +134,7 @@ describe('apps-devices-delete', () => {
       return Promise.resolve('');
     });
 
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
-      throw new Error(`process.exit called with code ${code}`);
-    });
-
-    try {
-      await deleteDeviceCommand.action(options, undefined);
-    } catch (error: any) {
-      expect(error.message).toBe('process.exit called with code 1');
-    }
-
-    expect(exitSpy).toHaveBeenCalledWith(1);
+    await expect(deleteDeviceCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
   });
 
   it('should handle API error during deletion', async () => {
