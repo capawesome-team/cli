@@ -48,12 +48,12 @@ describe('apps-liveupdates-register', () => {
     const options = { appId, url: bundleUrl, rolloutPercentage: 1 };
 
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(false);
-    vi.mocked((await import('@/utils/prompt.js')).prompt).mockResolvedValueOnce(false);
 
     await expect(registerCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
-    expect(mockConsola.error).toHaveBeenCalledWith('You must be logged in to run this command.');
-    expect(mockConsola.error).toHaveBeenCalledWith('Please run the `login` command first.');
+    expect(mockConsola.error).toHaveBeenCalledWith(
+      'You must be logged in to run this command. Set the `CAPAWESOME_TOKEN` environment variable or use the `--token` option.',
+    );
   });
 
   it('should register bundle with self-hosted URL', async () => {

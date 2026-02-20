@@ -44,12 +44,12 @@ describe('apps-channels-list', () => {
     const options = { appId };
 
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(false);
-    mockPrompt.mockResolvedValueOnce(false);
 
     await expect(listChannelsCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
-    expect(mockConsola.error).toHaveBeenCalledWith('You must be logged in to run this command.');
-    expect(mockConsola.error).toHaveBeenCalledWith('Please run the `login` command first.');
+    expect(mockConsola.error).toHaveBeenCalledWith(
+      'You must be logged in to run this command. Set the `CAPAWESOME_TOKEN` environment variable or use the `--token` option.',
+    );
   });
 
   it('should require appId', async () => {
