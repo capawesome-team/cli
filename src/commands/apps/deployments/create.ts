@@ -45,8 +45,8 @@ export default defineCommand({
         consola.error('You must provide an app ID when running in non-interactive environment.');
         process.exit(1);
       }
-      const organizationId = await promptOrganizationSelection();
-      appId = await promptAppSelection(organizationId);
+      const organizationId = await promptOrganizationSelection({ allowCreate: true });
+      appId = await promptAppSelection(organizationId, { allowCreate: true });
     }
 
     // Convert build number to build ID if provided

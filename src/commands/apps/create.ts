@@ -22,7 +22,7 @@ export default defineCommand({
         consola.error('You must provide the organization ID when running in non-interactive environment.');
         process.exit(1);
       }
-      organizationId = await promptOrganizationSelection();
+      organizationId = await promptOrganizationSelection({ allowCreate: true });
     }
     if (!name) {
       if (!isInteractive()) {

@@ -10,19 +10,23 @@ export const prompt: typeof consola.prompt = async (message, options) => {
   return response;
 };
 
-export const promptOrganizationSelection = async (): Promise<string> => {
+export const promptOrganizationSelection = async (options?: { allowCreate?: boolean }): Promise<string> => {
   const organizationsService = await import('@/services/organizations.js').then((mod) => mod.default);
   let organizations = await organizationsService.findAll();
   if (organizations.length === 0) {
-    const shouldCreate = await prompt('No organizations found. Do you want to create one now?', {
-      type: 'confirm',
-      initial: true,
-    });
-    if (shouldCreate) {
-      await (await import('@/commands/organizations/create.js').then((mod) => mod.default)).action({}, undefined);
-      organizations = await organizationsService.findAll();
+    if (options?.allowCreate) {
+      const shouldCreate = await prompt('No organizations found. Do you want to create one now?', {
+        type: 'confirm',
+        initial: true,
+      });
+      if (shouldCreate) {
+        await (await import('@/commands/organizations/create.js').then((mod) => mod.default)).action({}, undefined);
+        organizations = await organizationsService.findAll();
+      } else {
+        process.exit(1);
+      }
     } else {
-      consola.error('Please create an organization first.');
+      consola.error('No organizations found. Please create one first.');
       process.exit(1);
     }
   }
@@ -34,21 +38,28 @@ export const promptOrganizationSelection = async (): Promise<string> => {
   return organizationId;
 };
 
-export const promptAppSelection = async (organizationId: string): Promise<string> => {
+export const promptAppSelection = async (
+  organizationId: string,
+  options?: { allowCreate?: boolean },
+): Promise<string> => {
   const appsService = await import('@/services/apps.js').then((mod) => mod.default);
   let apps = await appsService.findAll({ organizationId });
   if (apps.length === 0) {
-    const shouldCreate = await prompt('No apps found. Do you want to create one now?', {
-      type: 'confirm',
-      initial: true,
-    });
-    if (shouldCreate) {
-      await (
-        await import('@/commands/apps/create.js').then((mod) => mod.default)
-      ).action({ organizationId }, undefined);
-      apps = await appsService.findAll({ organizationId });
+    if (options?.allowCreate) {
+      const shouldCreate = await prompt('No apps found. Do you want to create one now?', {
+        type: 'confirm',
+        initial: true,
+      });
+      if (shouldCreate) {
+        await (
+          await import('@/commands/apps/create.js').then((mod) => mod.default)
+        ).action({ organizationId }, undefined);
+        apps = await appsService.findAll({ organizationId });
+      } else {
+        process.exit(1);
+      }
     } else {
-      consola.error('Please create an app first.');
+      consola.error('No apps found. Please create one first.');
       process.exit(1);
     }
   }
