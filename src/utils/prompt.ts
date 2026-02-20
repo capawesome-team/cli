@@ -22,11 +22,12 @@ export const promptOrganizationSelection = async (): Promise<string> => {
       await (await import('@/commands/organizations/create.js').then((mod) => mod.default)).action({}, undefined);
       organizations = await organizationsService.findAll();
     } else {
+      consola.error('Please create an organization first.');
       process.exit(1);
     }
   }
   // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-  const organizationId = await prompt('Which organization?', {
+  const organizationId = await prompt('Which organization do you want to use?', {
     type: 'select',
     options: organizations.map((organization) => ({ label: organization.name, value: organization.id })),
   });
@@ -47,11 +48,12 @@ export const promptAppSelection = async (organizationId: string): Promise<string
       ).action({ organizationId }, undefined);
       apps = await appsService.findAll({ organizationId });
     } else {
+      consola.error('Please create an app first.');
       process.exit(1);
     }
   }
   // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-  const appId = await prompt('Which app?', {
+  const appId = await prompt('Which app do you want to use?', {
     type: 'select',
     options: apps.map((app) => ({ label: app.name, value: app.id })),
   });
