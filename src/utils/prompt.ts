@@ -42,10 +42,9 @@ export const promptAppSelection = async (organizationId: string): Promise<string
       initial: true,
     });
     if (shouldCreate) {
-      await (await import('@/commands/apps/create.js').then((mod) => mod.default)).action(
-        { organizationId },
-        undefined,
-      );
+      await (
+        await import('@/commands/apps/create.js').then((mod) => mod.default)
+      ).action({ organizationId }, undefined);
       apps = await appsService.findAll({ organizationId });
     } else {
       process.exit(1);
