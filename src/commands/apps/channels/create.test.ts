@@ -1,6 +1,6 @@
 import { DEFAULT_API_BASE_URL } from '@/config/consts.js';
 import authorizationService from '@/services/authorization-service.js';
-import { prompt } from '@/utils/prompt.js';
+import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
 import nock from 'nock';
@@ -19,6 +19,8 @@ vi.mock('@/utils/environment.js', () => ({
 describe('apps-channels-create', () => {
   const mockUserConfig = vi.mocked(userConfig);
   const mockPrompt = vi.mocked(prompt);
+  const mockPromptOrganizationSelection = vi.mocked(promptOrganizationSelection);
+  const mockPromptAppSelection = vi.mocked(promptAppSelection);
   const mockConsola = vi.mocked(consola);
   const mockAuthorizationService = vi.mocked(authorizationService);
 
@@ -73,17 +75,6 @@ describe('apps-channels-create', () => {
 
     const options = { name: channelName };
 
-    const orgsScope = nock(DEFAULT_API_BASE_URL)
-      .get('/v1/organizations')
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, [{ id: orgId, name: 'Org 1' }]);
-
-    const appsScope = nock(DEFAULT_API_BASE_URL)
-      .get('/v1/apps')
-      .query({ organizationId: orgId })
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, [{ id: appId, name: 'App 1' }]);
-
     const createScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/channels`, {
         appId,
@@ -93,14 +84,11 @@ describe('apps-channels-create', () => {
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(201, { id: channelId, name: channelName });
 
-    mockPrompt
-      .mockResolvedValueOnce(orgId) // organization selection
-      .mockResolvedValueOnce(appId); // app selection
+    mockPromptOrganizationSelection.mockResolvedValueOnce(orgId);
+    mockPromptAppSelection.mockResolvedValueOnce(appId);
 
     await createChannelCommand.action(options, undefined);
 
-    expect(orgsScope.isDone()).toBe(true);
-    expect(appsScope.isDone()).toBe(true);
     expect(createScope.isDone()).toBe(true);
     expect(mockConsola.success).toHaveBeenCalledWith('Channel created successfully.');
   });
