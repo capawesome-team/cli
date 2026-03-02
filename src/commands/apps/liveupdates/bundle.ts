@@ -37,10 +37,13 @@ export default defineCommand({
         process.exit(1);
       }
       consola.warn('Make sure you have built your web assets before creating a bundle (e.g., `npm run build`).');
-      const response = await prompt('Enter the path to the web assets directory (e.g., `dist` or `www`):', {
+      inputPath = await prompt('Enter the path to the web assets directory (e.g., `dist` or `www`):', {
         type: 'text',
       });
-      inputPath = response as string;
+      if (!inputPath) {
+        consola.error('You must provide an input path.');
+        process.exit(1);
+      }
     }
 
     // Convert to absolute path
