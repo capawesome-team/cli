@@ -7,7 +7,7 @@ import FormData from 'form-data';
 export interface AppBundleFilesService {
   create(
     dto: CreateAppBundleFileDto,
-    onProgress?: (completedParts: number, totalParts: number) => void,
+    onProgress?: (currentPart: number, totalParts: number) => void,
   ): Promise<AppBundleFileDto>;
 }
 
@@ -20,7 +20,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
 
   async create(
     dto: CreateAppBundleFileDto,
-    onProgress?: (completedParts: number, totalParts: number) => void,
+    onProgress?: (currentPart: number, totalParts: number) => void,
   ): Promise<AppBundleFileDto> {
     const sizeInBytes = dto.buffer.byteLength;
     const useMultipartUpload = sizeInBytes >= 50 * 1024 * 1024; // 50 MB
@@ -114,7 +114,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
 
   private async createUploadParts(
     dto: CreateAppBundleFileUploadPartsDto,
-    onProgress?: (completedParts: number, totalParts: number) => void,
+    onProgress?: (currentPart: number, totalParts: number) => void,
   ): Promise<AppBundleFileUploadPartDto[]> {
     const uploadedParts: AppBundleFileUploadPartDto[] = [];
     const partSize = 10 * 1024 * 1024; // 10 MB. 5 MB is the minimum part size except for the last part.
@@ -153,7 +153,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
 
   private async upload(
     dto: UploadAppBundleFileDto,
-    onProgress?: (completedParts: number, totalParts: number) => void,
+    onProgress?: (currentPart: number, totalParts: number) => void,
   ): Promise<void> {
     // 1. Create a multipart upload
     const { uploadId } = await this.createUpload({
