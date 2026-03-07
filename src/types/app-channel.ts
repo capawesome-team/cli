@@ -7,9 +7,6 @@ export interface AppChannelDto {
   appId: string;
   name: string;
   expiresAt?: string | null;
-  protectedAt?: number | null;
-  createdAt: number;
-  updatedAt: number;
 }
 
 export interface CreateAppChannelDto {
