@@ -150,7 +150,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
       uploadPartPromises[i] = uploadNextPart();
     }
     await Promise.all(uploadPartPromises);
-    return uploadedParts;
+    return uploadedParts.sort((a, b) => a.partNumber - b.partNumber);
   }
 
   private async upload(
