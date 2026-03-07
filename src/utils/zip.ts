@@ -1,4 +1,4 @@
-import archiver from 'archiver';
+import AdmZip from 'adm-zip';
 
 interface Zip {
   zipFolder(sourceFolder: string): Promise<Buffer>;
@@ -7,17 +7,9 @@ interface Zip {
 
 class ZipImpl implements Zip {
   async zipFolder(sourceFolder: string): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-      const archive = archiver('zip', { zlib: { level: 9 } });
-      const buffers: any[] = [];
-
-      archive.on('data', (data) => buffers.push(data));
-      archive.on('error', (err) => reject(err));
-      archive.on('end', () => resolve(Buffer.concat(buffers)));
-
-      archive.directory(sourceFolder, false);
-      archive.finalize();
-    });
+    const zip = new AdmZip();
+    zip.addLocalFolder(sourceFolder);
+    return zip.toBuffer();
   }
 
   isZipped(path: string): boolean {
