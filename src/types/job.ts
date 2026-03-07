@@ -2,7 +2,6 @@ export interface JobLogDto {
   jobId: string;
   number: number;
   payload: string;
-  timestamp: string;
 }
 
 export interface JobDto {
