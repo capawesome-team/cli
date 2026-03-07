@@ -333,10 +333,11 @@ const uploadFile = async (options: {
   href?: string;
   mimeType: string;
   name: string;
+  onProgress?: (completedParts: number, totalParts: number) => void;
   privateKeyBuffer: Buffer | undefined;
   retryOnFailure?: boolean;
 }): Promise<AppBundleFileDto> => {
-  let { appId, appBundleId, buffer, href, mimeType, name, privateKeyBuffer, retryOnFailure } = options;
+  let { appId, appBundleId, buffer, href, mimeType, name, onProgress, privateKeyBuffer, retryOnFailure } = options;
 
   try {
     // Generate checksum
@@ -347,16 +348,19 @@ const uploadFile = async (options: {
       signature = await createSignature(privateKeyBuffer, buffer);
     }
     // Create the multipart upload
-    return await appBundleFilesService.create({
-      appId,
-      appBundleId,
-      buffer,
-      checksum: hash,
-      href,
-      mimeType,
-      name,
-      signature,
-    });
+    return await appBundleFilesService.create(
+      {
+        appId,
+        appBundleId,
+        buffer,
+        checksum: hash,
+        href,
+        mimeType,
+        name,
+        signature,
+      },
+      onProgress,
+    );
   } catch (error) {
     if (retryOnFailure) {
       return uploadFile({
@@ -438,6 +442,9 @@ const uploadZip = async (options: {
     buffer: fileBuffer,
     mimeType: 'application/zip',
     name: 'bundle.zip',
+    onProgress: (completed, total) => {
+      consola.start(`Uploading file (part ${completed}/${total})...`);
+    },
     privateKeyBuffer: privateKeyBuffer,
   });
   return {
