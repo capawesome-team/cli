@@ -1,6 +1,6 @@
-export function formatTimeAgo(timestamp: number): string {
+export function formatTimeAgo(timestamp: string): string {
   const now = Date.now();
-  const diffInMs = now - timestamp;
+  const diffInMs = now - new Date(timestamp).getTime();
   const diffInSeconds = Math.floor(diffInMs / 1000);
 
   if (diffInSeconds < 60) {

@@ -7,7 +7,6 @@ export interface AppBuildArtifactDto {
   fileSizeInBytes: number;
   status: 'pending' | 'ready';
   type: 'apk' | 'aab' | 'ipa' | 'zip';
-  createdAt: number;
 }
 
 export interface AppBuildDto {
@@ -22,8 +21,6 @@ export interface AppBuildDto {
   numberAsString: string;
   platform: 'ios' | 'android' | 'web';
   type: string;
-  createdAt?: number;
-  createdBy?: string;
 }
 
 export interface CreateAppBuildDto {

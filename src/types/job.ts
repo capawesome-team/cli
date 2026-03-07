@@ -13,19 +13,13 @@ export interface JobDto {
   appDeploymentId?: string;
   appId?: string;
   organizationId?: string;
-  queuedAt?: number;
-  pendingAt?: number;
-  inProgressAt?: number;
-  finishedAt?: number;
-  canceledAt?: number;
-  canceledBy?: string;
+  finishedAt?: string;
   queueTimeInSeconds?: number;
   pendingTimeInSeconds?: number;
   inProgressTimeInSeconds?: number;
   totalTimeInSeconds?: number;
-  createdAt?: number;
-  createdBy?: string;
   jobLogs?: JobLogDto[];
+  createdAt: string;
 }
 
 export interface UpdateJobDto {
