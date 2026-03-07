@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.3.0](https://github.com/capawesome-team/cli/compare/v4.2.1...v4.3.0) (2026-03-07)
+
+
+### Features
+
+* add part-level progress for multipart zip uploads ([#122](https://github.com/capawesome-team/cli/issues/122)) ([f74cda4](https://github.com/capawesome-team/cli/commit/f74cda48f454dfbc786052498ebecccef98e6fc5))
+
+
+### Bug Fixes
+
+* **deps:** remove `glob` dependency ([#120](https://github.com/capawesome-team/cli/issues/120)) ([80709de](https://github.com/capawesome-team/cli/commit/80709deac3292b976f3633f3335004d2cb80fc22))
+* read deployment ID from update response ([#121](https://github.com/capawesome-team/cli/issues/121)) ([9ef9979](https://github.com/capawesome-team/cli/commit/9ef99794a5bb14631fcecf41c1a9885931627dfd))
+* use ISO string timestamps ([#119](https://github.com/capawesome-team/cli/issues/119)) ([7fe8263](https://github.com/capawesome-team/cli/commit/7fe8263956fc83ca7a93d803e6867133fea8c879))
+* validate prompt response in bundle command ([#118](https://github.com/capawesome-team/cli/issues/118)) ([a1541a0](https://github.com/capawesome-team/cli/commit/a1541a074f614b42bf69f2c6a186eeef5d95200b))
+
 ## [4.2.1](https://github.com/capawesome-team/cli/compare/v4.2.0...v4.2.1) (2026-03-01)
 
 ## [4.2.0](https://github.com/capawesome-team/cli/compare/v4.1.0...v4.2.0) (2026-02-20)
