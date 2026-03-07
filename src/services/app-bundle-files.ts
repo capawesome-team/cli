@@ -120,12 +120,12 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
     const partSize = 10 * 1024 * 1024; // 10 MB. 5 MB is the minimum part size except for the last part.
     const totalParts = Math.ceil(dto.buffer.byteLength / partSize);
     let partNumber = 0;
-    let completedParts = 0;
     const uploadNextPart = async () => {
       if (partNumber >= totalParts) {
         return;
       }
       partNumber++;
+      onProgress?.(partNumber, totalParts);
       const start = (partNumber - 1) * partSize;
       const end = Math.min(start + partSize, dto.buffer.byteLength);
       const partBuffer = dto.buffer.subarray(start, end);
@@ -140,8 +140,6 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
         uploadId: dto.uploadId,
       });
       uploadedParts.push(uploadedPart);
-      completedParts++;
-      onProgress?.(completedParts, totalParts);
       await uploadNextPart();
     };
 
