@@ -1,4 +1,4 @@
-import { MAX_CONCURRENT_UPLOADS } from '@/config/index.js';
+import { MAX_CONCURRENT_PART_UPLOADS } from '@/config/index.js';
 import authorizationService from '@/services/authorization-service.js';
 import { AppBundleFileDto, CreateAppBundleFileDto } from '@/types/app-bundle-file.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
@@ -143,8 +143,8 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
       await uploadNextPart();
     };
 
-    const uploadPartPromises = Array.from({ length: MAX_CONCURRENT_UPLOADS });
-    for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+    const uploadPartPromises = Array.from({ length: MAX_CONCURRENT_PART_UPLOADS });
+    for (let i = 0; i < MAX_CONCURRENT_PART_UPLOADS; i++) {
       uploadPartPromises[i] = uploadNextPart();
     }
     await Promise.all(uploadPartPromises);

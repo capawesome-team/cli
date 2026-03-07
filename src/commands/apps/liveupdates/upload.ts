@@ -1,4 +1,4 @@
-import { DEFAULT_CONSOLE_BASE_URL, MAX_CONCURRENT_UPLOADS } from '@/config/index.js';
+import { DEFAULT_CONSOLE_BASE_URL, MAX_CONCURRENT_FILE_UPLOADS } from '@/config/index.js';
 import appBundleFilesService from '@/services/app-bundle-files.js';
 import appBundlesService from '@/services/app-bundles.js';
 import appsService from '@/services/apps.js';
@@ -410,8 +410,8 @@ const uploadFiles = async (options: {
     await uploadNextFile();
   };
 
-  const uploadPromises = Array.from({ length: MAX_CONCURRENT_UPLOADS });
-  for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+  const uploadPromises = Array.from({ length: MAX_CONCURRENT_FILE_UPLOADS });
+  for (let i = 0; i < MAX_CONCURRENT_FILE_UPLOADS; i++) {
     uploadPromises[i] = uploadNextFile();
   }
   await Promise.all(uploadPromises);
