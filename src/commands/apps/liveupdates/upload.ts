@@ -278,7 +278,7 @@ export default defineCommand({
 
     // Create the app bundle
     consola.start('Creating bundle...');
-    const response = await appBundlesService.create({
+    const createBundleResponse = await appBundlesService.create({
       appId,
       artifactType,
       channelName: channel,
@@ -301,24 +301,26 @@ export default defineCommand({
     let appBundleFileId: string | undefined;
     // Upload the app bundle files
     if (artifactType === 'manifest') {
-      await uploadFiles({ appId, appBundleId: response.id, path, privateKeyBuffer });
+      await uploadFiles({ appId, appBundleId: createBundleResponse.id, path, privateKeyBuffer });
     } else {
-      const result = await uploadZip({ appId, appBundleId: response.id, path, privateKeyBuffer });
+      const result = await uploadZip({ appId, appBundleId: createBundleResponse.id, path, privateKeyBuffer });
       appBundleFileId = result.appBundleFileId;
     }
 
     // Update the app bundle
     consola.start('Updating bundle...');
-    await appBundlesService.update({
+    const updateBundleResponse = await appBundlesService.update({
       appBundleFileId,
       appId,
       artifactStatus: 'ready',
-      appBundleId: response.id,
+      appBundleId: createBundleResponse.id,
     });
 
-    consola.info(`Build Artifact ID: ${response.id}`);
-    if (response.appDeploymentId) {
-      consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.appDeploymentId}`);
+    consola.info(`Build Artifact ID: ${createBundleResponse.id}`);
+    if (updateBundleResponse.appDeploymentId) {
+      consola.info(
+        `Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${updateBundleResponse.appDeploymentId}`,
+      );
     }
     consola.success('Live Update successfully uploaded.');
   }),
