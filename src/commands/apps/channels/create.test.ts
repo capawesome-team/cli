@@ -140,7 +140,7 @@ describe('apps-channels-create', () => {
     expect(scope.isDone()).toBe(true);
   });
 
-  it('should create channel with expiresInDays option', async () => {
+  it('should show warning when expiresInDays option is used', async () => {
     const appId = 'app-123';
     const channelName = 'production';
     const expiresInDays = 30;
@@ -149,20 +149,11 @@ describe('apps-channels-create', () => {
 
     const options = { appId, name: channelName, expiresInDays };
 
-    // Calculate expected expiration date
-    const expectedExpiresAt = new Date();
-    expectedExpiresAt.setDate(expectedExpiresAt.getDate() + expiresInDays);
-
     const scope = nock(DEFAULT_API_BASE_URL)
-      .post(`/v1/apps/${appId}/channels`, (body) => {
-        // Verify the request includes expiresAt and it's approximately correct (within 1 minute)
-        const actualExpiresAt = new Date(body.expiresAt);
-        const timeDiff = Math.abs(actualExpiresAt.getTime() - expectedExpiresAt.getTime());
-        const oneMinute = 60 * 1000;
-
-        return (
-          body.appId === appId && body.name === channelName && body.protected === undefined && timeDiff < oneMinute
-        );
+      .post(`/v1/apps/${appId}/channels`, {
+        appId,
+        name: channelName,
+        protected: undefined,
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(201, { id: channelId, name: channelName });
@@ -170,7 +161,9 @@ describe('apps-channels-create', () => {
     await createChannelCommand.action(options, undefined);
 
     expect(scope.isDone()).toBe(true);
+    expect(mockConsola.warn).toHaveBeenCalledWith(
+      'The `--expires-in-days` option is deprecated and will be removed in a future version. Channel expiration is now managed by the data retention policy of your organization billing plan.',
+    );
     expect(mockConsola.success).toHaveBeenCalledWith('Channel created successfully.');
-    expect(mockConsola.info).toHaveBeenCalledWith(`Channel ID: ${channelId}`);
   });
 });
