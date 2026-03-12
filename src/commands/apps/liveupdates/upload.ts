@@ -149,12 +149,10 @@ export default defineCommand({
       rolloutPercentage,
     } = options;
 
-    // Calculate the expiration date
-    let expiresAt: string | undefined;
     if (expiresInDays) {
-      const expiresAtDate = new Date();
-      expiresAtDate.setDate(expiresAtDate.getDate() + expiresInDays);
-      expiresAt = expiresAtDate.toISOString();
+      consola.warn(
+        'The `--expires-in-days` option is deprecated and will be removed in a future version. Bundle expiration is now managed by the data retention policy of your organization billing plan.',
+      );
     }
 
     // Prompt for path if not provided
@@ -292,7 +290,6 @@ export default defineCommand({
       gitCommitSha: commitSha,
       gitRef,
       customProperties: parseCustomProperties(customProperty),
-      expiresAt,
       maxAndroidAppVersionCode: androidMax,
       maxIosAppVersionCode: iosMax,
       minAndroidAppVersionCode: androidMin,

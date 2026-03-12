@@ -29,12 +29,10 @@ export default defineCommand({
   action: withAuth(async (options, args) => {
     let { appId, expiresInDays, ignoreErrors, name, protected: _protected } = options;
 
-    // Calculate the expiration date
-    let expiresAt: string | undefined;
     if (expiresInDays) {
-      const expiresAtDate = new Date();
-      expiresAtDate.setDate(expiresAtDate.getDate() + expiresInDays);
-      expiresAt = expiresAtDate.toISOString();
+      consola.warn(
+        'The `--expires-in-days` option is deprecated and will be removed in a future version. Channel expiration is now managed by the data retention policy of your organization billing plan.',
+      );
     }
     // Validate the app ID
     if (!appId) {
@@ -58,7 +56,6 @@ export default defineCommand({
         appId,
         protected: _protected,
         name,
-        expiresAt,
       });
       consola.info(`Channel ID: ${response.id}`);
       consola.success('Channel created successfully.');
