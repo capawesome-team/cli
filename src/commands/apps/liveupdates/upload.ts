@@ -203,6 +203,9 @@ export default defineCommand({
         consola.error('The path must be a folder when creating a bundle with an artifact type of `manifest`.');
         process.exit(1);
       }
+      consola.warn(
+        'The `zip` artifact type is faster and more efficient for most apps. The `manifest` type can result in longer downloads and more network requests if your files change frequently between builds. Learn more: https://capawesome.io/cloud/live-updates/advanced/delta-updates/',
+      );
     }
 
     // Prompt for appId if not provided
