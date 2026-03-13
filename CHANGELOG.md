@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.4.0](https://github.com/capawesome-team/cli/compare/v4.3.0...v4.4.0) (2026-03-13)
+
+
+### Features
+
+* add `apps:devices:forcechannel` and `apps:devices:unforcechannel` commands ([#124](https://github.com/capawesome-team/cli/issues/124)) ([c47c15f](https://github.com/capawesome-team/cli/commit/c47c15fc8328824973dd9062bfac2bca2e847752))
+* add deprecation warning for `--expires-in-days` option ([#123](https://github.com/capawesome-team/cli/issues/123)) ([db628a2](https://github.com/capawesome-team/cli/commit/db628a21b50b826d59a1b29eb3913c1f6ce225bf))
+* add warning when using manifest artifact type ([42a6b2b](https://github.com/capawesome-team/cli/commit/42a6b2bfae0cc958127d4ff60562000eb9713943))
+
 ## [4.3.0](https://github.com/capawesome-team/cli/compare/v4.2.1...v4.3.0) (2026-03-07)
 
 
