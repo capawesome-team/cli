@@ -50,6 +50,10 @@ export default defineCommand({
       const absolutePublicKeyPath = pathModule.resolve(process.cwd(), publicKeyPath);
       const absolutePrivateKeyPath = pathModule.resolve(process.cwd(), privateKeyPath);
 
+      // Ensure parent directories exist
+      await fs.mkdir(pathModule.dirname(absolutePublicKeyPath), { recursive: true });
+      await fs.mkdir(pathModule.dirname(absolutePrivateKeyPath), { recursive: true });
+
       // Write the keys to files
       await fs.writeFile(absolutePublicKeyPath, publicKey, 'utf8');
       await fs.writeFile(absolutePrivateKeyPath, privateKey, 'utf8');
