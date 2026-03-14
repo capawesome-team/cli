@@ -37,6 +37,9 @@ class AppsServiceImpl implements AppsService {
 
   async findAll(dto: FindAllAppsDto): Promise<AppDto[]> {
     const params = new URLSearchParams({ organizationId: dto.organizationId });
+    if (dto.limit) {
+      params.append('limit', dto.limit.toString());
+    }
     const response = await this.httpClient.get<AppDto[]>(`/v1/apps?${params.toString()}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,

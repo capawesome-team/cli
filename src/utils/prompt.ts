@@ -43,7 +43,7 @@ export const promptAppSelection = async (
   options?: { allowCreate?: boolean },
 ): Promise<string> => {
   const appsService = await import('@/services/apps.js').then((mod) => mod.default);
-  let apps = await appsService.findAll({ organizationId });
+  let apps = await appsService.findAll({ organizationId, limit: 50 });
   if (apps.length === 0) {
     if (options?.allowCreate) {
       const shouldCreate = await prompt('No apps found. Do you want to create one now?', {
