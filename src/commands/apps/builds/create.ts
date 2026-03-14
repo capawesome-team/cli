@@ -36,6 +36,8 @@ export default defineCommand({
         .optional()
         .describe('App ID to create the build for.'),
       certificate: z.string().optional().describe('The name of the certificate to use for the build.'),
+      channel: z.string().optional().describe('The name of the channel to deploy to (Web only).'),
+      destination: z.string().optional().describe('The name of the destination to deploy to (Android/iOS only).'),
       detached: z
         .boolean()
         .optional()
@@ -79,6 +81,18 @@ export default defineCommand({
     // Validate that detached flag cannot be used with artifact flags
     if (options.detached && (options.apk || options.aab || options.ipa || options.zip)) {
       consola.error('The --detached flag cannot be used with --apk, --aab, --ipa, or --zip flags.');
+      process.exit(1);
+    }
+
+    // Validate that detached flag cannot be used with channel or destination
+    if (options.detached && (options.channel || options.destination)) {
+      consola.error('The --detached flag cannot be used with --channel or --destination flags.');
+      process.exit(1);
+    }
+
+    // Validate that channel and destination cannot be used together
+    if (options.channel && options.destination) {
+      consola.error('The --channel and --destination flags cannot be used together.');
       process.exit(1);
     }
 
@@ -148,6 +162,18 @@ export default defineCommand({
       consola.error(
         `Invalid build type for Android. Supported values are: ${ANDROID_BUILD_TYPES.map((t) => `\`${t}\``).join(', ')}.`,
       );
+      process.exit(1);
+    }
+
+    // Validate that channel is only used with web platform
+    if (options.channel && platform !== 'web') {
+      consola.error('The --channel flag can only be used with the web platform.');
+      process.exit(1);
+    }
+
+    // Validate that destination is only used with non-web platforms
+    if (options.destination && platform === 'web') {
+      consola.error('The --destination flag cannot be used with the web platform.');
       process.exit(1);
     }
 
@@ -322,6 +348,15 @@ export default defineCommand({
                     null,
                     2,
                   ),
+                );
+              }
+              // Create deployment if channel or destination is set
+              if (options.channel || options.destination) {
+                await (
+                  await import('@/commands/apps/deployments/create.js').then((mod) => mod.default)
+                ).action(
+                  { appId, buildId: response.id, channel: options.channel, destination: options.destination },
+                  undefined,
                 );
               }
               // Exit successfully
