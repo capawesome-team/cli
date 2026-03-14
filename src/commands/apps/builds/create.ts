@@ -172,8 +172,8 @@ export default defineCommand({
       }
     }
 
-    // Prompt for certificate if not provided (skip for web platform)
-    if (!certificate && !options.yes && isInteractive() && platform !== 'web') {
+    // Prompt for certificate if not provided
+    if (!certificate && !options.yes && isInteractive()) {
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
       const selectCertificate = await prompt('Do you want to select a certificate?', {
         type: 'confirm',
