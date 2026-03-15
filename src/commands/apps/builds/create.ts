@@ -397,10 +397,7 @@ export default defineCommand({
     if (options.channel || options.destination) {
       await (
         await import('@/commands/apps/deployments/create.js').then((mod) => mod.default)
-      ).action(
-        { appId, buildId: response.id, channel: options.channel, destination: options.destination },
-        undefined,
-      );
+      ).action({ appId, buildId: response.id, channel: options.channel, destination: options.destination }, undefined);
     }
   }),
 });
