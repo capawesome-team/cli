@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.5.0](https://github.com/capawesome-team/cli/compare/v4.4.0...v4.5.0) (2026-03-15)
+
+
+### Features
+
+* add certificate and destination CRUD commands ([#126](https://github.com/capawesome-team/cli/issues/126)) ([2d5e3cf](https://github.com/capawesome-team/cli/commit/2d5e3cfc80518fc1237dbc926a57c4a2eddf2b31))
+* **apps:builds:create:** add `--channel` and `--destination` options ([#127](https://github.com/capawesome-team/cli/issues/127)) ([baab841](https://github.com/capawesome-team/cli/commit/baab841d330c7bf230dbbf8e0819f3aaf248867b))
+* **update:** add dev version detection in update check ([#128](https://github.com/capawesome-team/cli/issues/128)) ([5004095](https://github.com/capawesome-team/cli/commit/50040958cd2a873ff296981b0950b3a799505a93))
+
+
+### Bug Fixes
+
+* **apps:builds:create:** allow certificate selection for web platform ([a038251](https://github.com/capawesome-team/cli/commit/a03825128b8380f86dcf85e8d3507b3a41d9f775))
+* create parent directories before writing signing key files ([#125](https://github.com/capawesome-team/cli/issues/125)) ([e152606](https://github.com/capawesome-team/cli/commit/e152606d1d9c1758e922379e5bbda0764261c711))
+
 ## [4.4.0](https://github.com/capawesome-team/cli/compare/v4.3.0...v4.4.0) (2026-03-13)
 
 
