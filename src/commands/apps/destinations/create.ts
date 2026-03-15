@@ -120,7 +120,7 @@ export default defineCommand({
           process.exit(1);
         }
       }
-      // 6. Ask for publishing format (preselect AAB)
+      // 6. Ask for publishing format
       if (!androidBuildArtifactType) {
         if (!isInteractive()) {
           consola.error(
@@ -141,7 +141,7 @@ export default defineCommand({
           process.exit(1);
         }
       }
-      // 7. Ask for release status (preselect draft)
+      // 7. Ask for release status
       if (!androidReleaseStatus) {
         if (!isInteractive()) {
           consola.error('You must provide the Android release status when running in non-interactive environment.');
@@ -188,7 +188,7 @@ export default defineCommand({
     }
 
     if (platform === 'ios') {
-      // 9. Ask for authentication method (preselect API key)
+      // 9. Ask for authentication method
       let authMethod: string | undefined;
       if (appleApiKeyFile || appleIssuerId) {
         authMethod = 'apiKey';
@@ -207,6 +207,11 @@ export default defineCommand({
           consola.error('You must select an authentication method.');
           process.exit(1);
         }
+      } else {
+        consola.error(
+          'You must provide authentication options when running in non-interactive environment. Either pass --apple-api-key-file and --apple-issuer-id for API Key authentication or --apple-id, --apple-app-id, and --apple-app-password for Password authentication.',
+        );
+        process.exit(1);
       }
 
       if (authMethod === 'apiKey') {
