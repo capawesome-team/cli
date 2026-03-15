@@ -21,7 +21,7 @@ class UpdateServiceImpl implements UpdateService {
     try {
       const response = await this.httpClient.get<NpmPackageDto>(`https://registry.npmjs.org/${pkg.name}/latest`);
       const latestVersion = response.data.version;
-      if (pkg.version.includes('dev')) {
+      if (pkg.version.includes('-dev')) {
         console.log(''); // Add an empty line for better readability
         consola.info(
           `You are using a development version of Capawesome CLI (${pkg.version}). The latest stable version is ${latestVersion}.`,
