@@ -59,7 +59,9 @@ export default defineCommand({
           options: destinations.map((dest) => ({ label: dest.name, value: dest.id })),
         });
       } else {
-        consola.error('You must provide the destination ID or --name and --platform when running in non-interactive environment.');
+        consola.error(
+          'You must provide the destination ID or --name and --platform when running in non-interactive environment.',
+        );
         process.exit(1);
       }
     }

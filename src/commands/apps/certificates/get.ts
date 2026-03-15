@@ -14,7 +14,10 @@ export default defineCommand({
       certificateId: z.string().optional().describe('ID of the certificate.'),
       json: z.boolean().optional().describe('Output in JSON format.'),
       name: z.string().optional().describe('Name of the certificate.'),
-      platform: z.enum(['android', 'ios', 'web']).optional().describe('Platform of the certificate (android, ios, web).'),
+      platform: z
+        .enum(['android', 'ios', 'web'])
+        .optional()
+        .describe('Platform of the certificate (android, ios, web).'),
     }),
   ),
   action: withAuth(async (options, args) => {
@@ -60,7 +63,9 @@ export default defineCommand({
           options: certificates.map((cert) => ({ label: cert.name, value: cert.id })),
         });
       } else {
-        consola.error('You must provide the certificate ID or --name and --platform when running in non-interactive environment.');
+        consola.error(
+          'You must provide the certificate ID or --name and --platform when running in non-interactive environment.',
+        );
         process.exit(1);
       }
     }
