@@ -350,22 +350,7 @@ export default defineCommand({
                   ),
                 );
               }
-              // Create deployment if channel or destination is set
-              if (options.channel || options.destination) {
-                try {
-                  await (
-                    await import('@/commands/apps/deployments/create.js').then((mod) => mod.default)
-                  ).action(
-                    { appId, buildId: response.id, channel: options.channel, destination: options.destination },
-                    undefined,
-                  );
-                } catch (error) {
-                  consola.error('Failed to create deployment:', error);
-                  process.exit(1);
-                }
-              }
-              // Exit successfully
-              process.exit(0);
+              break;
             } else if (jobStatus === 'failed') {
               consola.error('Build failed.');
               process.exit(1);
@@ -406,6 +391,16 @@ export default defineCommand({
         consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
         consola.success(`Build completed successfully.`);
       }
+    }
+
+    // Create deployment if channel or destination is set
+    if (options.channel || options.destination) {
+      await (
+        await import('@/commands/apps/deployments/create.js').then((mod) => mod.default)
+      ).action(
+        { appId, buildId: response.id, channel: options.channel, destination: options.destination },
+        undefined,
+      );
     }
   }),
 });
