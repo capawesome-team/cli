@@ -51,6 +51,7 @@ export interface FindOneAppCertificateDto {
 export interface FindAllAppCertificatesDto {
   appId: string;
   limit?: number;
+  name?: string;
   offset?: number;
   platform?: 'android' | 'ios' | 'web';
   type?: 'development' | 'production';

@@ -49,6 +49,9 @@ class AppDestinationsServiceImpl implements AppDestinationsService {
     if (dto.offset !== undefined) {
       params.offset = dto.offset.toString();
     }
+    if (dto.name) {
+      params.name = dto.name;
+    }
     if (dto.platform) {
       params.platform = dto.platform;
     }

@@ -7,6 +7,9 @@ test-folder
 test-folder.zip
 
 *.pem
+*.jks
+*.p12
+*.mobileprovision
 www
 www_large
 www.zip

@@ -71,6 +71,7 @@ export interface FindOneAppDestinationDto {
 export interface FindAllAppDestinationsDto {
   appId: string;
   limit?: number;
+  name?: string;
   offset?: number;
   platform?: 'android' | 'ios';
   query?: string;
