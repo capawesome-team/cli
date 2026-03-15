@@ -352,12 +352,17 @@ export default defineCommand({
               }
               // Create deployment if channel or destination is set
               if (options.channel || options.destination) {
-                await (
-                  await import('@/commands/apps/deployments/create.js').then((mod) => mod.default)
-                ).action(
-                  { appId, buildId: response.id, channel: options.channel, destination: options.destination },
-                  undefined,
-                );
+                try {
+                  await (
+                    await import('@/commands/apps/deployments/create.js').then((mod) => mod.default)
+                  ).action(
+                    { appId, buildId: response.id, channel: options.channel, destination: options.destination },
+                    undefined,
+                  );
+                } catch (error) {
+                  consola.error('Failed to create deployment:', error);
+                  process.exit(1);
+                }
               }
               // Exit successfully
               process.exit(0);
