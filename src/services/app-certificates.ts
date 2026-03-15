@@ -59,10 +59,10 @@ class AppCertificatesServiceImpl implements AppCertificatesService {
 
   async findAll(dto: FindAllAppCertificatesDto): Promise<AppCertificateDto[]> {
     const params: Record<string, string> = {};
-    if (dto.limit) {
+    if (dto.limit !== undefined) {
       params.limit = dto.limit.toString();
     }
-    if (dto.offset) {
+    if (dto.offset !== undefined) {
       params.offset = dto.offset.toString();
     }
     if (dto.platform) {
