@@ -60,6 +60,7 @@ const config = defineConfig({
     'apps:environments:set': await import('@/commands/apps/environments/set.js').then((mod) => mod.default),
     'apps:environments:unset': await import('@/commands/apps/environments/unset.js').then((mod) => mod.default),
     'apps:liveupdates:bundle': await import('@/commands/apps/liveupdates/bundle.js').then((mod) => mod.default),
+    'apps:liveupdates:create': await import('@/commands/apps/liveupdates/create.js').then((mod) => mod.default),
     'apps:liveupdates:generatesigningkey': await import('@/commands/apps/liveupdates/generate-signing-key.js').then(
       (mod) => mod.default,
     ),
