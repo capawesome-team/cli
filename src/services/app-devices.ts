@@ -32,17 +32,14 @@ class AppDevicesServiceImpl implements AppDevicesService {
   }
 
   async findOneById(data: FindOneAppDeviceDto): Promise<AppDeviceDto> {
-    const response = await this.httpClient.get<AppDeviceDto>(
-      `/v1/apps/${data.appId}/devices/${data.deviceId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
-        },
-        params: {
-          relations: 'appChannel',
-        },
+    const response = await this.httpClient.get<AppDeviceDto>(`/v1/apps/${data.appId}/devices/${data.deviceId}`, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
-    );
+      params: {
+        relations: 'appChannel',
+      },
+    });
     return response.data;
   }
 
@@ -63,15 +60,12 @@ class AppDevicesServiceImpl implements AppDevicesService {
     if (data.deviceId) {
       params.deviceId = data.deviceId;
     }
-    const response = await this.httpClient.get<ProbeAppDeviceResponseDto>(
-      `/v1/apps/${data.appId}/bundles/latest`,
-      {
-        headers: {
-          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
-        },
-        params,
+    const response = await this.httpClient.get<ProbeAppDeviceResponseDto>(`/v1/apps/${data.appId}/bundles/latest`, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
-    );
+      params,
+    });
     return response.data;
   }
 
