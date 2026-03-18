@@ -53,6 +53,7 @@ const config = defineConfig({
     'apps:destinations:update': await import('@/commands/apps/destinations/update.js').then((mod) => mod.default),
     'apps:devices:delete': await import('@/commands/apps/devices/delete.js').then((mod) => mod.default),
     'apps:devices:forcechannel': await import('@/commands/apps/devices/forcechannel.js').then((mod) => mod.default),
+    'apps:devices:probe': await import('@/commands/apps/devices/probe.js').then((mod) => mod.default),
     'apps:devices:unforcechannel': await import('@/commands/apps/devices/unforcechannel.js').then((mod) => mod.default),
     'apps:environments:create': await import('@/commands/apps/environments/create.js').then((mod) => mod.default),
     'apps:environments:delete': await import('@/commands/apps/environments/delete.js').then((mod) => mod.default),
