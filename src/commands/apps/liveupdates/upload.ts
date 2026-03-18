@@ -11,7 +11,12 @@ import {
   isPrivateKeyContent,
 } from '@/utils/buffer.js';
 import { isInteractive } from '@/utils/environment.js';
-import { directoryContainsSourceMaps, fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '@/utils/file.js';
+import {
+  directoryContainsSourceMaps,
+  fileExistsAtPath,
+  getFilesInDirectoryAndSubdirectories,
+  isDirectory,
+} from '@/utils/file.js';
 import { createHash } from '@/utils/hash.js';
 import { generateManifestJson } from '@/utils/manifest.js';
 import { formatPrivateKey } from '@/utils/private-key.js';
