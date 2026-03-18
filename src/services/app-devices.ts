@@ -33,10 +33,13 @@ class AppDevicesServiceImpl implements AppDevicesService {
 
   async findOneById(data: FindOneAppDeviceDto): Promise<AppDeviceDto> {
     const response = await this.httpClient.get<AppDeviceDto>(
-      `/v1/apps/${data.appId}/devices/${data.deviceId}?relations=appChannel`,
+      `/v1/apps/${data.appId}/devices/${data.deviceId}`,
       {
         headers: {
           Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
+        params: {
+          relations: 'appChannel',
         },
       },
     );
@@ -44,27 +47,29 @@ class AppDevicesServiceImpl implements AppDevicesService {
   }
 
   async probe(data: ProbeAppDeviceDto): Promise<ProbeAppDeviceResponseDto> {
-    const queryParams = new URLSearchParams();
-    queryParams.append('appVersionCode', data.appVersionCode);
-    queryParams.append('appVersionName', data.appVersionName);
-    queryParams.append('osVersion', data.osVersion);
-    queryParams.append('platform', data.platform.toString());
-    queryParams.append('pluginVersion', data.pluginVersion);
+    const params: Record<string, string> = {
+      appVersionCode: data.appVersionCode,
+      appVersionName: data.appVersionName,
+      osVersion: data.osVersion,
+      platform: data.platform.toString(),
+      pluginVersion: data.pluginVersion,
+    };
     if (data.channelName) {
-      queryParams.append('channelName', data.channelName);
+      params.channelName = data.channelName;
     }
     if (data.customId) {
-      queryParams.append('customId', data.customId);
+      params.customId = data.customId;
     }
     if (data.deviceId) {
-      queryParams.append('deviceId', data.deviceId);
+      params.deviceId = data.deviceId;
     }
     const response = await this.httpClient.get<ProbeAppDeviceResponseDto>(
-      `/v1/apps/${data.appId}/bundles/latest?${queryParams}`,
+      `/v1/apps/${data.appId}/bundles/latest`,
       {
         headers: {
           Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
         },
+        params,
       },
     );
     return response.data;
