@@ -61,7 +61,11 @@ export default defineCommand({
       }
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 404) {
-        consola.info('No update available for this device.');
+        if (json) {
+          console.log(JSON.stringify({ bundleId: null }, null, 2));
+        } else {
+          consola.info('No update available for this device.');
+        }
       } else {
         throw error;
       }
