@@ -79,24 +79,9 @@ export default defineCommand({
         process.exit(1);
       }
     }
-    // 4. Select certificate type
-    if (!type) {
-      if (!isInteractive()) {
-        consola.error('You must provide the certificate type when running in non-interactive environment.');
-        process.exit(1);
-      }
-      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      type = await prompt('Select the certificate type:', {
-        type: 'select',
-        options: [
-          { label: 'Development', value: 'development' },
-          { label: 'Production', value: 'production' },
-        ],
-      });
-      if (!type) {
-        consola.error('You must select a certificate type.');
-        process.exit(1);
-      }
+    // 4. Warn if deprecated --type option is used
+    if (type) {
+      consola.warn('The --type option is deprecated. The certificate type is now detected automatically.');
     }
     // 5. Enter certificate file path
     if (!file) {
@@ -175,7 +160,6 @@ export default defineCommand({
       fileName,
       name,
       platform: platform!,
-      type: type!,
       password,
       keyAlias,
       keyPassword,

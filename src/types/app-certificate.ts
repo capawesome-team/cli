@@ -22,7 +22,6 @@ export interface CreateAppCertificateDto {
   fileName: string;
   name: string;
   platform: 'android' | 'ios' | 'web';
-  type: 'development' | 'production';
   password?: string;
   keyAlias?: string;
   keyPassword?: string;
@@ -32,7 +31,6 @@ export interface UpdateAppCertificateDto {
   appId: string;
   certificateId: string;
   name?: string;
-  type?: 'development' | 'production';
   password?: string;
   keyAlias?: string;
   keyPassword?: string;

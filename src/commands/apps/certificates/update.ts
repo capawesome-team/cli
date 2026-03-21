@@ -41,11 +41,14 @@ export default defineCommand({
       certificateId = await prompt('Enter the certificate ID:', { type: 'text' });
     }
 
+    if (type) {
+      consola.warn('The --type option is deprecated. The certificate type is now detected automatically.');
+    }
+
     await appCertificatesService.update({
       appId,
       certificateId,
       name,
-      type,
       password,
       keyAlias,
       keyPassword,
