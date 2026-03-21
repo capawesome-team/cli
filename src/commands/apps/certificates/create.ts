@@ -81,7 +81,9 @@ export default defineCommand({
     }
     // 4. Warn if deprecated --type option is used
     if (type) {
-      consola.warn('The --type option is deprecated. The certificate type is now detected automatically.');
+      consola.warn(
+        'The --type option is deprecated and will be removed in a future version. The certificate type is now detected automatically.',
+      );
     }
     // 5. Enter certificate file path
     if (!file) {
