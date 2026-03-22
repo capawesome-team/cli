@@ -30,7 +30,6 @@ class AppCertificatesServiceImpl implements AppCertificatesService {
     formData.append('file', dto.buffer, { filename: dto.fileName });
     formData.append('name', dto.name);
     formData.append('platform', dto.platform);
-    formData.append('type', dto.type);
     if (dto.password) {
       formData.append('password', dto.password);
     }
