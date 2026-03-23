@@ -101,7 +101,7 @@ export default defineCommand({
 
     // Validate that path and gitRef cannot be used together
     if (sourcePath && gitRef) {
-      consola.error('The --path and --gitRef flags cannot be used together.');
+      consola.error('The --path and --git-ref flags cannot be used together.');
       process.exit(1);
     }
 
@@ -115,7 +115,7 @@ export default defineCommand({
       }
       const packageJsonPath = path.join(resolvedPath, 'package.json');
       const packageJsonStat = await fs.stat(packageJsonPath).catch(() => null);
-      if (!packageJsonStat) {
+      if (!packageJsonStat || !packageJsonStat.isFile()) {
         consola.error('The directory specified by --path must contain a package.json file.');
         process.exit(1);
       }
