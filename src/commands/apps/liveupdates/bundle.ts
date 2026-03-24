@@ -1,5 +1,5 @@
 import { isInteractive } from '@/utils/environment.js';
-import { fileExistsAtPath, isDirectory } from '@/utils/file.js';
+import { directoryContainsSourceMaps, fileExistsAtPath, isDirectory } from '@/utils/file.js';
 import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
 import zip from '@/utils/zip.js';
@@ -69,6 +69,14 @@ export default defineCommand({
     if (!hasIndexHtml) {
       consola.error(`Directory must contain an index.html file: ${inputPath}`);
       process.exit(1);
+    }
+
+    // Check for source maps
+    const containsSourceMaps = await directoryContainsSourceMaps(inputPath);
+    if (containsSourceMaps) {
+      consola.warn(
+        'Source map files were detected in the specified path. Source maps should not be distributed to end users as they expose your original source code and increase the download size. Consider excluding source map files from your build output.',
+      );
     }
 
     // 2. Output path resolution

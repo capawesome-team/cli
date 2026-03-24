@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.6.0](https://github.com/capawesome-team/cli/compare/v4.5.0...v4.6.0) (2026-03-18)
+
+
+### Features
+
+* add `apps:devices:probe` command ([#129](https://github.com/capawesome-team/cli/issues/129)) ([33607cd](https://github.com/capawesome-team/cli/commit/33607cdb2e65e26c48d114d694b876db3762b8ec))
+
 ## [4.5.0](https://github.com/capawesome-team/cli/compare/v4.4.0...v4.5.0) (2026-03-15)
 
 

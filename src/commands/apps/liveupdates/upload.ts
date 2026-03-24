@@ -11,7 +11,12 @@ import {
   isPrivateKeyContent,
 } from '@/utils/buffer.js';
 import { isInteractive } from '@/utils/environment.js';
-import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '@/utils/file.js';
+import {
+  directoryContainsSourceMaps,
+  fileExistsAtPath,
+  getFilesInDirectoryAndSubdirectories,
+  isDirectory,
+} from '@/utils/file.js';
 import { createHash } from '@/utils/hash.js';
 import { generateManifestJson } from '@/utils/manifest.js';
 import { formatPrivateKey } from '@/utils/private-key.js';
@@ -192,6 +197,16 @@ export default defineCommand({
     } else {
       consola.error('The path must be either a folder or a zip file.');
       process.exit(1);
+    }
+
+    // Check for source maps
+    if (pathIsDirectory) {
+      const containsSourceMaps = await directoryContainsSourceMaps(path);
+      if (containsSourceMaps) {
+        consola.warn(
+          'Source map files were detected in the specified path. Source maps should not be distributed to end users as they expose your original source code and increase the download size. Consider excluding source map files from your build output.',
+        );
+      }
     }
 
     // Check that the path is a directory when creating a bundle with an artifact type of manifest
