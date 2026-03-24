@@ -56,3 +56,9 @@ export interface UpdateAppDeviceDto {
   deviceId: string;
   forcedAppChannelId?: string | null;
 }
+
+export interface UpdateAppDevicesDto {
+  appId: string;
+  deviceIds: string[];
+  forcedAppChannelId?: string | null;
+}

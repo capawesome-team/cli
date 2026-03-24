@@ -12,12 +12,12 @@ export default defineCommand({
   options: defineOptions(
     z.object({
       appId: z.string().uuid({ message: 'App ID must be a UUID.' }).optional().describe('ID of the app.'),
-      deviceId: z.string().optional().describe('ID of the device.'),
+      deviceId: z.array(z.string()).optional().describe('ID of the device. Can be specified multiple times.'),
       channel: z.string().optional().describe('Name of the channel to force.'),
     }),
   ),
   action: withAuth(async (options, args) => {
-    let { appId, deviceId, channel } = options;
+    let { appId, deviceId: deviceIds, channel } = options;
 
     if (!appId) {
       if (!isInteractive()) {
@@ -28,14 +28,15 @@ export default defineCommand({
       appId = await promptAppSelection(organizationId);
     }
 
-    if (!deviceId) {
+    if (!deviceIds || deviceIds.length === 0) {
       if (!isInteractive()) {
         consola.error('You must provide the device ID when running in non-interactive environment.');
         process.exit(1);
       }
-      deviceId = await prompt('Enter the device ID:', {
+      const deviceId = await prompt('Enter the device ID:', {
         type: 'text',
       });
+      deviceIds = [deviceId];
     }
 
     if (!channel) {
@@ -65,11 +66,12 @@ export default defineCommand({
       process.exit(1);
     }
 
-    await appDevicesService.update({
+    await appDevicesService.updateMany({
       appId,
-      deviceId,
+      deviceIds,
       forcedAppChannelId: channelId,
     });
-    consola.success('Device forced to channel successfully.');
+    const deviceCount = deviceIds.length;
+    consola.success(`${deviceCount === 1 ? 'Device' : `${deviceCount} devices`} forced to channel successfully.`);
   }),
 });
