@@ -5,6 +5,7 @@ import {
   ProbeAppDeviceDto,
   ProbeAppDeviceResponseDto,
   UpdateAppDeviceDto,
+  UpdateAppDevicesDto,
 } from '@/types/index.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
 import authorizationService from '@/services/authorization-service.js';
@@ -14,6 +15,7 @@ export interface AppDevicesService {
   findOneById(dto: FindOneAppDeviceDto): Promise<AppDeviceDto>;
   probe(dto: ProbeAppDeviceDto): Promise<ProbeAppDeviceResponseDto>;
   update(dto: UpdateAppDeviceDto): Promise<void>;
+  updateMany(dto: UpdateAppDevicesDto): Promise<void>;
 }
 
 class AppDevicesServiceImpl implements AppDevicesService {
@@ -72,6 +74,19 @@ class AppDevicesServiceImpl implements AppDevicesService {
   async update(data: UpdateAppDeviceDto): Promise<void> {
     await this.httpClient.patch(
       `/v1/apps/${data.appId}/devices/${data.deviceId}`,
+      { forcedAppChannelId: data.forcedAppChannelId },
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
+      },
+    );
+  }
+
+  async updateMany(data: UpdateAppDevicesDto): Promise<void> {
+    const ids = data.deviceIds.join(',');
+    await this.httpClient.patch(
+      `/v1/apps/${data.appId}/devices?ids=${ids}`,
       { forcedAppChannelId: data.forcedAppChannelId },
       {
         headers: {
