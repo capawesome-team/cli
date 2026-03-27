@@ -37,11 +37,21 @@ export default defineCommand({
       appId = await promptAppSelection(organizationId);
     }
     if (!certificateId) {
-      if (name && platform && type) {
+      if (name && platform) {
         const certificates = await appCertificatesService.findAll({ appId, name, platform, type });
         const firstCertificate = certificates[0];
         if (!firstCertificate) {
-          consola.error(`No certificate found with name '${name}', platform '${platform}', and type '${type}'.`);
+          if (type) {
+            consola.error(`No certificate found with name '${name}', platform '${platform}', and type '${type}'.`);
+          } else {
+            consola.error(`No certificate found with name '${name}' and platform '${platform}'.`);
+          }
+          process.exit(1);
+        }
+        if (certificates.length > 1 && !type) {
+          consola.error(
+            `Multiple certificates found with name '${name}' and platform '${platform}'. Please specify --type or --certificate-id to disambiguate.`,
+          );
           process.exit(1);
         }
         certificateId = firstCertificate.id;
@@ -79,7 +89,7 @@ export default defineCommand({
         });
       } else {
         consola.error(
-          'You must provide the certificate ID or --name, --platform, and --type when running in non-interactive environment.',
+          'You must provide the certificate ID or --name and --platform when running in non-interactive environment.',
         );
         process.exit(1);
       }

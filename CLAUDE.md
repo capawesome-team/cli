@@ -52,6 +52,7 @@ This project is structured as follows:
 - **DRY Code**: Avoid code duplication by using services and utility functions.
 - **Keep changes minimal**: When making changes, try to keep them as minimal as possible to avoid introducing bugs.
 - **Simplicity**: Keep code simple and readable.
+- **Type Safety**: Never use non-null assertions (`!`). Always write type-safe code. Non-null assertions are only allowed in test files.
 
 ## Philosophy
 
