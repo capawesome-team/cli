@@ -17,12 +17,16 @@ export default defineCommand({
         .enum(['android', 'ios', 'web'])
         .optional()
         .describe('Platform of the certificate (android, ios, web).'),
+      type: z
+        .enum(['development', 'production'])
+        .optional()
+        .describe('Type of the certificate (development, production).'),
       yes: z.boolean().optional().describe('Skip confirmation prompt.'),
     }),
     { y: 'yes' },
   ),
   action: withAuth(async (options, args) => {
-    let { appId, certificateId, name, platform } = options;
+    let { appId, certificateId, name, platform, type } = options;
 
     if (!appId) {
       if (!isInteractive()) {
@@ -34,10 +38,14 @@ export default defineCommand({
     }
     if (!certificateId) {
       if (name && platform) {
-        const certificates = await appCertificatesService.findAll({ appId, name, platform });
+        const certificates = await appCertificatesService.findAll({ appId, name, platform, type });
         const firstCertificate = certificates[0];
         if (!firstCertificate) {
-          consola.error(`No certificate found with name '${name}' and platform '${platform}'.`);
+          if (type) {
+            consola.error(`No certificate found with name '${name}', platform '${platform}', and type '${type}'.`);
+          } else {
+            consola.error(`No certificate found with name '${name}' and platform '${platform}'.`);
+          }
           process.exit(1);
         }
         certificateId = firstCertificate.id;
@@ -53,7 +61,7 @@ export default defineCommand({
             ],
           });
         }
-        const certificates = await appCertificatesService.findAll({ appId, platform });
+        const certificates = await appCertificatesService.findAll({ appId, platform, type });
         if (!certificates.length) {
           consola.error('No certificates found for this app. Create one first.');
           process.exit(1);
