@@ -36,15 +36,13 @@ export default defineCommand({
       appId = await promptAppSelection(organizationId);
     }
     if (!certificateId) {
-      if (name && platform) {
+      if (name && platform && type) {
         const certificates = await appCertificatesService.findAll({ appId, name, platform, type });
         const firstCertificate = certificates[0];
         if (!firstCertificate) {
-          if (type) {
-            consola.error(`No certificate found with name '${name}', platform '${platform}', and type '${type}'.`);
-          } else {
-            consola.error(`No certificate found with name '${name}' and platform '${platform}'.`);
-          }
+          consola.error(
+            `No certificate found with name '${name}', platform '${platform}', and type '${type}'.`,
+          );
           process.exit(1);
         }
         certificateId = firstCertificate.id;
@@ -60,6 +58,16 @@ export default defineCommand({
             ],
           });
         }
+        if (!type) {
+          // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+          type = await prompt('Select the type:', {
+            type: 'select',
+            options: [
+              { label: 'Development', value: 'development' },
+              { label: 'Production', value: 'production' },
+            ],
+          });
+        }
         const certificates = await appCertificatesService.findAll({ appId, platform, type });
         if (!certificates.length) {
           consola.error('No certificates found for this app. Create one first.');
@@ -72,7 +80,7 @@ export default defineCommand({
         });
       } else {
         consola.error(
-          'You must provide the certificate ID or --name and --platform when running in non-interactive environment.',
+          'You must provide the certificate ID or --name, --platform, and --type when running in non-interactive environment.',
         );
         process.exit(1);
       }
