@@ -41,9 +41,7 @@ export default defineCommand({
         const certificates = await appCertificatesService.findAll({ appId, name, platform, type });
         const firstCertificate = certificates[0];
         if (!firstCertificate) {
-          consola.error(
-            `No certificate found with name '${name}', platform '${platform}', and type '${type}'.`,
-          );
+          consola.error(`No certificate found with name '${name}', platform '${platform}', and type '${type}'.`);
           process.exit(1);
         }
         certificateId = firstCertificate.id;
