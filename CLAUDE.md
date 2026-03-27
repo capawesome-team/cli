@@ -62,6 +62,10 @@ This project is structured as follows:
 - **Reusability**: Write reusable services and utilities.
 - **Less is more**: Avoid unnecessary complexity and minimize the code footprint.
 
+## Formatting
+
+- Always run `npm run fmt` before pushing code.
+
 ## Pull Request
 
 If you have to create a pull request (PR) with your changes, please follow these guidelines:
