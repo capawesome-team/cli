@@ -69,9 +69,7 @@ export default defineCommand({
         }
         const certificates = await appCertificatesService.findAll({ appId, name, platform, type });
         if (!certificates.length) {
-          consola.error(
-            `No certificates found with platform '${platform}' and type '${type}'. Create one first.`,
-          );
+          consola.error(`No certificates found with platform '${platform}' and type '${type}'. Create one first.`);
           process.exit(1);
         }
         // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
