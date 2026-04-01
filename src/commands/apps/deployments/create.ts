@@ -11,7 +11,7 @@ import consola from 'consola';
 import { z } from 'zod';
 
 export default defineCommand({
-  description: 'Create a new app deployment.',
+  description: 'Create a new app deployment on Capawesome Cloud.',
   options: defineOptions(
     z.object({
       appId: z

@@ -18,7 +18,7 @@ const IOS_BUILD_TYPES = ['simulator', 'development', 'ad-hoc', 'app-store', 'ent
 const ANDROID_BUILD_TYPES = ['debug', 'release'] as const;
 
 export default defineCommand({
-  description: 'Create a new app build.',
+  description: 'Create a new app build on Capawesome Cloud Runners.',
   options: defineOptions(
     z.object({
       aab: z

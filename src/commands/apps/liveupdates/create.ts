@@ -15,7 +15,7 @@ import fs from 'fs/promises';
 import { z } from 'zod';
 
 export default defineCommand({
-  description: 'Create a new live update by building and deploying web assets using Capawesome Cloud Job Runners.',
+  description: 'Create a new live update by building and deploying web assets using Capawesome Cloud Runners.',
   options: defineOptions(
     z.object({
       androidEq: z.string().optional().describe('The exact Android versionCode for the live update.'),

@@ -91,7 +91,7 @@ export default defineCommand({
   action: async (options, args) => {
     consola.warn('The `apps:bundles:create` command has been deprecated.');
     consola.info('Please use one of the following commands instead:');
-    consola.info('  - `apps:liveupdates:create` to build and deploy using Capawesome Cloud Job Runners');
+    consola.info('  - `apps:liveupdates:create` to build and deploy using Capawesome Cloud Runners');
     consola.info('  - `apps:liveupdates:upload` to upload a locally built bundle to Capawesome Cloud');
     consola.info('  - `apps:liveupdates:register` to register a self-hosted bundle URL');
     process.exit(1);
