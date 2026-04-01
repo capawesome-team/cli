@@ -1,4 +1,4 @@
-import { fileExistsAtPath, isDirectory } from '@/utils/file.js';
+import { directoryContainsSymlinks, fileExistsAtPath, isDirectory } from '@/utils/file.js';
 import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
 import consola from 'consola';
@@ -17,6 +17,7 @@ vi.mock('@/utils/environment.js', () => ({
 describe('apps-liveupdates-generatemanifest', () => {
   const mockFileExistsAtPath = vi.mocked(fileExistsAtPath);
   const mockIsDirectory = vi.mocked(isDirectory);
+  const mockDirectoryContainsSymlinks = vi.mocked(directoryContainsSymlinks);
   const mockGenerateManifestJson = vi.mocked(generateManifestJson);
   const mockPrompt = vi.mocked(prompt);
   const mockConsola = vi.mocked(consola);
@@ -83,5 +84,31 @@ describe('apps-liveupdates-generatemanifest', () => {
     await expect(generateManifestCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith('The path does not exist.');
+  });
+
+  it('should handle non-directory path', async () => {
+    const options = { path: './file.txt' };
+
+    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsDirectory.mockResolvedValue(false);
+
+    await expect(generateManifestCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
+
+    expect(mockConsola.error).toHaveBeenCalledWith('The path is not a directory.');
+  });
+
+  it('should warn when symlinks are detected', async () => {
+    const options = { path: './dist' };
+
+    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsDirectory.mockResolvedValue(true);
+    mockDirectoryContainsSymlinks.mockResolvedValue(true);
+    mockGenerateManifestJson.mockResolvedValue(undefined);
+
+    await generateManifestCommand.action(options, undefined);
+
+    expect(mockConsola.warn).toHaveBeenCalledWith(
+      'Symbolic links were detected in the specified path. Symbolic links are skipped during manifest generation.',
+    );
   });
 });
