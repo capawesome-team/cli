@@ -11,11 +11,11 @@ export default defineCommand({
   options: defineOptions(
     z.object({
       appId: z.string().uuid({ message: 'App ID must be a UUID.' }).optional().describe('ID of the app.'),
-      deviceId: z.string().optional().describe('ID of the device.'),
+      deviceId: z.array(z.string()).optional().describe('ID of the device. Can be specified multiple times.'),
     }),
   ),
   action: withAuth(async (options, args) => {
-    let { appId, deviceId } = options;
+    let { appId, deviceId: deviceIds } = options;
 
     if (!appId) {
       if (!isInteractive()) {
@@ -26,21 +26,25 @@ export default defineCommand({
       appId = await promptAppSelection(organizationId);
     }
 
-    if (!deviceId) {
+    if (!deviceIds || deviceIds.length === 0) {
       if (!isInteractive()) {
         consola.error('You must provide the device ID when running in non-interactive environment.');
         process.exit(1);
       }
-      deviceId = await prompt('Enter the device ID:', {
+      const deviceId = await prompt('Enter the device ID:', {
         type: 'text',
       });
+      deviceIds = [deviceId];
     }
 
-    await appDevicesService.update({
+    await appDevicesService.updateMany({
       appId,
-      deviceId,
+      deviceIds,
       forcedAppChannelId: null,
     });
-    consola.success('Forced channel removed from device successfully.');
+    const deviceCount = deviceIds.length;
+    consola.success(
+      `Forced channel removed from ${deviceCount === 1 ? 'device' : `${deviceCount} devices`} successfully.`,
+    );
   }),
 });

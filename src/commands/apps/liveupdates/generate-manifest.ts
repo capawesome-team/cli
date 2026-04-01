@@ -1,5 +1,5 @@
 import { isInteractive } from '@/utils/environment.js';
-import { directoryContainsSourceMaps, fileExistsAtPath } from '@/utils/file.js';
+import { directoryContainsSourceMaps, directoryContainsSymlinks, fileExistsAtPath, isDirectory } from '@/utils/file.js';
 import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
@@ -39,11 +39,25 @@ export default defineCommand({
       consola.error(`The path does not exist.`);
       process.exit(1);
     }
+    // Check if the path is a directory
+    const pathIsDirectory = await isDirectory(path);
+    if (!pathIsDirectory) {
+      consola.error(`The path is not a directory.`);
+      process.exit(1);
+    }
     // Check for source maps
     const containsSourceMaps = await directoryContainsSourceMaps(path);
     if (containsSourceMaps) {
       consola.warn(
         'Source map files were detected in the specified path. Source maps should not be distributed to end users as they expose your original source code and increase the download size. Consider excluding source map files from your build output.',
+      );
+    }
+
+    // Check for symlinks
+    const containsSymlinks = await directoryContainsSymlinks(path);
+    if (containsSymlinks) {
+      consola.warn(
+        'Symbolic links were detected in the specified path. Symbolic links are skipped during manifest generation.',
       );
     }
 

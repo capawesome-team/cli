@@ -52,6 +52,7 @@ This project is structured as follows:
 - **DRY Code**: Avoid code duplication by using services and utility functions.
 - **Keep changes minimal**: When making changes, try to keep them as minimal as possible to avoid introducing bugs.
 - **Simplicity**: Keep code simple and readable.
+- **Type Safety**: Never use non-null assertions (`!`). Always write type-safe code. Non-null assertions are only allowed in test files.
 
 ## Philosophy
 
@@ -61,6 +62,10 @@ This project is structured as follows:
 - **Maintainability**: Write code that is easy to maintain and extend.
 - **Reusability**: Write reusable services and utilities.
 - **Less is more**: Avoid unnecessary complexity and minimize the code footprint.
+
+## Formatting
+
+- Always run `npm run fmt` before pushing code.
 
 ## Pull Request
 
