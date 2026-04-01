@@ -360,7 +360,14 @@ const uploadFile = async (options: {
     // Sign the bundle
     let signature: string | undefined;
     if (privateKeyBuffer) {
-      signature = await createSignature(privateKeyBuffer, buffer);
+      try {
+        signature = await createSignature(privateKeyBuffer, buffer);
+      } catch {
+        consola.error(
+          'Failed to parse the private key. Make sure the private key is a valid PEM-formatted key and is not encrypted.',
+        );
+        process.exit(1);
+      }
     }
     // Create the multipart upload
     return await appBundleFilesService.create(
