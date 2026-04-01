@@ -21,6 +21,7 @@ export default defineCommand({
   action: async (options, args) => {
     const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
     let { token: sessionIdOrToken } = options;
+    sessionIdOrToken = sessionIdOrToken?.trim();
     if (sessionIdOrToken === undefined) {
       if (!isInteractive()) {
         consola.error('You must provide a token when running in non-interactive environment.');
@@ -71,9 +72,11 @@ export default defineCommand({
       } else {
         consola.info(`You can create a token at ${consoleBaseUrl}/settings/tokens.`);
         // Prompt the user to enter their token
-        sessionIdOrToken = await prompt('Please provide your authentication token:', {
-          type: 'text',
-        });
+        sessionIdOrToken = (
+          await prompt('Please provide your authentication token:', {
+            type: 'text',
+          })
+        )?.trim();
         if (!sessionIdOrToken) {
           consola.error('Token must be provided.');
           process.exit(1);
