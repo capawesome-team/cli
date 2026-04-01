@@ -61,10 +61,6 @@ export const fileExistsAtPath = async (path: string): Promise<boolean> => {
 export const isDirectory = async (path: string): Promise<boolean> => {
   return new Promise((resolve) => {
     fs.lstat(path, (err, stats) => {
-      if (err) {
-        resolve(false);
-        return;
-      }
       resolve(stats.isDirectory());
     });
   });
