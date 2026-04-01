@@ -27,6 +27,8 @@ class AuthorizationServiceImpl implements AuthorizationService {
   getCurrentAuthorizationToken(): string | null {
     const token =
       this.userConfig.read().token || process.env.CAPAWESOME_CLOUD_TOKEN || process.env.CAPAWESOME_TOKEN || null;
+    // Trim to remove newline characters that may be included when pasting a token,
+    // which would cause an invalid character error in the Authorization header.
     const trimmedToken = token?.trim();
     return trimmedToken || null;
   }
