@@ -27,7 +27,8 @@ class AuthorizationServiceImpl implements AuthorizationService {
   getCurrentAuthorizationToken(): string | null {
     const token =
       this.userConfig.read().token || process.env.CAPAWESOME_CLOUD_TOKEN || process.env.CAPAWESOME_TOKEN || null;
-    return token ? token.trim() : null;
+    const trimmedToken = token?.trim();
+    return trimmedToken || null;
   }
 
   hasAuthorizationToken(): boolean {
