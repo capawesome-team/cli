@@ -16,7 +16,7 @@ import consola from 'consola';
 import { z } from 'zod';
 
 export default defineCommand({
-  description: 'Register a self-hosted bundle URL.',
+  description: 'Register a self-hosted bundle URL for serving artifacts from your own infrastructure.',
   options: defineOptions(
     z.object({
       androidMax: z.coerce

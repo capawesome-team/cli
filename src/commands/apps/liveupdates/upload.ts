@@ -32,7 +32,7 @@ import pathModule from 'path';
 import { z } from 'zod';
 
 export default defineCommand({
-  description: 'Upload a bundle to Capawesome Cloud.',
+  description: 'Upload a locally built bundle to Capawesome Cloud.',
   options: defineOptions(
     z.object({
       androidMax: z.coerce
