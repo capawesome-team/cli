@@ -74,9 +74,7 @@ export default defineCommand({
     // Check for symlinks
     const containsSymlinks = await directoryContainsSymlinks(inputPath);
     if (containsSymlinks) {
-      consola.warn(
-        'Symbolic links were detected in the specified path. Symbolic links are skipped during bundling.',
-      );
+      consola.warn('Symbolic links were detected in the specified path. Symbolic links are skipped during bundling.');
     }
     // Check for source maps
     const containsSourceMaps = await directoryContainsSourceMaps(inputPath);

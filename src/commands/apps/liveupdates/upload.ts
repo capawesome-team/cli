@@ -204,9 +204,7 @@ export default defineCommand({
     if (pathIsDirectory) {
       const containsSymlinks = await directoryContainsSymlinks(path);
       if (containsSymlinks) {
-        consola.warn(
-          'Symbolic links were detected in the specified path. Symbolic links are skipped during upload.',
-        );
+        consola.warn('Symbolic links were detected in the specified path. Symbolic links are skipped during upload.');
       }
     }
     // Check for source maps
