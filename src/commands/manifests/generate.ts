@@ -3,7 +3,7 @@ import consola from 'consola';
 import { z } from 'zod';
 
 export default defineCommand({
-  description: 'Generate a manifest file.',
+  description: 'Generate a manifest file. Deprecated, use `apps:liveupdates:generate-manifest` instead.',
   options: defineOptions(
     z.object({
       path: z.string().optional().describe('Path to the web assets folder (e.g. `www` or `dist`).'),

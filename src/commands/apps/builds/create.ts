@@ -3,12 +3,11 @@ import appBuildsService from '@/services/app-builds.js';
 import appCertificatesService from '@/services/app-certificates.js';
 import appEnvironmentsService from '@/services/app-environments.js';
 import { AppBuildArtifactDto } from '@/types/app-build.js';
-import { unescapeAnsi } from '@/utils/ansi.js';
 import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
+import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
-import { wait } from '@/utils/wait.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import fs from 'fs/promises';
@@ -19,7 +18,7 @@ const IOS_BUILD_TYPES = ['simulator', 'development', 'ad-hoc', 'app-store', 'ent
 const ANDROID_BUILD_TYPES = ['debug', 'release'] as const;
 
 export default defineCommand({
-  description: 'Create a new app build.',
+  description: 'Create a new app build on Capawesome Cloud Runners.',
   options: defineOptions(
     z.object({
       aab: z
@@ -261,140 +260,68 @@ export default defineCommand({
     // Wait for build job to complete by default, unless --detached flag is set
     const shouldWait = !options.detached;
     if (shouldWait) {
-      let lastPrintedLogNumber = 0;
-      let isWaitingForStart = true;
+      await waitForJobCompletion({ jobId: response.jobId });
+      const appBuild = await appBuildsService.findOne({
+        appId,
+        appBuildId: response.id,
+        relations: 'appBuildArtifacts',
+      });
 
-      // Poll build status until completion
-      while (true) {
-        try {
-          const build = await appBuildsService.findOne({
-            appId,
-            appBuildId: response.id,
-            relations: 'appBuildArtifacts,job,job.jobLogs',
-          });
+      consola.info(`Build ID: ${response.id}`);
+      consola.info(`Build Number: ${response.numberAsString}`);
+      consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
+      consola.success('Build completed successfully.');
+      console.log();
 
-          if (!build.job) {
-            await wait(3000);
-            continue;
-          }
-
-          const jobStatus = build.job.status;
-
-          // Show spinner while queued or pending
-          if (jobStatus === 'queued' || jobStatus === 'pending') {
-            if (isWaitingForStart) {
-              consola.start(`Waiting for build to start (status: ${jobStatus})...`);
-            }
-            await wait(3000);
-            continue;
-          }
-
-          // Stop spinner when job moves to in_progress
-          if (isWaitingForStart && jobStatus === 'in_progress') {
-            isWaitingForStart = false;
-            consola.success('Build started...');
-          }
-
-          // Print new logs
-          if (build.job.jobLogs && build.job.jobLogs.length > 0) {
-            const newLogs = build.job.jobLogs
-              .filter((log) => log.number > lastPrintedLogNumber)
-              .sort((a, b) => a.number - b.number);
-
-            for (const log of newLogs) {
-              console.log(unescapeAnsi(log.payload));
-              lastPrintedLogNumber = log.number;
-            }
-          }
-
-          // Handle terminal states
-          if (
-            jobStatus === 'succeeded' ||
-            jobStatus === 'failed' ||
-            jobStatus === 'canceled' ||
-            jobStatus === 'rejected' ||
-            jobStatus === 'timed_out'
-          ) {
-            console.log(); // New line for better readability
-            if (jobStatus === 'succeeded') {
-              consola.info(`Build ID: ${response.id}`);
-              consola.info(`Build Number: ${response.numberAsString}`);
-              consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
-              consola.success('Build completed successfully.');
-              console.log(); // New line for better readability
-
-              // Download artifacts if flags are set
-              if (options.apk && platform === 'android') {
-                await handleArtifactDownload({
-                  appId,
-                  buildId: response.id,
-                  buildArtifacts: build.appBuildArtifacts,
-                  artifactType: 'apk',
-                  filePath: typeof options.apk === 'string' ? options.apk : undefined,
-                });
-              }
-              if (options.aab && platform === 'android') {
-                await handleArtifactDownload({
-                  appId,
-                  buildId: response.id,
-                  buildArtifacts: build.appBuildArtifacts,
-                  artifactType: 'aab',
-                  filePath: typeof options.aab === 'string' ? options.aab : undefined,
-                });
-              }
-              if (options.ipa && platform === 'ios') {
-                await handleArtifactDownload({
-                  appId,
-                  buildId: response.id,
-                  buildArtifacts: build.appBuildArtifacts,
-                  artifactType: 'ipa',
-                  filePath: typeof options.ipa === 'string' ? options.ipa : undefined,
-                });
-              }
-              if (options.zip && platform === 'web') {
-                await handleArtifactDownload({
-                  appId,
-                  buildId: response.id,
-                  buildArtifacts: build.appBuildArtifacts,
-                  artifactType: 'zip',
-                  filePath: typeof options.zip === 'string' ? options.zip : undefined,
-                });
-              }
-              // Output JSON if json flag is set
-              if (json) {
-                console.log(
-                  JSON.stringify(
-                    {
-                      id: response.id,
-                      numberAsString: response.numberAsString,
-                    },
-                    null,
-                    2,
-                  ),
-                );
-              }
-              break;
-            } else if (jobStatus === 'failed') {
-              consola.error('Build failed.');
-              process.exit(1);
-            } else if (jobStatus === 'canceled') {
-              consola.warn('Build was canceled.');
-              process.exit(1);
-            } else if (jobStatus === 'rejected') {
-              consola.error('Build was rejected.');
-              process.exit(1);
-            } else if (jobStatus === 'timed_out') {
-              consola.error('Build timed out.');
-              process.exit(1);
-            }
-          }
-
-          // Wait before next poll (3 seconds)
-          await wait(3000);
-        } catch (error) {
-          consola.error('Error polling build status:', error);
-          process.exit(1);
-        }
+      // Download artifacts if flags are set
+      if (options.apk && platform === 'android') {
+        await handleArtifactDownload({
+          appId,
+          buildId: response.id,
+          buildArtifacts: appBuild.appBuildArtifacts,
+          artifactType: 'apk',
+          filePath: typeof options.apk === 'string' ? options.apk : undefined,
+        });
+      }
+      if (options.aab && platform === 'android') {
+        await handleArtifactDownload({
+          appId,
+          buildId: response.id,
+          buildArtifacts: appBuild.appBuildArtifacts,
+          artifactType: 'aab',
+          filePath: typeof options.aab === 'string' ? options.aab : undefined,
+        });
+      }
+      if (options.ipa && platform === 'ios') {
+        await handleArtifactDownload({
+          appId,
+          buildId: response.id,
+          buildArtifacts: appBuild.appBuildArtifacts,
+          artifactType: 'ipa',
+          filePath: typeof options.ipa === 'string' ? options.ipa : undefined,
+        });
+      }
+      if (options.zip && platform === 'web') {
+        await handleArtifactDownload({
+          appId,
+          buildId: response.id,
+          buildArtifacts: appBuild.appBuildArtifacts,
+          artifactType: 'zip',
+          filePath: typeof options.zip === 'string' ? options.zip : undefined,
+        });
+      }
+      // Output JSON if json flag is set
+      if (json) {
+        console.log(
+          JSON.stringify(
+            {
+              id: response.id,
+              numberAsString: response.numberAsString,
+            },
+            null,
+            2,
+          ),
+        );
       }
     } else {
       if (json) {

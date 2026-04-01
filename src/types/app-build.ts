@@ -43,6 +43,7 @@ export interface FindOneAppBuildDto {
 export interface UpdateAppBuildDto {
   appId: string;
   appBuildId: string;
+  customProperties?: Record<string, string>;
   eqAndroidAppVersionCode?: string;
   maxAndroidAppVersionCode?: string;
   minAndroidAppVersionCode?: string;

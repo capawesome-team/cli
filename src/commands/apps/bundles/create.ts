@@ -3,7 +3,7 @@ import consola from 'consola';
 import { z } from 'zod';
 
 export default defineCommand({
-  description: 'Create a new app bundle.',
+  description: 'Create a new app bundle. Deprecated, use the `apps:liveupdates` commands instead.',
   options: defineOptions(
     z.object({
       androidMax: z.coerce
@@ -40,6 +40,7 @@ export default defineCommand({
       commitSha: z.string().optional().describe('The commit sha related to the bundle.'),
       customProperty: z
         .array(z.string().min(1).max(100))
+        .max(10)
         .optional()
         .describe(
           'A custom property to assign to the bundle. Must be in the format `key=value`. Can be specified multiple times.',
@@ -90,7 +91,8 @@ export default defineCommand({
   action: async (options, args) => {
     consola.warn('The `apps:bundles:create` command has been deprecated.');
     consola.info('Please use one of the following commands instead:');
-    consola.info('  - `apps:liveupdates:upload` to upload a bundle to Capawesome Cloud');
+    consola.info('  - `apps:liveupdates:create` to build and deploy using Capawesome Cloud Runners');
+    consola.info('  - `apps:liveupdates:upload` to upload a locally built bundle to Capawesome Cloud');
     consola.info('  - `apps:liveupdates:register` to register a self-hosted bundle URL');
     process.exit(1);
   },

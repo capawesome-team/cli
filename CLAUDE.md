@@ -53,6 +53,7 @@ This project is structured as follows:
 - **Keep changes minimal**: When making changes, try to keep them as minimal as possible to avoid introducing bugs.
 - **Simplicity**: Keep code simple and readable.
 - **Type Safety**: Never use non-null assertions (`!`). Always write type-safe code. Non-null assertions are only allowed in test files.
+- **Zod Coercion for CLI Options**: Always use `z.coerce.number()` (not `z.number()`) for numeric CLI options, since CLI arguments are parsed as strings.
 
 ## Philosophy
 
