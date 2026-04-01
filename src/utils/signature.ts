@@ -6,6 +6,7 @@ export const createSignature = async (privateKey: Buffer, data: Buffer): Promise
   } catch (error) {
     throw new Error(
       'Failed to parse the private key. Make sure the private key is a valid PEM-formatted key and is not encrypted.',
+      { cause: error },
     );
   }
   const sign = crypto.createSign('sha256');
