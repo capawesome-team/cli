@@ -10,7 +10,9 @@ export const getFilesInDirectoryAndSubdirectories = async (
     const dirEntries = await fs.promises.readdir(directory, { withFileTypes: true }).catch(() => []);
     for (const dirEntry of dirEntries) {
       const fullPath = pathModule.join(directory, dirEntry.name);
-      if (dirEntry.isDirectory()) {
+      if (dirEntry.isSymbolicLink()) {
+        // Skip symlinks
+      } else if (dirEntry.isDirectory()) {
         await walk(fullPath);
       } else {
         let pathToReplace = pathModule.normalize(path);
@@ -36,6 +38,11 @@ export const getFilesInDirectoryAndSubdirectories = async (
   };
   await walk(path);
   return files;
+};
+
+export const directoryContainsSymlinks = async (path: string): Promise<boolean> => {
+  const dirEntries = await fs.promises.readdir(path, { withFileTypes: true, recursive: true }).catch(() => []);
+  return dirEntries.some((dirEntry) => dirEntry.isSymbolicLink());
 };
 
 export const directoryContainsSourceMaps = async (path: string): Promise<boolean> => {

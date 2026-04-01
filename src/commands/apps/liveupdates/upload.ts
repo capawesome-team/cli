@@ -13,6 +13,7 @@ import {
 import { isInteractive } from '@/utils/environment.js';
 import {
   directoryContainsSourceMaps,
+  directoryContainsSymlinks,
   fileExistsAtPath,
   getFilesInDirectoryAndSubdirectories,
   isDirectory,
@@ -199,6 +200,13 @@ export default defineCommand({
       process.exit(1);
     }
 
+    // Check for symlinks
+    if (pathIsDirectory) {
+      const containsSymlinks = await directoryContainsSymlinks(path);
+      if (containsSymlinks) {
+        consola.warn('Symbolic links were detected in the specified path. Symbolic links are skipped during upload.');
+      }
+    }
     // Check for source maps
     if (pathIsDirectory) {
       const containsSourceMaps = await directoryContainsSourceMaps(path);
