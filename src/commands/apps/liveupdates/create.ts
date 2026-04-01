@@ -31,7 +31,10 @@ export default defineCommand({
         .optional()
         .describe('App ID to create the live update for.'),
       certificate: z.string().optional().describe('The name of the certificate to use for the build.'),
-      channel: z.string().optional().describe('The name of the channel to deploy to.'),
+      channel: z
+        .array(z.string())
+        .optional()
+        .describe('The name of the channel to deploy to. Can be specified multiple times.'),
       customProperty: z
         .array(z.string().min(1).max(100))
         .max(10)
@@ -137,18 +140,19 @@ export default defineCommand({
     }
 
     // Prompt for channel if not provided
-    if (!channel) {
+    if (!channel || channel.length === 0) {
       if (!isInteractive()) {
-        consola.error('You must provide a channel when running in non-interactive environment.');
+        consola.error('You must provide at least one channel when running in non-interactive environment.');
         process.exit(1);
       }
-      channel = await prompt('Enter the channel name to deploy to:', {
+      const channelName = await prompt('Enter the channel name to deploy to:', {
         type: 'text',
       });
-      if (!channel) {
+      if (!channelName) {
         consola.error('You must provide a channel.');
         process.exit(1);
       }
+      channel = [channelName];
     }
 
     // Prompt for environment if not provided
@@ -284,18 +288,22 @@ export default defineCommand({
       consola.success('Build updated successfully.');
     }
 
-    // Deploy to channel
-    consola.start('Creating deployment...');
+    // Deploy to channels
     const rolloutPercentage = (options.rolloutPercentage ?? 100) / 100;
-    const deployment = await appDeploymentsService.create({
-      appId,
-      appBuildId: response.id,
-      appChannelName: channel,
-      rolloutPercentage,
-    });
-    consola.info(`Deployment ID: ${deployment.id}`);
-    consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${deployment.id}`);
-    consola.success('Deployment created successfully.');
+    const deploymentIds: string[] = [];
+    for (const channelName of channel) {
+      consola.start(`Creating deployment for channel "${channelName}"...`);
+      const deployment = await appDeploymentsService.create({
+        appId,
+        appBuildId: response.id,
+        appChannelName: channelName,
+        rolloutPercentage,
+      });
+      deploymentIds.push(deployment.id);
+      consola.info(`Deployment ID: ${deployment.id}`);
+      consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${deployment.id}`);
+      consola.success('Deployment created successfully.');
+    }
 
     // Output JSON if json flag is set
     if (json) {
@@ -304,7 +312,7 @@ export default defineCommand({
           {
             buildId: response.id,
             buildNumberAsString: response.numberAsString,
-            deploymentId: deployment.id,
+            deploymentIds,
           },
           null,
           2,
