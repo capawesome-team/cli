@@ -4,10 +4,19 @@ export const parseCustomProperties = (customProperty: string[] | undefined): Rec
   }
   const customProperties: Record<string, string> = {};
   for (const property of customProperty) {
-    const [key, value] = property.split('=');
-    if (key && value) {
-      customProperties[key] = value;
+    if (!property) {
+      continue;
     }
+    const separatorIndex = property.indexOf('=');
+    if (separatorIndex === -1) {
+      continue;
+    }
+    const key = property.slice(0, separatorIndex).trim();
+    const value = property.slice(separatorIndex + 1).trim();
+    if (!key || !value) {
+      continue;
+    }
+    customProperties[key] = value;
   }
-  return customProperties;
+  return Object.keys(customProperties).length > 0 ? customProperties : undefined;
 };
