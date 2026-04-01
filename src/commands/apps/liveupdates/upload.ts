@@ -77,7 +77,8 @@ export default defineCommand({
         .optional()
         .describe('The commit sha related to the bundle. Deprecated, use `--git-ref` instead.'),
       customProperty: z
-        .array(z.string().min(1).max(100)).max(10)
+        .array(z.string().min(1).max(100))
+        .max(10)
         .optional()
         .describe(
           'A custom property to assign to the bundle. Must be in the format `key=value`. Can be specified multiple times.',

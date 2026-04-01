@@ -28,7 +28,8 @@ export default defineCommand({
       certificate: z.string().optional().describe('The name of the certificate to use for the build.'),
       channel: z.string().optional().describe('The name of the channel to deploy to.'),
       customProperty: z
-        .array(z.string().min(1).max(100)).max(10)
+        .array(z.string().min(1).max(100))
+        .max(10)
         .optional()
         .describe(
           'A custom property to assign to the build. Must be in the format `key=value`. Can be specified multiple times.',
