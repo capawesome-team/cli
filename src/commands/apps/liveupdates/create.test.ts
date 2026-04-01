@@ -281,7 +281,7 @@ describe('apps-liveupdates-create', () => {
     await expect(createCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith(
-      'You must provide a git ref when running in non-interactive environment.',
+      'You must provide a git ref, path, or url when running in non-interactive environment.',
     );
   });
 
