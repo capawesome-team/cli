@@ -10,7 +10,7 @@ import pathModule from 'path';
 import { z } from 'zod';
 
 export default defineCommand({
-  description: 'Generate manifest file and compress web assets into a bundle.zip file.',
+  description: 'Generate manifest file and compress locally built web assets into a bundle.zip file.',
   options: defineOptions(
     z.object({
       inputPath: z.string().optional().describe('Path to the web assets directory.'),
