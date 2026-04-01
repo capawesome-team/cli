@@ -10,7 +10,7 @@ import createCommand from './create.js';
 vi.mock('@/utils/user-config.js');
 vi.mock('@/utils/prompt.js');
 vi.mock('@/services/authorization-service.js');
-vi.mock('@/utils/build.js');
+vi.mock('@/utils/job.js');
 vi.mock('consola');
 
 vi.mock('@/utils/environment.js', () => ({
@@ -34,16 +34,12 @@ describe('apps-liveupdates-create', () => {
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(true);
     mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue(testToken);
 
-    // Mock waitForBuildCompletion to resolve immediately
-    const buildUtils = await import('@/utils/build.js');
-    vi.mocked(buildUtils.waitForBuildCompletion).mockResolvedValue({
-      id: buildId,
-      appId,
-      gitRef: 'main',
-      jobId: 'job-1',
-      numberAsString: '1',
-      platform: 'web',
-      type: 'web',
+    // Mock waitForJobCompletion to resolve immediately
+    const jobUtils = await import('@/utils/job.js');
+    vi.mocked(jobUtils.waitForJobCompletion).mockResolvedValue({
+      id: 'job-1',
+      status: 'succeeded',
+      createdAt: '2024-01-01T00:00:00Z',
     });
 
     vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
@@ -84,7 +80,7 @@ describe('apps-liveupdates-create', () => {
         platform: 'web',
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(201, { id: buildId, numberAsString: '1' });
+      .reply(201, { id: buildId, jobId: 'job-1', numberAsString: '1' });
 
     const deploymentScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/deployments`, {
@@ -125,7 +121,7 @@ describe('apps-liveupdates-create', () => {
         appCertificateName: 'my-cert',
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(201, { id: buildId, numberAsString: '1' });
+      .reply(201, { id: buildId, jobId: 'job-1', numberAsString: '1' });
 
     const deploymentScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/deployments`)
@@ -154,7 +150,7 @@ describe('apps-liveupdates-create', () => {
         stack: 'macos-tahoe',
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(201, { id: buildId, numberAsString: '1' });
+      .reply(201, { id: buildId, jobId: 'job-1', numberAsString: '1' });
 
     const deploymentScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/deployments`)
@@ -181,7 +177,7 @@ describe('apps-liveupdates-create', () => {
     const buildScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/builds`)
       .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(201, { id: buildId, numberAsString: '1' });
+      .reply(201, { id: buildId, jobId: 'job-1', numberAsString: '1' });
 
     const updateScope = nock(DEFAULT_API_BASE_URL)
       .patch(`/v1/apps/${appId}/builds/${buildId}`, {
@@ -217,7 +213,7 @@ describe('apps-liveupdates-create', () => {
     const buildScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/builds`)
       .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(201, { id: buildId, numberAsString: '1' });
+      .reply(201, { id: buildId, jobId: 'job-1', numberAsString: '1' });
 
     const deploymentScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/deployments`, {
@@ -247,7 +243,7 @@ describe('apps-liveupdates-create', () => {
     nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/builds`)
       .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(201, { id: buildId, numberAsString: '42' });
+      .reply(201, { id: buildId, jobId: 'job-1', numberAsString: '42' });
 
     nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/deployments`)
@@ -328,7 +324,7 @@ describe('apps-liveupdates-create', () => {
     nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/builds`)
       .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(201, { id: buildId, numberAsString: '1' });
+      .reply(201, { id: buildId, jobId: 'job-1', numberAsString: '1' });
 
     nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/deployments`)

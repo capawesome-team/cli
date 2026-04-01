@@ -5,8 +5,8 @@ import appEnvironmentsService from '@/services/app-environments.js';
 import { AppBuildArtifactDto } from '@/types/app-build.js';
 import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
-import { waitForBuildCompletion } from '@/utils/build.js';
 import { isInteractive } from '@/utils/environment.js';
+import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
@@ -260,10 +260,11 @@ export default defineCommand({
     // Wait for build job to complete by default, unless --detached flag is set
     const shouldWait = !options.detached;
     if (shouldWait) {
-      const build = await waitForBuildCompletion({
+      await waitForJobCompletion({ jobId: response.jobId });
+      const appBuild = await appBuildsService.findOne({
         appId,
         appBuildId: response.id,
-        relations: 'appBuildArtifacts,job,job.jobLogs',
+        relations: 'appBuildArtifacts',
       });
 
       consola.info(`Build ID: ${response.id}`);
@@ -277,7 +278,7 @@ export default defineCommand({
         await handleArtifactDownload({
           appId,
           buildId: response.id,
-          buildArtifacts: build.appBuildArtifacts,
+          buildArtifacts: appBuild.appBuildArtifacts,
           artifactType: 'apk',
           filePath: typeof options.apk === 'string' ? options.apk : undefined,
         });
@@ -286,7 +287,7 @@ export default defineCommand({
         await handleArtifactDownload({
           appId,
           buildId: response.id,
-          buildArtifacts: build.appBuildArtifacts,
+          buildArtifacts: appBuild.appBuildArtifacts,
           artifactType: 'aab',
           filePath: typeof options.aab === 'string' ? options.aab : undefined,
         });
@@ -295,7 +296,7 @@ export default defineCommand({
         await handleArtifactDownload({
           appId,
           buildId: response.id,
-          buildArtifacts: build.appBuildArtifacts,
+          buildArtifacts: appBuild.appBuildArtifacts,
           artifactType: 'ipa',
           filePath: typeof options.ipa === 'string' ? options.ipa : undefined,
         });
@@ -304,7 +305,7 @@ export default defineCommand({
         await handleArtifactDownload({
           appId,
           buildId: response.id,
-          buildArtifacts: build.appBuildArtifacts,
+          buildArtifacts: appBuild.appBuildArtifacts,
           artifactType: 'zip',
           filePath: typeof options.zip === 'string' ? options.zip : undefined,
         });

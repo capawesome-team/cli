@@ -2,11 +2,10 @@ import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appBuildsService from '@/services/app-builds.js';
 import appDeploymentsService from '@/services/app-deployments.js';
 import appDestinationsService from '@/services/app-destinations.js';
-import { unescapeAnsi } from '@/utils/ansi.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
+import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
-import { wait } from '@/utils/wait.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { z } from 'zod';
@@ -171,86 +170,9 @@ export default defineCommand({
     // Wait for deployment job to complete by default, unless --detached flag is set
     const shouldWait = !options.detached && build.platform !== 'web';
     if (shouldWait) {
-      let lastPrintedLogNumber = 0;
-      let isWaitingForStart = true;
-
-      // Poll deployment status until completion
-      while (true) {
-        try {
-          const deployment = await appDeploymentsService.findOne({
-            appId,
-            appDeploymentId: response.id,
-            relations: 'job,job.jobLogs',
-          });
-
-          if (!deployment.job) {
-            await wait(3000);
-            continue;
-          }
-
-          const jobStatus = deployment.job.status;
-
-          // Show spinner while queued or pending
-          if (jobStatus === 'queued' || jobStatus === 'pending') {
-            if (isWaitingForStart) {
-              consola.start(`Waiting for deployment to start (status: ${jobStatus})...`);
-            }
-            await wait(3000);
-            continue;
-          }
-
-          // Stop spinner when job moves to in_progress
-          if (isWaitingForStart && jobStatus === 'in_progress') {
-            isWaitingForStart = false;
-            consola.success('Deployment started...');
-          }
-
-          // Print new logs
-          if (deployment.job.jobLogs && deployment.job.jobLogs.length > 0) {
-            const newLogs = deployment.job.jobLogs
-              .filter((log) => log.number > lastPrintedLogNumber)
-              .sort((a, b) => a.number - b.number);
-
-            for (const log of newLogs) {
-              console.log(unescapeAnsi(log.payload));
-              lastPrintedLogNumber = log.number;
-            }
-          }
-
-          // Handle terminal states
-          if (
-            jobStatus === 'succeeded' ||
-            jobStatus === 'failed' ||
-            jobStatus === 'canceled' ||
-            jobStatus === 'rejected' ||
-            jobStatus === 'timed_out'
-          ) {
-            console.log(); // New line for better readability
-            if (jobStatus === 'succeeded') {
-              consola.success('Deployment completed successfully.');
-              process.exit(0);
-            } else if (jobStatus === 'failed') {
-              consola.error('Deployment failed.');
-              process.exit(1);
-            } else if (jobStatus === 'canceled') {
-              consola.warn('Deployment was canceled.');
-              process.exit(1);
-            } else if (jobStatus === 'rejected') {
-              consola.error('Deployment was rejected.');
-              process.exit(1);
-            } else if (jobStatus === 'timed_out') {
-              consola.error('Deployment timed out.');
-              process.exit(1);
-            }
-          }
-
-          // Wait before next poll (3 seconds)
-          await wait(3000);
-        } catch (error) {
-          consola.error('Error polling deployment status:', error);
-          process.exit(1);
-        }
-      }
+      await waitForJobCompletion({ jobId: response.jobId });
+      consola.success('Deployment completed successfully.');
+      process.exit(0);
     }
   }),
 });

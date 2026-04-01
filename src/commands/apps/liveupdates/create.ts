@@ -4,7 +4,7 @@ import appCertificatesService from '@/services/app-certificates.js';
 import appDeploymentsService from '@/services/app-deployments.js';
 import appEnvironmentsService from '@/services/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
-import { waitForBuildCompletion } from '@/utils/build.js';
+import { waitForJobCompletion } from '@/utils/job.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
@@ -150,7 +150,7 @@ export default defineCommand({
     consola.success('Build created successfully.');
 
     // Wait for build to complete
-    await waitForBuildCompletion({ appId, appBuildId: response.id });
+    await waitForJobCompletion({ jobId: response.jobId });
     consola.success('Build completed successfully.');
     console.log();
 
