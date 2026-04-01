@@ -1,4 +1,5 @@
 import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
+import appBuildSourcesService from '@/services/app-build-sources.js';
 import appBuildsService from '@/services/app-builds.js';
 import appCertificatesService from '@/services/app-certificates.js';
 import appEnvironmentsService from '@/services/app-environments.js';
@@ -8,6 +9,7 @@ import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
+import zip from '@/utils/zip.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import fs from 'fs/promises';
@@ -49,6 +51,7 @@ export default defineCommand({
         .optional()
         .describe('Download the generated IPA file (iOS only). Optionally provide a file path.'),
       json: z.boolean().optional().describe('Output in JSON format.'),
+      path: z.string().optional().describe('Path to local source files to upload.'),
       platform: z
         .enum(['ios', 'android', 'web'], {
           message: 'Platform must be either `ios`, `android`, or `web`.',
@@ -61,6 +64,7 @@ export default defineCommand({
         })
         .optional()
         .describe('The build stack to use for the build process.'),
+      url: z.string().optional().describe('URL to a zip file to use as build source.'),
       type: z
         .string()
         .optional()
@@ -84,7 +88,7 @@ export default defineCommand({
     { y: 'yes' },
   ),
   action: withAuth(async (options) => {
-    let { appId, platform, type, gitRef, environment, certificate, json, stack } = options;
+    let { appId, platform, type, gitRef, environment, certificate, json, stack, path: sourcePath, url } = options;
 
     // Validate that detached flag cannot be used with artifact flags
     if (options.detached && (options.apk || options.aab || options.ipa || options.zip)) {
@@ -102,6 +106,42 @@ export default defineCommand({
     if (options.channel && options.destination) {
       consola.error('The --channel and --destination flags cannot be used together.');
       process.exit(1);
+    }
+
+    // Validate that path, url, and gitRef cannot be used together
+    if (sourcePath && gitRef) {
+      consola.error('The --path and --git-ref flags cannot be used together.');
+      process.exit(1);
+    }
+    if (url && gitRef) {
+      consola.error('The --url and --git-ref flags cannot be used together.');
+      process.exit(1);
+    }
+    if (url && sourcePath) {
+      consola.error('The --url and --path flags cannot be used together.');
+      process.exit(1);
+    }
+
+    // Validate url if provided
+    if (url) {
+      consola.warn('The --url option is experimental and may change in the future.');
+    }
+
+    // Validate path if provided
+    if (sourcePath) {
+      consola.warn('The --path option is experimental and may change in the future.');
+      const resolvedPath = path.resolve(sourcePath);
+      const stat = await fs.stat(resolvedPath).catch(() => null);
+      if (!stat || !stat.isDirectory()) {
+        consola.error('The --path must point to an existing directory.');
+        process.exit(1);
+      }
+      const packageJsonPath = path.join(resolvedPath, 'package.json');
+      const packageJsonStat = await fs.stat(packageJsonPath).catch(() => null);
+      if (!packageJsonStat || !packageJsonStat.isFile()) {
+        consola.error('The directory specified by --path must contain a package.json file.');
+        process.exit(1);
+      }
     }
 
     // Prompt for app ID if not provided
@@ -135,10 +175,10 @@ export default defineCommand({
       }
     }
 
-    // Prompt for git ref if not provided
-    if (!gitRef) {
+    // Prompt for git ref if not provided and no path or url specified
+    if (!sourcePath && !url && !gitRef) {
       if (!isInteractive()) {
-        consola.error('You must provide a git ref when running in non-interactive environment.');
+        consola.error('You must provide a git ref, path, or url when running in non-interactive environment.');
         process.exit(1);
       }
       gitRef = await prompt('Enter the Git reference (branch, tag, or commit SHA):', {
@@ -240,10 +280,41 @@ export default defineCommand({
     }
     const adHocEnvironmentVariables = variablesMap.size > 0 ? Object.fromEntries(variablesMap) : undefined;
 
+    // Create build source from URL if provided
+    let appBuildSourceId: string | undefined;
+    if (url) {
+      consola.start('Creating build source from URL...');
+      const appBuildSource = await appBuildSourcesService.createFromUrl({ appId, fileUrl: url });
+      appBuildSourceId = appBuildSource.id;
+      consola.success('Build source created successfully.');
+    }
+
+    // Upload source files if path is provided
+    if (sourcePath) {
+      const resolvedPath = path.resolve(sourcePath);
+      consola.start('Zipping source files...');
+      const buffer = await zip.zipFolderWithGitignore(resolvedPath);
+      consola.start('Uploading source files...');
+      const appBuildSource = await appBuildSourcesService.createFromFile(
+        {
+          appId,
+          fileSizeInBytes: buffer.byteLength,
+          buffer,
+          name: 'source.zip',
+        },
+        (currentPart, totalParts) => {
+          consola.start(`Uploading source files (${currentPart}/${totalParts})...`);
+        },
+      );
+      appBuildSourceId = appBuildSource.id;
+      consola.success('Source files uploaded successfully.');
+    }
+
     // Create the app build
     consola.start('Creating build...');
     const response = await appBuildsService.create({
       adHocEnvironmentVariables,
+      appBuildSourceId,
       appCertificateName: certificate,
       appEnvironmentName: environment,
       appId,

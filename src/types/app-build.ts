@@ -14,8 +14,9 @@ export interface AppBuildDto {
   appBuildArtifacts?: AppBuildArtifactDto[];
   appCertificateId?: string;
   appEnvironmentId?: string;
+  appBuildSourceId?: string;
   appId: string;
-  gitRef: string;
+  gitRef?: string;
   job?: JobDto;
   jobId: string;
   numberAsString: string;
@@ -25,11 +26,12 @@ export interface AppBuildDto {
 
 export interface CreateAppBuildDto {
   adHocEnvironmentVariables?: Record<string, string>;
+  appBuildSourceId?: string;
   appCertificateName?: string;
   appEnvironmentName?: string;
   appId: string;
   stack?: 'macos-sequoia' | 'macos-tahoe';
-  gitRef: string;
+  gitRef?: string;
   platform: 'ios' | 'android' | 'web';
   type?: string;
 }
