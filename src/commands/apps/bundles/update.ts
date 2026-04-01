@@ -3,7 +3,7 @@ import consola from 'consola';
 import { z } from 'zod';
 
 export default defineCommand({
-  description: 'Update an app bundle.',
+  description: 'Update an app bundle. Deprecated.',
   options: defineOptions(
     z.object({
       androidMax: z
@@ -43,8 +43,9 @@ export default defineCommand({
     }),
   ),
   action: async (options, args) => {
-    consola.warn('The `apps:bundles:update` command has been deprecated and will be removed in future versions.');
-    consola.info('Please refer to the official documentation for alternative approaches.');
+    consola.warn(
+      'The `apps:bundles:update` command has been deprecated. Please use the `apps:liveupdates` commands instead.',
+    );
     process.exit(1);
   },
 });

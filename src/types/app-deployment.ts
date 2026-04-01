@@ -19,6 +19,7 @@ export interface CreateAppDeploymentDto {
   appBuildId: string;
   appDestinationName?: string;
   appChannelName?: string;
+  rolloutPercentage?: number;
 }
 
 export interface FindOneAppDeploymentDto {

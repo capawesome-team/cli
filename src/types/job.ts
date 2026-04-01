@@ -21,6 +21,11 @@ export interface JobDto {
   createdAt: string;
 }
 
+export interface FindOneJobDto {
+  jobId: string;
+  relations?: string;
+}
+
 export interface UpdateJobDto {
   status: string;
 }
