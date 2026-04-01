@@ -66,7 +66,7 @@ export const waitForJobCompletion = async (options: { jobId: string }): Promise<
           consola.error(`${capitalize(label)} failed.`);
           process.exit(1);
         } else if (jobStatus === 'canceled') {
-          consola.warn(`${capitalize(label)} was canceled.`);
+          consola.error(`${capitalize(label)} was canceled.`);
           process.exit(1);
         } else if (jobStatus === 'rejected') {
           consola.error(`${capitalize(label)} was rejected.`);
