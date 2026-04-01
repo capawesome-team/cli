@@ -41,22 +41,8 @@ export const getFilesInDirectoryAndSubdirectories = async (
 };
 
 export const directoryContainsSymlinks = async (path: string): Promise<boolean> => {
-  const walk = async (directory: string): Promise<boolean> => {
-    const dirEntries = await fs.promises.readdir(directory, { withFileTypes: true }).catch(() => []);
-    for (const dirEntry of dirEntries) {
-      const fullPath = pathModule.join(directory, dirEntry.name);
-      if (dirEntry.isSymbolicLink()) {
-        return true;
-      }
-      if (dirEntry.isDirectory()) {
-        if (await walk(fullPath)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  };
-  return walk(path);
+  const dirEntries = await fs.promises.readdir(path, { withFileTypes: true, recursive: true }).catch(() => []);
+  return dirEntries.some((dirEntry) => dirEntry.isSymbolicLink());
 };
 
 export const directoryContainsSourceMaps = async (path: string): Promise<boolean> => {
