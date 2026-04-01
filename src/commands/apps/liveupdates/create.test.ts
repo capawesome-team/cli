@@ -57,7 +57,7 @@ describe('apps-liveupdates-create', () => {
   it('should require authentication', async () => {
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(false);
 
-    const options = { appId, gitRef: 'main', channel: 'production' };
+    const options = { appId, gitRef: 'main', channel: ['production'] };
 
     await expect(createCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
@@ -70,7 +70,7 @@ describe('apps-liveupdates-create', () => {
     const options = {
       appId,
       gitRef: 'main',
-      channel: 'production',
+      channel: ['production'],
       yes: true,
     };
 
@@ -107,7 +107,7 @@ describe('apps-liveupdates-create', () => {
     const options = {
       appId,
       gitRef: 'v1.0.0',
-      channel: 'production',
+      channel: ['production'],
       environment: 'staging',
       certificate: 'my-cert',
       yes: true,
@@ -138,7 +138,7 @@ describe('apps-liveupdates-create', () => {
     const options = {
       appId,
       gitRef: 'main',
-      channel: 'production',
+      channel: ['production'],
       stack: 'macos-tahoe' as const,
       yes: true,
     };
@@ -167,7 +167,7 @@ describe('apps-liveupdates-create', () => {
     const options = {
       appId,
       gitRef: 'main',
-      channel: 'production',
+      channel: ['production'],
       androidMin: '10',
       androidMax: '50',
       iosEq: '42',
@@ -205,7 +205,7 @@ describe('apps-liveupdates-create', () => {
     const options = {
       appId,
       gitRef: 'main',
-      channel: 'production',
+      channel: ['production'],
       rolloutPercentage: 50,
       yes: true,
     };
@@ -231,11 +231,55 @@ describe('apps-liveupdates-create', () => {
     expect(deploymentScope.isDone()).toBe(true);
   });
 
+  it('should create multiple deployments for multiple channels', async () => {
+    const deploymentId2 = '00000000-0000-0000-0000-000000000004';
+    const options = {
+      appId,
+      gitRef: 'main',
+      channel: ['production', 'staging'],
+      yes: true,
+    };
+
+    const buildScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/builds`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: buildId, jobId: 'job-1', numberAsString: '1' });
+
+    const deploymentScope1 = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/deployments`, {
+        appId,
+        appBuildId: buildId,
+        appChannelName: 'production',
+        rolloutPercentage: 1,
+      })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: deploymentId });
+
+    const deploymentScope2 = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/deployments`, {
+        appId,
+        appBuildId: buildId,
+        appChannelName: 'staging',
+        rolloutPercentage: 1,
+      })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: deploymentId2 });
+
+    await createCommand.action(options, undefined);
+
+    expect(buildScope.isDone()).toBe(true);
+    expect(deploymentScope1.isDone()).toBe(true);
+    expect(deploymentScope2.isDone()).toBe(true);
+    expect(mockConsola.success).toHaveBeenCalledWith('Deployment created successfully.');
+    expect(mockConsola.info).toHaveBeenCalledWith(`Deployment ID: ${deploymentId}`);
+    expect(mockConsola.info).toHaveBeenCalledWith(`Deployment ID: ${deploymentId2}`);
+  });
+
   it('should output JSON when json flag is set', async () => {
     const options = {
       appId,
       gitRef: 'main',
-      channel: 'production',
+      channel: ['production'],
       json: true,
       yes: true,
     };
@@ -257,7 +301,7 @@ describe('apps-liveupdates-create', () => {
         {
           buildId,
           buildNumberAsString: '42',
-          deploymentId,
+          deploymentIds: [deploymentId],
         },
         null,
         2,
@@ -266,7 +310,7 @@ describe('apps-liveupdates-create', () => {
   });
 
   it('should require app ID in non-interactive mode', async () => {
-    const options = { gitRef: 'main', channel: 'production' };
+    const options = { gitRef: 'main', channel: ['production'] };
 
     await expect(createCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
@@ -276,7 +320,7 @@ describe('apps-liveupdates-create', () => {
   });
 
   it('should require git ref in non-interactive mode', async () => {
-    const options = { appId, channel: 'production' };
+    const options = { appId, channel: ['production'] };
 
     await expect(createCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
@@ -291,7 +335,7 @@ describe('apps-liveupdates-create', () => {
     await expect(createCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith(
-      'You must provide a channel when running in non-interactive environment.',
+      'You must provide at least one channel when running in non-interactive environment.',
     );
   });
 
@@ -299,7 +343,7 @@ describe('apps-liveupdates-create', () => {
     const options = {
       appId,
       gitRef: 'main',
-      channel: 'production',
+      channel: ['production'],
       yes: true,
     };
 
@@ -317,7 +361,7 @@ describe('apps-liveupdates-create', () => {
     const options = {
       appId,
       gitRef: 'main',
-      channel: 'production',
+      channel: ['production'],
       yes: true,
     };
 
