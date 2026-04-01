@@ -3,6 +3,7 @@ import appBuildsService from '@/services/app-builds.js';
 import appCertificatesService from '@/services/app-certificates.js';
 import appDeploymentsService from '@/services/app-deployments.js';
 import appEnvironmentsService from '@/services/app-environments.js';
+import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
 import { parseCustomProperties } from '@/utils/custom-properties.js';
 import { isInteractive } from '@/utils/environment.js';
@@ -10,6 +11,7 @@ import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
+import fs from 'fs/promises';
 import { z } from 'zod';
 
 export default defineCommand({
@@ -53,6 +55,14 @@ export default defineCommand({
         })
         .optional()
         .describe('The build stack to use for the build process.'),
+      variable: z
+        .array(z.string())
+        .optional()
+        .describe('Ad hoc environment variable in key=value format. Can be specified multiple times.'),
+      variableFile: z
+        .string()
+        .optional()
+        .describe('Path to a file containing ad hoc environment variables in .env format.'),
       yes: z.boolean().optional().describe('Skip confirmation prompts.'),
     }),
     { y: 'yes' },
@@ -142,9 +152,23 @@ export default defineCommand({
       }
     }
 
+    // Parse ad hoc environment variables from inline and file
+    const variablesMap = new Map<string, string>();
+    if (options.variableFile) {
+      const fileContent = await fs.readFile(options.variableFile, 'utf-8');
+      const fileVariables = parseKeyValuePairs(fileContent);
+      fileVariables.forEach((v) => variablesMap.set(v.key, v.value));
+    }
+    if (options.variable) {
+      const inlineVariables = parseKeyValuePairs(options.variable.join('\n'));
+      inlineVariables.forEach((v) => variablesMap.set(v.key, v.value));
+    }
+    const adHocEnvironmentVariables = variablesMap.size > 0 ? Object.fromEntries(variablesMap) : undefined;
+
     // Create the web build
     consola.start('Creating build...');
     const response = await appBuildsService.create({
+      adHocEnvironmentVariables,
       appCertificateName: certificate,
       appEnvironmentName: environment,
       appId,
