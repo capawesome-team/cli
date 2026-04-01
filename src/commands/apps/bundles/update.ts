@@ -43,7 +43,9 @@ export default defineCommand({
     }),
   ),
   action: async (options, args) => {
-    consola.warn('The `apps:bundles:update` command has been deprecated. Please use the `apps:liveupdates` commands instead.');
+    consola.warn(
+      'The `apps:bundles:update` command has been deprecated. Please use the `apps:liveupdates` commands instead.',
+    );
     process.exit(1);
   },
 });
