@@ -4,8 +4,9 @@ import appCertificatesService from '@/services/app-certificates.js';
 import appDeploymentsService from '@/services/app-deployments.js';
 import appEnvironmentsService from '@/services/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
-import { waitForJobCompletion } from '@/utils/job.js';
+import { parseCustomProperties } from '@/utils/custom-properties.js';
 import { isInteractive } from '@/utils/environment.js';
+import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
@@ -15,6 +16,9 @@ export default defineCommand({
   description: 'Create a new live update.',
   options: defineOptions(
     z.object({
+      androidEq: z.string().optional().describe('The exact Android versionCode for the live update.'),
+      androidMax: z.string().optional().describe('The maximum Android versionCode for the live update.'),
+      androidMin: z.string().optional().describe('The minimum Android versionCode for the live update.'),
       appId: z
         .uuid({
           message: 'App ID must be a UUID.',
@@ -23,20 +27,18 @@ export default defineCommand({
         .describe('App ID to create the live update for.'),
       certificate: z.string().optional().describe('The name of the certificate to use for the build.'),
       channel: z.string().optional().describe('The name of the channel to deploy to.'),
-      gitRef: z.string().optional().describe('The Git reference (branch, tag, or commit SHA) to build.'),
-      environment: z.string().optional().describe('The name of the environment to use for the build.'),
-      stack: z
-        .enum(['macos-sequoia', 'macos-tahoe'], {
-          message: 'Build stack must be either `macos-sequoia` or `macos-tahoe`.',
-        })
+      customProperty: z
+        .array(z.string().min(1).max(100)).max(10)
         .optional()
-        .describe('The build stack to use for the build process.'),
-      androidMin: z.string().optional().describe('The minimum Android versionCode for the live update.'),
-      androidMax: z.string().optional().describe('The maximum Android versionCode for the live update.'),
-      androidEq: z.string().optional().describe('The exact Android versionCode for the live update.'),
-      iosMin: z.string().optional().describe('The minimum iOS CFBundleVersion for the live update.'),
-      iosMax: z.string().optional().describe('The maximum iOS CFBundleVersion for the live update.'),
+        .describe(
+          'A custom property to assign to the build. Must be in the format `key=value`. Can be specified multiple times.',
+        ),
+      environment: z.string().optional().describe('The name of the environment to use for the build.'),
+      gitRef: z.string().optional().describe('The Git reference (branch, tag, or commit SHA) to build.'),
       iosEq: z.string().optional().describe('The exact iOS CFBundleVersion for the live update.'),
+      iosMax: z.string().optional().describe('The maximum iOS CFBundleVersion for the live update.'),
+      iosMin: z.string().optional().describe('The minimum iOS CFBundleVersion for the live update.'),
+      json: z.boolean().optional().describe('Output in JSON format.'),
       rolloutPercentage: z.coerce
         .number()
         .int()
@@ -44,7 +46,12 @@ export default defineCommand({
         .max(100)
         .optional()
         .describe('The rollout percentage for the deployment (0-100). Default: 100.'),
-      json: z.boolean().optional().describe('Output in JSON format.'),
+      stack: z
+        .enum(['macos-sequoia', 'macos-tahoe'], {
+          message: 'Build stack must be either `macos-sequoia` or `macos-tahoe`.',
+        })
+        .optional()
+        .describe('The build stack to use for the build process.'),
       yes: z.boolean().optional().describe('Skip confirmation prompts.'),
     }),
     { y: 'yes' },
@@ -154,19 +161,22 @@ export default defineCommand({
     consola.success('Build completed successfully.');
     console.log();
 
-    // Update build with version constraints if any are provided
-    const hasVersionConstraints =
+    // Update build with custom properties and version constraints if any are provided
+    const customProperties = parseCustomProperties(options.customProperty);
+    const hasUpdateFields =
+      customProperties ||
       options.androidMin ||
       options.androidMax ||
       options.androidEq ||
       options.iosMin ||
       options.iosMax ||
       options.iosEq;
-    if (hasVersionConstraints) {
-      consola.start('Updating version constraints...');
+    if (hasUpdateFields) {
+      consola.start('Updating build...');
       await appBuildsService.update({
         appId,
         appBuildId: response.id,
+        customProperties,
         minAndroidAppVersionCode: options.androidMin,
         maxAndroidAppVersionCode: options.androidMax,
         eqAndroidAppVersionCode: options.androidEq,
@@ -174,7 +184,7 @@ export default defineCommand({
         maxIosAppVersionCode: options.iosMax,
         eqIosAppVersionCode: options.iosEq,
       });
-      consola.success('Version constraints updated successfully.');
+      consola.success('Build updated successfully.');
     }
 
     // Deploy to channel

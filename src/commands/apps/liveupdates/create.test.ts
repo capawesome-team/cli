@@ -198,7 +198,7 @@ describe('apps-liveupdates-create', () => {
     expect(buildScope.isDone()).toBe(true);
     expect(updateScope.isDone()).toBe(true);
     expect(deploymentScope.isDone()).toBe(true);
-    expect(mockConsola.success).toHaveBeenCalledWith('Version constraints updated successfully.');
+    expect(mockConsola.success).toHaveBeenCalledWith('Build updated successfully.');
   });
 
   it('should convert rollout percentage to decimal', async () => {

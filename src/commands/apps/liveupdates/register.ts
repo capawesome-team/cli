@@ -2,6 +2,7 @@ import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appBundlesService from '@/services/app-bundles.js';
 import appsService from '@/services/apps.js';
 import { withAuth } from '@/utils/auth.js';
+import { parseCustomProperties } from '@/utils/custom-properties.js';
 import { createBufferFromPath, createBufferFromString, isPrivateKeyContent } from '@/utils/buffer.js';
 import { isInteractive } from '@/utils/environment.js';
 import { fileExistsAtPath } from '@/utils/file.js';
@@ -53,7 +54,7 @@ export default defineCommand({
         .optional()
         .describe('The commit sha related to the bundle. Deprecated, use `--git-ref` instead.'),
       customProperty: z
-        .array(z.string().min(1).max(100))
+        .array(z.string().min(1).max(100)).max(10)
         .optional()
         .describe(
           'A custom property to assign to the bundle. Must be in the format `key=value`. Can be specified multiple times.',
@@ -286,17 +287,3 @@ export default defineCommand({
     consola.success('Live Update successfully registered.');
   }),
 });
-
-const parseCustomProperties = (customProperty: string[] | undefined): Record<string, string> | undefined => {
-  let customProperties: Record<string, string> | undefined;
-  if (customProperty) {
-    customProperties = {};
-    for (const property of customProperty) {
-      const [key, value] = property.split('=');
-      if (key && value) {
-        customProperties[key] = value;
-      }
-    }
-  }
-  return customProperties;
-};
