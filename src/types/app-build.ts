@@ -25,6 +25,7 @@ export interface AppBuildDto {
 }
 
 export interface CreateAppBuildDto {
+  adHocEnvironmentVariables?: Record<string, string>;
   appBuildSourceId?: string;
   appCertificateName?: string;
   appEnvironmentName?: string;

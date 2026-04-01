@@ -13,6 +13,7 @@ import {
 import { isInteractive } from '@/utils/environment.js';
 import {
   directoryContainsSourceMaps,
+  directoryContainsSymlinks,
   fileExistsAtPath,
   getFilesInDirectoryAndSubdirectories,
   isDirectory,
@@ -199,6 +200,13 @@ export default defineCommand({
       process.exit(1);
     }
 
+    // Check for symlinks
+    if (pathIsDirectory) {
+      const containsSymlinks = await directoryContainsSymlinks(path);
+      if (containsSymlinks) {
+        consola.warn('Symbolic links were detected in the specified path. Symbolic links are skipped during upload.');
+      }
+    }
     // Check for source maps
     if (pathIsDirectory) {
       const containsSourceMaps = await directoryContainsSourceMaps(path);
@@ -360,7 +368,14 @@ const uploadFile = async (options: {
     // Sign the bundle
     let signature: string | undefined;
     if (privateKeyBuffer) {
-      signature = await createSignature(privateKeyBuffer, buffer);
+      try {
+        signature = await createSignature(privateKeyBuffer, buffer);
+      } catch {
+        consola.error(
+          'Failed to parse the private key. Make sure the private key is a valid PEM-formatted key and is not encrypted.',
+        );
+        process.exit(1);
+      }
     }
     // Create the multipart upload
     return await appBundleFilesService.create(

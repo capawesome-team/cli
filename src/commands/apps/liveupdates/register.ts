@@ -227,7 +227,14 @@ export default defineCommand({
         }
 
         // Sign the bundle
-        signature = await createSignature(privateKeyBuffer, fileBuffer);
+        try {
+          signature = await createSignature(privateKeyBuffer, fileBuffer);
+        } catch {
+          consola.error(
+            'Failed to parse the private key. Make sure the private key is a valid PEM-formatted key and is not encrypted.',
+          );
+          process.exit(1);
+        }
       }
     }
 

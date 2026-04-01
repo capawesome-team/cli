@@ -5,6 +5,7 @@ import appCertificatesService from '@/services/app-certificates.js';
 import appEnvironmentsService from '@/services/app-environments.js';
 import { AppBuildArtifactDto } from '@/types/app-build.js';
 import { unescapeAnsi } from '@/utils/ansi.js';
+import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
@@ -70,6 +71,14 @@ export default defineCommand({
         .describe(
           'The type of build. For iOS, supported values are `simulator`, `development`, `ad-hoc`, `app-store`, and `enterprise`. For Android, supported values are `debug` and `release`. For Web, no type is required.',
         ),
+      variable: z
+        .array(z.string())
+        .optional()
+        .describe('Ad hoc environment variable in key=value format. Can be specified multiple times.'),
+      variableFile: z
+        .string()
+        .optional()
+        .describe('Path to a file containing ad hoc environment variables in .env format.'),
       zip: z
         .union([z.boolean(), z.string()])
         .optional()
@@ -244,6 +253,19 @@ export default defineCommand({
       }
     }
 
+    // Parse ad hoc environment variables from inline and file
+    const variablesMap = new Map<string, string>();
+    if (options.variableFile) {
+      const fileContent = await fs.readFile(options.variableFile, 'utf-8');
+      const fileVariables = parseKeyValuePairs(fileContent);
+      fileVariables.forEach((v) => variablesMap.set(v.key, v.value));
+    }
+    if (options.variable) {
+      const inlineVariables = parseKeyValuePairs(options.variable.join('\n'));
+      inlineVariables.forEach((v) => variablesMap.set(v.key, v.value));
+    }
+    const adHocEnvironmentVariables = variablesMap.size > 0 ? Object.fromEntries(variablesMap) : undefined;
+
     // Upload source files if path is provided
     let appBuildSourceId: string | undefined;
     if (sourcePath) {
@@ -269,6 +291,7 @@ export default defineCommand({
     // Create the app build
     consola.start('Creating build...');
     const response = await appBuildsService.create({
+      adHocEnvironmentVariables,
       appBuildSourceId,
       appCertificateName: certificate,
       appEnvironmentName: environment,
