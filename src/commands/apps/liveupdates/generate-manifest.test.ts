@@ -1,4 +1,4 @@
-import { fileExistsAtPath } from '@/utils/file.js';
+import { fileExistsAtPath, isDirectory } from '@/utils/file.js';
 import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
 import consola from 'consola';
@@ -16,6 +16,7 @@ vi.mock('@/utils/environment.js', () => ({
 
 describe('apps-liveupdates-generatemanifest', () => {
   const mockFileExistsAtPath = vi.mocked(fileExistsAtPath);
+  const mockIsDirectory = vi.mocked(isDirectory);
   const mockGenerateManifestJson = vi.mocked(generateManifestJson);
   const mockPrompt = vi.mocked(prompt);
   const mockConsola = vi.mocked(consola);
@@ -36,6 +37,7 @@ describe('apps-liveupdates-generatemanifest', () => {
     const options = { path: './dist' };
 
     mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsDirectory.mockResolvedValue(true);
     mockGenerateManifestJson.mockResolvedValue(undefined);
 
     await generateManifestCommand.action(options, undefined);
@@ -50,6 +52,7 @@ describe('apps-liveupdates-generatemanifest', () => {
 
     mockPrompt.mockResolvedValueOnce('./www');
     mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsDirectory.mockResolvedValue(true);
     mockGenerateManifestJson.mockResolvedValue(undefined);
 
     await generateManifestCommand.action(options, undefined);

@@ -1,5 +1,5 @@
 import { isInteractive } from '@/utils/environment.js';
-import { directoryContainsSourceMaps, fileExistsAtPath, isDirectory } from '@/utils/file.js';
+import { directoryContainsSourceMaps, directoryContainsSymlinks, fileExistsAtPath, isDirectory } from '@/utils/file.js';
 import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
 import zip from '@/utils/zip.js';
@@ -71,6 +71,13 @@ export default defineCommand({
       process.exit(1);
     }
 
+    // Check for symlinks
+    const containsSymlinks = await directoryContainsSymlinks(inputPath);
+    if (containsSymlinks) {
+      consola.warn(
+        'Symbolic links were detected in the specified path. Symbolic links are skipped during bundling.',
+      );
+    }
     // Check for source maps
     const containsSourceMaps = await directoryContainsSourceMaps(inputPath);
     if (containsSourceMaps) {
