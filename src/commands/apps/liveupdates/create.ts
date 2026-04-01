@@ -1,7 +1,7 @@
 import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appBuildsService from '@/services/app-builds.js';
-import appDeploymentsService from '@/services/app-deployments.js';
 import appCertificatesService from '@/services/app-certificates.js';
+import appDeploymentsService from '@/services/app-deployments.js';
 import appEnvironmentsService from '@/services/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
 import { waitForBuildCompletion } from '@/utils/build.js';
@@ -37,7 +37,7 @@ export default defineCommand({
       iosMin: z.string().optional().describe('The minimum iOS CFBundleVersion for the live update.'),
       iosMax: z.string().optional().describe('The maximum iOS CFBundleVersion for the live update.'),
       iosEq: z.string().optional().describe('The exact iOS CFBundleVersion for the live update.'),
-      rolloutPercentage: z
+      rolloutPercentage: z.coerce
         .number()
         .int()
         .min(0)
