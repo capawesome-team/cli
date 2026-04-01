@@ -64,6 +64,7 @@ export default defineCommand({
         })
         .optional()
         .describe('The build stack to use for the build process.'),
+      url: z.string().optional().describe('URL to a zip file to use as build source.'),
       type: z
         .string()
         .optional()
@@ -87,7 +88,7 @@ export default defineCommand({
     { y: 'yes' },
   ),
   action: withAuth(async (options) => {
-    let { appId, platform, type, gitRef, environment, certificate, json, stack, path: sourcePath } = options;
+    let { appId, platform, type, gitRef, environment, certificate, json, stack, path: sourcePath, url } = options;
 
     // Validate that detached flag cannot be used with artifact flags
     if (options.detached && (options.apk || options.aab || options.ipa || options.zip)) {
@@ -107,14 +108,28 @@ export default defineCommand({
       process.exit(1);
     }
 
-    // Validate that path and gitRef cannot be used together
+    // Validate that path, url, and gitRef cannot be used together
     if (sourcePath && gitRef) {
       consola.error('The --path and --git-ref flags cannot be used together.');
       process.exit(1);
     }
+    if (url && gitRef) {
+      consola.error('The --url and --git-ref flags cannot be used together.');
+      process.exit(1);
+    }
+    if (url && sourcePath) {
+      consola.error('The --url and --path flags cannot be used together.');
+      process.exit(1);
+    }
+
+    // Validate url if provided
+    if (url) {
+      consola.warn('The --url option is experimental and may change in the future.');
+    }
 
     // Validate path if provided
     if (sourcePath) {
+      consola.warn('The --path option is experimental and may change in the future.');
       const resolvedPath = path.resolve(sourcePath);
       const stat = await fs.stat(resolvedPath).catch(() => null);
       if (!stat || !stat.isDirectory()) {
@@ -160,10 +175,10 @@ export default defineCommand({
       }
     }
 
-    // Prompt for git ref if not provided and no path specified
-    if (!sourcePath && !gitRef) {
+    // Prompt for git ref if not provided and no path or url specified
+    if (!sourcePath && !url && !gitRef) {
       if (!isInteractive()) {
-        consola.error('You must provide a git ref or path when running in non-interactive environment.');
+        consola.error('You must provide a git ref, path, or url when running in non-interactive environment.');
         process.exit(1);
       }
       gitRef = await prompt('Enter the Git reference (branch, tag, or commit SHA):', {
@@ -265,14 +280,22 @@ export default defineCommand({
     }
     const adHocEnvironmentVariables = variablesMap.size > 0 ? Object.fromEntries(variablesMap) : undefined;
 
-    // Upload source files if path is provided
+    // Create build source from URL if provided
     let appBuildSourceId: string | undefined;
+    if (url) {
+      consola.start('Creating build source from URL...');
+      const appBuildSource = await appBuildSourcesService.createFromUrl({ appId, fileUrl: url });
+      appBuildSourceId = appBuildSource.id;
+      consola.success('Build source created successfully.');
+    }
+
+    // Upload source files if path is provided
     if (sourcePath) {
       const resolvedPath = path.resolve(sourcePath);
       consola.start('Zipping source files...');
       const buffer = await zip.zipFolderWithGitignore(resolvedPath);
       consola.start('Uploading source files...');
-      const appBuildSource = await appBuildSourcesService.create(
+      const appBuildSource = await appBuildSourcesService.createFromFile(
         {
           appId,
           fileSizeInBytes: buffer.byteLength,

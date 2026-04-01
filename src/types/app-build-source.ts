@@ -5,5 +5,6 @@ export interface AppBuildSourceDto {
 
 export interface CreateAppBuildSourceDto {
   appId: string;
-  fileSizeInBytes: number;
+  fileSizeInBytes?: number;
+  fileUrl?: string;
 }

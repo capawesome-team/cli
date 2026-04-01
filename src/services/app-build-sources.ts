@@ -5,10 +5,11 @@ import httpClient, { HttpClient } from '@/utils/http-client.js';
 import FormData from 'form-data';
 
 export interface AppBuildSourcesService {
-  create(
+  createFromFile(
     dto: CreateAppBuildSourceDto & { buffer: Buffer; name: string },
     onProgress?: (currentPart: number, totalParts: number) => void,
   ): Promise<AppBuildSourceDto>;
+  createFromUrl(dto: { appId: string; fileUrl: string }): Promise<AppBuildSourceDto>;
 }
 
 class AppBuildSourcesServiceImpl implements AppBuildSourcesService {
@@ -18,7 +19,7 @@ class AppBuildSourcesServiceImpl implements AppBuildSourcesService {
     this.httpClient = httpClient;
   }
 
-  async create(
+  async createFromFile(
     dto: CreateAppBuildSourceDto & { buffer: Buffer; name: string },
     onProgress?: (currentPart: number, totalParts: number) => void,
   ): Promise<AppBuildSourceDto> {
@@ -39,6 +40,19 @@ class AppBuildSourcesServiceImpl implements AppBuildSourcesService {
         name: dto.name,
       },
       onProgress,
+    );
+    return response.data;
+  }
+
+  async createFromUrl(dto: { appId: string; fileUrl: string }): Promise<AppBuildSourceDto> {
+    const response = await this.httpClient.post<AppBuildSourceDto>(
+      `/v1/apps/${dto.appId}/build-sources`,
+      { fileUrl: dto.fileUrl },
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
+      },
     );
     return response.data;
   }
