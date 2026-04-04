@@ -80,21 +80,28 @@ export const parseGitRemoteUrl = (remoteUrl: string): GitRemoteInfo => {
     };
   }
 
-  // HTTPS: https://{host}/{owner}[/{subgroup}]/{repo}.git
-  const httpsMatch = remoteUrl.match(/https?:\/\/([^/]+)\/([^/]+)(?:\/([^/]+))?\/([^/]+?)(?:\.git)?$/);
-  if (httpsMatch && httpsMatch[1] && httpsMatch[2] && httpsMatch[4]) {
-    const hostname = httpsMatch[1];
-    const provider = HOSTNAME_TO_PROVIDER[hostname];
-    if (!provider) {
-      throw new Error(`Unsupported git provider for hostname "${hostname}".`);
+  // HTTPS: https://[user@]{host}/{owner}[/{subgroup}]/{repo}.git
+  try {
+    const url = new URL(remoteUrl);
+    if (url.protocol === 'http:' || url.protocol === 'https:') {
+      const hostname = url.hostname;
+      const provider = HOSTNAME_TO_PROVIDER[hostname];
+      if (!provider) {
+        throw new Error(`Unsupported git provider for hostname "${hostname}".`);
+      }
+      const pathSegments = url.pathname.split('/').filter(Boolean);
+      const repositorySlug = pathSegments.pop()?.replace(/\.git$/, '');
+      const ownerSlug = pathSegments.shift();
+      const projectSlug = pathSegments.length > 0 ? pathSegments.join('/') : undefined;
+      if (ownerSlug && repositorySlug) {
+        return { ownerSlug, provider, repositorySlug, projectSlug };
+      }
     }
-    return {
-      ownerSlug: httpsMatch[2],
-      provider,
-      repositorySlug: httpsMatch[4],
-      projectSlug: httpsMatch[3],
-    };
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith('Unsupported git provider')) {
+      throw error;
+    }
   }
 
-  throw new Error(`Could not parse git remote URL: "${remoteUrl}".`);
+  throw new Error('Could not parse git remote URL.');
 };

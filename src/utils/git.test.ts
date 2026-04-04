@@ -124,13 +124,28 @@ describe('parseGitRemoteUrl', () => {
     });
   });
 
+  it('should parse GitHub HTTPS URL with credentials', () => {
+    const result = parseGitRemoteUrl('https://x-access-token:ghp_secret123@github.com/capawesome-team/cli.git');
+    expect(result).toEqual({
+      ownerSlug: 'capawesome-team',
+      provider: 'github',
+      repositorySlug: 'cli',
+    });
+  });
+
   it('should throw for unsupported hostname', () => {
     expect(() => parseGitRemoteUrl('https://example.com/owner/repo.git')).toThrow(
       'Unsupported git provider for hostname "example.com".',
     );
   });
 
+  it('should not leak credentials in error messages', () => {
+    expect(() => parseGitRemoteUrl('https://token@example.com/owner/repo.git')).toThrow(
+      'Unsupported git provider for hostname "example.com".',
+    );
+  });
+
   it('should throw for unparseable URL', () => {
-    expect(() => parseGitRemoteUrl('not-a-url')).toThrow('Could not parse git remote URL: "not-a-url".');
+    expect(() => parseGitRemoteUrl('not-a-url')).toThrow('Could not parse git remote URL.');
   });
 });
