@@ -59,18 +59,20 @@ describe('parseGitRemoteUrl', () => {
   it('should parse GitLab HTTPS URL with subgroup', () => {
     const result = parseGitRemoteUrl('https://gitlab.com/my-group/my-subgroup/my-repo.git');
     expect(result).toEqual({
-      ownerSlug: 'my-group/my-subgroup',
+      ownerSlug: 'my-group',
       provider: 'gitlab',
       repositorySlug: 'my-repo',
+      projectSlug: 'my-subgroup',
     });
   });
 
   it('should parse GitLab SSH URL with subgroup', () => {
     const result = parseGitRemoteUrl('git@gitlab.com:my-group/my-subgroup/my-repo.git');
     expect(result).toEqual({
-      ownerSlug: 'my-group/my-subgroup',
+      ownerSlug: 'my-group',
       provider: 'gitlab',
       repositorySlug: 'my-repo',
+      projectSlug: 'my-subgroup',
     });
   });
 

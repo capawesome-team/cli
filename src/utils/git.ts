@@ -65,8 +65,8 @@ export const parseGitRemoteUrl = (remoteUrl: string): GitRemoteInfo => {
   }
 
   // SSH: git@{host}:{owner}[/{subgroup}]/{repo}.git
-  const sshMatch = remoteUrl.match(/git@([^:]+):(.+)\/([^/]+?)(?:\.git)?$/);
-  if (sshMatch && sshMatch[1] && sshMatch[2] && sshMatch[3]) {
+  const sshMatch = remoteUrl.match(/git@([^:]+):([^/]+)(?:\/([^/]+))?\/([^/]+?)(?:\.git)?$/);
+  if (sshMatch && sshMatch[1] && sshMatch[2] && sshMatch[4]) {
     const hostname = sshMatch[1];
     const provider = HOSTNAME_TO_PROVIDER[hostname];
     if (!provider) {
@@ -75,13 +75,14 @@ export const parseGitRemoteUrl = (remoteUrl: string): GitRemoteInfo => {
     return {
       ownerSlug: sshMatch[2],
       provider,
-      repositorySlug: sshMatch[3],
+      repositorySlug: sshMatch[4],
+      projectSlug: sshMatch[3],
     };
   }
 
   // HTTPS: https://{host}/{owner}[/{subgroup}]/{repo}.git
-  const httpsMatch = remoteUrl.match(/https?:\/\/([^/]+)\/(.+)\/([^/]+?)(?:\.git)?$/);
-  if (httpsMatch && httpsMatch[1] && httpsMatch[2] && httpsMatch[3]) {
+  const httpsMatch = remoteUrl.match(/https?:\/\/([^/]+)\/([^/]+)(?:\/([^/]+))?\/([^/]+?)(?:\.git)?$/);
+  if (httpsMatch && httpsMatch[1] && httpsMatch[2] && httpsMatch[4]) {
     const hostname = httpsMatch[1];
     const provider = HOSTNAME_TO_PROVIDER[hostname];
     if (!provider) {
@@ -90,7 +91,8 @@ export const parseGitRemoteUrl = (remoteUrl: string): GitRemoteInfo => {
     return {
       ownerSlug: httpsMatch[2],
       provider,
-      repositorySlug: httpsMatch[3],
+      repositorySlug: httpsMatch[4],
+      projectSlug: httpsMatch[3],
     };
   }
 
