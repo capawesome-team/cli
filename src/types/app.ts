@@ -29,6 +29,11 @@ export interface LinkAppRepositoryDto {
   projectSlug?: string;
 }
 
+export interface TransferAppDto {
+  appId: string;
+  organizationId: string;
+}
+
 export interface UnlinkAppRepositoryDto {
   appId: string;
 }

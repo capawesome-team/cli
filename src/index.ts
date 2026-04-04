@@ -25,6 +25,7 @@ const config = defineConfig({
     'apps:create': await import('@/commands/apps/create.js').then((mod) => mod.default),
     'apps:delete': await import('@/commands/apps/delete.js').then((mod) => mod.default),
     'apps:link': await import('@/commands/apps/link.js').then((mod) => mod.default),
+    'apps:transfer': await import('@/commands/apps/transfer.js').then((mod) => mod.default),
     'apps:unlink': await import('@/commands/apps/unlink.js').then((mod) => mod.default),
     'apps:builds:cancel': await import('@/commands/apps/builds/cancel.js').then((mod) => mod.default),
     'apps:builds:create': await import('@/commands/apps/builds/create.js').then((mod) => mod.default),
