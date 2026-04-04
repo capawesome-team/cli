@@ -21,7 +21,19 @@ export interface FindOneAppDto {
   appId: string;
 }
 
+export interface LinkAppRepositoryDto {
+  appId: string;
+  ownerSlug: string;
+  provider: string;
+  repositorySlug: string;
+  projectSlug?: string;
+}
+
 export interface TransferAppDto {
   appId: string;
   organizationId: string;
+}
+
+export interface UnlinkAppRepositoryDto {
+  appId: string;
 }

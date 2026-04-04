@@ -1,5 +1,14 @@
 import authorizationService from '@/services/authorization-service.js';
-import { AppDto, CreateAppDto, DeleteAppDto, FindAllAppsDto, FindOneAppDto, TransferAppDto } from '@/types/app.js';
+import {
+  AppDto,
+  CreateAppDto,
+  DeleteAppDto,
+  FindAllAppsDto,
+  FindOneAppDto,
+  LinkAppRepositoryDto,
+  TransferAppDto,
+  UnlinkAppRepositoryDto,
+} from '@/types/app.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
 
 export interface AppsService {
@@ -7,7 +16,9 @@ export interface AppsService {
   delete(dto: DeleteAppDto): Promise<void>;
   findAll(dto: FindAllAppsDto): Promise<AppDto[]>;
   findOne(dto: FindOneAppDto): Promise<AppDto>;
+  linkRepository(dto: LinkAppRepositoryDto): Promise<AppDto>;
   transfer(dto: TransferAppDto): Promise<AppDto>;
+  unlinkRepository(dto: UnlinkAppRepositoryDto): Promise<void>;
 }
 
 class AppsServiceImpl implements AppsService {
@@ -57,6 +68,17 @@ class AppsServiceImpl implements AppsService {
     });
     return response.data;
   }
+
+  async linkRepository(dto: LinkAppRepositoryDto): Promise<AppDto> {
+    const { appId, ...bodyData } = dto;
+    const response = await this.httpClient.put<AppDto>(`/v1/apps/${appId}/repository`, bodyData, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+      },
+    });
+    return response.data;
+  }
+
   async transfer(dto: TransferAppDto): Promise<AppDto> {
     const { appId, ...bodyData } = dto;
     const response = await this.httpClient.post<AppDto>(`/v1/apps/${appId}/transfer`, bodyData, {
@@ -65,6 +87,14 @@ class AppsServiceImpl implements AppsService {
       },
     });
     return response.data;
+  }
+
+  async unlinkRepository(dto: UnlinkAppRepositoryDto): Promise<void> {
+    await this.httpClient.delete(`/v1/apps/${dto.appId}/repository`, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+      },
+    });
   }
 }
 
