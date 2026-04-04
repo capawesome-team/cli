@@ -63,6 +63,25 @@ describe('apps-transfer', () => {
     expect(mockConsola.success).toHaveBeenCalledWith('App transferred successfully.');
   });
 
+  it('should skip confirmation prompt when --yes is provided', async () => {
+    const appId = 'app-123';
+    const organizationId = 'org-456';
+    const testToken = 'test-token';
+
+    const options = { appId, organizationId, yes: true };
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/transfer`, { organizationId })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
+
+    await transferAppCommand.action(options, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    expect(mockPrompt).not.toHaveBeenCalled();
+    expect(mockConsola.success).toHaveBeenCalledWith('App transferred successfully.');
+  });
+
   it('should not transfer app when confirmation is declined', async () => {
     const appId = 'app-123';
     const organizationId = 'org-456';

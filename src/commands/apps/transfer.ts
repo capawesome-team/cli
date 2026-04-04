@@ -24,7 +24,9 @@ export default defineCommand({
         consola.error('You must provide the app ID when running in non-interactive environment.');
         process.exit(1);
       }
-      const sourceOrganizationId = await promptOrganizationSelection();
+      const sourceOrganizationId = await promptOrganizationSelection({
+        message: 'Which organization does the app belong to?',
+      });
       appId = await promptAppSelection(sourceOrganizationId);
     }
     if (!organizationId) {
@@ -32,7 +34,9 @@ export default defineCommand({
         consola.error('You must provide the organization ID when running in non-interactive environment.');
         process.exit(1);
       }
-      organizationId = await promptOrganizationSelection();
+      organizationId = await promptOrganizationSelection({
+        message: 'Which organization do you want to transfer the app to?',
+      });
     }
     if (!options.yes && isInteractive()) {
       const confirmed = await prompt('Are you sure you want to transfer this app?', {
