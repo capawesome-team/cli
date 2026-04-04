@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.7.0](https://github.com/capawesome-team/cli/compare/v4.6.0...v4.7.0) (2026-04-04)
+
+
+### Features
+
+* **apps:builds:create:** support ad hoc environment variables ([#134](https://github.com/capawesome-team/cli/issues/134)) ([80c962a](https://github.com/capawesome-team/cli/commit/80c962abbc7548d32a7c0782860632117817d62b))
+* **apps:certificates:** add `--type` option to `get` and `delete` commands ([#135](https://github.com/capawesome-team/cli/issues/135)) ([b9bdc51](https://github.com/capawesome-team/cli/commit/b9bdc5190a7a19b82589876cc798a30a83a4c5f2))
+* **apps:certificates:** deprecate `--type` option ([#130](https://github.com/capawesome-team/cli/issues/130)) ([c53b766](https://github.com/capawesome-team/cli/commit/c53b76697189e40c9b96f8ad679e058775c23cd9))
+* **apps:devices:** support multiple `--device-id` flags for `forcechannel` and `unforcechannel` ([#132](https://github.com/capawesome-team/cli/issues/132)) ([f61b812](https://github.com/capawesome-team/cli/commit/f61b8126d862eb44c1c1989692e823fdb95b0635))
+* **apps:liveupdates:** add `apps:liveupdates:create` command ([#133](https://github.com/capawesome-team/cli/issues/133)) ([244c0b0](https://github.com/capawesome-team/cli/commit/244c0b0f785548083c555453c63941584135bc17))
+* **apps:liveupdates:** add source map detection and warning ([f90427c](https://github.com/capawesome-team/cli/commit/f90427c0f1d9a691f609f481c4b098c51f6adb1f))
+* **apps:liveupdates:** support multiple `--channel` options in `create` command ([#140](https://github.com/capawesome-team/cli/issues/140)) ([12df3ca](https://github.com/capawesome-team/cli/commit/12df3ca100cb53196064ca18c3f5970b7326b1a2))
+* **apps:** add `--path` and `--url` options ([#131](https://github.com/capawesome-team/cli/issues/131)) ([8ae803e](https://github.com/capawesome-team/cli/commit/8ae803e38b74634be3eb32333aca072f722c1bf4))
+* **apps:** add `apps:link` and `apps:unlink` commands ([#141](https://github.com/capawesome-team/cli/issues/141)) ([e37e2fe](https://github.com/capawesome-team/cli/commit/e37e2fe8c8d80845e92379a7f859564f78725052))
+* **apps:** add `apps:transfer` command ([#142](https://github.com/capawesome-team/cli/issues/142)) ([b6f6b57](https://github.com/capawesome-team/cli/commit/b6f6b57943075ac3ab04d52a9a2d62deda85482e))
+
+
+### Bug Fixes
+
+* **apps:liveupdates:** improve error message for invalid private keys ([#138](https://github.com/capawesome-team/cli/issues/138)) ([7752df3](https://github.com/capawesome-team/cli/commit/7752df3fc94f61555d07f7e2e9488d51fca0ae9b))
+* **apps:liveupdates:** skip symlinks and validate directory path in live update commands ([#139](https://github.com/capawesome-team/cli/issues/139)) ([e1ad835](https://github.com/capawesome-team/cli/commit/e1ad83592ea0e6fdf21ea888f39b5dce66a63e29))
+* **login:** trim authorization token to prevent invalid header characters ([#137](https://github.com/capawesome-team/cli/issues/137)) ([d49d410](https://github.com/capawesome-team/cli/commit/d49d4104c4392d32bfc0fb351e5837a74e02b6b3))
+* **utils:** use error instead of warn for canceled build status ([ef3ab54](https://github.com/capawesome-team/cli/commit/ef3ab540416553f71047a0400a6af4e28da32568))
+
 ## [4.6.0](https://github.com/capawesome-team/cli/compare/v4.5.0...v4.6.0) (2026-03-18)
 
 
