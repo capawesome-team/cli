@@ -44,10 +44,9 @@ export default defineCommand({
       });
     }
     if (shouldLink) {
-      await (await import('@/commands/apps/link.js').then((mod) => mod.default)).action(
-        { appId: response.id },
-        undefined,
-      );
+      await (
+        await import('@/commands/apps/link.js').then((mod) => mod.default)
+      ).action({ appId: response.id }, undefined);
     }
   }),
 });
