@@ -64,8 +64,8 @@ export const parseGitRemoteUrl = (remoteUrl: string): GitRemoteInfo => {
     };
   }
 
-  // SSH: git@{host}:{owner}/{repo}.git
-  const sshMatch = remoteUrl.match(/git@([^:]+):([^/]+)\/([^/]+?)(?:\.git)?$/);
+  // SSH: git@{host}:{owner}[/{subgroup}]/{repo}.git
+  const sshMatch = remoteUrl.match(/git@([^:]+):(.+)\/([^/]+?)(?:\.git)?$/);
   if (sshMatch && sshMatch[1] && sshMatch[2] && sshMatch[3]) {
     const hostname = sshMatch[1];
     const provider = HOSTNAME_TO_PROVIDER[hostname];
@@ -79,8 +79,8 @@ export const parseGitRemoteUrl = (remoteUrl: string): GitRemoteInfo => {
     };
   }
 
-  // HTTPS: https://{host}/{owner}/{repo}.git
-  const httpsMatch = remoteUrl.match(/https?:\/\/([^/]+)\/([^/]+)\/([^/]+?)(?:\.git)?$/);
+  // HTTPS: https://{host}/{owner}[/{subgroup}]/{repo}.git
+  const httpsMatch = remoteUrl.match(/https?:\/\/([^/]+)\/(.+)\/([^/]+?)(?:\.git)?$/);
   if (httpsMatch && httpsMatch[1] && httpsMatch[2] && httpsMatch[3]) {
     const hostname = httpsMatch[1];
     const provider = HOSTNAME_TO_PROVIDER[hostname];

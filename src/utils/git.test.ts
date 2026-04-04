@@ -56,6 +56,24 @@ describe('parseGitRemoteUrl', () => {
     });
   });
 
+  it('should parse GitLab HTTPS URL with subgroup', () => {
+    const result = parseGitRemoteUrl('https://gitlab.com/my-group/my-subgroup/my-repo.git');
+    expect(result).toEqual({
+      ownerSlug: 'my-group/my-subgroup',
+      provider: 'gitlab',
+      repositorySlug: 'my-repo',
+    });
+  });
+
+  it('should parse GitLab SSH URL with subgroup', () => {
+    const result = parseGitRemoteUrl('git@gitlab.com:my-group/my-subgroup/my-repo.git');
+    expect(result).toEqual({
+      ownerSlug: 'my-group/my-subgroup',
+      provider: 'gitlab',
+      repositorySlug: 'my-repo',
+    });
+  });
+
   it('should parse Bitbucket HTTPS URL', () => {
     const result = parseGitRemoteUrl('https://bitbucket.org/my-team/my-repo.git');
     expect(result).toEqual({
