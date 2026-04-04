@@ -20,3 +20,8 @@ export interface FindAllAppsDto {
 export interface FindOneAppDto {
   appId: string;
 }
+
+export interface TransferAppDto {
+  appId: string;
+  organizationId: string;
+}
