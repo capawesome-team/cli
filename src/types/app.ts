@@ -20,3 +20,15 @@ export interface FindAllAppsDto {
 export interface FindOneAppDto {
   appId: string;
 }
+
+export interface LinkAppRepositoryDto {
+  appId: string;
+  ownerSlug: string;
+  provider: string;
+  repositorySlug: string;
+  projectSlug?: string;
+}
+
+export interface UnlinkAppRepositoryDto {
+  appId: string;
+}
