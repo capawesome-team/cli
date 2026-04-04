@@ -10,7 +10,10 @@ export const prompt: typeof consola.prompt = async (message, options) => {
   return response;
 };
 
-export const promptOrganizationSelection = async (options?: { allowCreate?: boolean }): Promise<string> => {
+export const promptOrganizationSelection = async (options?: {
+  allowCreate?: boolean;
+  message?: string;
+}): Promise<string> => {
   const organizationsService = await import('@/services/organizations.js').then((mod) => mod.default);
   let organizations = await organizationsService.findAll();
   if (organizations.length === 0) {
@@ -31,7 +34,7 @@ export const promptOrganizationSelection = async (options?: { allowCreate?: bool
     }
   }
   // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-  const organizationId = await prompt('Which organization do you want to use?', {
+  const organizationId = await prompt(options?.message ?? 'Which organization do you want to use?', {
     type: 'select',
     options: organizations.map((organization) => ({ label: organization.name, value: organization.id })),
   });
