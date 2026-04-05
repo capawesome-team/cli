@@ -12,7 +12,9 @@ export default defineCommand({
     z.object({
       name: z.string().optional().describe('Name of the app.'),
       organizationId: z.string().optional().describe('ID of the organization to create the app in.'),
+      yes: z.boolean().optional().describe('Skip all confirmation prompts.'),
     }),
+    { y: 'yes' },
   ),
   action: withAuth(async (options, args) => {
     let { name, organizationId } = options;
@@ -34,5 +36,17 @@ export default defineCommand({
     const response = await appsService.create({ name, organizationId });
     consola.info(`App ID: ${response.id}`);
     consola.success('App created successfully.');
+
+    let shouldLink = false;
+    if (!options.yes && isInteractive()) {
+      shouldLink = await prompt('Do you want to connect a git repository?', {
+        type: 'confirm',
+      });
+    }
+    if (shouldLink) {
+      await (
+        await import('@/commands/apps/link.js').then((mod) => mod.default)
+      ).action({ appId: response.id }, undefined);
+    }
   }),
 });
