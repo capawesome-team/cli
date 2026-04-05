@@ -14,9 +14,9 @@ export default defineCommand({
       organizationId: z.string().optional().describe('ID of the organization to create the app in.'),
       yes: z.boolean().optional().describe('Skip all confirmation prompts.'),
     }),
+    { y: 'yes' },
   ),
   action: withAuth(async (options, args) => {
-    const { yes } = options;
     let { name, organizationId } = options;
 
     if (!organizationId) {
@@ -38,7 +38,7 @@ export default defineCommand({
     consola.success('App created successfully.');
 
     let shouldLink = false;
-    if (!yes && isInteractive()) {
+    if (!options.yes && isInteractive()) {
       shouldLink = await prompt('Do you want to connect a git repository?', {
         type: 'confirm',
       });
