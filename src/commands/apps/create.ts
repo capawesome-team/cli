@@ -1,3 +1,4 @@
+import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appsService from '@/services/apps.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
@@ -36,6 +37,7 @@ export default defineCommand({
     }
     const response = await appsService.create({ name, organizationId });
     consola.info(`App ID: ${response.id}`);
+    consola.info(`App URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${response.id}`);
     consola.success('App created successfully.');
 
     let shouldLink = options.link ?? false;
