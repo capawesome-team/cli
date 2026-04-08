@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.8.0](https://github.com/capawesome-team/cli/compare/v4.7.0...v4.8.0) (2026-04-08)
+
+
+### Features
+
+* **apps:** add `--json` option to `apps:create` ([#147](https://github.com/capawesome-team/cli/issues/147)) ([3573d60](https://github.com/capawesome-team/cli/commit/3573d6021574111e12a6758d212b41002a357ae8))
+* **apps:** add `--link` option to `apps:create` ([#145](https://github.com/capawesome-team/cli/issues/145)) ([c9e38b8](https://github.com/capawesome-team/cli/commit/c9e38b8e3e360bc856cbff4bf66b68fadedd3b04))
+* **apps:** add prompt to connect git repository after app creation ([#143](https://github.com/capawesome-team/cli/issues/143)) ([3427e6d](https://github.com/capawesome-team/cli/commit/3427e6da277fa61902dac5b9045c433535188142))
+* **apps:** print app URL after `apps:create` ([#146](https://github.com/capawesome-team/cli/issues/146)) ([ed7e04a](https://github.com/capawesome-team/cli/commit/ed7e04a5b379187d8c69856d180256f246931571))
+* **error:** add `UserError` class to skip user errors in Sentry ([#144](https://github.com/capawesome-team/cli/issues/144)) ([f7728d0](https://github.com/capawesome-team/cli/commit/f7728d0849cf4883c761de5bfd673eb5c3c37409))
+
 ## [4.7.0](https://github.com/capawesome-team/cli/compare/v4.6.0...v4.7.0) (2026-04-04)
 
 
