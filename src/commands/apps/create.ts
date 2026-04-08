@@ -10,6 +10,7 @@ export default defineCommand({
   description: 'Create a new app.',
   options: defineOptions(
     z.object({
+      link: z.boolean().optional().describe('Connect the created app to the local git repository.'),
       name: z.string().optional().describe('Name of the app.'),
       organizationId: z.string().optional().describe('ID of the organization to create the app in.'),
       yes: z.boolean().optional().describe('Skip all confirmation prompts.'),
@@ -37,8 +38,8 @@ export default defineCommand({
     consola.info(`App ID: ${response.id}`);
     consola.success('App created successfully.');
 
-    let shouldLink = false;
-    if (!options.yes && isInteractive()) {
+    let shouldLink = options.link ?? false;
+    if (!shouldLink && !options.yes && isInteractive()) {
       shouldLink = await prompt('Do you want to connect a git repository?', {
         type: 'confirm',
       });
