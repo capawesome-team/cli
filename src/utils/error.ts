@@ -1,6 +1,13 @@
 import { AxiosError } from 'axios';
 import { ZodError } from 'zod';
 
+export class UserError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'UserError';
+  }
+}
+
 export const getMessageFromUnknownError = (error: unknown): string => {
   let message = 'An unknown error has occurred.';
   if (error instanceof AxiosError) {

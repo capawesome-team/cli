@@ -1,5 +1,7 @@
 import { execSync } from 'child_process';
 
+import { UserError } from '@/utils/error.js';
+
 export interface GitRemoteInfo {
   ownerSlug: string;
   provider: string;
@@ -24,7 +26,7 @@ const getGitRemoteUrl = (): string => {
   try {
     return execSync('git remote get-url origin', { encoding: 'utf-8' }).trim();
   } catch {
-    throw new Error(
+    throw new UserError(
       'Could not read the git remote URL. Make sure you are inside a git repository with an origin remote.',
     );
   }
@@ -70,7 +72,7 @@ export const parseGitRemoteUrl = (remoteUrl: string): GitRemoteInfo => {
     const hostname = sshMatch[1];
     const provider = HOSTNAME_TO_PROVIDER[hostname];
     if (!provider) {
-      throw new Error(`Unsupported git provider for hostname "${hostname}".`);
+      throw new UserError(`Unsupported git provider for hostname "${hostname}".`);
     }
     return {
       ownerSlug: sshMatch[2],
@@ -87,7 +89,7 @@ export const parseGitRemoteUrl = (remoteUrl: string): GitRemoteInfo => {
       const hostname = url.hostname;
       const provider = HOSTNAME_TO_PROVIDER[hostname];
       if (!provider) {
-        throw new Error(`Unsupported git provider for hostname "${hostname}".`);
+        throw new UserError(`Unsupported git provider for hostname "${hostname}".`);
       }
       const pathSegments = url.pathname.split('/').filter(Boolean);
       const repositorySlug = pathSegments.pop()?.replace(/\.git$/, '');
@@ -98,10 +100,10 @@ export const parseGitRemoteUrl = (remoteUrl: string): GitRemoteInfo => {
       }
     }
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith('Unsupported git provider')) {
+    if (error instanceof UserError) {
       throw error;
     }
   }
 
-  throw new Error('Could not parse git remote URL.');
+  throw new UserError('Could not parse git remote URL.');
 };
