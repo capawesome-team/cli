@@ -300,12 +300,13 @@ export default defineCommand({
     // Upload source files if path is provided
     if (sourcePath) {
       const resolvedPath = path.resolve(sourcePath);
+      const sourcePathIsDirectory = await isDirectory(resolvedPath);
       let buffer: Buffer;
-      if (zip.isZipped(resolvedPath)) {
-        buffer = await createBufferFromPath(resolvedPath);
-      } else {
+      if (sourcePathIsDirectory) {
         consola.start('Zipping source files...');
         buffer = await zip.zipFolderWithGitignore(resolvedPath);
+      } else {
+        buffer = await createBufferFromPath(resolvedPath);
       }
       consola.start('Uploading source files...');
       const appBuildSource = await appBuildSourcesService.createFromFile(
