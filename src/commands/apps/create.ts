@@ -11,6 +11,7 @@ export default defineCommand({
   description: 'Create a new app.',
   options: defineOptions(
     z.object({
+      json: z.boolean().optional().describe('Output in JSON format.'),
       link: z.boolean().optional().describe('Connect the created app to the local git repository.'),
       name: z.string().optional().describe('Name of the app.'),
       organizationId: z.string().optional().describe('ID of the organization to create the app in.'),
@@ -19,7 +20,7 @@ export default defineCommand({
     { y: 'yes' },
   ),
   action: withAuth(async (options, args) => {
-    let { name, organizationId } = options;
+    let { json, name, organizationId } = options;
 
     if (!organizationId) {
       if (!isInteractive()) {
@@ -36,12 +37,14 @@ export default defineCommand({
       name = await prompt('Enter the name of the app:', { type: 'text' });
     }
     const response = await appsService.create({ name, organizationId });
-    consola.info(`App ID: ${response.id}`);
-    consola.info(`App URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${response.id}`);
-    consola.success('App created successfully.');
+    if (!json) {
+      consola.info(`App ID: ${response.id}`);
+      consola.info(`App URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${response.id}`);
+      consola.success('App created successfully.');
+    }
 
     let shouldLink = options.link ?? false;
-    if (!shouldLink && !options.yes && isInteractive()) {
+    if (!shouldLink && !options.yes && !json && isInteractive()) {
       shouldLink = await prompt('Do you want to connect a git repository?', {
         type: 'confirm',
       });
@@ -50,6 +53,10 @@ export default defineCommand({
       await (
         await import('@/commands/apps/link.js').then((mod) => mod.default)
       ).action({ appId: response.id }, undefined);
+    }
+
+    if (json) {
+      console.log(JSON.stringify({ id: response.id }, null, 2));
     }
   }),
 });
