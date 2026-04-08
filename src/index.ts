@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import configService from '@/services/config.js';
 import updateService from '@/services/update.js';
-import { getMessageFromUnknownError } from '@/utils/error.js';
+import { getMessageFromUnknownError, UserError } from '@/utils/error.js';
 import { defineConfig, processConfig, ZliError } from '@robingenz/zli';
 import * as Sentry from '@sentry/node';
 import { AxiosError } from 'axios';
@@ -84,16 +84,20 @@ const config = defineConfig({
 });
 
 const captureException = async (error: unknown) => {
+  // Ignore failed HTTP requests
+  if (error instanceof AxiosError) {
+    return;
+  }
+  // Ignore expected user errors
+  if (error instanceof UserError) {
+    return;
+  }
   // Ignore errors from the CLI itself (e.g. "No command found.")
   if (error instanceof ZliError) {
     return;
   }
   // Ignore validation errors
   if (error instanceof ZodError) {
-    return;
-  }
-  // Ignore failed HTTP requests
-  if (error instanceof AxiosError) {
     return;
   }
   const environment = await configService.getValueForKey('ENVIRONMENT');
