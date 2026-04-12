@@ -38,7 +38,9 @@ const getErrorMessageFromAxiosError = (error: AxiosError): string => {
     message = 'The service is currently unavailable. Please try again later.';
   } else if ((error.response?.data as any)?.message) {
     message = (error.response?.data as any)?.message;
-  } else if ((error.response?.data as any)?.error?.issues[0]?.message) {
+  } else if (Array.isArray((error.response?.data as any)?.error) && (error.response?.data as any).error[0]?.message) {
+    message = (error.response?.data as any).error[0].message;
+  } else if ((error.response?.data as any)?.error?.issues?.[0]?.message) {
     message = (error.response?.data as any).error.issues[0].message;
   } else if (error.response?.data && typeof error.response?.data === 'string') {
     message = error.response.data;
