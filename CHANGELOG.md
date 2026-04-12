@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.8.1](https://github.com/capawesome-team/cli/compare/v4.8.0...v4.8.1) (2026-04-12)
+
+
+### Bug Fixes
+
+* **apps:** validate file count before zipping in `apps:builds:create` ([#149](https://github.com/capawesome-team/cli/issues/149)) ([75c20f3](https://github.com/capawesome-team/cli/commit/75c20f3716097c23f1698d000f04646fd93201a1))
+* **deps:** update `axios` to version 1.15.0 ([9f3a801](https://github.com/capawesome-team/cli/commit/9f3a8014f4bd468ede3e40add3e98b79bec76634))
+* improve error message handling for Axios v4 errors ([#150](https://github.com/capawesome-team/cli/issues/150)) ([ca7be4b](https://github.com/capawesome-team/cli/commit/ca7be4bcf75c7d6cb78eb39997b0b101e7e3eef7))
+
 ## [4.8.0](https://github.com/capawesome-team/cli/compare/v4.7.0...v4.8.0) (2026-04-08)
 
 
