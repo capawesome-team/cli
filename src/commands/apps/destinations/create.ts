@@ -180,7 +180,9 @@ export default defineCommand({
       // Upload Google service account key file
       const googleServiceAccountKeyFileExists = await fileExistsAtPath(googleServiceAccountKeyFile);
       if (!googleServiceAccountKeyFileExists) {
-        consola.error(`The Google service account key file was not found or is not accessible: ${googleServiceAccountKeyFile}`);
+        consola.error(
+          `The Google service account key file was not found or is not accessible: ${googleServiceAccountKeyFile}`,
+        );
         process.exit(1);
       }
       const buffer = fs.readFileSync(googleServiceAccountKeyFile);
