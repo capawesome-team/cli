@@ -141,7 +141,7 @@ export default defineCommand({
 
     const fileExists = await fileExistsAtPath(file);
     if (!fileExists) {
-      consola.error('The certificate file does not exist.');
+      consola.error(`The certificate file was not found or is not accessible: ${file}`);
       process.exit(1);
     }
     const buffer = fs.readFileSync(file);
@@ -153,7 +153,7 @@ export default defineCommand({
       for (const profilePath of provisioningProfile) {
         const profileExists = await fileExistsAtPath(profilePath);
         if (!profileExists) {
-          consola.error('The provisioning profile file does not exist.');
+          consola.error(`The provisioning profile file was not found or is not accessible: ${profilePath}`);
           process.exit(1);
         }
         const profileBuffer = fs.readFileSync(profilePath);

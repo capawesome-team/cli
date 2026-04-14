@@ -180,7 +180,7 @@ export default defineCommand({
       // Upload Google service account key file
       const googleServiceAccountKeyFileExists = await fileExistsAtPath(googleServiceAccountKeyFile);
       if (!googleServiceAccountKeyFileExists) {
-        consola.error('The Google service account key file does not exist.');
+        consola.error(`The Google service account key file was not found or is not accessible: ${googleServiceAccountKeyFile}`);
         process.exit(1);
       }
       const buffer = fs.readFileSync(googleServiceAccountKeyFile);
@@ -238,7 +238,7 @@ export default defineCommand({
         // Upload Apple API key file
         const appleApiKeyFileExists = await fileExistsAtPath(appleApiKeyFile);
         if (!appleApiKeyFileExists) {
-          consola.error('The Apple API key file does not exist.');
+          consola.error(`The Apple API key file was not found or is not accessible: ${appleApiKeyFile}`);
           process.exit(1);
         }
         const buffer = fs.readFileSync(appleApiKeyFile);
