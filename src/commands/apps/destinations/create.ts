@@ -3,6 +3,7 @@ import appDestinationsService from '@/services/app-destinations.js';
 import appGoogleServiceAccountKeysService from '@/services/app-google-service-account-keys.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
+import { fileExistsAtPath } from '@/utils/file.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
@@ -177,6 +178,13 @@ export default defineCommand({
         }
       }
       // Upload Google service account key file
+      const googleServiceAccountKeyFileExists = await fileExistsAtPath(googleServiceAccountKeyFile);
+      if (!googleServiceAccountKeyFileExists) {
+        consola.error(
+          `The Google service account key file was not found or is not accessible: ${googleServiceAccountKeyFile}`,
+        );
+        process.exit(1);
+      }
       const buffer = fs.readFileSync(googleServiceAccountKeyFile);
       const fileName = path.basename(googleServiceAccountKeyFile);
       const key = await appGoogleServiceAccountKeysService.create({
@@ -230,6 +238,11 @@ export default defineCommand({
           }
         }
         // Upload Apple API key file
+        const appleApiKeyFileExists = await fileExistsAtPath(appleApiKeyFile);
+        if (!appleApiKeyFileExists) {
+          consola.error(`The Apple API key file was not found or is not accessible: ${appleApiKeyFile}`);
+          process.exit(1);
+        }
         const buffer = fs.readFileSync(appleApiKeyFile);
         const fileName = path.basename(appleApiKeyFile);
         const key = await appAppleApiKeysService.create({
