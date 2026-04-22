@@ -8,6 +8,13 @@ export class UserError extends Error {
   }
 }
 
+export const getCodeFromUnknownError = (error: unknown): string | undefined => {
+  if (error instanceof Error && 'code' in error && typeof error.code === 'string') {
+    return error.code;
+  }
+  return undefined;
+};
+
 export const getMessageFromUnknownError = (error: unknown): string => {
   let message = 'An unknown error has occurred.';
   if (error instanceof AxiosError) {
