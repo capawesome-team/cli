@@ -17,7 +17,7 @@ class UserConfigImpl implements UserConfig {
     try {
       return readUser<IUserConfig>({ name: this.file });
     } catch (error) {
-      throw this.toUserErrorIfAccessDenied(error);
+      this.rethrow(error);
     }
   }
 
@@ -25,19 +25,20 @@ class UserConfigImpl implements UserConfig {
     try {
       writeUser<IUserConfig>(config, { name: this.file });
     } catch (error) {
-      throw this.toUserErrorIfAccessDenied(error);
+      this.rethrow(error);
     }
   }
 
-  private toUserErrorIfAccessDenied(error: unknown): unknown {
-    if (getCodeFromUnknownError(error) === 'EACCES') {
+  private rethrow(error: unknown): never {
+    const code = getCodeFromUnknownError(error);
+    if (code === 'EACCES' || code === 'EPERM') {
       const path = error instanceof Error && 'path' in error && typeof error.path === 'string' ? error.path : this.file;
-      return new UserError(
+      throw new UserError(
         `Permission denied accessing ${path}. The file may be owned by another user (e.g. from a previous run with sudo). ` +
           `Try running \`sudo chown $USER ${path}\` or \`rm ${path}\`, then retry.`,
       );
     }
-    return error;
+    throw error;
   }
 }
 
