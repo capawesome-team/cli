@@ -1,3 +1,5 @@
+import { homedir } from 'node:os';
+import { resolve } from 'node:path';
 import { readUser, writeUser } from 'rc9';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UserError } from './error.js';
@@ -36,6 +38,15 @@ describe('userConfig', () => {
         throw error;
       });
       expect(() => userConfig.read()).toThrow(UserError);
+    });
+
+    it('should fall back to the resolved home path when the error has no path', () => {
+      const error = Object.assign(new Error('EACCES'), { code: 'EACCES' });
+      mockReadUser.mockImplementation(() => {
+        throw error;
+      });
+      const expectedPath = resolve(process.env.XDG_CONFIG_HOME || homedir(), '.capawesome');
+      expect(() => userConfig.read()).toThrow(expectedPath);
     });
 
     it('should rethrow non-access errors as-is', () => {

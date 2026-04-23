@@ -1,4 +1,6 @@
 import { getCodeFromUnknownError, UserError } from '@/utils/error.js';
+import { homedir } from 'node:os';
+import { resolve } from 'node:path';
 import { readUser, writeUser } from 'rc9';
 
 export interface IUserConfig {
@@ -32,13 +34,20 @@ class UserConfigImpl implements UserConfig {
   private rethrow(error: unknown): never {
     const code = getCodeFromUnknownError(error);
     if (code === 'EACCES' || code === 'EPERM') {
-      const path = error instanceof Error && 'path' in error && typeof error.path === 'string' ? error.path : this.file;
+      const path =
+        error instanceof Error && 'path' in error && typeof error.path === 'string'
+          ? error.path
+          : this.getResolvedPath();
       throw new UserError(
         `Permission denied accessing ${path}. The file may be owned by another user (e.g. from a previous run with sudo). ` +
           `Try running \`sudo chown $USER ${path}\` or \`rm ${path}\`, then retry.`,
       );
     }
     throw error;
+  }
+
+  private getResolvedPath(): string {
+    return resolve(process.env.XDG_CONFIG_HOME || homedir(), this.file);
   }
 }
 
