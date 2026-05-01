@@ -6,3 +6,12 @@ export interface OrganizationDto {
 export interface CreateOrganizationDto {
   name: string;
 }
+
+export interface FindAllOrganizationsDto {
+  limit?: number;
+  offset?: number;
+}
+
+export interface FindOneOrganizationDto {
+  organizationId: string;
+}

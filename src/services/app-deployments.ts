@@ -33,11 +33,20 @@ class AppDeploymentsServiceImpl implements AppDeploymentsService {
 
   async findAll(dto: FindAllAppDeploymentsDto): Promise<AppDeploymentDto[]> {
     const params: Record<string, string> = {};
+    if (dto.appBuildId) {
+      params.appBuildId = dto.appBuildId;
+    }
     if (dto.appChannelId) {
       params.appChannelId = dto.appChannelId;
     }
-    if (dto.limit) {
+    if (dto.appDestinationId) {
+      params.appDestinationId = dto.appDestinationId;
+    }
+    if (dto.limit !== undefined) {
       params.limit = dto.limit.toString();
+    }
+    if (dto.offset !== undefined) {
+      params.offset = dto.offset.toString();
     }
     if (dto.relations) {
       params.relations = dto.relations;
