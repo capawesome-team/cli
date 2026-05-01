@@ -3,9 +3,12 @@ export interface AppDto {
   name: string;
 }
 
+export type AppType = 'android' | 'capacitor' | 'cordova' | 'ios';
+
 export interface CreateAppDto {
   name: string;
   organizationId: string;
+  type: AppType;
 }
 
 export interface DeleteAppDto {
