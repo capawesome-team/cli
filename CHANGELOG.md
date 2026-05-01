@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.9.0](https://github.com/capawesome-team/cli/compare/v4.8.3...v4.9.0) (2026-05-01)
+
+
+### Features
+
+* add `get`/`list` commands for apps, builds, deployments, and organizations ([#156](https://github.com/capawesome-team/cli/issues/156)) ([32363d4](https://github.com/capawesome-team/cli/commit/32363d4f7d44bc0d7036f9062a1d74c01e15dfed))
+* **apps:** add `--type` option to `apps:create` ([#154](https://github.com/capawesome-team/cli/issues/154)) ([c23c877](https://github.com/capawesome-team/cli/commit/c23c8775359de0841ce57904dc4c75b9420fad04))
+
+
+### Bug Fixes
+
+* surface actionable error when config file is not writable ([#153](https://github.com/capawesome-team/cli/issues/153)) ([ab8ed4c](https://github.com/capawesome-team/cli/commit/ab8ed4cb33ab02c5e5db62140ca3501b02e263b4))
+
 ## [4.8.3](https://github.com/capawesome-team/cli/compare/v4.8.2...v4.8.3) (2026-04-20)
 
 
