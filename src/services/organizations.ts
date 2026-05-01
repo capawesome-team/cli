@@ -1,10 +1,16 @@
-import { CreateOrganizationDto, OrganizationDto } from '@/types/organization.js';
+import {
+  CreateOrganizationDto,
+  FindAllOrganizationsDto,
+  FindOneOrganizationDto,
+  OrganizationDto,
+} from '@/types/organization.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
 import authorizationService from '@/services/authorization-service.js';
 
 export interface OrganizationsService {
   create(dto: CreateOrganizationDto): Promise<OrganizationDto>;
-  findAll(): Promise<OrganizationDto[]>;
+  findAll(dto?: FindAllOrganizationsDto): Promise<OrganizationDto[]>;
+  findOne(dto: FindOneOrganizationDto): Promise<OrganizationDto>;
 }
 
 class OrganizationsServiceImpl implements OrganizationsService {
@@ -23,8 +29,25 @@ class OrganizationsServiceImpl implements OrganizationsService {
     return response.data;
   }
 
-  async findAll(): Promise<OrganizationDto[]> {
+  async findAll(dto?: FindAllOrganizationsDto): Promise<OrganizationDto[]> {
+    const params: Record<string, string> = {};
+    if (dto?.limit !== undefined) {
+      params.limit = dto.limit.toString();
+    }
+    if (dto?.offset !== undefined) {
+      params.offset = dto.offset.toString();
+    }
     const response = await this.httpClient.get<OrganizationDto[]>(`/v1/organizations`, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+      },
+      params,
+    });
+    return response.data;
+  }
+
+  async findOne(dto: FindOneOrganizationDto): Promise<OrganizationDto> {
+    const response = await this.httpClient.get<OrganizationDto>(`/v1/organizations/${dto.organizationId}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },

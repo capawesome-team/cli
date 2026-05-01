@@ -30,8 +30,11 @@ export interface FindOneAppDeploymentDto {
 
 export interface FindAllAppDeploymentsDto {
   appId: string;
+  appBuildId?: string;
   appChannelId?: string;
+  appDestinationId?: string;
   limit?: number;
+  offset?: number;
   relations?: string;
 }
 

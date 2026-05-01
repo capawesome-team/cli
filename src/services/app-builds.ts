@@ -41,11 +41,20 @@ class AppBuildsServiceImpl implements AppBuildsService {
 
   async findAll(dto: FindAllAppBuildsDto): Promise<AppBuildDto[]> {
     const params: Record<string, string> = {};
-    if (dto.platform) {
-      params.platform = dto.platform;
+    if (dto.limit !== undefined) {
+      params.limit = dto.limit.toString();
     }
     if (dto.numberAsString) {
       params.numberAsString = dto.numberAsString;
+    }
+    if (dto.offset !== undefined) {
+      params.offset = dto.offset.toString();
+    }
+    if (dto.platform) {
+      params.platform = dto.platform;
+    }
+    if (dto.relations) {
+      params.relations = dto.relations;
     }
     const response = await this.httpClient.get<AppBuildDto[]>(`/v1/apps/${dto.appId}/builds`, {
       headers: {
