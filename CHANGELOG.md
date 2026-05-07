@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.9.1](https://github.com/capawesome-team/cli/compare/v4.9.0...v4.9.1) (2026-05-07)
+
 ## [4.9.0](https://github.com/capawesome-team/cli/compare/v4.8.3...v4.9.0) (2026-05-01)
 
 
