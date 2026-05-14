@@ -2,7 +2,7 @@ import appEnvironmentsService from '@/services/app-environments.js';
 import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
-import { fileExistsAtPath } from '@/utils/file.js';
+import { isReadable } from '@/utils/file.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
@@ -59,9 +59,9 @@ export default defineCommand({
     // Parse variables from inline and file
     const variablesMap = new Map<string, string>();
     if (variableFile) {
-      const fileExists = await fileExistsAtPath(variableFile);
-      if (!fileExists) {
-        consola.error(`The variable file was not found or is not accessible: ${variableFile}`);
+      const variableFileReadable = await isReadable(variableFile);
+      if (!variableFileReadable) {
+        consola.error(`The variable file does not exist or is not accessible: ${variableFile}`);
         process.exit(1);
       }
       const fileContent = await fs.promises.readFile(variableFile, 'utf-8');
@@ -77,9 +77,9 @@ export default defineCommand({
     // Parse secrets from inline and file
     const secretsMap = new Map<string, string>();
     if (secretFile) {
-      const fileExists = await fileExistsAtPath(secretFile);
-      if (!fileExists) {
-        consola.error(`The secret file was not found or is not accessible: ${secretFile}`);
+      const secretFileReadable = await isReadable(secretFile);
+      if (!secretFileReadable) {
+        consola.error(`The secret file does not exist or is not accessible: ${secretFile}`);
         process.exit(1);
       }
       const fileContent = await fs.promises.readFile(secretFile, 'utf-8');

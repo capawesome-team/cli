@@ -1,7 +1,7 @@
 import { DEFAULT_API_BASE_URL } from '@/config/consts.js';
 import authorizationService from '@/services/authorization-service.js';
 import { isInteractive } from '@/utils/environment.js';
-import { fileExistsAtPath, getFilesInDirectoryAndSubdirectories, isDirectory } from '@/utils/file.js';
+import { isReadable, getFilesInDirectoryAndSubdirectories, isDirectory } from '@/utils/file.js';
 import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
 import nock from 'nock';
@@ -25,7 +25,7 @@ vi.mock('consola');
 describe('apps-liveupdates-upload', () => {
   const mockUserConfig = vi.mocked(userConfig);
   const mockAuthorizationService = vi.mocked(authorizationService);
-  const mockFileExistsAtPath = vi.mocked(fileExistsAtPath);
+  const mockIsReadable = vi.mocked(isReadable);
   const mockGetFilesInDirectoryAndSubdirectories = vi.mocked(getFilesInDirectoryAndSubdirectories);
   const mockIsDirectory = vi.mocked(isDirectory);
   const mockIsInteractive = vi.mocked(isInteractive);
@@ -68,11 +68,11 @@ describe('apps-liveupdates-upload', () => {
 
     const options = { appId, path: nonexistentPath, artifactType: 'zip' as const, rollout: 1 };
 
-    mockFileExistsAtPath.mockResolvedValue(false);
+    mockIsReadable.mockResolvedValue(false);
 
     await expect(uploadCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
-    expect(mockConsola.error).toHaveBeenCalledWith('The path does not exist.');
+    expect(mockConsola.error).toHaveBeenCalledWith(`The path does not exist or is not accessible: ${nonexistentPath}`);
   });
 
   it('should validate manifest artifact type requires directory', async () => {
@@ -86,7 +86,7 @@ describe('apps-liveupdates-upload', () => {
       rollout: 1,
     };
 
-    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsReadable.mockResolvedValue(true);
     mockIsDirectory.mockResolvedValue(false);
 
     // Mock zip utility to return true so path validation passes
@@ -114,7 +114,7 @@ describe('apps-liveupdates-upload', () => {
       rollout: 1,
     };
 
-    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsReadable.mockResolvedValue(true);
     mockIsDirectory.mockResolvedValue(true);
     mockGetFilesInDirectoryAndSubdirectories.mockResolvedValue([
       { href: 'index.html', mimeType: 'text/html', name: 'index.html', path: 'index.html' },
@@ -179,7 +179,7 @@ describe('apps-liveupdates-upload', () => {
       gitRef,
     };
 
-    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsReadable.mockResolvedValue(true);
     mockIsDirectory.mockResolvedValue(true);
     mockGetFilesInDirectoryAndSubdirectories.mockResolvedValue([
       { href: 'index.html', mimeType: 'text/html', name: 'index.html', path: 'index.html' },
@@ -246,7 +246,7 @@ describe('apps-liveupdates-upload', () => {
       rollout: 1,
     };
 
-    mockFileExistsAtPath.mockImplementation((path: string) => {
+    mockIsReadable.mockImplementation((path: string) => {
       if (path === privateKeyPath) return Promise.resolve(true);
       if (path === bundlePath) return Promise.resolve(true);
       return Promise.resolve(false);
@@ -314,7 +314,7 @@ describe('apps-liveupdates-upload', () => {
       rollout: 1,
     };
 
-    mockFileExistsAtPath.mockImplementation((path: string) => {
+    mockIsReadable.mockImplementation((path: string) => {
       if (path === privateKeyPath) return Promise.resolve(false);
       return Promise.resolve(true);
     });
@@ -329,7 +329,9 @@ describe('apps-liveupdates-upload', () => {
 
     await expect(uploadCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
-    expect(mockConsola.error).toHaveBeenCalledWith('Private key file not found.');
+    expect(mockConsola.error).toHaveBeenCalledWith(
+      `The private key file does not exist or is not accessible: ${privateKeyPath}`,
+    );
   });
 
   it('should handle invalid private key format', async () => {
@@ -344,7 +346,7 @@ describe('apps-liveupdates-upload', () => {
       rollout: 1,
     };
 
-    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsReadable.mockResolvedValue(true);
     mockIsDirectory.mockResolvedValue(false);
 
     // Mock zip utility to pass path validation
@@ -375,7 +377,7 @@ describe('apps-liveupdates-upload', () => {
       rollout: 1,
     };
 
-    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsReadable.mockResolvedValue(true);
     mockIsDirectory.mockResolvedValue(true);
     mockGetFilesInDirectoryAndSubdirectories.mockResolvedValue([
       { href: 'index.html', mimeType: 'text/html', name: 'index.html', path: 'index.html' },

@@ -1,6 +1,6 @@
 import { DEFAULT_API_BASE_URL } from '@/config/consts.js';
 import authorizationService from '@/services/authorization-service.js';
-import { fileExistsAtPath } from '@/utils/file.js';
+import { isReadable } from '@/utils/file.js';
 import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
 import nock from 'nock';
@@ -22,7 +22,7 @@ vi.mock('consola');
 describe('apps-liveupdates-register', () => {
   const mockUserConfig = vi.mocked(userConfig);
   const mockAuthorizationService = vi.mocked(authorizationService);
-  const mockFileExistsAtPath = vi.mocked(fileExistsAtPath);
+  const mockIsReadable = vi.mocked(isReadable);
   const mockConsola = vi.mocked(consola);
 
   beforeEach(() => {
@@ -148,7 +148,7 @@ describe('apps-liveupdates-register', () => {
       yes: true,
     };
 
-    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsReadable.mockResolvedValue(true);
 
     // Mock utility functions
     const mockZip = await import('@/utils/zip.js');
@@ -203,7 +203,7 @@ describe('apps-liveupdates-register', () => {
       yes: true,
     };
 
-    mockFileExistsAtPath.mockImplementation((path: string) => {
+    mockIsReadable.mockImplementation((path: string) => {
       if (path === privateKeyPath) return Promise.resolve(true);
       if (path === bundlePath) return Promise.resolve(true);
       return Promise.resolve(false);
@@ -270,7 +270,7 @@ describe('apps-liveupdates-register', () => {
       yes: true,
     };
 
-    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsReadable.mockResolvedValue(true);
 
     // Mock utility functions
     const mockZip = await import('@/utils/zip.js');
@@ -326,7 +326,7 @@ describe('apps-liveupdates-register', () => {
       rolloutPercentage: 1,
     };
 
-    mockFileExistsAtPath.mockImplementation((path: string) => {
+    mockIsReadable.mockImplementation((path: string) => {
       if (path === privateKeyPath) return Promise.resolve(false);
       return Promise.resolve(true);
     });
@@ -339,7 +339,9 @@ describe('apps-liveupdates-register', () => {
 
     await expect(registerCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
-    expect(mockConsola.error).toHaveBeenCalledWith('Private key file not found.');
+    expect(mockConsola.error).toHaveBeenCalledWith(
+      `The private key file does not exist or is not accessible: ${privateKeyPath}`,
+    );
   });
 
   it('should validate path must be a zip file', async () => {
@@ -354,7 +356,7 @@ describe('apps-liveupdates-register', () => {
       rolloutPercentage: 1,
     };
 
-    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsReadable.mockResolvedValue(true);
 
     // Mock zip utility to return false
     const mockZip = await import('@/utils/zip.js');

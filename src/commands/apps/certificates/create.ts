@@ -2,7 +2,7 @@ import appCertificatesService from '@/services/app-certificates.js';
 import appProvisioningProfilesService from '@/services/app-provisioning-profiles.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
-import { fileExistsAtPath } from '@/utils/file.js';
+import { isReadable } from '@/utils/file.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
@@ -139,9 +139,9 @@ export default defineCommand({
       }
     }
 
-    const fileExists = await fileExistsAtPath(file);
-    if (!fileExists) {
-      consola.error(`The certificate file was not found or is not accessible: ${file}`);
+    const fileReadable = await isReadable(file);
+    if (!fileReadable) {
+      consola.error(`The certificate file does not exist or is not accessible: ${file}`);
       process.exit(1);
     }
     const buffer = fs.readFileSync(file);
@@ -151,9 +151,9 @@ export default defineCommand({
     const provisioningProfileIds: string[] = [];
     if (provisioningProfile && provisioningProfile.length > 0) {
       for (const profilePath of provisioningProfile) {
-        const profileExists = await fileExistsAtPath(profilePath);
-        if (!profileExists) {
-          consola.error(`The provisioning profile file was not found or is not accessible: ${profilePath}`);
+        const profileReadable = await isReadable(profilePath);
+        if (!profileReadable) {
+          consola.error(`The provisioning profile file does not exist or is not accessible: ${profilePath}`);
           process.exit(1);
         }
         const profileBuffer = fs.readFileSync(profilePath);
