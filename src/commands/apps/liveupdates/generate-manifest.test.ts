@@ -1,4 +1,4 @@
-import { directoryContainsSymlinks, fileExistsAtPath, isDirectory } from '@/utils/file.js';
+import { directoryContainsSymlinks, isReadable, isDirectory } from '@/utils/file.js';
 import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
 import consola from 'consola';
@@ -15,7 +15,7 @@ vi.mock('@/utils/environment.js', () => ({
 }));
 
 describe('apps-liveupdates-generatemanifest', () => {
-  const mockFileExistsAtPath = vi.mocked(fileExistsAtPath);
+  const mockIsReadable = vi.mocked(isReadable);
   const mockIsDirectory = vi.mocked(isDirectory);
   const mockDirectoryContainsSymlinks = vi.mocked(directoryContainsSymlinks);
   const mockGenerateManifestJson = vi.mocked(generateManifestJson);
@@ -37,13 +37,13 @@ describe('apps-liveupdates-generatemanifest', () => {
   it('should generate manifest with provided path', async () => {
     const options = { path: './dist' };
 
-    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsReadable.mockResolvedValue(true);
     mockIsDirectory.mockResolvedValue(true);
     mockGenerateManifestJson.mockResolvedValue(undefined);
 
     await generateManifestCommand.action(options, undefined);
 
-    expect(mockFileExistsAtPath).toHaveBeenCalledWith('./dist');
+    expect(mockIsReadable).toHaveBeenCalledWith('./dist');
     expect(mockGenerateManifestJson).toHaveBeenCalledWith('./dist');
     expect(mockConsola.success).toHaveBeenCalledWith('Manifest file generated.');
   });
@@ -52,7 +52,7 @@ describe('apps-liveupdates-generatemanifest', () => {
     const options = {};
 
     mockPrompt.mockResolvedValueOnce('./www');
-    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsReadable.mockResolvedValue(true);
     mockIsDirectory.mockResolvedValue(true);
     mockGenerateManifestJson.mockResolvedValue(undefined);
 
@@ -61,7 +61,7 @@ describe('apps-liveupdates-generatemanifest', () => {
     expect(mockPrompt).toHaveBeenCalledWith('Enter the path to the web assets folder (e.g., `dist` or `www`):', {
       type: 'text',
     });
-    expect(mockFileExistsAtPath).toHaveBeenCalledWith('./www');
+    expect(mockIsReadable).toHaveBeenCalledWith('./www');
     expect(mockGenerateManifestJson).toHaveBeenCalledWith('./www');
     expect(mockConsola.success).toHaveBeenCalledWith('Manifest file generated.');
   });
@@ -79,17 +79,17 @@ describe('apps-liveupdates-generatemanifest', () => {
   it('should handle nonexistent path', async () => {
     const options = { path: './nonexistent' };
 
-    mockFileExistsAtPath.mockResolvedValue(false);
+    mockIsReadable.mockResolvedValue(false);
 
     await expect(generateManifestCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
-    expect(mockConsola.error).toHaveBeenCalledWith('The path does not exist.');
+    expect(mockConsola.error).toHaveBeenCalledWith('The path does not exist or is not accessible: ./nonexistent');
   });
 
   it('should handle non-directory path', async () => {
     const options = { path: './file.txt' };
 
-    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsReadable.mockResolvedValue(true);
     mockIsDirectory.mockResolvedValue(false);
 
     await expect(generateManifestCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
@@ -100,7 +100,7 @@ describe('apps-liveupdates-generatemanifest', () => {
   it('should warn when symlinks are detected', async () => {
     const options = { path: './dist' };
 
-    mockFileExistsAtPath.mockResolvedValue(true);
+    mockIsReadable.mockResolvedValue(true);
     mockIsDirectory.mockResolvedValue(true);
     mockDirectoryContainsSymlinks.mockResolvedValue(true);
     mockGenerateManifestJson.mockResolvedValue(undefined);

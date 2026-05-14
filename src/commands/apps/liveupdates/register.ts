@@ -5,7 +5,7 @@ import { withAuth } from '@/utils/auth.js';
 import { parseCustomProperties } from '@/utils/custom-properties.js';
 import { createBufferFromPath, createBufferFromString, isPrivateKeyContent } from '@/utils/buffer.js';
 import { isInteractive } from '@/utils/environment.js';
-import { fileExistsAtPath } from '@/utils/file.js';
+import { isReadable } from '@/utils/file.js';
 import { createHash } from '@/utils/hash.js';
 import { formatPrivateKey } from '@/utils/private-key.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
@@ -192,9 +192,9 @@ export default defineCommand({
       }
 
       // Check if the path exists
-      const pathExists = await fileExistsAtPath(path);
-      if (!pathExists) {
-        consola.error(`The path does not exist.`);
+      const pathReadable = await isReadable(path);
+      if (!pathReadable) {
+        consola.error(`The path does not exist or is not accessible: ${path}`);
         process.exit(1);
       }
 
@@ -213,14 +213,14 @@ export default defineCommand({
           privateKeyBuffer = createBufferFromString(formattedPrivateKey);
         } else if (privateKey.endsWith('.pem')) {
           // Handle file path
-          const fileExists = await fileExistsAtPath(privateKey);
-          if (fileExists) {
+          const privateKeyReadable = await isReadable(privateKey);
+          if (privateKeyReadable) {
             const keyBuffer = await createBufferFromPath(privateKey);
             const keyContent = keyBuffer.toString('utf8');
             const formattedPrivateKey = formatPrivateKey(keyContent);
             privateKeyBuffer = createBufferFromString(formattedPrivateKey);
           } else {
-            consola.error('Private key file not found.');
+            consola.error(`The private key file does not exist or is not accessible: ${privateKey}`);
             process.exit(1);
           }
         } else {

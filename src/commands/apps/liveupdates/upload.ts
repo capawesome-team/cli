@@ -15,7 +15,7 @@ import { isInteractive } from '@/utils/environment.js';
 import {
   directoryContainsSourceMaps,
   directoryContainsSymlinks,
-  fileExistsAtPath,
+  isReadable,
   getFilesInDirectoryAndSubdirectories,
   isDirectory,
 } from '@/utils/file.js';
@@ -180,9 +180,9 @@ export default defineCommand({
     }
 
     // Validate the provided path
-    const pathExists = await fileExistsAtPath(path);
-    if (!pathExists) {
-      consola.error(`The path does not exist.`);
+    const pathReadable = await isReadable(path);
+    if (!pathReadable) {
+      consola.error(`The path does not exist or is not accessible: ${path}`);
       process.exit(1);
     }
 
@@ -267,14 +267,14 @@ export default defineCommand({
         privateKeyBuffer = createBufferFromString(formattedPrivateKey);
       } else if (privateKey.endsWith('.pem')) {
         // Handle file path
-        const fileExists = await fileExistsAtPath(privateKey);
-        if (fileExists) {
+        const privateKeyReadable = await isReadable(privateKey);
+        if (privateKeyReadable) {
           const keyBuffer = await createBufferFromPath(privateKey);
           const keyContent = keyBuffer.toString('utf8');
           const formattedPrivateKey = formatPrivateKey(keyContent);
           privateKeyBuffer = createBufferFromString(formattedPrivateKey);
         } else {
-          consola.error('Private key file not found.');
+          consola.error(`The private key file does not exist or is not accessible: ${privateKey}`);
           process.exit(1);
         }
       } else {

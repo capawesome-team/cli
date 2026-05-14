@@ -8,7 +8,7 @@ import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
 import { parseCustomProperties } from '@/utils/custom-properties.js';
 import { isInteractive } from '@/utils/environment.js';
-import { fileExistsAtPath } from '@/utils/file.js';
+import { isReadable } from '@/utils/file.js';
 import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import zip from '@/utils/zip.js';
@@ -201,9 +201,9 @@ export default defineCommand({
     // Parse ad hoc environment variables from inline and file
     const variablesMap = new Map<string, string>();
     if (options.variableFile) {
-      const fileExists = await fileExistsAtPath(options.variableFile);
-      if (!fileExists) {
-        consola.error(`The variable file was not found or is not accessible: ${options.variableFile}`);
+      const variableFileReadable = await isReadable(options.variableFile);
+      if (!variableFileReadable) {
+        consola.error(`The variable file does not exist or is not accessible: ${options.variableFile}`);
         process.exit(1);
       }
       const fileContent = await fs.readFile(options.variableFile, 'utf-8');

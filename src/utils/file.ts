@@ -50,9 +50,9 @@ export const directoryContainsSourceMaps = async (path: string): Promise<boolean
   return files.some((file) => file.name.endsWith('.js.map') || file.name.endsWith('.css.map'));
 };
 
-export const fileExistsAtPath = async (path: string): Promise<boolean> => {
+export const isReadable = async (path: string): Promise<boolean> => {
   return new Promise((resolve) => {
-    fs.access(path, fs.constants.F_OK, (err) => {
+    fs.access(path, fs.constants.R_OK, (err) => {
       resolve(!err);
     });
   });

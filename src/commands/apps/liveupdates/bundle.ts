@@ -1,5 +1,5 @@
 import { isInteractive } from '@/utils/environment.js';
-import { directoryContainsSourceMaps, directoryContainsSymlinks, fileExistsAtPath, isDirectory } from '@/utils/file.js';
+import { directoryContainsSourceMaps, directoryContainsSymlinks, isReadable, isDirectory } from '@/utils/file.js';
 import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
 import zip from '@/utils/zip.js';
@@ -50,9 +50,9 @@ export default defineCommand({
     inputPath = pathModule.resolve(inputPath);
 
     // Validate input path exists
-    const inputExists = await fileExistsAtPath(inputPath);
-    if (!inputExists) {
-      consola.error(`Input path does not exist: ${inputPath}`);
+    const inputPathReadable = await isReadable(inputPath);
+    if (!inputPathReadable) {
+      consola.error(`The input path does not exist or is not accessible: ${inputPath}`);
       process.exit(1);
     }
 
@@ -65,9 +65,9 @@ export default defineCommand({
 
     // Validate directory contains index.html
     const indexHtmlPath = pathModule.join(inputPath, 'index.html');
-    const hasIndexHtml = await fileExistsAtPath(indexHtmlPath);
-    if (!hasIndexHtml) {
-      consola.error(`Directory must contain an index.html file: ${inputPath}`);
+    const indexHtmlReadable = await isReadable(indexHtmlPath);
+    if (!indexHtmlReadable) {
+      consola.error(`The index.html file does not exist or is not accessible: ${indexHtmlPath}`);
       process.exit(1);
     }
 
@@ -91,8 +91,8 @@ export default defineCommand({
     outputPath = pathModule.resolve(outputPath);
 
     // 3. Check if output exists and handle overwrite
-    const outputExists = await fileExistsAtPath(outputPath);
-    if (outputExists) {
+    const outputPathReadable = await isReadable(outputPath);
+    if (outputPathReadable) {
       if (!overwrite) {
         if (!isInteractive()) {
           consola.error(
@@ -113,9 +113,9 @@ export default defineCommand({
 
     // Validate parent directory exists
     const outputDir = pathModule.dirname(outputPath);
-    const outputDirExists = await fileExistsAtPath(outputDir);
-    if (!outputDirExists) {
-      consola.error(`Output directory does not exist: ${outputDir}`);
+    const outputDirReadable = await isReadable(outputDir);
+    if (!outputDirReadable) {
+      consola.error(`The output directory does not exist or is not accessible: ${outputDir}`);
       process.exit(1);
     }
 
