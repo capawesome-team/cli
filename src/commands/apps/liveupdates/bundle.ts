@@ -1,5 +1,11 @@
 import { isInteractive } from '@/utils/environment.js';
-import { directoryContainsSourceMaps, directoryContainsSymlinks, isReadable, isDirectory } from '@/utils/file.js';
+import {
+  directoryContainsSourceMaps,
+  directoryContainsSymlinks,
+  isDirectory,
+  isReadable,
+  pathExists,
+} from '@/utils/file.js';
 import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
 import zip from '@/utils/zip.js';
@@ -91,8 +97,8 @@ export default defineCommand({
     outputPath = pathModule.resolve(outputPath);
 
     // 3. Check if output exists and handle overwrite
-    const outputPathReadable = await isReadable(outputPath);
-    if (outputPathReadable) {
+    const outputPathExists = await pathExists(outputPath);
+    if (outputPathExists) {
       if (!overwrite) {
         if (!isInteractive()) {
           consola.error(
@@ -113,9 +119,9 @@ export default defineCommand({
 
     // Validate parent directory exists
     const outputDir = pathModule.dirname(outputPath);
-    const outputDirReadable = await isReadable(outputDir);
-    if (!outputDirReadable) {
-      consola.error(`The output directory does not exist or is not accessible: ${outputDir}`);
+    const outputDirExists = await pathExists(outputDir);
+    if (!outputDirExists) {
+      consola.error(`The output directory does not exist: ${outputDir}`);
       process.exit(1);
     }
 

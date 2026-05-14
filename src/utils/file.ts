@@ -58,6 +58,14 @@ export const isReadable = async (path: string): Promise<boolean> => {
   });
 };
 
+export const pathExists = async (path: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    fs.access(path, fs.constants.F_OK, (err) => {
+      resolve(!err);
+    });
+  });
+};
+
 export const isDirectory = async (path: string): Promise<boolean> => {
   return new Promise((resolve) => {
     fs.lstat(path, (err, stats) => {
