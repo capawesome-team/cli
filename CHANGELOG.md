@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.9.3](https://github.com/capawesome-team/cli/compare/v4.9.2...v4.9.3) (2026-05-14)
+
+
+### Bug Fixes
+
+* **apps:builds:create:** exclude native build artifact directories when zipping source ([#159](https://github.com/capawesome-team/cli/issues/159)) ([4c2a704](https://github.com/capawesome-team/cli/commit/4c2a7048d59d9e966f48d7c05af2e0f2d8d75379))
+* check file read access to surface permission errors ([#158](https://github.com/capawesome-team/cli/issues/158)) ([242189a](https://github.com/capawesome-team/cli/commit/242189a21f19ecbab72a34d8ce13f23824f1a4bf))
+
 ## [4.9.2](https://github.com/capawesome-team/cli/compare/v4.9.1...v4.9.2) (2026-05-13)
 
 ## [4.9.1](https://github.com/capawesome-team/cli/compare/v4.9.0...v4.9.1) (2026-05-07)
