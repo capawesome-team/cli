@@ -22,7 +22,16 @@ class ZipImpl implements Zip {
     const files = await globby(['**/*'], {
       cwd: sourceFolder,
       gitignore: true,
-      ignore: ['.git/**'],
+      ignore: [
+        '.git/**',
+        '**/node_modules/**',
+        '**/ios/DerivedData/**',
+        '**/ios/Pods/**',
+        '**/ios/build/**',
+        '**/android/build/**',
+        '**/android/.gradle/**',
+        '**/android/app/build/**',
+      ],
       dot: true,
     });
     if (files.length > MAX_ZIP_ENTRIES) {
