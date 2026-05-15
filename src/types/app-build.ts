@@ -56,6 +56,9 @@ export interface UpdateAppBuildDto {
 
 export interface FindAllAppBuildsDto {
   appId: string;
+  limit?: number;
   numberAsString?: string;
+  offset?: number;
   platform?: 'android' | 'ios' | 'web';
+  relations?: string;
 }

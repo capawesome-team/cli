@@ -46,10 +46,10 @@ describe('apps-create', () => {
     const appId = 'app-456';
     const testToken = 'test-token';
 
-    const options = { name: appName, organizationId };
+    const options = { name: appName, organizationId, type: 'capacitor' as const };
 
     const scope = nock(DEFAULT_API_BASE_URL)
-      .post(`/v1/apps?organizationId=${organizationId}`, { name: appName })
+      .post(`/v1/apps?organizationId=${organizationId}`, { name: appName, type: 'capacitor' })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(201, { id: appId, name: appName });
 
@@ -66,10 +66,10 @@ describe('apps-create', () => {
     const appId = 'app-456';
     const testToken = 'test-token';
 
-    const options = { name: appName };
+    const options = { name: appName, type: 'capacitor' as const };
 
     const createScope = nock(DEFAULT_API_BASE_URL)
-      .post(`/v1/apps?organizationId=${orgId}`, { name: appName })
+      .post(`/v1/apps?organizationId=${orgId}`, { name: appName, type: 'capacitor' })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(201, { id: appId, name: appName });
 
@@ -88,10 +88,10 @@ describe('apps-create', () => {
     const appId = 'app-456';
     const testToken = 'test-token';
 
-    const options = { organizationId };
+    const options = { organizationId, type: 'capacitor' as const };
 
     const scope = nock(DEFAULT_API_BASE_URL)
-      .post(`/v1/apps?organizationId=${organizationId}`, { name: promptedAppName })
+      .post(`/v1/apps?organizationId=${organizationId}`, { name: promptedAppName, type: 'capacitor' })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(201, { id: appId, name: promptedAppName });
 
@@ -104,7 +104,7 @@ describe('apps-create', () => {
   });
 
   it('should exit when promptOrganizationSelection exits', async () => {
-    const options = { name: 'Test App' };
+    const options = { name: 'Test App', type: 'capacitor' as const };
 
     mockPromptOrganizationSelection.mockImplementation(() => {
       process.exit(1);
@@ -119,10 +119,10 @@ describe('apps-create', () => {
     const organizationId = 'org-123';
     const testToken = 'test-token';
 
-    const options = { name: appName, organizationId };
+    const options = { name: appName, organizationId, type: 'capacitor' as const };
 
     const scope = nock(DEFAULT_API_BASE_URL)
-      .post(`/v1/apps?organizationId=${organizationId}`, { name: appName })
+      .post(`/v1/apps?organizationId=${organizationId}`, { name: appName, type: 'capacitor' })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(400, { message: 'App name already exists' });
 

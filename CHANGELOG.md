@@ -2,6 +2,54 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.9.3](https://github.com/capawesome-team/cli/compare/v4.9.2...v4.9.3) (2026-05-14)
+
+
+### Bug Fixes
+
+* **apps:builds:create:** exclude native build artifact directories when zipping source ([#159](https://github.com/capawesome-team/cli/issues/159)) ([4c2a704](https://github.com/capawesome-team/cli/commit/4c2a7048d59d9e966f48d7c05af2e0f2d8d75379))
+* check file read access to surface permission errors ([#158](https://github.com/capawesome-team/cli/issues/158)) ([242189a](https://github.com/capawesome-team/cli/commit/242189a21f19ecbab72a34d8ce13f23824f1a4bf))
+
+## [4.9.2](https://github.com/capawesome-team/cli/compare/v4.9.1...v4.9.2) (2026-05-13)
+
+## [4.9.1](https://github.com/capawesome-team/cli/compare/v4.9.0...v4.9.1) (2026-05-07)
+
+## [4.9.0](https://github.com/capawesome-team/cli/compare/v4.8.3...v4.9.0) (2026-05-01)
+
+
+### Features
+
+* add `get`/`list` commands for apps, builds, deployments, and organizations ([#156](https://github.com/capawesome-team/cli/issues/156)) ([32363d4](https://github.com/capawesome-team/cli/commit/32363d4f7d44bc0d7036f9062a1d74c01e15dfed))
+* **apps:** add `--type` option to `apps:create` ([#154](https://github.com/capawesome-team/cli/issues/154)) ([c23c877](https://github.com/capawesome-team/cli/commit/c23c8775359de0841ce57904dc4c75b9420fad04))
+
+
+### Bug Fixes
+
+* surface actionable error when config file is not writable ([#153](https://github.com/capawesome-team/cli/issues/153)) ([ab8ed4c](https://github.com/capawesome-team/cli/commit/ab8ed4cb33ab02c5e5db62140ca3501b02e263b4))
+
+## [4.8.3](https://github.com/capawesome-team/cli/compare/v4.8.2...v4.8.3) (2026-04-20)
+
+
+### Bug Fixes
+
+* validate file existence before reading user-provided files ([#152](https://github.com/capawesome-team/cli/issues/152)) ([f95523e](https://github.com/capawesome-team/cli/commit/f95523e63a7731ceb0a8dc97ab47ed1b8831d968))
+
+## [4.8.2](https://github.com/capawesome-team/cli/compare/v4.8.1...v4.8.2) (2026-04-20)
+
+
+### Bug Fixes
+
+* validate file existence before reading in `apps:certificates:create` and `apps:destinations:create` ([#151](https://github.com/capawesome-team/cli/issues/151)) ([5e9e405](https://github.com/capawesome-team/cli/commit/5e9e4055bce3f91026daba576c0c7a97b581c1ae))
+
+## [4.8.1](https://github.com/capawesome-team/cli/compare/v4.8.0...v4.8.1) (2026-04-12)
+
+
+### Bug Fixes
+
+* **apps:** validate file count before zipping in `apps:builds:create` ([#149](https://github.com/capawesome-team/cli/issues/149)) ([75c20f3](https://github.com/capawesome-team/cli/commit/75c20f3716097c23f1698d000f04646fd93201a1))
+* **deps:** update `axios` to version 1.15.0 ([9f3a801](https://github.com/capawesome-team/cli/commit/9f3a8014f4bd468ede3e40add3e98b79bec76634))
+* improve error message handling for Axios v4 errors ([#150](https://github.com/capawesome-team/cli/issues/150)) ([ca7be4b](https://github.com/capawesome-team/cli/commit/ca7be4bcf75c7d6cb78eb39997b0b101e7e3eef7))
+
 ## [4.8.0](https://github.com/capawesome-team/cli/compare/v4.7.0...v4.8.0) (2026-04-08)
 
 

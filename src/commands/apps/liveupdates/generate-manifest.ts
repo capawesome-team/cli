@@ -1,5 +1,5 @@
 import { isInteractive } from '@/utils/environment.js';
-import { directoryContainsSourceMaps, directoryContainsSymlinks, fileExistsAtPath, isDirectory } from '@/utils/file.js';
+import { directoryContainsSourceMaps, directoryContainsSymlinks, isReadable, isDirectory } from '@/utils/file.js';
 import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
@@ -34,9 +34,9 @@ export default defineCommand({
     }
 
     // Check if the path exists
-    const pathExists = await fileExistsAtPath(path);
-    if (!pathExists) {
-      consola.error(`The path does not exist.`);
+    const pathReadable = await isReadable(path);
+    if (!pathReadable) {
+      consola.error(`The path does not exist or is not accessible: ${path}`);
       process.exit(1);
     }
     // Check if the path is a directory

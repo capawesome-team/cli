@@ -15,12 +15,17 @@ export default defineCommand({
       link: z.boolean().optional().describe('Connect the created app to the local git repository.'),
       name: z.string().optional().describe('Name of the app.'),
       organizationId: z.string().optional().describe('ID of the organization to create the app in.'),
+      type: z
+        .enum(['android', 'capacitor', 'cordova', 'ios'])
+        .optional()
+        .describe('Type of the app. Defaults to `capacitor`.'),
       yes: z.boolean().optional().describe('Skip all confirmation prompts.'),
     }),
     { y: 'yes' },
   ),
   action: withAuth(async (options, args) => {
     let { json, name, organizationId } = options;
+    const type = options.type ?? 'capacitor';
 
     if (!organizationId) {
       if (!isInteractive()) {
@@ -36,7 +41,7 @@ export default defineCommand({
       }
       name = await prompt('Enter the name of the app:', { type: 'text' });
     }
-    const response = await appsService.create({ name, organizationId });
+    const response = await appsService.create({ name, organizationId, type });
     if (!json) {
       consola.info(`App ID: ${response.id}`);
       consola.info(`App URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${response.id}`);

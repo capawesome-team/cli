@@ -52,6 +52,9 @@ class AppsServiceImpl implements AppsService {
     if (dto.limit !== undefined) {
       params.append('limit', dto.limit.toString());
     }
+    if (dto.offset !== undefined) {
+      params.append('offset', dto.offset.toString());
+    }
     const response = await this.httpClient.get<AppDto[]>(`/v1/apps?${params.toString()}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,

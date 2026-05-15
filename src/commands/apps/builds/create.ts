@@ -8,7 +8,7 @@ import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
 import { createBufferFromPath } from '@/utils/buffer.js';
 import { isInteractive } from '@/utils/environment.js';
-import { fileExistsAtPath, isDirectory } from '@/utils/file.js';
+import { isDirectory, isReadable, pathExists } from '@/utils/file.js';
 import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import zip from '@/utils/zip.js';
@@ -133,7 +133,7 @@ export default defineCommand({
     if (sourcePath) {
       consola.warn('The --path option is experimental and may change in the future.');
       const resolvedPath = path.resolve(sourcePath);
-      const exists = await fileExistsAtPath(resolvedPath);
+      const exists = await pathExists(resolvedPath);
       if (!exists) {
         consola.error('The --path does not exist.');
         process.exit(1);
@@ -141,7 +141,7 @@ export default defineCommand({
       const pathIsDirectory = await isDirectory(resolvedPath);
       if (pathIsDirectory) {
         const packageJsonPath = path.join(resolvedPath, 'package.json');
-        const packageJsonExists = await fileExistsAtPath(packageJsonPath);
+        const packageJsonExists = await pathExists(packageJsonPath);
         if (!packageJsonExists) {
           consola.error('The directory specified by --path must contain a package.json file.');
           process.exit(1);
@@ -278,6 +278,11 @@ export default defineCommand({
     // Parse ad hoc environment variables from inline and file
     const variablesMap = new Map<string, string>();
     if (options.variableFile) {
+      const variableFileReadable = await isReadable(options.variableFile);
+      if (!variableFileReadable) {
+        consola.error(`The variable file does not exist or is not accessible: ${options.variableFile}`);
+        process.exit(1);
+      }
       const fileContent = await fs.readFile(options.variableFile, 'utf-8');
       const fileVariables = parseKeyValuePairs(fileContent);
       fileVariables.forEach((v) => variablesMap.set(v.key, v.value));
