@@ -38,9 +38,9 @@ export default defineCommand({
         consola.error(`The fingerprint file does not exist: ${absolutePath}`);
         process.exit(1);
       }
+      const content = await fs.readFile(absolutePath, 'utf8');
       let fingerprint: Fingerprint;
       try {
-        const content = await fs.readFile(absolutePath, 'utf8');
         fingerprint = JSON.parse(content) as Fingerprint;
       } catch {
         throw new UserError(`The fingerprint file is not a valid JSON file: ${absolutePath}`);

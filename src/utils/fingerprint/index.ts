@@ -1,6 +1,6 @@
 import { createBufferFromPath } from '@/utils/buffer.js';
 import { UserError } from '@/utils/error.js';
-import { pathExists, isDirectory } from '@/utils/file.js';
+import { isDirectory, pathExists } from '@/utils/file.js';
 import { createHash } from '@/utils/hash.js';
 import pathModule from 'path';
 import { detectAppType } from './app-types.js';
