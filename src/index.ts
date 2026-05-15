@@ -84,6 +84,15 @@ const config = defineConfig({
     'apps:liveupdates:generatemanifest': await import('@/commands/apps/liveupdates/generate-manifest.js').then(
       (mod) => mod.default,
     ),
+    'apps:liveupdates:generatefingerprint': await import('@/commands/apps/liveupdates/generate-fingerprint.js').then(
+      (mod) => mod.default,
+    ),
+    'apps:liveupdates:verifyfingerprint': await import('@/commands/apps/liveupdates/verify-fingerprint.js').then(
+      (mod) => mod.default,
+    ),
+    'apps:liveupdates:comparefingerprints': await import('@/commands/apps/liveupdates/compare-fingerprints.js').then(
+      (mod) => mod.default,
+    ),
     'manifests:generate': await import('@/commands/manifests/generate.js').then((mod) => mod.default),
     'organizations:create': await import('@/commands/organizations/create.js').then((mod) => mod.default),
     'organizations:get': await import('@/commands/organizations/get.js').then((mod) => mod.default),
