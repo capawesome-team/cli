@@ -6,8 +6,9 @@ import appEnvironmentsService from '@/services/app-environments.js';
 import { AppBuildArtifactDto } from '@/types/app-build.js';
 import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
+import { createBufferFromPath } from '@/utils/buffer.js';
 import { isInteractive } from '@/utils/environment.js';
-import { isReadable } from '@/utils/file.js';
+import { isDirectory, isReadable } from '@/utils/file.js';
 import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import zip from '@/utils/zip.js';
@@ -52,7 +53,7 @@ export default defineCommand({
         .optional()
         .describe('Download the generated IPA file (iOS only). Optionally provide a file path.'),
       json: z.boolean().optional().describe('Output in JSON format.'),
-      path: z.string().optional().describe('Path to local source files to upload.'),
+      path: z.string().optional().describe('Path to local source files to upload. Must be a folder or a zip file.'),
       platform: z
         .enum(['ios', 'android', 'web'], {
           message: 'Platform must be either `ios`, `android`, or `web`.',
@@ -132,15 +133,21 @@ export default defineCommand({
     if (sourcePath) {
       consola.warn('The --path option is experimental and may change in the future.');
       const resolvedPath = path.resolve(sourcePath);
-      const stat = await fs.stat(resolvedPath).catch(() => null);
-      if (!stat || !stat.isDirectory()) {
-        consola.error('The --path must point to an existing directory.');
+      const pathReadable = await isReadable(resolvedPath);
+      if (!pathReadable) {
+        consola.error(`The path does not exist or is not accessible: ${resolvedPath}`);
         process.exit(1);
       }
-      const packageJsonPath = path.join(resolvedPath, 'package.json');
-      const packageJsonStat = await fs.stat(packageJsonPath).catch(() => null);
-      if (!packageJsonStat || !packageJsonStat.isFile()) {
-        consola.error('The directory specified by --path must contain a package.json file.');
+      const pathIsDirectory = await isDirectory(resolvedPath);
+      if (pathIsDirectory) {
+        const packageJsonPath = path.join(resolvedPath, 'package.json');
+        const packageJsonReadable = await isReadable(packageJsonPath);
+        if (!packageJsonReadable) {
+          consola.error(`The path must contain a package.json file: ${packageJsonPath}`);
+          process.exit(1);
+        }
+      } else if (!zip.isZipped(resolvedPath)) {
+        consola.error(`The path must be a folder or a zip file: ${resolvedPath}`);
         process.exit(1);
       }
     }
@@ -298,8 +305,14 @@ export default defineCommand({
     // Upload source files if path is provided
     if (sourcePath) {
       const resolvedPath = path.resolve(sourcePath);
-      consola.start('Zipping source files...');
-      const buffer = await zip.zipFolderWithGitignore(resolvedPath);
+      const sourcePathIsDirectory = await isDirectory(resolvedPath);
+      let buffer: Buffer;
+      if (sourcePathIsDirectory) {
+        consola.start('Zipping source files...');
+        buffer = await zip.zipFolderWithGitignore(resolvedPath);
+      } else {
+        buffer = await createBufferFromPath(resolvedPath);
+      }
       consola.start('Uploading source files...');
       const appBuildSource = await appBuildSourcesService.createFromFile(
         {
