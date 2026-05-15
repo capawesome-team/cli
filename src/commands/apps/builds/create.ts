@@ -135,7 +135,7 @@ export default defineCommand({
       const resolvedPath = path.resolve(sourcePath);
       const exists = await pathExists(resolvedPath);
       if (!exists) {
-        consola.error('The --path does not exist.');
+        consola.error(`The path does not exist: ${resolvedPath}`);
         process.exit(1);
       }
       const pathIsDirectory = await isDirectory(resolvedPath);
@@ -143,11 +143,11 @@ export default defineCommand({
         const packageJsonPath = path.join(resolvedPath, 'package.json');
         const packageJsonExists = await pathExists(packageJsonPath);
         if (!packageJsonExists) {
-          consola.error('The directory specified by --path must contain a package.json file.');
+          consola.error(`The path must contain a package.json file: ${packageJsonPath}`);
           process.exit(1);
         }
       } else if (!zip.isZipped(resolvedPath)) {
-        consola.error('The --path must be a folder or a zip file.');
+        consola.error(`The path must be a folder or a zip file: ${resolvedPath}`);
         process.exit(1);
       }
     }
