@@ -8,7 +8,7 @@ import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
 import { createBufferFromPath } from '@/utils/buffer.js';
 import { isInteractive } from '@/utils/environment.js';
-import { isDirectory, isReadable, pathExists } from '@/utils/file.js';
+import { isDirectory, isReadable } from '@/utils/file.js';
 import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import zip from '@/utils/zip.js';
@@ -133,16 +133,16 @@ export default defineCommand({
     if (sourcePath) {
       consola.warn('The --path option is experimental and may change in the future.');
       const resolvedPath = path.resolve(sourcePath);
-      const exists = await pathExists(resolvedPath);
-      if (!exists) {
-        consola.error(`The path does not exist: ${resolvedPath}`);
+      const pathReadable = await isReadable(resolvedPath);
+      if (!pathReadable) {
+        consola.error(`The path does not exist or is not accessible: ${resolvedPath}`);
         process.exit(1);
       }
       const pathIsDirectory = await isDirectory(resolvedPath);
       if (pathIsDirectory) {
         const packageJsonPath = path.join(resolvedPath, 'package.json');
-        const packageJsonExists = await pathExists(packageJsonPath);
-        if (!packageJsonExists) {
+        const packageJsonReadable = await isReadable(packageJsonPath);
+        if (!packageJsonReadable) {
           consola.error(`The path must contain a package.json file: ${packageJsonPath}`);
           process.exit(1);
         }
