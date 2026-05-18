@@ -13,8 +13,16 @@ interface Zip {
 
 class ZipImpl implements Zip {
   async zipFolder(sourceFolder: string): Promise<Buffer> {
+    const files = await globby(['**/*'], {
+      cwd: sourceFolder,
+      dot: true,
+    });
     const zip = new AdmZip();
-    zip.addLocalFolder(sourceFolder);
+    for (const file of files) {
+      const filePath = path.join(sourceFolder, file);
+      const dirName = path.dirname(file);
+      zip.addLocalFile(filePath, dirName === '.' ? '' : dirName);
+    }
     return zip.toBuffer();
   }
 
