@@ -30,9 +30,10 @@ class ZipImpl implements Zip {
 
   async zipFolderWithGitignore(sourceFolder: string): Promise<Buffer> {
     // Do NOT apply the `entry.attr = 0` workaround from `zipFolder` here.
-    // This method zips full project sources for `apps:builds:create`, which
-    // include executables like `gradlew` whose `0755` mode must survive the
-    // round-trip so the server-side build can run them.
+    // This method zips full project sources for server-side builds (callers:
+    // `apps:builds:create`, `apps:liveupdates:create`), which include
+    // executables like `gradlew` whose `0755` mode must survive the round-trip
+    // so the build runner can execute them.
     const files = await globby(['**/*'], {
       cwd: sourceFolder,
       gitignore: true,
