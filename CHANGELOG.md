@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.10.0](https://github.com/capawesome-team/cli/compare/v4.9.3...v4.10.0) (2026-05-18)
+
+
+### Features
+
+* **apps:** support zip files in `apps:builds:create --path` option ([#148](https://github.com/capawesome-team/cli/issues/148)) ([6417f02](https://github.com/capawesome-team/cli/commit/6417f028ff030b08b971d76bf2aaf983663bbb3c))
+
+
+### Bug Fixes
+
+* **apps:liveupdates:** clear zip entry attrs to prevent Android extraction errors ([#163](https://github.com/capawesome-team/cli/issues/163)) ([2636c02](https://github.com/capawesome-team/cli/commit/2636c0260095e0d7e13934d58e7a12e646a3ec43))
+
 ## [4.9.3](https://github.com/capawesome-team/cli/compare/v4.9.2...v4.9.3) (2026-05-14)
 
 
