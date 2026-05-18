@@ -15,10 +15,24 @@ class ZipImpl implements Zip {
   async zipFolder(sourceFolder: string): Promise<Buffer> {
     const zip = new AdmZip();
     zip.addLocalFolder(sourceFolder);
+    // Strip external file attributes from every entry. `addLocalFolder` copies
+    // the source's Unix mode bits onto each entry, so a directory with e.g.
+    // `0500` on a CI checkout ends up in the bundle and makes `zip4j` on
+    // Android fail with "Could not create directory" when extracting children
+    // into that read-only parent. Clearing attrs lets the extractor fall back
+    // to its OS defaults. Mirrors the plugin-side workaround in live-update
+    // 8.2.1+ (`FileHeader.setExternalFileAttributes(null)`).
+    for (const entry of zip.getEntries()) {
+      entry.attr = 0;
+    }
     return zip.toBuffer();
   }
 
   async zipFolderWithGitignore(sourceFolder: string): Promise<Buffer> {
+    // Do NOT apply the `entry.attr = 0` workaround from `zipFolder` here.
+    // This method zips full project sources for `apps:builds:create`, which
+    // include executables like `gradlew` whose `0755` mode must survive the
+    // round-trip so the server-side build can run them.
     const files = await globby(['**/*'], {
       cwd: sourceFolder,
       gitignore: true,
