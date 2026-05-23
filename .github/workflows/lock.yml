@@ -2,7 +2,7 @@ name: Lock old issues and pull requests that are closed
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 permissions:
@@ -17,6 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'capawesome-team/cli'
     steps:
-      - uses: dessant/lock-threads@v3
+      - uses: dessant/lock-threads@v6
         with:
-          issue-inactive-days: '56'
+          issue-inactive-days: "56"
