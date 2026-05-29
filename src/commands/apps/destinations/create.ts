@@ -77,14 +77,14 @@ export default defineCommand({
         process.exit(1);
       }
     }
-    // 3. Derive platform from app type for single-platform apps
+    // Derive platform from app type for single-platform apps
     if (!platform) {
       const app = await appsService.findOne({ appId });
       if (app.type === 'android' || app.type === 'ios') {
         platform = app.type;
       }
     }
-    // 4. Select platform
+    // 3. Select platform
     if (!platform) {
       if (!isInteractive()) {
         consola.error('You must provide the platform when running in non-interactive environment.');
