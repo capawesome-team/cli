@@ -1,6 +1,7 @@
 import appAppleApiKeysService from '@/services/app-apple-api-keys.js';
 import appDestinationsService from '@/services/app-destinations.js';
 import appGoogleServiceAccountKeysService from '@/services/app-google-service-account-keys.js';
+import appsService from '@/services/apps.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { isReadable } from '@/utils/file.js';
@@ -74,6 +75,13 @@ export default defineCommand({
       if (!name) {
         consola.error('You must provide a destination name.');
         process.exit(1);
+      }
+    }
+    // Derive platform from app type for single-platform apps
+    if (!platform) {
+      const app = await appsService.findOne({ appId });
+      if (app.type === 'android' || app.type === 'ios') {
+        platform = app.type;
       }
     }
     // 3. Select platform

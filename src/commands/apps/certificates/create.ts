@@ -1,5 +1,6 @@
 import appCertificatesService from '@/services/app-certificates.js';
 import appProvisioningProfilesService from '@/services/app-provisioning-profiles.js';
+import appsService from '@/services/apps.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { isReadable } from '@/utils/file.js';
@@ -58,6 +59,13 @@ export default defineCommand({
       if (!name) {
         consola.error('You must provide a certificate name.');
         process.exit(1);
+      }
+    }
+    // Derive platform from app type for single-platform apps
+    if (!platform) {
+      const app = await appsService.findOne({ appId });
+      if (app.type === 'android' || app.type === 'ios') {
+        platform = app.type;
       }
     }
     // 3. Select platform

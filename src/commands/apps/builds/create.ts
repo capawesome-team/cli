@@ -3,6 +3,7 @@ import appBuildSourcesService from '@/services/app-build-sources.js';
 import appBuildsService from '@/services/app-builds.js';
 import appCertificatesService from '@/services/app-certificates.js';
 import appEnvironmentsService from '@/services/app-environments.js';
+import appsService from '@/services/apps.js';
 import { AppBuildArtifactDto } from '@/types/app-build.js';
 import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
@@ -160,6 +161,14 @@ export default defineCommand({
       }
       const organizationId = await promptOrganizationSelection({ allowCreate: true });
       appId = await promptAppSelection(organizationId, { allowCreate: true });
+    }
+
+    // Derive platform from app type for single-platform apps
+    if (!platform) {
+      const app = await appsService.findOne({ appId });
+      if (app.type === 'android' || app.type === 'ios') {
+        platform = app.type;
+      }
     }
 
     // Prompt for platform if not provided
