@@ -1,6 +1,7 @@
 export interface AppDto {
   id: string;
   name: string;
+  type: AppType;
 }
 
 export type AppType = 'android' | 'capacitor' | 'cordova' | 'ios';
