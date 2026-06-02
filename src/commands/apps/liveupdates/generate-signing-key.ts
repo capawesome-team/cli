@@ -3,11 +3,20 @@ import consola from 'consola';
 import { promises as fs } from 'fs';
 import pathModule from 'path';
 import { z } from 'zod';
+import { isInteractive } from '@/utils/environment.js';
+import { prompt } from '@/utils/prompt.js';
+
+const APP_TYPES = ['capacitor', 'cordova'] as const;
+type SigningKeyAppType = (typeof APP_TYPES)[number];
 
 export default defineCommand({
   description: 'Generate a new code signing key pair for Live Updates.',
   options: defineOptions(
     z.object({
+      appType: z
+        .enum(APP_TYPES)
+        .optional()
+        .describe('The app type to configure code signing for. Either `capacitor` or `cordova`.'),
       publicKeyPath: z
         .string()
         .optional()
@@ -63,26 +72,16 @@ export default defineCommand({
       consola.log('Private key saved to: ' + absolutePrivateKeyPath);
       consola.log('');
       consola.warn('IMPORTANT: Keep your private key safe and never commit it to version control!');
+
+      const appType = await resolveAppType(options.appType);
+      if (appType) {
+        // Format the public key for JSON output (remove line breaks)
+        const publicKeyForJson = publicKey.replace(/\n/g, '');
+        consola.log('');
+        printSigningKeyConfig(appType, publicKeyForJson);
+      }
+
       consola.log('');
-      consola.log(
-        'To configure code signing in the Capacitor Live Update plugin, add the following to your Capacitor Configuration file:',
-      );
-      consola.log('');
-
-      // Format the public key for JSON output (remove line breaks)
-      const publicKeyForJson = publicKey.replace(/\n/g, '');
-
-      // Print the JSON configuration
-      const config = {
-        plugins: {
-          LiveUpdate: {
-            publicKey: publicKeyForJson,
-          },
-        },
-      };
-
-      consola.log(JSON.stringify(config, null, 2));
-      console.log('');
       consola.success('Code signing key pair generated successfully!');
     } catch (error) {
       consola.error('Failed to generate signing key pair.');
@@ -90,3 +89,55 @@ export default defineCommand({
     }
   },
 });
+
+const resolveAppType = async (appType?: SigningKeyAppType): Promise<SigningKeyAppType | undefined> => {
+  if (appType) {
+    return appType;
+  }
+  if (!isInteractive()) {
+    return undefined;
+  }
+  // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+  return prompt('Which app type do you want to configure code signing for?', {
+    type: 'select',
+    options: [
+      { label: 'Capacitor', value: 'capacitor' },
+      { label: 'Cordova', value: 'cordova' },
+    ],
+  });
+};
+
+const printSigningKeyConfig = (appType: SigningKeyAppType, publicKey: string): void => {
+  if (appType === 'cordova') {
+    const config = {
+      cordova: {
+        plugins: {
+          '@capawesome/cordova-live-update': {
+            PUBLIC_KEY: publicKey,
+          },
+        },
+      },
+    };
+    consola.log(
+      'To configure code signing in the Cordova Live Update plugin, add the following to your `package.json` file:',
+    );
+    consola.log('');
+    consola.log(JSON.stringify(config, null, 2));
+    consola.log('');
+    consola.warn('If the plugin has already been added, you must re-add it for the changes to take effect.');
+    return;
+  }
+
+  const config = {
+    plugins: {
+      LiveUpdate: {
+        publicKey,
+      },
+    },
+  };
+  consola.log(
+    'To configure code signing in the Capacitor Live Update plugin, add the following to your Capacitor configuration file:',
+  );
+  consola.log('');
+  consola.log(JSON.stringify(config, null, 2));
+};
