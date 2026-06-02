@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 import { resolve } from 'path';
 
 export default defineConfig({
@@ -8,6 +8,7 @@ export default defineConfig({
     env: {
       NODE_ENV: 'test',
     },
+    exclude: [...configDefaults.exclude, '**/dist/**'],
   },
   resolve: {
     alias: {
