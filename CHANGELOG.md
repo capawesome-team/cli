@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.11.0](https://github.com/capawesome-team/cli/compare/v4.10.0...v4.11.0) (2026-06-02)
+
+
+### Features
+
+* **apps:** derive platform from app type for single-platform apps ([#165](https://github.com/capawesome-team/cli/issues/165)) ([c14efd6](https://github.com/capawesome-team/cli/commit/c14efd607190c7dc8dbc6f2550fde20bd90faeb4))
+
+
+### Bug Fixes
+
+* hash and sign buffers in chunks to avoid `RangeError: data is too long` ([#164](https://github.com/capawesome-team/cli/issues/164)) ([7c37bcf](https://github.com/capawesome-team/cli/commit/7c37bcfd3bd6d286acdc0674082aea35ec45115b))
+
 ## [4.10.0](https://github.com/capawesome-team/cli/compare/v4.9.3...v4.10.0) (2026-05-18)
 
 
