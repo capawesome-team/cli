@@ -29,3 +29,11 @@ export interface FindOneJobDto {
 export interface UpdateJobDto {
   status: string;
 }
+
+export interface GenerateJobFailureSummaryDto {
+  jobId: string;
+}
+
+export interface JobFailureSummaryDto {
+  summary: string;
+}

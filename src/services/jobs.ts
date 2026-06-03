@@ -1,9 +1,16 @@
 import authorizationService from '@/services/authorization-service.js';
-import { FindOneJobDto, JobDto, UpdateJobDto } from '@/types/job.js';
+import {
+  FindOneJobDto,
+  GenerateJobFailureSummaryDto,
+  JobDto,
+  JobFailureSummaryDto,
+  UpdateJobDto,
+} from '@/types/job.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
 
 export interface JobsService {
   findOne(dto: FindOneJobDto): Promise<JobDto>;
+  generateFailureSummary(dto: GenerateJobFailureSummaryDto): Promise<JobFailureSummaryDto>;
   update(options: { jobId: string; dto: UpdateJobDto }): Promise<JobDto>;
 }
 
@@ -25,6 +32,19 @@ class JobsServiceImpl implements JobsService {
       },
       params,
     });
+    return response.data;
+  }
+
+  async generateFailureSummary(dto: GenerateJobFailureSummaryDto): Promise<JobFailureSummaryDto> {
+    const response = await this.httpClient.post<JobFailureSummaryDto>(
+      `/v1/jobs/${dto.jobId}/failure-summary`,
+      undefined,
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
+      },
+    );
     return response.data;
   }
 

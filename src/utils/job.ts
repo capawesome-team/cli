@@ -16,7 +16,10 @@ const getLabel = (job: JobDto): string => {
 
 const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
-export const waitForJobCompletion = async (options: { jobId: string }): Promise<JobDto> => {
+export const waitForJobCompletion = async (options: {
+  jobId: string;
+  onFailure?: (job: JobDto) => void | Promise<void>;
+}): Promise<JobDto> => {
   const { jobId } = options;
 
   let lastPrintedLogNumber = 0;
@@ -64,6 +67,9 @@ export const waitForJobCompletion = async (options: { jobId: string }): Promise<
           return job;
         } else if (jobStatus === 'failed') {
           consola.error(`${capitalize(label)} failed.`);
+          if (options.onFailure) {
+            await options.onFailure(job);
+          }
           process.exit(1);
         } else if (jobStatus === 'canceled') {
           consola.error(`${capitalize(label)} was canceled.`);

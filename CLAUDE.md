@@ -50,6 +50,7 @@ This project is structured as follows:
 - **Early Returns**: Use to avoid nested conditions.
 - **Descriptive Names** : Use clear property/method names (e.g. prefix handlers with "handle").
 - **DRY Code**: Avoid code duplication by using services and utility functions.
+- **Specific File Names**: Name util files after their domain, not a generic term (e.g. `job-failure-summary.ts`, not `failure-summary.ts`).
 - **Keep changes minimal**: When making changes, try to keep them as minimal as possible to avoid introducing bugs.
 - **Simplicity**: Keep code simple and readable.
 - **Type Safety**: Never use non-null assertions (`!`). Always write type-safe code. Non-null assertions are only allowed in test files.
