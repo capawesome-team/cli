@@ -9,6 +9,7 @@ import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
 import { createBufferFromPath } from '@/utils/buffer.js';
 import { isInteractive } from '@/utils/environment.js';
+import { offerJobFailureSummary } from '@/utils/job-failure-summary.js';
 import { isDirectory, isReadable } from '@/utils/file.js';
 import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
@@ -48,6 +49,10 @@ export default defineCommand({
         .optional()
         .describe('Exit immediately after creating the build without waiting for completion.'),
       environment: z.string().optional().describe('The name of the environment to use for the build.'),
+      failureSummary: z
+        .boolean()
+        .optional()
+        .describe('Request an AI-powered failure summary (Capawesome Cloud Assist) if the build fails.'),
       gitRef: z.string().optional().describe('The Git reference (branch, tag, or commit SHA) to build.'),
       ipa: z
         .union([z.boolean(), z.string()])
@@ -102,6 +107,12 @@ export default defineCommand({
     // Validate that detached flag cannot be used with channel or destination
     if (options.detached && (options.channel || options.destination)) {
       consola.error('The --detached flag cannot be used with --channel or --destination flags.');
+      process.exit(1);
+    }
+
+    // Validate that detached flag cannot be used with failure summary
+    if (options.detached && options.failureSummary) {
+      consola.error('The --detached flag cannot be used with --failure-summary.');
       process.exit(1);
     }
 
@@ -359,7 +370,15 @@ export default defineCommand({
     // Wait for build job to complete by default, unless --detached flag is set
     const shouldWait = !options.detached;
     if (shouldWait) {
-      await waitForJobCompletion({ jobId: response.jobId });
+      await waitForJobCompletion({
+        jobId: response.jobId,
+        onFailed: () =>
+          offerJobFailureSummary({
+            jobId: response.jobId,
+            requested: !!options.failureSummary,
+            command: `npx @capawesome/cli apps:builds:failure-summary --app-id ${appId} --build-id ${response.id}`,
+          }),
+      });
       const appBuild = await appBuildsService.findOne({
         appId,
         appBuildId: response.id,

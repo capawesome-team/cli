@@ -4,6 +4,7 @@ import appDeploymentsService from '@/services/app-deployments.js';
 import appDestinationsService from '@/services/app-destinations.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
+import { offerJobFailureSummary } from '@/utils/job-failure-summary.js';
 import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
@@ -33,6 +34,10 @@ export default defineCommand({
         .boolean()
         .optional()
         .describe('Exit immediately after creating the deployment without waiting for completion.'),
+      failureSummary: z
+        .boolean()
+        .optional()
+        .describe('Request an AI-powered failure summary (Capawesome Cloud Assist) if the deployment fails.'),
     }),
   ),
   action: withAuth(async (options) => {
@@ -170,7 +175,15 @@ export default defineCommand({
     // Wait for deployment job to complete by default, unless --detached flag is set
     const shouldWait = !options.detached && build.platform !== 'web';
     if (shouldWait) {
-      await waitForJobCompletion({ jobId: response.jobId });
+      await waitForJobCompletion({
+        jobId: response.jobId,
+        onFailed: () =>
+          offerJobFailureSummary({
+            jobId: response.jobId,
+            requested: !!options.failureSummary,
+            command: `npx @capawesome/cli apps:deployments:failure-summary --app-id ${appId} --deployment-id ${response.id}`,
+          }),
+      });
       consola.success('Deployment completed successfully.');
       process.exit(0);
     }

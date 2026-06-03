@@ -31,6 +31,7 @@ const config = defineConfig({
     'apps:unlink': await import('@/commands/apps/unlink.js').then((mod) => mod.default),
     'apps:builds:cancel': await import('@/commands/apps/builds/cancel.js').then((mod) => mod.default),
     'apps:builds:create': await import('@/commands/apps/builds/create.js').then((mod) => mod.default),
+    'apps:builds:failure-summary': await import('@/commands/apps/builds/failure-summary.js').then((mod) => mod.default),
     'apps:builds:get': await import('@/commands/apps/builds/get.js').then((mod) => mod.default),
     'apps:builds:list': await import('@/commands/apps/builds/list.js').then((mod) => mod.default),
     'apps:builds:logs': await import('@/commands/apps/builds/logs.js').then((mod) => mod.default),
@@ -52,6 +53,9 @@ const config = defineConfig({
     'apps:channels:update': await import('@/commands/apps/channels/update.js').then((mod) => mod.default),
     'apps:deployments:create': await import('@/commands/apps/deployments/create.js').then((mod) => mod.default),
     'apps:deployments:cancel': await import('@/commands/apps/deployments/cancel.js').then((mod) => mod.default),
+    'apps:deployments:failure-summary': await import('@/commands/apps/deployments/failure-summary.js').then(
+      (mod) => mod.default,
+    ),
     'apps:deployments:get': await import('@/commands/apps/deployments/get.js').then((mod) => mod.default),
     'apps:deployments:list': await import('@/commands/apps/deployments/list.js').then((mod) => mod.default),
     'apps:deployments:logs': await import('@/commands/apps/deployments/logs.js').then((mod) => mod.default),
