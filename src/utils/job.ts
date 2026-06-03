@@ -18,7 +18,7 @@ const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1)
 
 export const waitForJobCompletion = async (options: {
   jobId: string;
-  onFailure?: (job: JobDto) => void | Promise<void>;
+  onFailed?: (job: JobDto) => void | Promise<void>;
 }): Promise<JobDto> => {
   const { jobId } = options;
 
@@ -67,8 +67,12 @@ export const waitForJobCompletion = async (options: {
           return job;
         } else if (jobStatus === 'failed') {
           consola.error(`${capitalize(label)} failed.`);
-          if (options.onFailure) {
-            await options.onFailure(job);
+          if (options.onFailed) {
+            try {
+              await options.onFailed(job);
+            } catch {
+              // Ignore errors from the failure handler -- the job failure is what matters.
+            }
           }
           process.exit(1);
         } else if (jobStatus === 'canceled') {

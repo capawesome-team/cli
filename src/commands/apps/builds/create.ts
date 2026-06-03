@@ -372,7 +372,7 @@ export default defineCommand({
     if (shouldWait) {
       await waitForJobCompletion({
         jobId: response.jobId,
-        onFailure: () =>
+        onFailed: () =>
           offerJobFailureSummary({
             jobId: response.jobId,
             requested: !!options.failureSummary,
