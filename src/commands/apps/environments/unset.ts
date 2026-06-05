@@ -64,16 +64,6 @@ export default defineCommand({
       }
     }
 
-    if (!environmentId && name) {
-      const environments = await appEnvironmentsService.findAll({ appId, name });
-      const environment = environments[0];
-      if (!environment) {
-        consola.error('Environment not found.');
-        process.exit(1);
-      }
-      environmentId = environment.id;
-    }
-
     if (!variableKeys?.length && !secretKeys?.length) {
       consola.error('You must provide at least one variable key or secret key to unset.');
       process.exit(1);
