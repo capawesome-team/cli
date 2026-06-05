@@ -6,8 +6,14 @@ export interface AppEnvironmentDto {
 
 export interface FindAllAppEnvironmentsDto {
   appId: string;
+  name?: string;
   limit?: number;
   offset?: number;
+}
+
+export interface FindOneAppEnvironmentByIdDto {
+  appId: string;
+  id: string;
 }
 
 export interface CreateAppEnvironmentDto {

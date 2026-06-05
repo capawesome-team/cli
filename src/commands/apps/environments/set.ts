@@ -14,7 +14,8 @@ export default defineCommand({
   options: defineOptions(
     z.object({
       appId: z.string().optional().describe('ID of the app.'),
-      environmentId: z.string().optional().describe('ID of the environment.'),
+      environmentId: z.string().optional().describe('ID of the environment. Either the ID or name must be provided.'),
+      name: z.string().optional().describe('Name of the environment. Either the ID or name must be provided.'),
       variable: z
         .array(z.string())
         .optional()
@@ -28,7 +29,7 @@ export default defineCommand({
     }),
   ),
   action: withAuth(async (options, args) => {
-    let { appId, environmentId, variable, variableFile, secret, secretFile } = options;
+    let { appId, environmentId, name, variable, variableFile, secret, secretFile } = options;
 
     if (!appId) {
       if (!isInteractive()) {
@@ -40,20 +41,32 @@ export default defineCommand({
     }
 
     if (!environmentId) {
-      if (!isInteractive()) {
-        consola.error('You must provide an environment ID when running in non-interactive environment.');
-        process.exit(1);
+      if (name) {
+        const environments = await appEnvironmentsService.findAll({ appId, name });
+        const environment = environments[0];
+        if (!environment) {
+          consola.error('Environment not found.');
+          process.exit(1);
+        }
+        environmentId = environment.id;
+      } else {
+        if (!isInteractive()) {
+          consola.error(
+            'You must provide either the environment ID or name when running in non-interactive environment.',
+          );
+          process.exit(1);
+        }
+        const environments = await appEnvironmentsService.findAll({ appId });
+        if (!environments.length) {
+          consola.error('No environments found for this app. Create one first.');
+          process.exit(1);
+        }
+        // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+        environmentId = await prompt('Select the environment:', {
+          type: 'select',
+          options: environments.map((env) => ({ label: env.name, value: env.id })),
+        });
       }
-      const environments = await appEnvironmentsService.findAll({ appId });
-      if (!environments.length) {
-        consola.error('No environments found for this app. Create one first.');
-        process.exit(1);
-      }
-      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      environmentId = await prompt('Select the environment:', {
-        type: 'select',
-        options: environments.map((env) => ({ label: env.name, value: env.id })),
-      });
     }
 
     // Parse variables from inline and file

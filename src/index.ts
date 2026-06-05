@@ -70,6 +70,7 @@ const config = defineConfig({
     'apps:devices:unforcechannel': await import('@/commands/apps/devices/unforcechannel.js').then((mod) => mod.default),
     'apps:environments:create': await import('@/commands/apps/environments/create.js').then((mod) => mod.default),
     'apps:environments:delete': await import('@/commands/apps/environments/delete.js').then((mod) => mod.default),
+    'apps:environments:get': await import('@/commands/apps/environments/get.js').then((mod) => mod.default),
     'apps:environments:list': await import('@/commands/apps/environments/list.js').then((mod) => mod.default),
     'apps:environments:set': await import('@/commands/apps/environments/set.js').then((mod) => mod.default),
     'apps:environments:unset': await import('@/commands/apps/environments/unset.js').then((mod) => mod.default),
