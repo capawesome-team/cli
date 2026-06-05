@@ -4,6 +4,7 @@ import {
   CreateAppEnvironmentDto,
   DeleteAppEnvironmentDto,
   FindAllAppEnvironmentsDto,
+  FindOneAppEnvironmentByIdDto,
   SetEnvironmentSecretsDto,
   SetEnvironmentVariablesDto,
   UnsetEnvironmentSecretsDto,
@@ -15,6 +16,7 @@ export interface AppEnvironmentsService {
   create(dto: CreateAppEnvironmentDto): Promise<AppEnvironmentDto>;
   delete(dto: DeleteAppEnvironmentDto): Promise<void>;
   findAll(dto: FindAllAppEnvironmentsDto): Promise<AppEnvironmentDto[]>;
+  findOneById(dto: FindOneAppEnvironmentByIdDto): Promise<AppEnvironmentDto>;
   setVariables(dto: SetEnvironmentVariablesDto): Promise<void>;
   setSecrets(dto: SetEnvironmentSecretsDto): Promise<void>;
   unsetVariables(dto: UnsetEnvironmentVariablesDto): Promise<void>;
@@ -58,6 +60,9 @@ class AppEnvironmentsServiceImpl implements AppEnvironmentsService {
 
   async findAll(dto: FindAllAppEnvironmentsDto): Promise<AppEnvironmentDto[]> {
     const queryParams = new URLSearchParams();
+    if (dto.name) {
+      queryParams.append('name', dto.name);
+    }
     if (dto.limit) {
       queryParams.append('limit', dto.limit.toString());
     }
@@ -69,6 +74,15 @@ class AppEnvironmentsServiceImpl implements AppEnvironmentsService {
       ? `/v1/apps/${dto.appId}/environments?${queryString}`
       : `/v1/apps/${dto.appId}/environments`;
     const response = await this.httpClient.get<AppEnvironmentDto[]>(url, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+      },
+    });
+    return response.data;
+  }
+
+  async findOneById(dto: FindOneAppEnvironmentByIdDto): Promise<AppEnvironmentDto> {
+    const response = await this.httpClient.get<AppEnvironmentDto>(`/v1/apps/${dto.appId}/environments/${dto.id}`, {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
