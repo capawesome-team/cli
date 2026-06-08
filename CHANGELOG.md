@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.12.0](https://github.com/capawesome-team/cli/compare/v4.11.0...v4.12.0) (2026-06-08)
+
+
+### Features
+
+* add AI-powered failure summary for builds and deployments ([#167](https://github.com/capawesome-team/cli/issues/167)) ([ff87668](https://github.com/capawesome-team/cli/commit/ff876683036f884cbe453bc6c00fe964d035f57c))
+* **environments:** add `get` command and `--name` option to `set`/`unset` ([#168](https://github.com/capawesome-team/cli/issues/168)) ([64fe273](https://github.com/capawesome-team/cli/commit/64fe273b2db3533f7d7929c6db4806720f1d9e50))
+* **liveupdates:** support Cordova app type in `generate-signing-key` ([#166](https://github.com/capawesome-team/cli/issues/166)) ([ea81c0f](https://github.com/capawesome-team/cli/commit/ea81c0fc86d89f1c81a18b3c59e9f642eee03f07))
+
 ## [4.11.0](https://github.com/capawesome-team/cli/compare/v4.10.0...v4.11.0) (2026-06-02)
 
 
