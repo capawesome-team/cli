@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.13.0](https://github.com/capawesome-team/cli/compare/v4.12.0...v4.13.0) (2026-06-09)
+
+
+### Features
+
+* **cli:** add `--json` output to create and register commands ([#171](https://github.com/capawesome-team/cli/issues/171)) ([aa84e81](https://github.com/capawesome-team/cli/commit/aa84e81b9dcf564f9196af3c2b2d72ab7ccd755c))
+* **deployments:** include app build data in `list` and `get` JSON output ([#170](https://github.com/capawesome-team/cli/issues/170)) ([d257dd4](https://github.com/capawesome-team/cli/commit/d257dd4bf87260bd703e7d26fb33509ef71227a5))
+* **environments:** include variable and secret keys in get and list output ([#172](https://github.com/capawesome-team/cli/issues/172)) ([b75098b](https://github.com/capawesome-team/cli/commit/b75098b1f206e4896be1c225b0d04551f37cd35b))
+* **liveupdates:** add `--json` output to `upload` and align JSON keys in `create` ([#169](https://github.com/capawesome-team/cli/issues/169)) ([e671294](https://github.com/capawesome-team/cli/commit/e671294770495aab06792cac354663f70c92a7b9))
+
 ## [4.12.0](https://github.com/capawesome-team/cli/compare/v4.11.0...v4.12.0) (2026-06-08)
 
 
