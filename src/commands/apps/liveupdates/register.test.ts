@@ -92,6 +92,47 @@ describe('apps-liveupdates-register', () => {
     expect(mockConsola.success).toHaveBeenCalledWith('Live Update successfully registered.');
   });
 
+  it('should output JSON when json flag is set', async () => {
+    const appId = 'app-123';
+    const bundleUrl = 'https://example.com/bundle.zip';
+    const bundleId = 'bundle-456';
+    const appBuildId = 'build-789';
+    const testToken = 'test-token';
+
+    const options = {
+      appId,
+      url: bundleUrl,
+      rolloutPercentage: 1,
+      json: true,
+      yes: true,
+    };
+
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
+
+    nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/bundles`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: bundleId, appBuildId });
+
+    await registerCommand.action(options, undefined);
+
+    expect(logSpy).toHaveBeenCalledWith(
+      JSON.stringify(
+        {
+          appBuildId,
+          appBuildArtifactId: bundleId,
+        },
+        null,
+        2,
+      ),
+    );
+  });
+
   it('should pass gitRef to API when provided', async () => {
     const appId = 'app-123';
     const bundleUrl = 'https://example.com/bundle.zip';

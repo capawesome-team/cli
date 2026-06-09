@@ -22,12 +22,13 @@ export default defineCommand({
         .optional()
         .describe('The number of days until the channel is automatically deleted.'),
       ignoreErrors: z.boolean().optional().describe('Whether to ignore errors or not.'),
+      json: z.boolean().optional().describe('Output in JSON format.'),
       name: z.string().optional().describe('Name of the channel.'),
       protected: z.boolean().optional().describe('Whether to protect the channel or not. Default is `false`.'),
     }),
   ),
   action: withAuth(async (options, args) => {
-    let { appId, expiresInDays, ignoreErrors, name, protected: _protected } = options;
+    let { appId, expiresInDays, ignoreErrors, json, name, protected: _protected } = options;
 
     if (expiresInDays) {
       consola.warn(
@@ -57,8 +58,12 @@ export default defineCommand({
         protected: _protected,
         name,
       });
-      consola.info(`Channel ID: ${response.id}`);
-      consola.success('Channel created successfully.');
+      if (json) {
+        console.log(JSON.stringify({ id: response.id }, null, 2));
+      } else {
+        consola.info(`Channel ID: ${response.id}`);
+        consola.success('Channel created successfully.');
+      }
     } catch (error) {
       if (ignoreErrors) {
         const message = getMessageFromUnknownError(error);

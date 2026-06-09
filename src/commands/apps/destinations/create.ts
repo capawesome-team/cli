@@ -17,6 +17,7 @@ export default defineCommand({
   options: defineOptions(
     z.object({
       appId: z.string().optional().describe('ID of the app.'),
+      json: z.boolean().optional().describe('Output in JSON format.'),
       name: z.string().optional().describe('Name of the destination.'),
       platform: z.enum(['android', 'ios']).optional().describe('Platform of the destination (android, ios).'),
       appleId: z.string().optional().describe('Apple ID for the destination.'),
@@ -38,6 +39,7 @@ export default defineCommand({
   action: withAuth(async (options, args) => {
     let {
       appId,
+      json,
       name,
       platform,
       appleId,
@@ -353,7 +355,11 @@ export default defineCommand({
       appGoogleServiceAccountKeyId,
       googlePlayTrack,
     });
-    consola.info(`Destination ID: ${response.id}`);
-    consola.success('Destination created successfully.');
+    if (json) {
+      console.log(JSON.stringify({ id: response.id }, null, 2));
+    } else {
+      consola.info(`Destination ID: ${response.id}`);
+      consola.success('Destination created successfully.');
+    }
   }),
 });
