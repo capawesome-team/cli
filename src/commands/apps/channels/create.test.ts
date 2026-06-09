@@ -66,6 +66,32 @@ describe('apps-channels-create', () => {
     expect(mockConsola.info).toHaveBeenCalledWith(`Channel ID: ${channelId}`);
   });
 
+  it('should output JSON when json flag is set', async () => {
+    const appId = 'app-123';
+    const channelName = 'production';
+    const channelId = 'channel-456';
+    const testToken = 'test-token';
+
+    const options = { appId, json: true, name: channelName };
+
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/channels`, {
+        appId,
+        name: channelName,
+        protected: undefined,
+      })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: channelId, name: channelName });
+
+    await createChannelCommand.action(options, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    expect(logSpy).toHaveBeenCalledWith(JSON.stringify({ id: channelId }, null, 2));
+    expect(mockConsola.info).not.toHaveBeenCalled();
+  });
+
   it('should prompt for app when not provided', async () => {
     const channelName = 'staging';
     const orgId = 'org-1';

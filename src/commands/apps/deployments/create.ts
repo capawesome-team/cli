@@ -38,10 +38,11 @@ export default defineCommand({
         .boolean()
         .optional()
         .describe('Request an AI-powered failure summary (Capawesome Cloud Assist) if the deployment fails.'),
+      json: z.boolean().optional().describe('Output in JSON format.'),
     }),
   ),
   action: withAuth(async (options) => {
-    let { appId, buildId, buildNumber, channel, destination } = options;
+    let { appId, buildId, buildNumber, channel, destination, json } = options;
 
     // Prompt for app ID if not provided
     if (!appId) {
@@ -185,7 +186,10 @@ export default defineCommand({
           }),
       });
       consola.success('Deployment completed successfully.');
-      process.exit(0);
+    }
+
+    if (json) {
+      console.log(JSON.stringify({ id: response.id }, null, 2));
     }
   }),
 });

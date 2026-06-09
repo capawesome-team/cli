@@ -11,11 +11,12 @@ export default defineCommand({
   options: defineOptions(
     z.object({
       appId: z.string().optional().describe('ID of the app.'),
+      json: z.boolean().optional().describe('Output in JSON format.'),
       name: z.string().optional().describe('Name of the environment.'),
     }),
   ),
   action: withAuth(async (options, args) => {
-    let { appId, name } = options;
+    let { appId, json, name } = options;
 
     if (!appId) {
       if (!isInteractive()) {
@@ -38,7 +39,11 @@ export default defineCommand({
       appId,
       name,
     });
-    consola.info(`Environment ID: ${response.id}`);
-    consola.success('Environment created successfully.');
+    if (json) {
+      console.log(JSON.stringify({ id: response.id }, null, 2));
+    } else {
+      consola.info(`Environment ID: ${response.id}`);
+      consola.success('Environment created successfully.');
+    }
   }),
 });

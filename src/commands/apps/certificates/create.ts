@@ -17,6 +17,7 @@ export default defineCommand({
     z.object({
       appId: z.string().optional().describe('ID of the app.'),
       file: z.string().optional().describe('Path to the certificate file.'),
+      json: z.boolean().optional().describe('Output in JSON format.'),
       keyAlias: z.string().optional().describe('Key alias for the certificate.'),
       keyPassword: z.string().optional().describe('Key password for the certificate.'),
       name: z.string().optional().describe('Name of the certificate.'),
@@ -38,7 +39,7 @@ export default defineCommand({
     { y: 'yes' },
   ),
   action: withAuth(async (options, args) => {
-    let { appId, file, keyAlias, keyPassword, name, password, platform, provisioningProfile, type } = options;
+    let { appId, file, json, keyAlias, keyPassword, name, password, platform, provisioningProfile, type } = options;
 
     // 1. Select organization and app
     if (!appId) {
@@ -195,7 +196,11 @@ export default defineCommand({
       });
     }
 
-    consola.info(`Certificate ID: ${certificate.id}`);
-    consola.success('Certificate created successfully.');
+    if (json) {
+      console.log(JSON.stringify({ id: certificate.id }, null, 2));
+    } else {
+      consola.info(`Certificate ID: ${certificate.id}`);
+      consola.success('Certificate created successfully.');
+    }
   }),
 });

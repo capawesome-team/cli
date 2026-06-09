@@ -85,6 +85,7 @@ export default defineCommand({
         .string()
         .optional()
         .describe('The exact iOS bundle version (`CFBundleVersion`) that the bundle does not support.'),
+      json: z.boolean().optional().describe('Output in JSON format.'),
       path: z.string().optional().describe('Path to zip file for code signing only.'),
       privateKey: z
         .string()
@@ -126,6 +127,7 @@ export default defineCommand({
       iosEq,
       iosMax,
       iosMin,
+      json,
       path,
       privateKey,
       rolloutPercentage,
@@ -286,5 +288,18 @@ export default defineCommand({
       consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.appDeploymentId}`);
     }
     consola.success('Live Update successfully registered.');
+
+    if (json) {
+      console.log(
+        JSON.stringify(
+          {
+            appBuildId: response.appBuildId,
+            appBuildArtifactId: response.id,
+          },
+          null,
+          2,
+        ),
+      );
+    }
   }),
 });

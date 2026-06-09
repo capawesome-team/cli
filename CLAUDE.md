@@ -55,6 +55,7 @@ This project is structured as follows:
 - **Simplicity**: Keep code simple and readable.
 - **Type Safety**: Never use non-null assertions (`!`). Always write type-safe code. Non-null assertions are only allowed in test files.
 - **Zod Coercion for CLI Options**: Always use `z.coerce.number()` (not `z.number()`) for numeric CLI options, since CLI arguments are parsed as strings.
+- **`--json` Output**: Commands that return data take a `json` option (`z.boolean().optional().describe('Output in JSON format.')`) and print `console.log(JSON.stringify(data, null, 2))` with the resource's own field names (`{ id }`). Commands with progress output (spinners, step logs) keep that output and just append the JSON, since progress is useful in CI/CD. Commands without progress output use `if (json) { ...JSON... } else { ...consola... }` so `--json` stays clean.
 
 ## Philosophy
 

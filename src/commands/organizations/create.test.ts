@@ -58,6 +58,27 @@ describe('organizations-create', () => {
     expect(mockConsola.info).toHaveBeenCalledWith(`Organization ID: ${organizationId}`);
   });
 
+  it('should output JSON when json flag is set', async () => {
+    const organizationName = 'Test Organization';
+    const organizationId = 'org-456';
+    const testToken = 'test-token';
+
+    const options = { json: true, name: organizationName };
+
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .post('/v1/organizations', { name: organizationName })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: organizationId, name: organizationName });
+
+    await createOrganizationCommand.action(options, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    expect(logSpy).toHaveBeenCalledWith(JSON.stringify({ id: organizationId }, null, 2));
+    expect(mockConsola.info).not.toHaveBeenCalled();
+  });
+
   it('should prompt for organization name when not provided', async () => {
     const promptedOrganizationName = 'Prompted Organization';
     const organizationId = 'org-456';
