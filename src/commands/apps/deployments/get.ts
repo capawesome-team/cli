@@ -28,7 +28,7 @@ export default defineCommand({
     const deployment = await appDeploymentsService.findOne({
       appId,
       appDeploymentId: deploymentId,
-      relations: json ? 'job' : undefined,
+      relations: json ? 'appBuild,job' : undefined,
     });
     if (json) {
       console.log(JSON.stringify(deployment, null, 2));
