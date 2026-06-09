@@ -38,7 +38,7 @@ export default defineCommand({
       appDestinationId: destinationId,
       limit,
       offset,
-      relations: json ? 'job' : undefined,
+      relations: json ? 'appBuild,job' : undefined,
     });
     if (json) {
       console.log(JSON.stringify(foundDeployments, null, 2));

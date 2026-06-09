@@ -11,6 +11,7 @@ export interface AppBuildArtifactDto {
 
 export interface AppBuildDto {
   id: string;
+  appBuildArtifactId: string | null;
   appBuildArtifacts?: AppBuildArtifactDto[];
   appCertificateId?: string;
   appEnvironmentId?: string;
