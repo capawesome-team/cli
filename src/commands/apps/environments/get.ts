@@ -48,11 +48,12 @@ export default defineCommand({
       });
     }
 
+    const relations = 'appEnvironmentVariables,appEnvironmentSecrets';
     let environment: AppEnvironmentDto | undefined;
     if (environmentId) {
-      environment = await appEnvironmentsService.findOneById({ appId, id: environmentId });
+      environment = await appEnvironmentsService.findOneById({ appId, id: environmentId, relations });
     } else if (name) {
-      const environments = await appEnvironmentsService.findAll({ appId, name });
+      const environments = await appEnvironmentsService.findAll({ appId, name, relations });
       environment = environments[0];
     }
     if (!environment) {
@@ -63,7 +64,14 @@ export default defineCommand({
     if (json) {
       console.log(JSON.stringify(environment, null, 2));
     } else {
-      console.table(environment);
+      const { appEnvironmentVariables, appEnvironmentSecrets, ...rest } = environment;
+      console.table(rest);
+      if (appEnvironmentVariables?.length) {
+        console.table(appEnvironmentVariables.map(({ id, key, value }) => ({ id, key, value })));
+      }
+      if (appEnvironmentSecrets?.length) {
+        console.table(appEnvironmentSecrets.map(({ id, key }) => ({ id, key })));
+      }
       consola.success('Environment retrieved successfully.');
     }
   }),
