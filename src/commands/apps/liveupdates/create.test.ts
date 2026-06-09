@@ -299,6 +299,9 @@ describe('apps-liveupdates-create', () => {
     expect(console.log).toHaveBeenCalledWith(
       JSON.stringify(
         {
+          appBuildId: buildId,
+          appBuildNumberAsString: '42',
+          appDeploymentIds: [deploymentId],
           buildId,
           buildNumberAsString: '42',
           deploymentIds: [deploymentId],

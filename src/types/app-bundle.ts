@@ -1,5 +1,6 @@
 export interface AppBundleDto {
   id: string;
+  appBuildId?: string;
   appDeploymentId?: string | null;
 }
 
