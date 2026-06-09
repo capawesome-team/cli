@@ -296,7 +296,7 @@ export default defineCommand({
 
     // Deploy to channels
     const rolloutPercentage = (options.rolloutPercentage ?? 100) / 100;
-    const deploymentIds: string[] = [];
+    const appDeploymentIds: string[] = [];
     for (const channelName of channel) {
       consola.start(`Creating deployment for channel "${channelName}"...`);
       const deployment = await appDeploymentsService.create({
@@ -305,7 +305,7 @@ export default defineCommand({
         appChannelName: channelName,
         rolloutPercentage,
       });
-      deploymentIds.push(deployment.id);
+      appDeploymentIds.push(deployment.id);
       consola.info(`Deployment ID: ${deployment.id}`);
       consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${deployment.id}`);
       consola.success('Deployment created successfully.');
@@ -316,9 +316,12 @@ export default defineCommand({
       console.log(
         JSON.stringify(
           {
-            buildId: response.id,
-            buildNumberAsString: response.numberAsString,
-            deploymentIds,
+            appBuildId: response.id,
+            appBuildNumberAsString: response.numberAsString,
+            appDeploymentIds,
+            buildId: response.id, // Deprecated, use appBuildId instead
+            buildNumberAsString: response.numberAsString, // Deprecated, use appBuildNumberAsString instead
+            deploymentIds: appDeploymentIds, // Deprecated, use appDeploymentIds instead
           },
           null,
           2,

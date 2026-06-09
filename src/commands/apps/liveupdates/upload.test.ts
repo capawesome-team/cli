@@ -228,6 +228,71 @@ describe('apps-liveupdates-upload', () => {
     expect(mockConsola.success).toHaveBeenCalledWith('Live Update successfully uploaded.');
   });
 
+  it('should output JSON when json flag is set', async () => {
+    const appId = 'app-123';
+    const bundlePath = './dist';
+    const bundleId = 'bundle-456';
+    const appBuildId = 'build-789';
+    const testToken = 'test-token';
+    const testBuffer = Buffer.from('test');
+
+    const options = {
+      appId,
+      path: bundlePath,
+      artifactType: 'zip' as const,
+      rollout: 1,
+      json: true,
+    };
+
+    mockIsReadable.mockResolvedValue(true);
+    mockIsDirectory.mockResolvedValue(true);
+    mockGetFilesInDirectoryAndSubdirectories.mockResolvedValue([
+      { href: 'index.html', mimeType: 'text/html', name: 'index.html', path: 'index.html' },
+    ]);
+
+    const mockZip = await import('@/utils/zip.js');
+    const mockHash = await import('@/utils/hash.js');
+
+    vi.mocked(mockZip.default.isZipped).mockReturnValue(false);
+    vi.mocked(mockZip.default.zipFolder).mockResolvedValue(testBuffer);
+    vi.mocked(mockHash.createHash).mockResolvedValue('test-hash');
+
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
+
+    nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/bundles`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: bundleId, appBuildId });
+
+    nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/bundles/${bundleId}/files`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: 'file-123' });
+
+    nock(DEFAULT_API_BASE_URL)
+      .patch(`/v1/apps/${appId}/bundles/${bundleId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: bundleId });
+
+    await uploadCommand.action(options, undefined);
+
+    expect(logSpy).toHaveBeenCalledWith(
+      JSON.stringify(
+        {
+          appBuildId,
+          appBuildArtifactId: bundleId,
+        },
+        null,
+        2,
+      ),
+    );
+  });
+
   it('should handle private key file path', async () => {
     const appId = 'app-123';
     const bundlePath = './dist';

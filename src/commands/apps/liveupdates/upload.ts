@@ -108,6 +108,7 @@ export default defineCommand({
         .string()
         .optional()
         .describe('The exact iOS bundle version (`CFBundleVersion`) that the bundle does not support.'),
+      json: z.boolean().optional().describe('Output in JSON format.'),
       path: z
         .string()
         .optional()
@@ -152,6 +153,7 @@ export default defineCommand({
       iosEq,
       iosMax,
       iosMin,
+      json,
       path,
       privateKey,
       rolloutPercentage,
@@ -348,6 +350,19 @@ export default defineCommand({
       );
     }
     consola.success('Live Update successfully uploaded.');
+
+    if (json) {
+      console.log(
+        JSON.stringify(
+          {
+            appBuildId: createBundleResponse.appBuildId,
+            appBuildArtifactId: createBundleResponse.id,
+          },
+          null,
+          2,
+        ),
+      );
+    }
   }),
 });
 
