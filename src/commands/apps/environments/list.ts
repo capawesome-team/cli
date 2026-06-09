@@ -30,6 +30,7 @@ export default defineCommand({
 
     const environments = await appEnvironmentsService.findAll({
       appId,
+      relations: json ? 'appEnvironmentVariables,appEnvironmentSecrets' : undefined,
       limit,
       offset,
     });
@@ -38,6 +39,7 @@ export default defineCommand({
       console.log(JSON.stringify(environments, null, 2));
     } else {
       console.table(environments);
+      consola.info('Run with --json to include variable keys/values and secret keys.');
       consola.success('Environments retrieved successfully.');
     }
   }),

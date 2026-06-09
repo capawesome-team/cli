@@ -63,6 +63,9 @@ class AppEnvironmentsServiceImpl implements AppEnvironmentsService {
     if (dto.name) {
       queryParams.append('name', dto.name);
     }
+    if (dto.relations) {
+      queryParams.append('relations', dto.relations);
+    }
     if (dto.limit) {
       queryParams.append('limit', dto.limit.toString());
     }
@@ -86,6 +89,7 @@ class AppEnvironmentsServiceImpl implements AppEnvironmentsService {
       headers: {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
+      params: dto.relations ? { relations: dto.relations } : undefined,
     });
     return response.data;
   }
