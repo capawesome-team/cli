@@ -2,6 +2,7 @@ import { DEFAULT_API_BASE_URL, DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.
 import configService from '@/services/config.js';
 import sessionCodesService from '@/services/session-code.js';
 import sessionsService from '@/services/sessions.js';
+import credentialStore from '@/utils/credential-store.js';
 import { prompt } from '@/utils/prompt.js';
 import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
@@ -12,6 +13,7 @@ import loginCommand from './login.js';
 
 // Mock dependencies
 vi.mock('@/utils/user-config.js');
+vi.mock('@/utils/credential-store.js');
 vi.mock('@/services/session-code.js');
 vi.mock('@/services/sessions.js');
 vi.mock('@/services/config.js');
@@ -21,12 +23,10 @@ vi.mock('@/utils/prompt.js');
 vi.mock('@/utils/environment.js', () => ({
   isInteractive: () => true,
 }));
-vi.mock('@/utils/environment.js', () => ({
-  isInteractive: () => true,
-}));
 
 describe('login', () => {
   const mockUserConfig = vi.mocked(userConfig);
+  const mockCredentialStore = vi.mocked(credentialStore);
   const mockSessionCodesService = vi.mocked(sessionCodesService);
   const mockSessionsService = vi.mocked(sessionsService);
   const mockConfigService = vi.mocked(configService);
@@ -39,6 +39,9 @@ describe('login', () => {
 
     mockUserConfig.write.mockImplementation(() => {});
     mockUserConfig.read.mockReturnValue({});
+    mockCredentialStore.setToken.mockImplementation(() => {});
+    mockCredentialStore.deleteToken.mockImplementation(() => {});
+    mockCredentialStore.getToken.mockReturnValue(null);
 
     // Mock config service to return consistent URLs
     mockConfigService.getValueForKey.mockImplementation((key: string) => {
@@ -61,8 +64,8 @@ describe('login', () => {
     const testToken = 'valid-token-123';
     const options = { token: testToken };
 
-    // Mock userConfig.read to return our test token after it's written
-    mockUserConfig.read.mockReturnValue({ token: testToken });
+    // Mock credentialStore.getToken to return our test token after it's written
+    mockCredentialStore.getToken.mockReturnValue(testToken);
 
     // Set up nock to intercept the /v1/users/me request
     const scope = nock(DEFAULT_API_BASE_URL)
@@ -72,17 +75,21 @@ describe('login', () => {
 
     await loginCommand.action(options, undefined);
 
-    expect(mockUserConfig.write).toHaveBeenCalledWith({ token: testToken });
-    expect(mockUserConfig.write).toHaveBeenCalledWith({ token: testToken, userId: 'user-123' });
+    expect(mockCredentialStore.setToken).toHaveBeenCalledWith(testToken);
     expect(scope.isDone()).toBe(true);
     expect(mockConsola.success).toHaveBeenCalledWith('Successfully signed in.');
   });
 
-  it('should preserve other config fields and clear the previous user ID before sign-in', async () => {
+  it('should preserve other config flags and replace the previous user ID', async () => {
     const testToken = 'valid-token-123';
     const options = { token: testToken };
 
-    mockUserConfig.read.mockReturnValue({ token: testToken, userId: 'previous-user', telemetryNoticeShown: true });
+    mockCredentialStore.getToken.mockReturnValue(testToken);
+    mockUserConfig.read.mockReturnValue({
+      token: 'previous-token',
+      userId: 'previous-user',
+      telemetryNoticeShown: true,
+    });
 
     const scope = nock(DEFAULT_API_BASE_URL)
       .get('/v1/users/me')
@@ -91,14 +98,10 @@ describe('login', () => {
 
     await loginCommand.action(options, undefined);
 
-    // The previous user ID is dropped before the new user is confirmed, while other flags are preserved.
-    expect(mockUserConfig.write).toHaveBeenCalledWith({ telemetryNoticeShown: true, token: testToken });
-    // Once confirmed, the new user ID is stored alongside the preserved flags.
-    expect(mockUserConfig.write).toHaveBeenCalledWith({
-      telemetryNoticeShown: true,
-      token: testToken,
-      userId: 'user-123',
-    });
+    // The previous user ID is dropped before the new account is confirmed.
+    expect(mockUserConfig.write).toHaveBeenNthCalledWith(1, { telemetryNoticeShown: true });
+    // The new user ID is stored while other flags are preserved.
+    expect(mockUserConfig.write).toHaveBeenNthCalledWith(2, { telemetryNoticeShown: true, userId: 'user-123' });
     expect(scope.isDone()).toBe(true);
   });
 
@@ -116,8 +119,8 @@ describe('login', () => {
 
     mockSessionsService.create.mockResolvedValue({ id: 'session-123' });
 
-    // Mock userConfig.read to return the session token
-    mockUserConfig.read.mockReturnValue({ token: 'session-123' });
+    // Mock credentialStore.getToken to return the session token
+    mockCredentialStore.getToken.mockReturnValue('session-123');
 
     // Set up nock to intercept the /v1/users/me request
     const scope = nock(DEFAULT_API_BASE_URL)
@@ -137,7 +140,6 @@ describe('login', () => {
     expect(mockSessionCodesService.create).toHaveBeenCalled();
     expect(mockConsola.box).toHaveBeenCalledWith('Copy your one-time code: ABCD-1234');
     expect(mockOpen).toHaveBeenCalledWith(`${DEFAULT_CONSOLE_BASE_URL}/login/device`);
-    expect(mockUserConfig.write).toHaveBeenCalledWith({ token: 'session-123', userId: 'user-123' });
     expect(scope.isDone()).toBe(true);
     expect(mockConsola.success).toHaveBeenCalledWith('Successfully signed in.');
   });
@@ -157,8 +159,8 @@ describe('login', () => {
     const invalidToken = 'invalid-token';
     const options = { token: invalidToken };
 
-    // Mock userConfig.read to return our invalid token after it's written
-    mockUserConfig.read.mockReturnValue({ token: invalidToken });
+    // Mock credentialStore.getToken to return our invalid token after it's written
+    mockCredentialStore.getToken.mockReturnValue(invalidToken);
 
     // Set up nock to intercept the /v1/users/me request and return 401
     const scope = nock(DEFAULT_API_BASE_URL)
@@ -168,8 +170,8 @@ describe('login', () => {
 
     await expect(loginCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
-    expect(mockUserConfig.write).toHaveBeenCalledWith({ token: invalidToken });
-    expect(mockUserConfig.write).toHaveBeenCalledWith({}); // Clears token on error
+    expect(mockCredentialStore.setToken).toHaveBeenCalledWith(invalidToken);
+    expect(mockCredentialStore.deleteToken).toHaveBeenCalled(); // Clears token on error
     expect(scope.isDone()).toBe(true);
     expect(mockConsola.error).toHaveBeenCalledWith(
       `Invalid token. Please provide a valid token. You can create a token at ${DEFAULT_CONSOLE_BASE_URL}/settings/tokens.`,

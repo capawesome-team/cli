@@ -1,5 +1,6 @@
 import { DEFAULT_API_BASE_URL } from '@/config/consts.js';
 import authorizationService from '@/services/authorization-service.js';
+import credentialStore from '@/utils/credential-store.js';
 import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
 import nock from 'nock';
@@ -8,18 +9,22 @@ import logoutCommand from './logout.js';
 
 // Mock dependencies
 vi.mock('@/services/authorization-service.js');
+vi.mock('@/utils/credential-store.js');
 vi.mock('@/utils/user-config.js');
 vi.mock('consola');
 
 describe('logout', () => {
   const mockAuthorizationService = vi.mocked(authorizationService);
+  const mockCredentialStore = vi.mocked(credentialStore);
   const mockUserConfig = vi.mocked(userConfig);
   const mockConsola = vi.mocked(consola);
 
   beforeEach(() => {
     vi.clearAllMocks();
 
+    mockCredentialStore.deleteToken.mockImplementation(() => {});
     mockUserConfig.write.mockImplementation(() => {});
+    mockUserConfig.read.mockReturnValue({});
   });
 
   afterEach(() => {
@@ -27,7 +32,7 @@ describe('logout', () => {
     vi.restoreAllMocks();
   });
 
-  it('should delete session and clear user config with session token', async () => {
+  it('should delete session and clear credentials with session token', async () => {
     const sessionToken = 'session-123';
     mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue(sessionToken);
 
@@ -37,18 +42,27 @@ describe('logout', () => {
     await logoutCommand.action({}, undefined);
 
     expect(scope.isDone()).toBe(true);
-    expect(mockUserConfig.write).toHaveBeenCalledWith({});
+    expect(mockCredentialStore.deleteToken).toHaveBeenCalled();
     expect(mockConsola.success).toHaveBeenCalledWith('Successfully signed out.');
   });
 
-  it('should only clear user config with API token', async () => {
+  it('should only clear credentials with API token', async () => {
     const apiToken = 'ca_abc123';
     mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue(apiToken);
 
     await logoutCommand.action({}, undefined);
 
-    expect(mockUserConfig.write).toHaveBeenCalledWith({});
+    expect(mockCredentialStore.deleteToken).toHaveBeenCalled();
     expect(mockConsola.success).toHaveBeenCalledWith('Successfully signed out.');
+  });
+
+  it('should clear the user ID but preserve other flags', async () => {
+    mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue('ca_abc123');
+    mockUserConfig.read.mockReturnValue({ token: 'ca_abc123', userId: 'user-1', telemetryNoticeShown: true });
+
+    await logoutCommand.action({}, undefined);
+
+    expect(mockUserConfig.write).toHaveBeenCalledWith({ telemetryNoticeShown: true });
   });
 
   it('should handle no token gracefully', async () => {
@@ -56,7 +70,7 @@ describe('logout', () => {
 
     await logoutCommand.action({}, undefined);
 
-    expect(mockUserConfig.write).toHaveBeenCalledWith({});
+    expect(mockCredentialStore.deleteToken).toHaveBeenCalled();
     expect(mockConsola.success).toHaveBeenCalledWith('Successfully signed out.');
   });
 });

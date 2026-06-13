@@ -1,5 +1,5 @@
+import authorizationService from '@/services/authorization-service.js';
 import usersService from '@/services/users.js';
-import userConfig from '@/utils/user-config.js';
 import { defineCommand } from '@robingenz/zli';
 import { AxiosError } from 'axios';
 import consola from 'consola';
@@ -7,7 +7,7 @@ import consola from 'consola';
 export default defineCommand({
   description: 'Show current user',
   action: async (options, args) => {
-    const { token } = userConfig.read();
+    const token = authorizationService.getCurrentAuthorizationToken();
     if (token) {
       try {
         const user = await usersService.me();

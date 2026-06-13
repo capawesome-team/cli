@@ -1,14 +1,14 @@
 import { DEFAULT_API_BASE_URL } from '@/config/consts.js';
-import userConfig from '@/utils/user-config.js';
+import authorizationService from '@/services/authorization-service.js';
 import nock from 'nock';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import whoamiCommand from './whoami.js';
 
 // Mock only the dependencies we need to control
-vi.mock('@/utils/user-config.js');
+vi.mock('@/services/authorization-service.js');
 
 describe('whoami', () => {
-  const mockUserConfig = vi.mocked(userConfig);
+  const mockAuthorizationService = vi.mocked(authorizationService);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -24,8 +24,8 @@ describe('whoami', () => {
   it('should send Bearer token in Authorization header when checking current user', async () => {
     const testToken = 'user-token-456';
 
-    // Mock userConfig.read to return our test token
-    mockUserConfig.read.mockReturnValue({ token: testToken });
+    // Mock the authorization service to return our test token
+    mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue(testToken);
 
     // Set up nock to intercept the /v1/users/me request
     const scope = nock(DEFAULT_API_BASE_URL)
