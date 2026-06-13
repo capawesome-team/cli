@@ -32,6 +32,18 @@ The Capawesome Cloud CLI ships with command documentation that is accessible wit
 npx @capawesome/cli --help
 ```
 
+## Telemetry
+
+The Capawesome Cloud CLI sends crash reports to help us identify and fix bugs. No usage analytics are collected.
+
+To opt out, set the following environment variable:
+
+```bash
+export CAPAWESOME_TELEMETRY_DISABLED=1
+```
+
+Learn more in the [Telemetry documentation](https://capawesome.io/docs/cloud/cli/telemetry/).
+
 ## Development
 
 ### Getting Started
