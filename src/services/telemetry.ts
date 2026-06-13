@@ -24,6 +24,7 @@ class TelemetryServiceImpl implements TelemetryService {
       if (config.telemetryNoticeShown) {
         return;
       }
+      console.log(''); // Add an empty line for better readability
       consola.info(
         'Capawesome CLI sends crash reports to help us fix bugs.\n' +
           'To opt out: export CAPAWESOME_TELEMETRY_DISABLED=1\n' +
