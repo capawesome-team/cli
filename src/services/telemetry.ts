@@ -20,7 +20,8 @@ class TelemetryServiceImpl implements TelemetryService {
       return;
     }
     try {
-      if (userConfig.read().telemetryNoticeShown) {
+      const config = userConfig.read();
+      if (config.telemetryNoticeShown) {
         return;
       }
       consola.info(
@@ -28,7 +29,7 @@ class TelemetryServiceImpl implements TelemetryService {
           'To opt out: export CAPAWESOME_TELEMETRY_DISABLED=1\n' +
           'Learn more: https://capawesome.io/docs/cloud/cli/telemetry/',
       );
-      userConfig.write({ ...userConfig.read(), telemetryNoticeShown: true });
+      userConfig.write({ ...config, telemetryNoticeShown: true });
     } catch {
       // Never let the telemetry notice break the CLI.
     }
