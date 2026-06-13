@@ -78,6 +78,30 @@ describe('login', () => {
     expect(mockConsola.success).toHaveBeenCalledWith('Successfully signed in.');
   });
 
+  it('should preserve other config fields and clear the previous user ID before sign-in', async () => {
+    const testToken = 'valid-token-123';
+    const options = { token: testToken };
+
+    mockUserConfig.read.mockReturnValue({ token: testToken, userId: 'previous-user', telemetryNoticeShown: true });
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .get('/v1/users/me')
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: 'user-123', email: 'test@example.com' });
+
+    await loginCommand.action(options, undefined);
+
+    // The previous user ID is dropped before the new user is confirmed, while other flags are preserved.
+    expect(mockUserConfig.write).toHaveBeenCalledWith({ telemetryNoticeShown: true, token: testToken });
+    // Once confirmed, the new user ID is stored alongside the preserved flags.
+    expect(mockUserConfig.write).toHaveBeenCalledWith({
+      telemetryNoticeShown: true,
+      token: testToken,
+      userId: 'user-123',
+    });
+    expect(scope.isDone()).toBe(true);
+  });
+
   it('should open the browser', async () => {
     const options = {};
 
