@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import configService from '@/services/config.js';
+import telemetryService from '@/services/telemetry.js';
 import updateService from '@/services/update.js';
 import { getMessageFromUnknownError, UserError } from '@/utils/error.js';
 import { defineConfig, processConfig, ZliError } from '@robingenz/zli';
@@ -113,6 +114,10 @@ const captureException = async (error: unknown) => {
   if (error instanceof ZodError) {
     return;
   }
+  // Respect telemetry opt-out
+  if (!telemetryService.isEnabled()) {
+    return;
+  }
   const environment = await configService.getValueForKey('ENVIRONMENT');
   if (environment !== 'production') {
     return;
@@ -143,12 +148,16 @@ try {
     // Suggest opening an issue
     consola.log('If you think this is a bug, please open an issue at:');
     consola.log('  https://github.com/capawesome-team/cli/issues/new/choose');
+    // Show the telemetry notice
+    telemetryService.showNoticeIfNeeded();
     // Check for updates
     await updateService.checkForUpdate();
     // Exit with a non-zero code
     process.exit(1);
   }
 } finally {
+  // Show the telemetry notice
+  telemetryService.showNoticeIfNeeded();
   // Check for updates
   await updateService.checkForUpdate();
 }
