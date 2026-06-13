@@ -3,6 +3,7 @@ import configService from '@/services/config.js';
 import telemetryService from '@/services/telemetry.js';
 import updateService from '@/services/update.js';
 import { getMessageFromUnknownError, UserError } from '@/utils/error.js';
+import userConfig from '@/utils/user-config.js';
 import { defineConfig, processConfig, ZliError } from '@robingenz/zli';
 import * as Sentry from '@sentry/node';
 import { AxiosError } from 'axios';
@@ -126,6 +127,14 @@ const captureException = async (error: unknown) => {
     dsn: 'https://19f30f2ec4b91899abc33818568ceb42@o4507446340747264.ingest.de.sentry.io/4508506426966096',
     release: `capawesome-team-cli@${pkg.version}`,
   });
+  try {
+    const { userId } = userConfig.read();
+    if (userId) {
+      Sentry.setUser({ id: userId });
+    }
+  } catch {
+    // Still report the crash even if the user ID can't be read.
+  }
   if (process.argv.slice(2).length > 0) {
     Sentry.setTag('cli_command', process.argv.slice(2)[0]);
   }

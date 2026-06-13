@@ -90,7 +90,8 @@ export default defineCommand({
       token: sessionIdOrToken,
     });
     try {
-      await usersService.me();
+      const user = await usersService.me();
+      userConfig.write({ token: sessionIdOrToken, userId: user.id });
       consola.success(`Successfully signed in.`);
     } catch (error) {
       userConfig.write({});

@@ -73,6 +73,7 @@ describe('login', () => {
     await loginCommand.action(options, undefined);
 
     expect(mockUserConfig.write).toHaveBeenCalledWith({ token: testToken });
+    expect(mockUserConfig.write).toHaveBeenCalledWith({ token: testToken, userId: 'user-123' });
     expect(scope.isDone()).toBe(true);
     expect(mockConsola.success).toHaveBeenCalledWith('Successfully signed in.');
   });
@@ -112,6 +113,7 @@ describe('login', () => {
     expect(mockSessionCodesService.create).toHaveBeenCalled();
     expect(mockConsola.box).toHaveBeenCalledWith('Copy your one-time code: ABCD-1234');
     expect(mockOpen).toHaveBeenCalledWith(`${DEFAULT_CONSOLE_BASE_URL}/login/device`);
+    expect(mockUserConfig.write).toHaveBeenCalledWith({ token: 'session-123', userId: 'user-123' });
     expect(scope.isDone()).toBe(true);
     expect(mockConsola.success).toHaveBeenCalledWith('Successfully signed in.');
   });
