@@ -1,10 +1,10 @@
-import userConfig, { UserConfig } from '@/utils/user-config.js';
+import credentialStore, { CredentialStore } from '@/utils/credential-store.js';
 
 export interface AuthorizationService {
   /**
    * Returns the current authorization token.
-   * If running in CI, it will return the CAPAWESOME_TOKEN environment variable.
-   * If not running in CI, it will return the token from the local user config.
+   * It prefers the token from the secure credential store and falls back to the
+   * CAPAWESOME_CLOUD_TOKEN and CAPAWESOME_TOKEN environment variables.
    * If no token is found, it will return null.
    * @returns The current authorization token or null.
    */
@@ -18,15 +18,15 @@ export interface AuthorizationService {
 }
 
 class AuthorizationServiceImpl implements AuthorizationService {
-  private readonly userConfig: UserConfig;
+  private readonly credentialStore: CredentialStore;
 
-  constructor(userConfig: UserConfig) {
-    this.userConfig = userConfig;
+  constructor(credentialStore: CredentialStore) {
+    this.credentialStore = credentialStore;
   }
 
   getCurrentAuthorizationToken(): string | null {
     const token =
-      this.userConfig.read().token || process.env.CAPAWESOME_CLOUD_TOKEN || process.env.CAPAWESOME_TOKEN || null;
+      this.credentialStore.getToken() || process.env.CAPAWESOME_CLOUD_TOKEN || process.env.CAPAWESOME_TOKEN || null;
     // Trim to remove newline characters that may be included when pasting a token,
     // which would cause an invalid character error in the Authorization header.
     const trimmedToken = token?.trim();
@@ -38,6 +38,6 @@ class AuthorizationServiceImpl implements AuthorizationService {
   }
 }
 
-const authorizationService: AuthorizationService = new AuthorizationServiceImpl(userConfig);
+const authorizationService: AuthorizationService = new AuthorizationServiceImpl(credentialStore);
 
 export default authorizationService;

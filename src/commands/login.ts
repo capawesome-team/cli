@@ -4,6 +4,7 @@ import sessionsService from '@/services/sessions.js';
 import usersService from '@/services/users.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
+import credentialStore from '@/utils/credential-store.js';
 import userConfig from '@/utils/user-config.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
 import { AxiosError } from 'axios';
@@ -86,17 +87,18 @@ export default defineCommand({
     }
     // Sign in with the provided token
     consola.start('Signing in...');
-    // Drop the previous token and user ID but keep other flags,
+    // Drop the previous user ID but keep other flags,
     // so a crash during sign-in isn't attributed to the previous account
     const { token: _previousToken, userId: _previousUserId, ...persistentConfig } = userConfig.read();
-    userConfig.write({ ...persistentConfig, token: sessionIdOrToken });
+    userConfig.write(persistentConfig);
+    credentialStore.setToken(sessionIdOrToken);
     try {
       const user = await usersService.me();
-      userConfig.write({ ...persistentConfig, token: sessionIdOrToken, userId: user.id });
+      userConfig.write({ ...persistentConfig, userId: user.id });
       consola.success(`Successfully signed in.`);
     } catch (error) {
       // Clear the credentials on failure while preserving the other flags
-      userConfig.write(persistentConfig);
+      credentialStore.deleteToken();
       if (error instanceof AxiosError && error.response?.status === 401) {
         consola.error(
           `Invalid token. Please provide a valid token. You can create a token at ${consoleBaseUrl}/settings/tokens.`,
