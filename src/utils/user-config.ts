@@ -5,6 +5,7 @@ import { readUser, writeUser } from 'rc9';
 
 export interface IUserConfig {
   token?: string;
+  userId?: string;
   telemetryNoticeShown?: boolean;
 }
 

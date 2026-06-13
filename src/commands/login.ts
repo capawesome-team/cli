@@ -86,14 +86,17 @@ export default defineCommand({
     }
     // Sign in with the provided token
     consola.start('Signing in...');
-    userConfig.write({
-      token: sessionIdOrToken,
-    });
+    // Drop the previous token and user ID but keep other flags,
+    // so a crash during sign-in isn't attributed to the previous account
+    const { token: _previousToken, userId: _previousUserId, ...persistentConfig } = userConfig.read();
+    userConfig.write({ ...persistentConfig, token: sessionIdOrToken });
     try {
-      await usersService.me();
+      const user = await usersService.me();
+      userConfig.write({ ...persistentConfig, token: sessionIdOrToken, userId: user.id });
       consola.success(`Successfully signed in.`);
     } catch (error) {
-      userConfig.write({});
+      // Clear the credentials on failure while preserving the other flags
+      userConfig.write(persistentConfig);
       if (error instanceof AxiosError && error.response?.status === 401) {
         consola.error(
           `Invalid token. Please provide a valid token. You can create a token at ${consoleBaseUrl}/settings/tokens.`,
