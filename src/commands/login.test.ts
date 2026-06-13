@@ -80,6 +80,31 @@ describe('login', () => {
     expect(mockConsola.success).toHaveBeenCalledWith('Successfully signed in.');
   });
 
+  it('should preserve other config flags and replace the previous user ID', async () => {
+    const testToken = 'valid-token-123';
+    const options = { token: testToken };
+
+    mockCredentialStore.getToken.mockReturnValue(testToken);
+    mockUserConfig.read.mockReturnValue({
+      token: 'previous-token',
+      userId: 'previous-user',
+      telemetryNoticeShown: true,
+    });
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .get('/v1/users/me')
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: 'user-123', email: 'test@example.com' });
+
+    await loginCommand.action(options, undefined);
+
+    // The previous user ID is dropped before the new account is confirmed.
+    expect(mockUserConfig.write).toHaveBeenNthCalledWith(1, { telemetryNoticeShown: true });
+    // The new user ID is stored while other flags are preserved.
+    expect(mockUserConfig.write).toHaveBeenNthCalledWith(2, { telemetryNoticeShown: true, userId: 'user-123' });
+    expect(scope.isDone()).toBe(true);
+  });
+
   it('should open the browser', async () => {
     const options = {};
 
