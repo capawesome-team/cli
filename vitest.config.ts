@@ -9,6 +9,10 @@ export default defineConfig({
       NODE_ENV: 'test',
     },
     exclude: [...configDefaults.exclude, '**/dist/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+    },
   },
   resolve: {
     alias: {
