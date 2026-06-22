@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.14.0](https://github.com/capawesome-team/cli/compare/v4.13.0...v4.14.0) (2026-06-22)
+
+
+### Features
+
+* hint that failure summary can take up to a minute ([9e75e4f](https://github.com/capawesome-team/cli/commit/9e75e4f211aedae075a9509059a8fd2c7fb5c1f5))
+* store authentication token in OS secure storage ([#175](https://github.com/capawesome-team/cli/issues/175)) ([337213d](https://github.com/capawesome-team/cli/commit/337213d4de900fef6ac52b9c0ae0166cdeded630))
+* **telemetry:** add crash report notice and opt-out ([#173](https://github.com/capawesome-team/cli/issues/173)) ([0027ff2](https://github.com/capawesome-team/cli/commit/0027ff258ef18a293646330fd3d46b29e7b0c324))
+* **telemetry:** attach user ID to crash reports ([#174](https://github.com/capawesome-team/cli/issues/174)) ([eeef34a](https://github.com/capawesome-team/cli/commit/eeef34a1aadbdd2a9b8f013e765155cdb1ea9b44))
+
 ## [4.13.0](https://github.com/capawesome-team/cli/compare/v4.12.0...v4.13.0) (2026-06-09)
 
 
