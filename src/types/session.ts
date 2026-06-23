@@ -9,4 +9,5 @@ export interface DeleteSessionDto {
 
 export interface SessionDto {
   id: string;
+  token: string;
 }
