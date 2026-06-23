@@ -44,7 +44,15 @@ class CredentialStoreImpl implements CredentialStore {
       this.writeFileToken(token);
       return;
     }
-    this.createEntry().setPassword(token);
+    try {
+      this.createEntry().setPassword(token);
+    } catch {
+      // The keyring read-probe can succeed while a write fails (e.g. a headless
+      // CI environment with a present but unusable Secret Service backend), so
+      // fall back to file storage instead of crashing.
+      this.writeFileToken(token);
+      return;
+    }
     this.clearFileToken();
   }
 

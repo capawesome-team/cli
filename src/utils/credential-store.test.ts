@@ -71,6 +71,19 @@ describe('credentialStore', () => {
       expect(mockWrite).toHaveBeenCalledWith({ userId: 'user-1' });
     });
 
+    it('should fall back to the config file when the keyring write fails', async () => {
+      mockRead.mockReturnValue({ userId: 'user-1' });
+      mockSetPassword.mockImplementation(() => {
+        throw new Error('Platform failure: Unknown(38)');
+      });
+      const credentialStore = await loadCredentialStore();
+
+      credentialStore.setToken('new-token');
+
+      expect(mockSetPassword).toHaveBeenCalledWith('new-token');
+      expect(mockWrite).toHaveBeenCalledWith({ userId: 'user-1', token: 'new-token' });
+    });
+
     it('should delete the token from the keyring', async () => {
       const credentialStore = await loadCredentialStore();
 
