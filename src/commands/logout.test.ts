@@ -57,6 +57,8 @@ describe('logout', () => {
 
     expect(scope.isDone()).toBe(true);
     expect(mockCredentialStore.deleteToken).toHaveBeenCalled();
+    // The session id and other sensitive fields must be cleared from the config
+    expect(mockUserConfig.write).toHaveBeenCalledWith({});
   });
 
   it('should only clear credentials with API token', async () => {

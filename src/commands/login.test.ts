@@ -142,6 +142,8 @@ describe('login', () => {
     expect(mockOpen).toHaveBeenCalledWith(`${DEFAULT_CONSOLE_BASE_URL}/login/device`);
     // The token (not the id) must be stored as the credential
     expect(mockCredentialStore.setToken).toHaveBeenCalledWith('session-token-123');
+    // The non-secret session id must be persisted so logout can delete the session
+    expect(mockUserConfig.write).toHaveBeenLastCalledWith({ userId: 'user-123', sessionId: 'session-123' });
     expect(scope.isDone()).toBe(true);
     expect(mockConsola.success).toHaveBeenCalledWith('Successfully signed in.');
   });

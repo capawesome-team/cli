@@ -99,15 +99,18 @@ export default defineCommand({
       userId: _previousUserId,
       ...persistentConfig
     } = userConfig.read();
-    userConfig.write(persistentConfig);
+    // Persist the non-secret session id right away, so a crash during sign-in
+    // still lets logout delete the correct server session.
+    userConfig.write({ ...persistentConfig, ...(sessionId ? { sessionId } : {}) });
     credentialStore.setToken(sessionIdOrToken);
     try {
       const user = await usersService.me();
       userConfig.write({ ...persistentConfig, userId: user.id, ...(sessionId ? { sessionId } : {}) });
       consola.success(`Successfully signed in.`);
     } catch (error) {
-      // Clear the credentials on failure while preserving the other flags
+      // Clear the credentials and session id on failure while preserving the other flags
       credentialStore.deleteToken();
+      userConfig.write(persistentConfig);
       if (error instanceof AxiosError && error.response?.status === 401) {
         consola.error(
           `Invalid token. Please provide a valid token. You can create a token at ${consoleBaseUrl}/settings/tokens.`,
