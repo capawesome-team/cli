@@ -34,7 +34,7 @@ describe('credentialStore', () => {
     mockRead.mockReturnValue({});
   });
 
-  describe('when the keyring is available', () => {
+  describe('when the keyring works', () => {
     beforeEach(() => {
       mockGetPassword.mockReturnValue(null);
     });
@@ -71,6 +71,32 @@ describe('credentialStore', () => {
       expect(mockWrite).toHaveBeenCalledWith({ userId: 'user-1' });
     });
 
+    it('should fall back to the config file when the keyring write fails', async () => {
+      mockRead.mockReturnValue({ userId: 'user-1' });
+      mockSetPassword.mockImplementation(() => {
+        throw new Error('Platform failure: Unknown(38)');
+      });
+      const credentialStore = await loadCredentialStore();
+
+      credentialStore.setToken('new-token');
+
+      expect(mockSetPassword).toHaveBeenCalledWith('new-token');
+      expect(mockWrite).toHaveBeenCalledWith({ userId: 'user-1', token: 'new-token' });
+    });
+
+    it('should read the file token after a keyring write failure even when a stale keyring token exists', async () => {
+      mockGetPassword.mockReturnValue('stale-keyring-token');
+      mockSetPassword.mockImplementation(() => {
+        throw new Error('Platform failure: Unknown(38)');
+      });
+      mockRead.mockReturnValue({ token: 'new-token' });
+      const credentialStore = await loadCredentialStore();
+
+      credentialStore.setToken('new-token');
+
+      expect(credentialStore.getToken()).toBe('new-token');
+    });
+
     it('should delete the token from the keyring', async () => {
       const credentialStore = await loadCredentialStore();
 
@@ -78,13 +104,28 @@ describe('credentialStore', () => {
 
       expect(mockDeletePassword).toHaveBeenCalled();
     });
+
+    it('should not read a stale keyring token after a keyring delete failure', async () => {
+      mockGetPassword.mockReturnValue('stale-keyring-token');
+      mockDeletePassword.mockImplementation(() => {
+        throw new Error('Platform failure: Unknown(38)');
+      });
+      const credentialStore = await loadCredentialStore();
+
+      credentialStore.deleteToken();
+
+      expect(credentialStore.getToken()).toBeNull();
+    });
   });
 
   describe('when the keyring is unavailable', () => {
     beforeEach(() => {
-      mockGetPassword.mockImplementation(() => {
+      const throwNoBackend = () => {
         throw new Error('no keyring backend');
-      });
+      };
+      mockGetPassword.mockImplementation(throwNoBackend);
+      mockSetPassword.mockImplementation(throwNoBackend);
+      mockDeletePassword.mockImplementation(throwNoBackend);
     });
 
     it('should return the token from the config file', async () => {
@@ -92,7 +133,6 @@ describe('credentialStore', () => {
       const credentialStore = await loadCredentialStore();
 
       expect(credentialStore.getToken()).toBe('file-token');
-      expect(mockSetPassword).not.toHaveBeenCalled();
     });
 
     it('should store the token in the config file while preserving other fields', async () => {
@@ -102,7 +142,14 @@ describe('credentialStore', () => {
       credentialStore.setToken('file-token');
 
       expect(mockWrite).toHaveBeenCalledWith({ userId: 'user-1', token: 'file-token' });
-      expect(mockSetPassword).not.toHaveBeenCalled();
+    });
+
+    it('should clear the file token without throwing when deleting', async () => {
+      mockRead.mockReturnValue({ token: 'file-token', userId: 'user-1' });
+      const credentialStore = await loadCredentialStore();
+
+      expect(() => credentialStore.deleteToken()).not.toThrow();
+      expect(mockWrite).toHaveBeenCalledWith({ userId: 'user-1' });
     });
   });
 });
