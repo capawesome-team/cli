@@ -26,38 +26,42 @@ export interface CredentialStore {
  * (e.g. headless CI environments without a keyring backend).
  */
 class CredentialStoreImpl implements CredentialStore {
-  private keyringAvailable: boolean | null = null;
+  // Set once any keyring operation fails (e.g. a headless CI environment with a
+  // present but unusable Secret Service backend). From then on the file token is
+  // the single source of truth for the rest of the process, so reads don't
+  // return a stale keyring token after a failed write.
+  private keyringDisabled = false;
 
   getToken(): string | null {
-    if (!this.isKeyringAvailable()) {
-      return userConfig.read().token ?? null;
+    if (!this.keyringDisabled) {
+      try {
+        const token = this.createEntry().getPassword();
+        if (token) {
+          return token;
+        }
+        return this.migrateFileToken();
+      } catch {
+        this.keyringDisabled = true;
+      }
     }
-    const token = this.createEntry().getPassword();
-    if (token) {
-      return token;
-    }
-    return this.migrateFileToken();
+    return userConfig.read().token ?? null;
   }
 
   setToken(token: string): void {
-    if (!this.isKeyringAvailable()) {
-      this.writeFileToken(token);
-      return;
+    if (!this.keyringDisabled) {
+      try {
+        this.createEntry().setPassword(token);
+        this.clearFileToken();
+        return;
+      } catch {
+        this.keyringDisabled = true;
+      }
     }
-    try {
-      this.createEntry().setPassword(token);
-    } catch {
-      // The keyring read-probe can succeed while a write fails (e.g. a headless
-      // CI environment with a present but unusable Secret Service backend), so
-      // fall back to file storage instead of crashing.
-      this.writeFileToken(token);
-      return;
-    }
-    this.clearFileToken();
+    this.writeFileToken(token);
   }
 
   deleteToken(): void {
-    if (this.isKeyringAvailable()) {
+    if (!this.keyringDisabled) {
       try {
         this.createEntry().deletePassword();
       } catch {
@@ -69,20 +73,6 @@ class CredentialStoreImpl implements CredentialStore {
 
   private createEntry(): Entry {
     return new Entry(SERVICE_NAME, ACCOUNT_NAME);
-  }
-
-  private isKeyringAvailable(): boolean {
-    if (this.keyringAvailable === null) {
-      try {
-        // Probe the backend with a read. This throws if no keyring backend is
-        // available, but returns null for a missing credential.
-        this.createEntry().getPassword();
-        this.keyringAvailable = true;
-      } catch {
-        this.keyringAvailable = false;
-      }
-    }
-    return this.keyringAvailable;
   }
 
   /**
