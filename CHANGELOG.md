@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.15.0](https://github.com/capawesome-team/cli/compare/v4.14.0...v4.15.0) (2026-06-23)
+
+
+### Features
+
+* **login:** support the new session token field ([#176](https://github.com/capawesome-team/cli/issues/176)) ([195922d](https://github.com/capawesome-team/cli/commit/195922d60e9a035143f236aeaaeea6e9aa842c52))
+
+
+### Bug Fixes
+
+* **login:** fall back to file storage when keyring write fails ([#177](https://github.com/capawesome-team/cli/issues/177)) ([ec6019d](https://github.com/capawesome-team/cli/commit/ec6019d58476abda2c12646fd434b77636095355))
+
 ## [4.14.0](https://github.com/capawesome-team/cli/compare/v4.13.0...v4.14.0) (2026-06-22)
 
 
