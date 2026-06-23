@@ -9,12 +9,14 @@ export default defineCommand({
   description: 'Sign out from the Capawesome Cloud Console.',
   action: async (options, args) => {
     const token = authorizationService.getCurrentAuthorizationToken();
+    // Clear the session id and user ID but keep other flags (e.g. the telemetry notice).
+    const { sessionId, token: _token, userId: _userId, ...persistentConfig } = userConfig.read();
     if (token && !token.startsWith('ca_')) {
-      await sessionsService.delete({ id: token }).catch(() => {});
+      // Delete by the stored session id. Fall back to the token for sessions
+      // created before the token/id split, whose token equals the id.
+      await sessionsService.delete({ id: sessionId ?? token }).catch(() => {});
     }
     credentialStore.deleteToken();
-    // Clear the user ID but keep other flags (e.g. the telemetry notice).
-    const { token: _token, userId: _userId, ...persistentConfig } = userConfig.read();
     userConfig.write(persistentConfig);
     consola.success('Successfully signed out.');
   },

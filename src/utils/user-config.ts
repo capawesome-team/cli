@@ -4,6 +4,9 @@ import { resolve } from 'node:path';
 import { readUser, writeUser } from 'rc9';
 
 export interface IUserConfig {
+  // The non-secret id of the active session, persisted so `logout` can delete
+  // the correct session. The session token is kept in the secure credential store.
+  sessionId?: string;
   token?: string;
   userId?: string;
   telemetryNoticeShown?: boolean;

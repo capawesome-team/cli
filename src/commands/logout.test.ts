@@ -46,6 +46,21 @@ describe('logout', () => {
     expect(mockConsola.success).toHaveBeenCalledWith('Successfully signed out.');
   });
 
+  it('should delete the session by its stored id when available', async () => {
+    mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue('session-token-xyz');
+    mockUserConfig.read.mockReturnValue({ sessionId: 'session-id-abc', token: 'session-token-xyz', userId: 'user-1' });
+
+    // The session must be deleted by its id, not by the token
+    const scope = nock(DEFAULT_API_BASE_URL).delete('/v1/sessions/session-id-abc').reply(200);
+
+    await logoutCommand.action({}, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    expect(mockCredentialStore.deleteToken).toHaveBeenCalled();
+    // The session id and other sensitive fields must be cleared from the config
+    expect(mockUserConfig.write).toHaveBeenCalledWith({});
+  });
+
   it('should only clear credentials with API token', async () => {
     const apiToken = 'ca_abc123';
     mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue(apiToken);

@@ -117,15 +117,15 @@ describe('login', () => {
       code: 'ABCD1234',
     });
 
-    mockSessionsService.create.mockResolvedValue({ id: 'session-123' });
+    mockSessionsService.create.mockResolvedValue({ id: 'session-123', token: 'session-token-123' });
 
     // Mock credentialStore.getToken to return the session token
-    mockCredentialStore.getToken.mockReturnValue('session-123');
+    mockCredentialStore.getToken.mockReturnValue('session-token-123');
 
     // Set up nock to intercept the /v1/users/me request
     const scope = nock(DEFAULT_API_BASE_URL)
       .get('/v1/users/me')
-      .matchHeader('Authorization', `Bearer session-123`)
+      .matchHeader('Authorization', `Bearer session-token-123`)
       .reply(200, { id: 'user-123', email: 'test@example.com' });
 
     await loginCommand.action(options, undefined);
@@ -140,6 +140,10 @@ describe('login', () => {
     expect(mockSessionCodesService.create).toHaveBeenCalled();
     expect(mockConsola.box).toHaveBeenCalledWith('Copy your one-time code: ABCD-1234');
     expect(mockOpen).toHaveBeenCalledWith(`${DEFAULT_CONSOLE_BASE_URL}/login/device`);
+    // The token (not the id) must be stored as the credential
+    expect(mockCredentialStore.setToken).toHaveBeenCalledWith('session-token-123');
+    // The non-secret session id must be persisted so logout can delete the session
+    expect(mockUserConfig.write).toHaveBeenLastCalledWith({ userId: 'user-123', sessionId: 'session-123' });
     expect(scope.isDone()).toBe(true);
     expect(mockConsola.success).toHaveBeenCalledWith('Successfully signed in.');
   });

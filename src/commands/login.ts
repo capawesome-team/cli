@@ -2,6 +2,7 @@ import configService from '@/services/config.js';
 import sessionCodesService from '@/services/session-code.js';
 import sessionsService from '@/services/sessions.js';
 import usersService from '@/services/users.js';
+import { SessionDto } from '@/types/session.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
 import credentialStore from '@/utils/credential-store.js';
@@ -22,6 +23,8 @@ export default defineCommand({
   action: async (options, args) => {
     const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
     let { token: sessionIdOrToken } = options;
+    // The non-secret session id, only set when authenticating via the browser.
+    let sessionId: string | undefined;
     if (sessionIdOrToken === undefined) {
       if (!isInteractive()) {
         consola.error('You must provide a token when running in non-interactive environment.');
@@ -63,12 +66,13 @@ export default defineCommand({
         }
         // Wait for the user to authenticate
         consola.start('Waiting for authentication...');
-        const sessionId = await createSession(deviceCode);
-        if (!sessionId) {
+        const session = await createSession(deviceCode);
+        if (!session) {
           consola.error('Authentication timed out. Please try again.');
           process.exit(1);
         }
-        sessionIdOrToken = sessionId;
+        sessionId = session.id;
+        sessionIdOrToken = session.token;
       } else {
         consola.info(`You can create a token at ${consoleBaseUrl}/settings/tokens.`);
         // Prompt the user to enter their token
@@ -89,16 +93,24 @@ export default defineCommand({
     consola.start('Signing in...');
     // Drop the previous user ID but keep other flags,
     // so a crash during sign-in isn't attributed to the previous account
-    const { token: _previousToken, userId: _previousUserId, ...persistentConfig } = userConfig.read();
-    userConfig.write(persistentConfig);
+    const {
+      sessionId: _previousSessionId,
+      token: _previousToken,
+      userId: _previousUserId,
+      ...persistentConfig
+    } = userConfig.read();
+    // Persist the non-secret session id right away, so a crash during sign-in
+    // still lets logout delete the correct server session.
+    userConfig.write({ ...persistentConfig, ...(sessionId ? { sessionId } : {}) });
     credentialStore.setToken(sessionIdOrToken);
     try {
       const user = await usersService.me();
-      userConfig.write({ ...persistentConfig, userId: user.id });
+      userConfig.write({ ...persistentConfig, userId: user.id, ...(sessionId ? { sessionId } : {}) });
       consola.success(`Successfully signed in.`);
     } catch (error) {
-      // Clear the credentials on failure while preserving the other flags
+      // Clear the credentials and session id on failure while preserving the other flags
       credentialStore.deleteToken();
+      userConfig.write(persistentConfig);
       if (error instanceof AxiosError && error.response?.status === 401) {
         consola.error(
           `Invalid token. Please provide a valid token. You can create a token at ${consoleBaseUrl}/settings/tokens.`,
@@ -111,18 +123,17 @@ export default defineCommand({
   },
 });
 
-const createSession = async (deviceCode: string) => {
+const createSession = async (deviceCode: string): Promise<SessionDto | null> => {
   const maxAttempts = 20;
   const interval = 3 * 1000; // 3 seconds
   let attempts = 0;
-  let sessionId: string | null = null;
-  while (attempts < maxAttempts && sessionId === null) {
+  let session: SessionDto | null = null;
+  while (attempts < maxAttempts && session === null) {
     try {
-      const response = await sessionsService.create({
+      session = await sessionsService.create({
         code: deviceCode,
         provider: 'code',
       });
-      sessionId = response.id;
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 400) {
         // Session not ready yet, wait and try again
@@ -133,5 +144,5 @@ const createSession = async (deviceCode: string) => {
       }
     }
   }
-  return sessionId;
+  return session;
 };
