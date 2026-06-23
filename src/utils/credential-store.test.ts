@@ -104,6 +104,18 @@ describe('credentialStore', () => {
 
       expect(mockDeletePassword).toHaveBeenCalled();
     });
+
+    it('should not read a stale keyring token after a keyring delete failure', async () => {
+      mockGetPassword.mockReturnValue('stale-keyring-token');
+      mockDeletePassword.mockImplementation(() => {
+        throw new Error('Platform failure: Unknown(38)');
+      });
+      const credentialStore = await loadCredentialStore();
+
+      credentialStore.deleteToken();
+
+      expect(credentialStore.getToken()).toBeNull();
+    });
   });
 
   describe('when the keyring is unavailable', () => {

@@ -65,7 +65,10 @@ class CredentialStoreImpl implements CredentialStore {
       try {
         this.createEntry().deletePassword();
       } catch {
-        // Ignore errors when there is no credential to delete.
+        // The deletion throws when there is no credential to delete, but also
+        // when the keyring cannot be mutated. Disable the keyring so a stale
+        // token can't be read back after the file token has been cleared.
+        this.keyringDisabled = true;
       }
     }
     this.clearFileToken();
