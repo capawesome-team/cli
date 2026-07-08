@@ -5,6 +5,7 @@ import appCertificatesService from '@/services/app-certificates.js';
 import appEnvironmentsService from '@/services/app-environments.js';
 import appsService from '@/services/apps.js';
 import { AppBuildArtifactDto } from '@/types/app-build.js';
+import { getAppBuildShareUrls } from '@/utils/app-build-shares.js';
 import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
 import { createBufferFromPath } from '@/utils/buffer.js';
@@ -66,6 +67,15 @@ export default defineCommand({
         })
         .optional()
         .describe('The platform for the build. Supported values are `ios`, `android`, and `web`.'),
+      share: z.boolean().optional().describe('Create a public share link for the build after it succeeds.'),
+      shareDescription: z
+        .string()
+        .optional()
+        .describe('Additional information for testers, e.g. what to test. Requires --share.'),
+      shareExpiresInDays: z.coerce
+        .number()
+        .optional()
+        .describe('Number of days until the share link expires. Requires --share.'),
       stack: z
         .enum(['macos-sequoia', 'macos-tahoe'], {
           message: 'Build stack must be either `macos-sequoia` or `macos-tahoe`.',
@@ -113,6 +123,12 @@ export default defineCommand({
     // Validate that detached flag cannot be used with failure summary
     if (options.detached && options.failureSummary) {
       consola.error('The --detached flag cannot be used with --failure-summary.');
+      process.exit(1);
+    }
+
+    // Validate that detached flag cannot be used with share
+    if (options.detached && options.share) {
+      consola.error('The --detached flag cannot be used with --share. Sharing requires waiting for completion.');
       process.exit(1);
     }
 
@@ -428,6 +444,31 @@ export default defineCommand({
           filePath: typeof options.zip === 'string' ? options.zip : undefined,
         });
       }
+      // Create a public share link if requested
+      let share: { id: string; url: string; qrCodeUrl: string; expiresAt: string | null } | undefined;
+      if (options.share) {
+        const expiresAt = options.shareExpiresInDays
+          ? new Date(Date.now() + options.shareExpiresInDays * 24 * 60 * 60 * 1000).toISOString()
+          : undefined;
+        const createdShare = await appBuildsService.createShare({
+          appId,
+          appBuildId: response.id,
+          description: options.shareDescription,
+          expiresAt,
+        });
+        const shareUrls = await getAppBuildShareUrls(createdShare.id);
+        share = {
+          id: createdShare.id,
+          url: shareUrls.url,
+          qrCodeUrl: shareUrls.qrCodeUrl,
+          expiresAt: createdShare.expiresAt,
+        };
+        if (!json) {
+          consola.success('Build shared successfully.');
+          consola.info(`Share URL: ${shareUrls.url}`);
+        }
+      }
+
       // Output JSON if json flag is set
       if (json) {
         console.log(
@@ -435,6 +476,7 @@ export default defineCommand({
             {
               id: response.id,
               numberAsString: response.numberAsString,
+              ...(share ? { share } : {}),
             },
             null,
             2,

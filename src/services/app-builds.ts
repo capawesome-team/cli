@@ -1,7 +1,9 @@
 import authorizationService from '@/services/authorization-service.js';
 import {
   AppBuildDto,
+  AppBuildShareDto,
   CreateAppBuildDto,
+  CreateAppBuildShareDto,
   FindAllAppBuildsDto,
   FindOneAppBuildDto,
   UpdateAppBuildDto,
@@ -16,6 +18,7 @@ export interface DownloadArtifactDto {
 
 export interface AppBuildsService {
   create(dto: CreateAppBuildDto): Promise<AppBuildDto>;
+  createShare(dto: CreateAppBuildShareDto): Promise<AppBuildShareDto>;
   findAll(dto: FindAllAppBuildsDto): Promise<AppBuildDto[]>;
   findOne(dto: FindOneAppBuildDto): Promise<AppBuildDto>;
   update(dto: UpdateAppBuildDto): Promise<AppBuildDto>;
@@ -36,6 +39,20 @@ class AppBuildsServiceImpl implements AppBuildsService {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
     });
+    return response.data;
+  }
+
+  async createShare(dto: CreateAppBuildShareDto): Promise<AppBuildShareDto> {
+    const { appId, appBuildId, ...bodyData } = dto;
+    const response = await this.httpClient.post<AppBuildShareDto>(
+      `/v1/apps/${appId}/builds/${appBuildId}/shares`,
+      bodyData,
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
+      },
+    );
     return response.data;
   }
 
