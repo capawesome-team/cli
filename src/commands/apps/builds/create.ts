@@ -74,6 +74,10 @@ export default defineCommand({
         .describe('Additional information for testers, e.g. what to test. Requires --share.'),
       shareExpiresInDays: z.coerce
         .number()
+        .int()
+        .min(1, {
+          message: 'Expires in days must be a positive integer.',
+        })
         .optional()
         .describe('Number of days until the share link expires. Requires --share.'),
       stack: z
@@ -129,6 +133,12 @@ export default defineCommand({
     // Validate that detached flag cannot be used with share
     if (options.detached && options.share) {
       consola.error('The --detached flag cannot be used with --share. Sharing requires waiting for completion.');
+      process.exit(1);
+    }
+
+    // Validate that share sub-flags cannot be used without share
+    if (!options.share && (options.shareDescription !== undefined || options.shareExpiresInDays !== undefined)) {
+      consola.error('The --share-description and --share-expires-in-days flags require --share.');
       process.exit(1);
     }
 
@@ -447,9 +457,10 @@ export default defineCommand({
       // Create a public share link if requested
       let share: { id: string; url: string; qrCodeUrl: string; expiresAt: string | null } | undefined;
       if (options.share) {
-        const expiresAt = options.shareExpiresInDays
-          ? new Date(Date.now() + options.shareExpiresInDays * 24 * 60 * 60 * 1000).toISOString()
-          : undefined;
+        const expiresAt =
+          options.shareExpiresInDays !== undefined
+            ? new Date(Date.now() + options.shareExpiresInDays * 24 * 60 * 60 * 1000).toISOString()
+            : undefined;
         const createdShare = await appBuildsService.createShare({
           appId,
           appBuildId: response.id,

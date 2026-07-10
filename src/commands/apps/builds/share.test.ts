@@ -24,6 +24,8 @@ describe('apps-builds-share', () => {
   const testToken = 'test-token';
   const appId = '00000000-0000-0000-0000-000000000001';
   const buildId = '00000000-0000-0000-0000-000000000002';
+  const validAppId = '11111111-1111-4111-8111-111111111111';
+  const validBuildId = '22222222-2222-4222-8222-222222222222';
   const shareId = 'share-abc';
 
   beforeEach(() => {
@@ -145,5 +147,23 @@ describe('apps-builds-share', () => {
     expect(mockConsola.error).toHaveBeenCalledWith(
       'You must provide a build ID when running in non-interactive environment.',
     );
+  });
+
+  it('should reject a non-positive expiresInDays value', () => {
+    const schema = shareCommand.options?.schema;
+
+    for (const expiresInDays of [0, -1]) {
+      const result = schema?.safeParse({ appId: validAppId, buildId: validBuildId, expiresInDays });
+      expect(result?.success).toBe(false);
+      expect(result?.error?.issues[0]?.message).toBe('Expires in days must be a positive integer.');
+    }
+  });
+
+  it('should accept a positive expiresInDays value', () => {
+    const schema = shareCommand.options?.schema;
+
+    const result = schema?.safeParse({ appId: validAppId, buildId: validBuildId, expiresInDays: 7 });
+    expect(result?.success).toBe(true);
+    expect(result?.data?.expiresInDays).toBe(7);
   });
 });

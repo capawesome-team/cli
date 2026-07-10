@@ -24,7 +24,14 @@ export default defineCommand({
         .optional()
         .describe('Build ID to share.'),
       description: z.string().optional().describe('Additional information for testers, e.g. what to test.'),
-      expiresInDays: z.coerce.number().optional().describe('Number of days until the share link expires.'),
+      expiresInDays: z.coerce
+        .number()
+        .int()
+        .min(1, {
+          message: 'Expires in days must be a positive integer.',
+        })
+        .optional()
+        .describe('Number of days until the share link expires.'),
       json: z.boolean().optional().describe('Output in JSON format.'),
     }),
   ),
@@ -75,9 +82,10 @@ export default defineCommand({
     }
 
     // Compute the expiration date if provided
-    const expiresAt = expiresInDays
-      ? new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000).toISOString()
-      : undefined;
+    const expiresAt =
+      expiresInDays !== undefined
+        ? new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000).toISOString()
+        : undefined;
 
     const share = await appBuildsService.createShare({ appId, appBuildId: buildId, description, expiresAt });
     const { url, qrCodeUrl } = await getAppBuildShareUrls(share.id);

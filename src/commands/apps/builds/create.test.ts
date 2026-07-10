@@ -25,6 +25,7 @@ describe('apps-builds-create', () => {
   const testToken = 'test-token';
   const appId = '00000000-0000-0000-0000-000000000001';
   const buildId = '00000000-0000-0000-0000-000000000002';
+  const validAppId = '11111111-1111-4111-8111-111111111111';
   const shareId = 'share-abc';
 
   beforeEach(async () => {
@@ -107,5 +108,55 @@ describe('apps-builds-create', () => {
     expect(mockConsola.error).toHaveBeenCalledWith(
       'The --detached flag cannot be used with --share. Sharing requires waiting for completion.',
     );
+  });
+
+  it('should reject --share-description without --share', async () => {
+    const options = { appId, platform: 'web' as const, gitRef: 'main', shareDescription: 'What to test' };
+
+    await expect(createCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
+
+    expect(mockConsola.error).toHaveBeenCalledWith(
+      'The --share-description and --share-expires-in-days flags require --share.',
+    );
+  });
+
+  it('should reject --share-expires-in-days without --share', async () => {
+    const options = { appId, platform: 'web' as const, gitRef: 'main', shareExpiresInDays: 7 };
+
+    await expect(createCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
+
+    expect(mockConsola.error).toHaveBeenCalledWith(
+      'The --share-description and --share-expires-in-days flags require --share.',
+    );
+  });
+
+  it('should reject a non-positive shareExpiresInDays value', () => {
+    const schema = createCommand.options?.schema;
+
+    for (const shareExpiresInDays of [0, -1]) {
+      const result = schema?.safeParse({
+        appId: validAppId,
+        platform: 'web',
+        gitRef: 'main',
+        share: true,
+        shareExpiresInDays,
+      });
+      expect(result?.success).toBe(false);
+      expect(result?.error?.issues[0]?.message).toBe('Expires in days must be a positive integer.');
+    }
+  });
+
+  it('should accept a positive shareExpiresInDays value', () => {
+    const schema = createCommand.options?.schema;
+
+    const result = schema?.safeParse({
+      appId: validAppId,
+      platform: 'web',
+      gitRef: 'main',
+      share: true,
+      shareExpiresInDays: 7,
+    });
+    expect(result?.success).toBe(true);
+    expect(result?.data?.shareExpiresInDays).toBe(7);
   });
 });
