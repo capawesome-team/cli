@@ -99,13 +99,13 @@ export default defineCommand({
         : undefined;
 
     const share = await appBuildsService.createShare({ appId, appBuildId: buildId, description, expiresAt });
-    const { url, qrCodeUrl } = await getAppBuildShareUrls(share.id);
+    const { qrCodeUrl, webUrl } = await getAppBuildShareUrls(share.id);
 
     if (json) {
-      console.log(JSON.stringify({ id: share.id, url, qrCodeUrl, expiresAt: share.expiresAt }, null, 2));
+      console.log(JSON.stringify({ id: share.id, qrCodeUrl, webUrl, expiresAt: share.expiresAt }, null, 2));
     } else {
       consola.success('Build shared successfully.');
-      consola.info(`Share URL: ${url}`);
+      consola.info(`Share URL: ${webUrl}`);
       consola.info(`QR Code URL: ${qrCodeUrl}`);
       if (share.expiresAt) {
         consola.info(`Expires At: ${share.expiresAt}`);

@@ -1,8 +1,8 @@
 import configService from '@/services/config.js';
 
 export interface AppBuildShareUrls {
-  url: string;
   qrCodeUrl: string;
+  webUrl: string;
 }
 
 /**
@@ -11,7 +11,7 @@ export interface AppBuildShareUrls {
 export const getAppBuildShareUrls = async (shareId: string): Promise<AppBuildShareUrls> => {
   const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
   const apiBaseUrl = await configService.getValueForKey('API_BASE_URL');
-  const url = `${consoleBaseUrl}/app-build-shares/${shareId}`;
-  const qrCodeUrl = `${apiBaseUrl}/v1/qrcodes?content=${encodeURIComponent(url)}&format=png`;
-  return { url, qrCodeUrl };
+  const webUrl = `${consoleBaseUrl}/app-build-shares/${shareId}`;
+  const qrCodeUrl = `${apiBaseUrl}/v1/qrcodes?content=${encodeURIComponent(webUrl)}&format=png`;
+  return { qrCodeUrl, webUrl };
 };

@@ -455,7 +455,7 @@ export default defineCommand({
         });
       }
       // Create a public share link if requested
-      let share: { id: string; url: string; qrCodeUrl: string; expiresAt: string | null } | undefined;
+      let appBuildShare: { id: string; qrCodeUrl: string; webUrl: string; expiresAt: string | null } | undefined;
       if (options.share) {
         const expiresAt =
           options.shareExpiresInDays !== undefined
@@ -468,15 +468,15 @@ export default defineCommand({
           expiresAt,
         });
         const shareUrls = await getAppBuildShareUrls(createdShare.id);
-        share = {
+        appBuildShare = {
           id: createdShare.id,
-          url: shareUrls.url,
           qrCodeUrl: shareUrls.qrCodeUrl,
+          webUrl: shareUrls.webUrl,
           expiresAt: createdShare.expiresAt,
         };
         if (!json) {
           consola.success('Build shared successfully.');
-          consola.info(`Share URL: ${shareUrls.url}`);
+          consola.info(`Share URL: ${shareUrls.webUrl}`);
         }
       }
 
@@ -497,7 +497,7 @@ export default defineCommand({
             {
               id: response.id,
               numberAsString: response.numberAsString,
-              ...(share ? { share } : {}),
+              ...(appBuildShare ? { appBuildShare } : {}),
             },
             null,
             2,

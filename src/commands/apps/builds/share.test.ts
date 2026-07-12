@@ -72,9 +72,11 @@ describe('apps-builds-share', () => {
     expect(buildScope.isDone()).toBe(true);
     expect(shareScope.isDone()).toBe(true);
 
-    const url = `${DEFAULT_CONSOLE_BASE_URL}/app-build-shares/${shareId}`;
-    const qrCodeUrl = `${DEFAULT_API_BASE_URL}/v1/qrcodes?content=${encodeURIComponent(url)}&format=png`;
-    expect(console.log).toHaveBeenCalledWith(JSON.stringify({ id: shareId, url, qrCodeUrl, expiresAt: null }, null, 2));
+    const webUrl = `${DEFAULT_CONSOLE_BASE_URL}/app-build-shares/${shareId}`;
+    const qrCodeUrl = `${DEFAULT_API_BASE_URL}/v1/qrcodes?content=${encodeURIComponent(webUrl)}&format=png`;
+    expect(console.log).toHaveBeenCalledWith(
+      JSON.stringify({ id: shareId, qrCodeUrl, webUrl, expiresAt: null }, null, 2),
+    );
     expect(mockConsola.success).not.toHaveBeenCalled();
   });
 
