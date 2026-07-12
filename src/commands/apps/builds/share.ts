@@ -23,6 +23,7 @@ export default defineCommand({
         })
         .optional()
         .describe('Build ID to share.'),
+      buildNumber: z.string().optional().describe('Build number to share (e.g., "1", "42").'),
       description: z.string().optional().describe('Additional information for testers, e.g. what to test.'),
       expiresInDays: z.coerce
         .number()
@@ -37,7 +38,7 @@ export default defineCommand({
   ),
   action: withAuth(async (options) => {
     let { appId, buildId } = options;
-    const { description, expiresInDays, json } = options;
+    const { buildNumber, description, expiresInDays, json } = options;
 
     // Prompt for app ID if not provided
     if (!appId) {
@@ -47,6 +48,16 @@ export default defineCommand({
       }
       const organizationId = await promptOrganizationSelection();
       appId = await promptAppSelection(organizationId);
+    }
+
+    // Convert build number to build ID if provided
+    if (!buildId && buildNumber) {
+      const builds = await appBuildsService.findAll({ appId, numberAsString: buildNumber });
+      if (builds.length === 0) {
+        consola.error(`Build #${buildNumber} not found.`);
+        process.exit(1);
+      }
+      buildId = builds[0]?.id;
     }
 
     // Prompt for build ID if not provided
