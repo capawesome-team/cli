@@ -480,6 +480,16 @@ export default defineCommand({
         }
       }
 
+      // Create deployment if channel or destination is set
+      if (options.channel || options.destination) {
+        await (
+          await import('@/commands/apps/deployments/create.js').then((mod) => mod.default)
+        ).action(
+          { appId, buildId: response.id, channel: options.channel, destination: options.destination },
+          undefined,
+        );
+      }
+
       // Output JSON if json flag is set
       if (json) {
         console.log(
@@ -512,13 +522,6 @@ export default defineCommand({
         consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
         consola.success('Build started successfully.');
       }
-    }
-
-    // Create deployment if channel or destination is set
-    if (options.channel || options.destination) {
-      await (
-        await import('@/commands/apps/deployments/create.js').then((mod) => mod.default)
-      ).action({ appId, buildId: response.id, channel: options.channel, destination: options.destination }, undefined);
     }
   }),
 });
