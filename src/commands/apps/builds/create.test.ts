@@ -85,14 +85,14 @@ describe('apps-builds-create', () => {
     expect(findScope.isDone()).toBe(true);
     expect(shareScope.isDone()).toBe(true);
 
-    const url = `${DEFAULT_CONSOLE_BASE_URL}/app-build-shares/${shareId}`;
-    const qrCodeUrl = `${DEFAULT_API_BASE_URL}/v1/qrcodes?content=${encodeURIComponent(url)}&format=png`;
+    const webUrl = `${DEFAULT_CONSOLE_BASE_URL}/app-build-shares/${shareId}`;
+    const qrCodeUrl = `${DEFAULT_API_BASE_URL}/v1/qrcodes?content=${encodeURIComponent(webUrl)}&format=png`;
     expect(console.log).toHaveBeenCalledWith(
       JSON.stringify(
         {
           id: buildId,
           numberAsString: '42',
-          share: { id: shareId, url, qrCodeUrl, expiresAt: null },
+          appBuildShare: { id: shareId, qrCodeUrl, webUrl, expiresAt: null },
         },
         null,
         2,
