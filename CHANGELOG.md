@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.17.0](https://github.com/capawesome-team/cli/compare/v4.16.1...v4.17.0) (2026-07-12)
+
+
+### Features
+
+* add `apps:builds:unshare` command ([#184](https://github.com/capawesome-team/cli/issues/184)) ([55ecd8e](https://github.com/capawesome-team/cli/commit/55ecd8e7892da4a70a6438b90b6e9db3470c315f))
+
 ## [4.16.1](https://github.com/capawesome-team/cli/compare/v4.16.0...v4.16.1) (2026-07-12)
 
 
