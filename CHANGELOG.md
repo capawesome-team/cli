@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.16.1](https://github.com/capawesome-team/cli/compare/v4.16.0...v4.16.1) (2026-07-12)
+
+
+### Bug Fixes
+
+* rename share JSON output to `appBuildShare` with `webUrl` ([#183](https://github.com/capawesome-team/cli/issues/183)) ([32d8bd8](https://github.com/capawesome-team/cli/commit/32d8bd8460c40cd78d3417849007e8394ead35fd))
+
 ## [4.16.0](https://github.com/capawesome-team/cli/compare/v4.15.0...v4.16.0) (2026-07-12)
 
 
