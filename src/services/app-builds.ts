@@ -4,6 +4,8 @@ import {
   AppBuildShareDto,
   CreateAppBuildDto,
   CreateAppBuildShareDto,
+  DeleteAppBuildShareDto,
+  FindAllAppBuildSharesDto,
   FindAllAppBuildsDto,
   FindOneAppBuildDto,
   UpdateAppBuildDto,
@@ -19,7 +21,9 @@ export interface DownloadArtifactDto {
 export interface AppBuildsService {
   create(dto: CreateAppBuildDto): Promise<AppBuildDto>;
   createShare(dto: CreateAppBuildShareDto): Promise<AppBuildShareDto>;
+  deleteShare(dto: DeleteAppBuildShareDto): Promise<void>;
   findAll(dto: FindAllAppBuildsDto): Promise<AppBuildDto[]>;
+  findAllShares(dto: FindAllAppBuildSharesDto): Promise<AppBuildShareDto[]>;
   findOne(dto: FindOneAppBuildDto): Promise<AppBuildDto>;
   update(dto: UpdateAppBuildDto): Promise<AppBuildDto>;
   downloadArtifact(dto: DownloadArtifactDto): Promise<ArrayBuffer>;
@@ -56,6 +60,14 @@ class AppBuildsServiceImpl implements AppBuildsService {
     return response.data;
   }
 
+  async deleteShare(dto: DeleteAppBuildShareDto): Promise<void> {
+    await this.httpClient.delete(`/v1/apps/${dto.appId}/builds/${dto.appBuildId}/shares/${dto.id}`, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+      },
+    });
+  }
+
   async findAll(dto: FindAllAppBuildsDto): Promise<AppBuildDto[]> {
     const params: Record<string, string> = {};
     if (dto.limit !== undefined) {
@@ -79,6 +91,18 @@ class AppBuildsServiceImpl implements AppBuildsService {
       },
       params,
     });
+    return response.data;
+  }
+
+  async findAllShares(dto: FindAllAppBuildSharesDto): Promise<AppBuildShareDto[]> {
+    const response = await this.httpClient.get<AppBuildShareDto[]>(
+      `/v1/apps/${dto.appId}/builds/${dto.appBuildId}/shares`,
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
+      },
+    );
     return response.data;
   }
 

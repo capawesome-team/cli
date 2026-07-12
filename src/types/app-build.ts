@@ -53,6 +53,17 @@ export interface CreateAppBuildShareDto {
   expiresAt?: string;
 }
 
+export interface DeleteAppBuildShareDto {
+  appId: string;
+  appBuildId: string;
+  id: string;
+}
+
+export interface FindAllAppBuildSharesDto {
+  appId: string;
+  appBuildId: string;
+}
+
 export interface FindOneAppBuildDto {
   appId: string;
   appBuildId: string;
