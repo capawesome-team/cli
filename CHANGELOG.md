@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.16.0](https://github.com/capawesome-team/cli/compare/v4.15.0...v4.16.0) (2026-07-12)
+
+
+### Features
+
+* add `apps:builds:share` command and `--share` flag on `apps:builds:create` ([#178](https://github.com/capawesome-team/cli/issues/178)) ([05588c3](https://github.com/capawesome-team/cli/commit/05588c3db4fab2843f54fa1180de9e37c0d9b518))
+
+
+### Bug Fixes
+
+* correct success message when using `--detached` ([#179](https://github.com/capawesome-team/cli/issues/179)) ([33cd33b](https://github.com/capawesome-team/cli/commit/33cd33b5266353fe62b8ba9858f58c7f13dd9e78))
+* run deployment before `--json` output in `apps:builds:create` ([#182](https://github.com/capawesome-team/cli/issues/182)) ([1d693fb](https://github.com/capawesome-team/cli/commit/1d693fb1cafccd02237dd61c94b81e9e62b79f36))
+
 ## [4.15.0](https://github.com/capawesome-team/cli/compare/v4.14.0...v4.15.0) (2026-06-23)
 
 
