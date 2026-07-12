@@ -37,6 +37,22 @@ export interface CreateAppBuildDto {
   type?: string;
 }
 
+export interface AppBuildShareDto {
+  id: string;
+  appBuildId: string;
+  description: string | null;
+  expiresAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateAppBuildShareDto {
+  appId: string;
+  appBuildId: string;
+  description?: string;
+  expiresAt?: string;
+}
+
 export interface FindOneAppBuildDto {
   appId: string;
   appBuildId: string;
