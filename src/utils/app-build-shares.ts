@@ -12,6 +12,6 @@ export const getAppBuildShareUrls = async (shareId: string): Promise<AppBuildSha
   const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
   const apiBaseUrl = await configService.getValueForKey('API_BASE_URL');
   const url = `${consoleBaseUrl}/app-build-shares/${shareId}`;
-  const qrCodeUrl = `${apiBaseUrl}/v1/qrcodes?content=${encodeURIComponent(url)}`;
+  const qrCodeUrl = `${apiBaseUrl}/v1/qrcodes?content=${encodeURIComponent(url)}&format=png`;
   return { url, qrCodeUrl };
 };

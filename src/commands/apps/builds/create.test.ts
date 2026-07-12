@@ -86,7 +86,7 @@ describe('apps-builds-create', () => {
     expect(shareScope.isDone()).toBe(true);
 
     const url = `${DEFAULT_CONSOLE_BASE_URL}/app-build-shares/${shareId}`;
-    const qrCodeUrl = `${DEFAULT_API_BASE_URL}/v1/qrcodes?content=${encodeURIComponent(url)}`;
+    const qrCodeUrl = `${DEFAULT_API_BASE_URL}/v1/qrcodes?content=${encodeURIComponent(url)}&format=png`;
     expect(console.log).toHaveBeenCalledWith(
       JSON.stringify(
         {
