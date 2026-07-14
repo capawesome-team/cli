@@ -16,9 +16,11 @@
     "sentry:releases:new": "sentry-cli releases new capawesome-team-cli@$npm_package_version --org genz-it-solutions-gmbh --project capawesome-team-cli",
     "sentry:releases:set-commits": "sentry-cli releases set-commits capawesome-team-cli@$npm_package_version --auto --org genz-it-solutions-gmbh --project capawesome-team-cli --ignore-missing",
     "sentry:releases:finalize": "sentry-cli releases finalize capawesome-team-cli@$npm_package_version --org genz-it-solutions-gmbh --project capawesome-team-cli",
-    "release": "commit-and-tag-version",
     "prepublishOnly": "npm run build && npm run sentry:releases:new && npm run sentry:releases:set-commits",
     "postpublish": "npm run sentry:releases:finalize"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "engines": {
     "npm": ">=10.0.0",
@@ -82,7 +84,6 @@
     "@types/semver": "7.5.8",
     "@vitest/coverage-v8": "4.1.7",
     "@vitest/ui": "4.1.7",
-    "commit-and-tag-version": "12.6.1",
     "nock": "14.0.10",
     "prettier": "3.3.3",
     "rimraf": "6.0.1",
