@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.17.1](https://github.com/capawesome-team/cli/compare/v4.17.0...v4.17.1) (2026-07-16)
+
+
+### Bug Fixes
+
+* **deps:** update `systeminformation` to `5.31.17` ([#187](https://github.com/capawesome-team/cli/issues/187)) ([2aca30c](https://github.com/capawesome-team/cli/commit/2aca30cd0c48f27ffc8cd44d400efec9763a58ac))
+
 ## [4.17.0](https://github.com/capawesome-team/cli/compare/v4.16.1...v4.17.0) (2026-07-12)
 
 
