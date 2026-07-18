@@ -28,6 +28,18 @@ export default defineCommand({
         })
         .optional()
         .describe('The percentage of devices to deploy the bundle to. Must be a number between 0 and 1 (e.g. 0.5).'),
+      electronMax: z
+        .string()
+        .optional()
+        .describe('The maximum Electron app version (`app.getVersion()`) that the bundle supports.'),
+      electronMin: z
+        .string()
+        .optional()
+        .describe('The minimum Electron app version (`app.getVersion()`) that the bundle supports.'),
+      electronEq: z
+        .string()
+        .optional()
+        .describe('The exact Electron app version (`app.getVersion()`) that the bundle should not support.'),
       iosMax: z
         .string()
         .optional()

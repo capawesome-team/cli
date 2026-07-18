@@ -228,6 +228,77 @@ describe('apps-liveupdates-upload', () => {
     expect(mockConsola.success).toHaveBeenCalledWith('Live Update successfully uploaded.');
   });
 
+  it('should pass Electron version constraints to API when provided', async () => {
+    const appId = 'app-123';
+    const bundlePath = './dist';
+    const bundleId = 'bundle-456';
+    const testToken = 'test-token';
+    const testBuffer = Buffer.from('test');
+    const electronEq = '1.0.0';
+    const electronMin = '2.0.0';
+    const electronMax = '3.0.0';
+
+    const options = {
+      appId,
+      path: bundlePath,
+      artifactType: 'zip' as const,
+      rollout: 1,
+      electronEq,
+      electronMin,
+      electronMax,
+    };
+
+    mockIsReadable.mockResolvedValue(true);
+    mockIsDirectory.mockResolvedValue(true);
+    mockGetFilesInDirectoryAndSubdirectories.mockResolvedValue([
+      { href: 'index.html', mimeType: 'text/html', name: 'index.html', path: 'index.html' },
+    ]);
+
+    // Mock utility functions
+    const mockZip = await import('@/utils/zip.js');
+    const mockHash = await import('@/utils/hash.js');
+
+    vi.mocked(mockZip.default.isZipped).mockReturnValue(false);
+    vi.mocked(mockZip.default.zipFolder).mockResolvedValue(testBuffer);
+    vi.mocked(mockHash.createHash).mockResolvedValue('test-hash');
+
+    const appScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
+
+    const bundleScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/bundles`, {
+        appId,
+        artifactType: 'zip',
+        eqElectronAppVersionCode: electronEq,
+        minElectronAppVersionCode: electronMin,
+        maxElectronAppVersionCode: electronMax,
+        rolloutPercentage: 1,
+      })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: bundleId, appBuildId: 'build-789' });
+
+    const uploadScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/bundles/${bundleId}/files`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: 'file-123' });
+
+    const updateScope = nock(DEFAULT_API_BASE_URL)
+      .patch(`/v1/apps/${appId}/bundles/${bundleId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: bundleId });
+
+    await uploadCommand.action(options, undefined);
+
+    expect(appScope.isDone()).toBe(true);
+    expect(bundleScope.isDone()).toBe(true);
+    expect(uploadScope.isDone()).toBe(true);
+    expect(updateScope.isDone()).toBe(true);
+    expect(mockConsola.info).toHaveBeenCalledWith(`Build Artifact ID: ${bundleId}`);
+    expect(mockConsola.success).toHaveBeenCalledWith('Live Update successfully uploaded.');
+  });
+
   it('should output JSON when json flag is set', async () => {
     const appId = 'app-123';
     const bundlePath = './dist';
