@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.17.2](https://github.com/capawesome-team/cli/compare/v4.17.1...v4.17.2) (2026-07-18)
+
+
+### Bug Fixes
+
+* **deps:** update `adm-zip` to `0.6.0` ([#190](https://github.com/capawesome-team/cli/issues/190)) ([6511f17](https://github.com/capawesome-team/cli/commit/6511f17fafc2c42cc0028833360abb076933d123))
+
 ## [4.17.1](https://github.com/capawesome-team/cli/compare/v4.17.0...v4.17.1) (2026-07-16)
 
 
