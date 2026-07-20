@@ -60,7 +60,7 @@
     "@robingenz/zli": "0.2.0",
     "@sentry/node": "10.58.0",
     "adm-zip": "0.6.0",
-    "axios": "1.16.0",
+    "axios": "1.18.1",
     "axios-retry": "4.5.0",
     "c12": "3.3.3",
     "consola": "3.3.0",
