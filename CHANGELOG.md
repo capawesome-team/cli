@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.17.3](https://github.com/capawesome-team/cli/compare/v4.17.2...v4.17.3) (2026-07-21)
+
+
+### Bug Fixes
+
+* **deps:** update `brace-expansion` to `5.0.7` ([1757368](https://github.com/capawesome-team/cli/commit/1757368e7eb796a0cc9a6975e460e340f51fd48a))
+
 ## [4.17.2](https://github.com/capawesome-team/cli/compare/v4.17.1...v4.17.2) (2026-07-18)
 
 
