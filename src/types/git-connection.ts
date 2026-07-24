@@ -22,6 +22,18 @@ export interface FindAllGitConnectionsDto {
   scope?: 'organization';
 }
 
+export interface ResolveGitConnectionsDto {
+  organizationId: string;
+  remoteUrl: string;
+  appId?: string;
+}
+
+export interface GitConnectionResolutionDto {
+  gitConnections: GitConnectionDto[];
+  path: string;
+  provider: GitConnectionProvider | null;
+}
+
 export interface FindAllGitConnectionRepositoriesDto {
   gitConnectionId: string;
   organizationId: string;

@@ -2,12 +2,13 @@ import { DEFAULT_API_BASE_URL } from '@/config/consts.js';
 import authorizationService from '@/services/authorization-service.js';
 import { GitConnectionDto } from '@/types/git-connection.js';
 import { isInteractive } from '@/utils/environment.js';
-import { getGitRemoteInfo } from '@/utils/git.js';
+import { getGitRemoteUrl } from '@/utils/git.js';
 import {
   prompt,
   promptAppSelection,
   promptGitConnectionSelection,
   promptOrganizationSelection,
+  promptRepositorySelection,
 } from '@/utils/prompt.js';
 import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
@@ -22,20 +23,15 @@ vi.mock('consola');
 vi.mock('@/utils/environment.js', () => ({
   isInteractive: vi.fn(() => true),
 }));
-vi.mock('@/utils/git.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/utils/git.js')>();
-  return {
-    ...actual,
-    getGitRemoteInfo: vi.fn(() => ({
-      host: 'github.com',
-      path: 'capawesome-team/cli',
-    })),
-  };
-});
+vi.mock('@/utils/git.js', () => ({
+  getGitRemoteUrl: vi.fn(() => 'git@github.com:capawesome-team/cli.git'),
+}));
 
 describe('apps-link', () => {
   const appId = 'app-123';
   const orgId = 'org-1';
+  const remoteUrl = 'git@github.com:capawesome-team/cli.git';
+  const repositoryPath = 'capawesome-team/cli';
   const testToken = 'test-token';
   const gitConnection: GitConnectionDto = {
     id: 'gc-1',
@@ -46,14 +42,20 @@ describe('apps-link', () => {
     organizationId: orgId,
     provider: 'github',
   };
+  const otherGitConnection: GitConnectionDto = {
+    ...gitConnection,
+    id: 'gc-2',
+    name: 'Other Connection',
+  };
 
   const mockUserConfig = vi.mocked(userConfig);
   const mockIsInteractive = vi.mocked(isInteractive);
-  const mockGetGitRemoteInfo = vi.mocked(getGitRemoteInfo);
+  const mockGetGitRemoteUrl = vi.mocked(getGitRemoteUrl);
   const mockPrompt = vi.mocked(prompt);
   const mockPromptOrganizationSelection = vi.mocked(promptOrganizationSelection);
   const mockPromptAppSelection = vi.mocked(promptAppSelection);
   const mockPromptGitConnectionSelection = vi.mocked(promptGitConnectionSelection);
+  const mockPromptRepositorySelection = vi.mocked(promptRepositorySelection);
   const mockConsola = vi.mocked(consola);
   const mockAuthorizationService = vi.mocked(authorizationService);
 
@@ -63,6 +65,19 @@ describe('apps-link', () => {
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(200, { id: appId, name: 'Test App', organizationId: orgId });
 
+  const nockResolveRequest = (gitConnections: GitConnectionDto[], provider: string | null = 'github') =>
+    nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/organizations/${orgId}/git-connections/resolve`)
+      .query({ remoteUrl, appId })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { gitConnections, path: repositoryPath, provider });
+
+  const nockLinkRequest = (gitConnectionId: string, path: string) =>
+    nock(DEFAULT_API_BASE_URL)
+      .put(`/v1/apps/${appId}/repository`, { gitConnectionId, path })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
+
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -70,6 +85,7 @@ describe('apps-link', () => {
     mockAuthorizationService.getCurrentAuthorizationToken.mockReturnValue('test-token');
     mockAuthorizationService.hasAuthorizationToken.mockReturnValue(true);
     mockIsInteractive.mockReturnValue(true);
+    mockGetGitRemoteUrl.mockReturnValue(remoteUrl);
 
     vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
       throw new Error(`Process exited with code ${code}`);
@@ -83,35 +99,25 @@ describe('apps-link', () => {
 
   it('should link repository with provided git connection ID and path', async () => {
     const appScope = nockAppRequest();
-    const scope = nock(DEFAULT_API_BASE_URL)
-      .put(`/v1/apps/${appId}/repository`, {
-        gitConnectionId: gitConnection.id,
-        path: 'capawesome-team/cli',
-      })
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, { id: appId, name: 'Test App' });
+    const linkScope = nockLinkRequest(gitConnection.id, repositoryPath);
 
-    await linkCommand.action({ appId, gitConnectionId: gitConnection.id, path: 'capawesome-team/cli' }, undefined);
+    await linkCommand.action({ appId, gitConnectionId: gitConnection.id, path: repositoryPath }, undefined);
 
     expect(appScope.isDone()).toBe(true);
-    expect(scope.isDone()).toBe(true);
+    expect(linkScope.isDone()).toBe(true);
     expect(mockConsola.success).toHaveBeenCalledWith('Repository connected successfully.');
   });
 
-  it('should link repository with git remote path when path is not provided', async () => {
+  it('should link repository with resolved path when path is not provided', async () => {
     const appScope = nockAppRequest();
-    const scope = nock(DEFAULT_API_BASE_URL)
-      .put(`/v1/apps/${appId}/repository`, {
-        gitConnectionId: gitConnection.id,
-        path: 'capawesome-team/cli',
-      })
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, { id: appId, name: 'Test App' });
+    const resolveScope = nockResolveRequest([gitConnection]);
+    const linkScope = nockLinkRequest(gitConnection.id, repositoryPath);
 
     await linkCommand.action({ appId, gitConnectionId: gitConnection.id }, undefined);
 
     expect(appScope.isDone()).toBe(true);
-    expect(scope.isDone()).toBe(true);
+    expect(resolveScope.isDone()).toBe(true);
+    expect(linkScope.isDone()).toBe(true);
     expect(mockConsola.success).toHaveBeenCalledWith('Repository connected successfully.');
   });
 
@@ -122,19 +128,13 @@ describe('apps-link', () => {
       .query({ name: gitConnection.name })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(200, [gitConnection]);
-    const scope = nock(DEFAULT_API_BASE_URL)
-      .put(`/v1/apps/${appId}/repository`, {
-        gitConnectionId: gitConnection.id,
-        path: 'capawesome-team/cli',
-      })
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, { id: appId, name: 'Test App' });
+    const linkScope = nockLinkRequest(gitConnection.id, repositoryPath);
 
-    await linkCommand.action({ appId, gitConnection: gitConnection.name, path: 'capawesome-team/cli' }, undefined);
+    await linkCommand.action({ appId, gitConnection: gitConnection.name, path: repositoryPath }, undefined);
 
     expect(appScope.isDone()).toBe(true);
     expect(connectionsScope.isDone()).toBe(true);
-    expect(scope.isDone()).toBe(true);
+    expect(linkScope.isDone()).toBe(true);
     expect(mockConsola.success).toHaveBeenCalledWith('Repository connected successfully.');
   });
 
@@ -175,42 +175,54 @@ describe('apps-link', () => {
     );
   });
 
-  it('should link repository after confirming the matching git connection', async () => {
+  it('should link repository after confirming the resolved git connection', async () => {
     mockPromptOrganizationSelection.mockResolvedValueOnce(orgId);
     mockPromptAppSelection.mockResolvedValueOnce(appId);
     mockPrompt.mockResolvedValueOnce(true as never);
 
-    const appConnectionsScope = nock(DEFAULT_API_BASE_URL)
-      .get(`/v1/organizations/${orgId}/git-connections`)
-      .query({ appId, limit: '50' })
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, []);
-    const organizationConnectionsScope = nock(DEFAULT_API_BASE_URL)
-      .get(`/v1/organizations/${orgId}/git-connections`)
-      .query({ scope: 'organization', limit: '50' })
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, [gitConnection]);
-    const scope = nock(DEFAULT_API_BASE_URL)
-      .put(`/v1/apps/${appId}/repository`, {
-        gitConnectionId: gitConnection.id,
-        path: 'capawesome-team/cli',
-      })
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, { id: appId, name: 'Test App' });
+    const resolveScope = nockResolveRequest([gitConnection]);
+    const linkScope = nockLinkRequest(gitConnection.id, repositoryPath);
 
     await linkCommand.action({}, undefined);
 
-    expect(appConnectionsScope.isDone()).toBe(true);
-    expect(organizationConnectionsScope.isDone()).toBe(true);
-    expect(scope.isDone()).toBe(true);
+    expect(resolveScope.isDone()).toBe(true);
+    expect(linkScope.isDone()).toBe(true);
     expect(mockPromptOrganizationSelection).toHaveBeenCalled();
     expect(mockPromptAppSelection).toHaveBeenCalledWith(orgId);
     expect(mockConsola.success).toHaveBeenCalledWith('Repository connected successfully.');
   });
 
-  it('should fall back to git connection selection when no connection matches the git remote', async () => {
-    mockGetGitRemoteInfo.mockReturnValue(undefined);
+  it('should prompt for git connection when multiple candidates are resolved', async () => {
+    mockPromptGitConnectionSelection.mockResolvedValueOnce(otherGitConnection);
+
+    const appScope = nockAppRequest();
+    const resolveScope = nockResolveRequest([gitConnection, otherGitConnection]);
+    const linkScope = nockLinkRequest(otherGitConnection.id, repositoryPath);
+
+    await linkCommand.action({ appId }, undefined);
+
+    expect(appScope.isDone()).toBe(true);
+    expect(resolveScope.isDone()).toBe(true);
+    expect(linkScope.isDone()).toBe(true);
+    expect(mockPromptGitConnectionSelection).toHaveBeenCalledWith([gitConnection, otherGitConnection]);
+    expect(mockConsola.success).toHaveBeenCalledWith('Repository connected successfully.');
+  });
+
+  it('should error when no git connection candidate is resolved', async () => {
+    const appScope = nockAppRequest();
+    const resolveScope = nockResolveRequest([]);
+
+    await expect(linkCommand.action({ appId }, undefined)).rejects.toThrow();
+
+    expect(appScope.isDone()).toBe(true);
+    expect(resolveScope.isDone()).toBe(true);
+    expect(mockConsola.error).toHaveBeenCalledWith(expect.stringContaining('Please create a github connection'));
+  });
+
+  it('should fall back to git connection selection when no git remote is available', async () => {
+    mockGetGitRemoteUrl.mockReturnValue(undefined);
     mockPromptGitConnectionSelection.mockResolvedValueOnce(gitConnection);
+    mockPromptRepositorySelection.mockResolvedValueOnce(repositoryPath);
 
     const appScope = nockAppRequest();
     const appConnectionsScope = nock(DEFAULT_API_BASE_URL)
@@ -223,25 +235,22 @@ describe('apps-link', () => {
       .query({ scope: 'organization', limit: '50' })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(200, [gitConnection]);
-    const scope = nock(DEFAULT_API_BASE_URL)
-      .put(`/v1/apps/${appId}/repository`, {
-        gitConnectionId: gitConnection.id,
-        path: 'capawesome-team/cli',
-      })
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, { id: appId, name: 'Test App' });
+    const linkScope = nockLinkRequest(gitConnection.id, repositoryPath);
 
-    await linkCommand.action({ appId, path: 'capawesome-team/cli' }, undefined);
+    await linkCommand.action({ appId }, undefined);
 
     expect(appScope.isDone()).toBe(true);
     expect(appConnectionsScope.isDone()).toBe(true);
     expect(organizationConnectionsScope.isDone()).toBe(true);
-    expect(scope.isDone()).toBe(true);
+    expect(linkScope.isDone()).toBe(true);
     expect(mockPromptGitConnectionSelection).toHaveBeenCalledWith([gitConnection]);
+    expect(mockPromptRepositorySelection).toHaveBeenCalledWith(gitConnection);
     expect(mockConsola.success).toHaveBeenCalledWith('Repository connected successfully.');
   });
 
   it('should error when no git connections are found', async () => {
+    mockGetGitRemoteUrl.mockReturnValue(undefined);
+
     const appScope = nockAppRequest();
     const appConnectionsScope = nock(DEFAULT_API_BASE_URL)
       .get(`/v1/organizations/${orgId}/git-connections`)
@@ -264,19 +273,19 @@ describe('apps-link', () => {
 
   it('should handle API error', async () => {
     const appScope = nockAppRequest();
-    const scope = nock(DEFAULT_API_BASE_URL)
+    const linkScope = nock(DEFAULT_API_BASE_URL)
       .put(`/v1/apps/${appId}/repository`, {
         gitConnectionId: gitConnection.id,
-        path: 'capawesome-team/cli',
+        path: repositoryPath,
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(404, { message: 'Git connection not found.' });
 
     await expect(
-      linkCommand.action({ appId, gitConnectionId: gitConnection.id, path: 'capawesome-team/cli' }, undefined),
+      linkCommand.action({ appId, gitConnectionId: gitConnection.id, path: repositoryPath }, undefined),
     ).rejects.toThrow();
 
     expect(appScope.isDone()).toBe(true);
-    expect(scope.isDone()).toBe(true);
+    expect(linkScope.isDone()).toBe(true);
   });
 });

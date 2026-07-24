@@ -4,12 +4,15 @@ import {
   FindAllGitConnectionsDto,
   GitConnectionDto,
   GitConnectionRepositoryDto,
+  GitConnectionResolutionDto,
+  ResolveGitConnectionsDto,
 } from '@/types/git-connection.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
 
 export interface GitConnectionsService {
   findAll(dto: FindAllGitConnectionsDto): Promise<GitConnectionDto[]>;
   findAllRepositories(dto: FindAllGitConnectionRepositoriesDto): Promise<GitConnectionRepositoryDto[]>;
+  resolve(dto: ResolveGitConnectionsDto): Promise<GitConnectionResolutionDto>;
 }
 
 class GitConnectionsServiceImpl implements GitConnectionsService {
@@ -64,6 +67,23 @@ class GitConnectionsServiceImpl implements GitConnectionsService {
     }
     const response = await this.httpClient.get<GitConnectionRepositoryDto[]>(
       `/v1/organizations/${dto.organizationId}/git-connections/${dto.gitConnectionId}/repositories`,
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
+        params,
+      },
+    );
+    return response.data;
+  }
+
+  async resolve(dto: ResolveGitConnectionsDto): Promise<GitConnectionResolutionDto> {
+    const params: Record<string, string> = { remoteUrl: dto.remoteUrl };
+    if (dto.appId !== undefined) {
+      params.appId = dto.appId;
+    }
+    const response = await this.httpClient.get<GitConnectionResolutionDto>(
+      `/v1/organizations/${dto.organizationId}/git-connections/resolve`,
       {
         headers: {
           Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,

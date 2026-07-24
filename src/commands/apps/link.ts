@@ -1,10 +1,10 @@
 import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appsService from '@/services/apps.js';
 import gitConnectionsService from '@/services/git-connections.js';
-import { GitConnectionDto } from '@/types/git-connection.js';
+import { GitConnectionDto, GitConnectionResolutionDto } from '@/types/git-connection.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
-import { getGitConnectionHost, getGitRemoteInfo } from '@/utils/git.js';
+import { getGitRemoteUrl } from '@/utils/git.js';
 import {
   prompt,
   promptAppSelection,
@@ -13,8 +13,27 @@ import {
   promptRepositorySelection,
 } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from '@robingenz/zli';
+import { AxiosError } from 'axios';
 import consola from 'consola';
 import { z } from 'zod';
+
+const resolveGitRemote = async (
+  organizationId: string,
+  appId: string,
+): Promise<GitConnectionResolutionDto | undefined> => {
+  const remoteUrl = getGitRemoteUrl();
+  if (!remoteUrl) {
+    return undefined;
+  }
+  try {
+    return await gitConnectionsService.resolve({ organizationId, appId, remoteUrl });
+  } catch (error) {
+    if (error instanceof AxiosError && error.response?.status === 400) {
+      return undefined;
+    }
+    throw error;
+  }
+};
 
 const findGitConnectionsForApp = async (organizationId: string, appId: string): Promise<GitConnectionDto[]> => {
   const [appGitConnections, organizationGitConnections] = await Promise.all([
@@ -70,7 +89,7 @@ export default defineCommand({
     }
 
     if (gitConnectionId) {
-      path = path ?? getGitRemoteInfo()?.path;
+      path = path ?? (await resolveGitRemote(organizationId, appId))?.path;
       if (!path) {
         consola.error('You must provide the repository path using the --path option.');
         process.exit(1);
@@ -87,6 +106,38 @@ export default defineCommand({
       process.exit(1);
     }
 
+    if (!path) {
+      const resolution = await resolveGitRemote(organizationId, appId);
+      if (resolution) {
+        const gitConnections = resolution.gitConnections;
+        const gitConnection = gitConnections[0];
+        if (gitConnections.length === 1 && gitConnection) {
+          const confirmed = await prompt(
+            `Do you want to connect \`${resolution.path}\` using the git connection "${gitConnection.name}"?`,
+            { type: 'confirm', initial: true },
+          );
+          if (confirmed) {
+            await appsService.linkRepository({ appId, gitConnectionId: gitConnection.id, path: resolution.path });
+            consola.success('Repository connected successfully.');
+            return;
+          }
+        } else if (gitConnections.length > 1) {
+          const selectedGitConnection = await promptGitConnectionSelection(gitConnections);
+          await appsService.linkRepository({ appId, gitConnectionId: selectedGitConnection.id, path: resolution.path });
+          consola.success('Repository connected successfully.');
+          return;
+        } else if (resolution.provider) {
+          consola.error(
+            `No git connection found for the git remote \`origin\`. Please create a ${resolution.provider} connection in the Capawesome Cloud Console (${DEFAULT_CONSOLE_BASE_URL}).`,
+          );
+          process.exit(1);
+        } else {
+          consola.error('No git connection can serve the git remote `origin`.');
+          process.exit(1);
+        }
+      }
+    }
+
     const gitConnections = await findGitConnectionsForApp(organizationId, appId);
     if (gitConnections.length === 0) {
       consola.error(
@@ -94,26 +145,6 @@ export default defineCommand({
       );
       process.exit(1);
     }
-
-    const gitRemoteInfo = getGitRemoteInfo();
-    if (gitRemoteInfo && !path) {
-      const matches = gitConnections.filter(
-        (gitConnection) => getGitConnectionHost(gitConnection) === gitRemoteInfo.host,
-      );
-      const match = matches[0];
-      if (matches.length === 1 && match) {
-        const confirmed = await prompt(
-          `Do you want to connect \`${gitRemoteInfo.path}\` using the git connection "${match.name}"?`,
-          { type: 'confirm', initial: true },
-        );
-        if (confirmed) {
-          await appsService.linkRepository({ appId, gitConnectionId: match.id, path: gitRemoteInfo.path });
-          consola.success('Repository connected successfully.');
-          return;
-        }
-      }
-    }
-
     const gitConnection = await promptGitConnectionSelection(gitConnections);
     if (!path) {
       if (gitConnection.provider === 'git_http') {
