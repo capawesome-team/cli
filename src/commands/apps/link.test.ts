@@ -35,12 +35,12 @@ describe('apps-link', () => {
   const testToken = 'test-token';
   const gitConnection: GitConnectionDto = {
     id: 'gc-1',
-    appId: null,
     authKind: 'oauth',
     baseUrl: null,
     name: 'My Connection',
     organizationId: orgId,
     provider: 'github',
+    restricted: false,
   };
   const otherGitConnection: GitConnectionDto = {
     ...gitConnection,
@@ -68,7 +68,7 @@ describe('apps-link', () => {
   const nockResolveRequest = (gitConnections: GitConnectionDto[], provider: string | null = 'github') =>
     nock(DEFAULT_API_BASE_URL)
       .get(`/v1/organizations/${orgId}/git-connections/resolve`)
-      .query({ remoteUrl, appId })
+      .query({ remoteUrl })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(200, { gitConnections, path: repositoryPath, provider });
 
@@ -225,14 +225,9 @@ describe('apps-link', () => {
     mockPromptRepositorySelection.mockResolvedValueOnce(repositoryPath);
 
     const appScope = nockAppRequest();
-    const appConnectionsScope = nock(DEFAULT_API_BASE_URL)
+    const connectionsScope = nock(DEFAULT_API_BASE_URL)
       .get(`/v1/organizations/${orgId}/git-connections`)
-      .query({ appId, limit: '50' })
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, []);
-    const organizationConnectionsScope = nock(DEFAULT_API_BASE_URL)
-      .get(`/v1/organizations/${orgId}/git-connections`)
-      .query({ scope: 'organization', limit: '50' })
+      .query({ restricted: 'false', limit: '50' })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(200, [gitConnection]);
     const linkScope = nockLinkRequest(gitConnection.id, repositoryPath);
@@ -240,8 +235,7 @@ describe('apps-link', () => {
     await linkCommand.action({ appId }, undefined);
 
     expect(appScope.isDone()).toBe(true);
-    expect(appConnectionsScope.isDone()).toBe(true);
-    expect(organizationConnectionsScope.isDone()).toBe(true);
+    expect(connectionsScope.isDone()).toBe(true);
     expect(linkScope.isDone()).toBe(true);
     expect(mockPromptGitConnectionSelection).toHaveBeenCalledWith([gitConnection]);
     expect(mockPromptRepositorySelection).toHaveBeenCalledWith(gitConnection);
@@ -252,22 +246,16 @@ describe('apps-link', () => {
     mockGetGitRemoteUrl.mockReturnValue(undefined);
 
     const appScope = nockAppRequest();
-    const appConnectionsScope = nock(DEFAULT_API_BASE_URL)
+    const connectionsScope = nock(DEFAULT_API_BASE_URL)
       .get(`/v1/organizations/${orgId}/git-connections`)
-      .query({ appId, limit: '50' })
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, []);
-    const organizationConnectionsScope = nock(DEFAULT_API_BASE_URL)
-      .get(`/v1/organizations/${orgId}/git-connections`)
-      .query({ scope: 'organization', limit: '50' })
+      .query({ restricted: 'false', limit: '50' })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(200, []);
 
     await expect(linkCommand.action({ appId }, undefined)).rejects.toThrow();
 
     expect(appScope.isDone()).toBe(true);
-    expect(appConnectionsScope.isDone()).toBe(true);
-    expect(organizationConnectionsScope.isDone()).toBe(true);
+    expect(connectionsScope.isDone()).toBe(true);
     expect(mockConsola.error).toHaveBeenCalled();
   });
 

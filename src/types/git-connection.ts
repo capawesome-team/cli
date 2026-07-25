@@ -4,28 +4,26 @@ export type GitConnectionProvider = 'azure_devops' | 'bitbucket' | 'git_http' | 
 
 export interface GitConnectionDto {
   id: string;
-  appId: string | null;
   authKind: GitConnectionAuthKind;
   baseUrl: string | null;
   name: string;
   organizationId: string;
   provider: GitConnectionProvider;
+  restricted: boolean;
 }
 
 export interface FindAllGitConnectionsDto {
   organizationId: string;
-  appId?: string;
   limit?: number;
   name?: string;
   offset?: number;
   provider?: GitConnectionProvider;
-  scope?: 'organization';
+  restricted?: boolean;
 }
 
 export interface ResolveGitConnectionsDto {
   organizationId: string;
   remoteUrl: string;
-  appId?: string;
 }
 
 export interface GitConnectionResolutionDto {

@@ -24,9 +24,6 @@ class GitConnectionsServiceImpl implements GitConnectionsService {
 
   async findAll(dto: FindAllGitConnectionsDto): Promise<GitConnectionDto[]> {
     const params: Record<string, string> = {};
-    if (dto.appId !== undefined) {
-      params.appId = dto.appId;
-    }
     if (dto.limit !== undefined) {
       params.limit = dto.limit.toString();
     }
@@ -39,8 +36,8 @@ class GitConnectionsServiceImpl implements GitConnectionsService {
     if (dto.provider !== undefined) {
       params.provider = dto.provider;
     }
-    if (dto.scope !== undefined) {
-      params.scope = dto.scope;
+    if (dto.restricted !== undefined) {
+      params.restricted = dto.restricted.toString();
     }
     const response = await this.httpClient.get<GitConnectionDto[]>(
       `/v1/organizations/${dto.organizationId}/git-connections`,
@@ -79,9 +76,6 @@ class GitConnectionsServiceImpl implements GitConnectionsService {
 
   async resolve(dto: ResolveGitConnectionsDto): Promise<GitConnectionResolutionDto> {
     const params: Record<string, string> = { remoteUrl: dto.remoteUrl };
-    if (dto.appId !== undefined) {
-      params.appId = dto.appId;
-    }
     const response = await this.httpClient.get<GitConnectionResolutionDto>(
       `/v1/organizations/${dto.organizationId}/git-connections/resolve`,
       {

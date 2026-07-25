@@ -1,7 +1,7 @@
 import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appsService from '@/services/apps.js';
 import gitConnectionsService from '@/services/git-connections.js';
-import { GitConnectionDto, GitConnectionResolutionDto } from '@/types/git-connection.js';
+import { GitConnectionResolutionDto } from '@/types/git-connection.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { getGitRemoteUrl } from '@/utils/git.js';
@@ -17,30 +17,19 @@ import { AxiosError } from 'axios';
 import consola from 'consola';
 import { z } from 'zod';
 
-const resolveGitRemote = async (
-  organizationId: string,
-  appId: string,
-): Promise<GitConnectionResolutionDto | undefined> => {
+const resolveGitRemote = async (organizationId: string): Promise<GitConnectionResolutionDto | undefined> => {
   const remoteUrl = getGitRemoteUrl();
   if (!remoteUrl) {
     return undefined;
   }
   try {
-    return await gitConnectionsService.resolve({ organizationId, appId, remoteUrl });
+    return await gitConnectionsService.resolve({ organizationId, remoteUrl });
   } catch (error) {
     if (error instanceof AxiosError && error.response?.status === 400) {
       return undefined;
     }
     throw error;
   }
-};
-
-const findGitConnectionsForApp = async (organizationId: string, appId: string): Promise<GitConnectionDto[]> => {
-  const [appGitConnections, organizationGitConnections] = await Promise.all([
-    gitConnectionsService.findAll({ organizationId, appId, limit: 50 }),
-    gitConnectionsService.findAll({ organizationId, scope: 'organization', limit: 50 }),
-  ]);
-  return [...appGitConnections, ...organizationGitConnections];
 };
 
 export default defineCommand({
@@ -89,7 +78,7 @@ export default defineCommand({
     }
 
     if (gitConnectionId) {
-      path = path ?? (await resolveGitRemote(organizationId, appId))?.path;
+      path = path ?? (await resolveGitRemote(organizationId))?.path;
       if (!path) {
         consola.error('You must provide the repository path using the --path option.');
         process.exit(1);
@@ -107,7 +96,7 @@ export default defineCommand({
     }
 
     if (!path) {
-      const resolution = await resolveGitRemote(organizationId, appId);
+      const resolution = await resolveGitRemote(organizationId);
       if (resolution) {
         const gitConnections = resolution.gitConnections;
         const gitConnection = gitConnections[0];
@@ -138,7 +127,7 @@ export default defineCommand({
       }
     }
 
-    const gitConnections = await findGitConnectionsForApp(organizationId, appId);
+    const gitConnections = await gitConnectionsService.findAll({ organizationId, restricted: false, limit: 50 });
     if (gitConnections.length === 0) {
       consola.error(
         `No git connections found. Please create one in the Capawesome Cloud Console (${DEFAULT_CONSOLE_BASE_URL}).`,
