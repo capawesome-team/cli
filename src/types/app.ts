@@ -1,6 +1,7 @@
 export interface AppDto {
   id: string;
   name: string;
+  organizationId: string;
   type: AppType;
 }
 
@@ -28,10 +29,8 @@ export interface FindOneAppDto {
 
 export interface LinkAppRepositoryDto {
   appId: string;
-  ownerSlug: string;
-  provider: string;
-  repositorySlug: string;
-  projectSlug?: string;
+  gitConnectionId: string;
+  path: string;
 }
 
 export interface TransferAppDto {

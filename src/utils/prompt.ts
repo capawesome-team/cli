@@ -1,3 +1,4 @@
+import { GitConnectionDto } from '@/types/git-connection.js';
 import consola from 'consola';
 
 export const prompt: typeof consola.prompt = async (message, options) => {
@@ -72,4 +73,53 @@ export const promptAppSelection = async (
     options: apps.map((app) => ({ label: app.name, value: app.id })),
   });
   return appId;
+};
+
+export const promptGitConnectionSelection = async (gitConnections: GitConnectionDto[]): Promise<GitConnectionDto> => {
+  // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+  const gitConnectionId = await prompt('Which git connection do you want to use?', {
+    type: 'select',
+    options: gitConnections.map((gitConnection) => ({
+      label: `${gitConnection.name} (${gitConnection.provider})`,
+      value: gitConnection.id,
+    })),
+  });
+  const gitConnection = gitConnections.find((gitConnection) => gitConnection.id === gitConnectionId);
+  if (!gitConnection) {
+    consola.error('Git connection not found.');
+    process.exit(1);
+  }
+  return gitConnection;
+};
+
+export const promptRepositorySelection = async (gitConnection: GitConnectionDto): Promise<string> => {
+  const gitConnectionsService = await import('@/services/git-connections.js').then((mod) => mod.default);
+  let namespace: string | undefined;
+  let query: string | undefined;
+  if (gitConnection.provider === 'bitbucket') {
+    namespace = await prompt('Enter the Bitbucket workspace slug:', { type: 'text' });
+  } else if (gitConnection.provider === 'azure_devops') {
+    namespace = await prompt('Enter the Azure DevOps organization and project (e.g. `my-org/my-project`):', {
+      type: 'text',
+    });
+  } else {
+    const search = await prompt('Search for a repository (optional):', { type: 'text' });
+    query = search.trim() || undefined;
+  }
+  const repositories = await gitConnectionsService.findAllRepositories({
+    gitConnectionId: gitConnection.id,
+    organizationId: gitConnection.organizationId,
+    namespace,
+    query,
+  });
+  if (repositories.length === 0) {
+    consola.error('No repositories found.');
+    process.exit(1);
+  }
+  // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+  const path = await prompt('Which repository do you want to connect?', {
+    type: 'select',
+    options: repositories.map((repository) => ({ label: repository.path, value: repository.path })),
+  });
+  return path;
 };
