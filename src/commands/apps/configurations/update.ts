@@ -18,7 +18,9 @@ export default defineCommand({
       packageName: z
         .string()
         .optional()
-        .describe('Package name (bundle ID) of the app. Pass an empty string to clear it.'),
+        .describe(
+          'Package name of the app (application ID on Android, bundle ID on iOS). Pass an empty string to clear it.',
+        ),
     }),
   ),
   action: withAuth(async (options, args) => {

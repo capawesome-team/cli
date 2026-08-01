@@ -14,7 +14,10 @@ export default defineCommand({
       displayName: z.string().optional().describe('Display name of the app.'),
       json: z.boolean().optional().describe('Output in JSON format.'),
       name: z.string().optional().describe('Name of the native configuration.'),
-      packageName: z.string().optional().describe('Package name (bundle ID) of the app.'),
+      packageName: z
+        .string()
+        .optional()
+        .describe('Package name of the app (application ID on Android, bundle ID on iOS).'),
     }),
   ),
   action: withAuth(async (options, args) => {
