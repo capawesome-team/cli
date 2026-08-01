@@ -55,6 +55,11 @@ const config = defineConfig({
     'apps:channels:pause': await import('@/commands/apps/channels/pause.js').then((mod) => mod.default),
     'apps:channels:resume': await import('@/commands/apps/channels/resume.js').then((mod) => mod.default),
     'apps:channels:update': await import('@/commands/apps/channels/update.js').then((mod) => mod.default),
+    'apps:configurations:create': await import('@/commands/apps/configurations/create.js').then((mod) => mod.default),
+    'apps:configurations:delete': await import('@/commands/apps/configurations/delete.js').then((mod) => mod.default),
+    'apps:configurations:get': await import('@/commands/apps/configurations/get.js').then((mod) => mod.default),
+    'apps:configurations:list': await import('@/commands/apps/configurations/list.js').then((mod) => mod.default),
+    'apps:configurations:update': await import('@/commands/apps/configurations/update.js').then((mod) => mod.default),
     'apps:deployments:create': await import('@/commands/apps/deployments/create.js').then((mod) => mod.default),
     'apps:deployments:cancel': await import('@/commands/apps/deployments/cancel.js').then((mod) => mod.default),
     'apps:deployments:failure-summary': await import('@/commands/apps/deployments/failure-summary.js').then(

@@ -130,6 +130,30 @@ describe('apps-builds-create', () => {
     );
   });
 
+  it('should reject --configuration combined with a platform that does not support it', async () => {
+    const options = { appId, platform: 'web' as const, gitRef: 'main', configuration: 'production' };
+
+    await expect(createCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
+
+    expect(mockConsola.error).toHaveBeenCalledWith(
+      'The --configuration flag can only be used with the android and ios platforms.',
+    );
+  });
+
+  it.each(['android', 'ios'] as const)('should accept --configuration with the %s platform', async (platform) => {
+    const options = { appId, platform, gitRef: 'main', configuration: 'production', detached: true };
+
+    const buildScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/builds`, (body) => body.appConfigurationName === 'production')
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: buildId, jobId: 'job-1', numberAsString: '42' });
+
+    await createCommand.action(options, undefined);
+
+    expect(buildScope.isDone()).toBe(true);
+    expect(mockConsola.error).not.toHaveBeenCalled();
+  });
+
   it('should reject a non-positive shareExpiresInDays value', () => {
     const schema = createCommand.options?.schema;
 
