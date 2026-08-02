@@ -57,7 +57,7 @@ export default defineCommand({
         .optional()
         .describe('Build ID to run.'),
       buildNumber: z.string().optional().describe('Build number to run (e.g., "1", "42").'),
-      list: z.boolean().optional().describe('Print a list of target devices available for the build.'),
+      list: z.boolean().optional().describe('Print a list of the emulators and simulators available on this machine.'),
       target: z.string().optional().describe('Run on a specific target device by its ID.'),
       targetName: z
         .string()
@@ -74,6 +74,12 @@ export default defineCommand({
   action: withAuth(async (options) => {
     let { appId, buildId } = options;
     const { buildNumber, list, target, targetName, targetNameSdkVersion } = options;
+
+    // Listing the local emulators and simulators does not require a build.
+    if (list) {
+      handleTargetList();
+      return;
+    }
 
     if (targetNameSdkVersion && !targetName) {
       consola.error('You must provide --target-name when using --target-name-sdk-version.');
@@ -141,18 +147,6 @@ export default defineCommand({
       process.exit(1);
     }
 
-    if (list) {
-      console.table(
-        targets.map(({ id, name, running, sdkVersion }) => ({
-          id,
-          name,
-          sdkVersion,
-          running,
-        })),
-      );
-      return;
-    }
-
     const artifactType = isAndroid ? 'apk' : 'app';
     const artifact = build.appBuildArtifacts?.find(
       (artifact) => artifact.type === artifactType && artifact.status === 'ready',
@@ -186,6 +180,49 @@ export default defineCommand({
     }
   }),
 });
+
+/**
+ * Print every emulator and simulator available on this machine.
+ */
+const handleTargetList = (): void => {
+  const rows: { id: string; name: string; platform: string; running: boolean; sdkVersion: string | null }[] = [];
+  try {
+    rows.push(
+      ...findAllAndroidEmulators().map(({ id, name, running, sdkVersion }) => ({
+        id,
+        name,
+        platform: 'android',
+        running,
+        sdkVersion,
+      })),
+    );
+  } catch {
+    // Ignore machines without an Android SDK.
+  }
+  if (process.platform === 'darwin') {
+    try {
+      rows.push(
+        ...findAllIosSimulators().map(({ id, name, running, sdkVersion }) => ({
+          id,
+          name,
+          platform: 'ios',
+          running,
+          sdkVersion,
+        })),
+      );
+    } catch {
+      // Ignore machines without Xcode.
+    }
+  }
+
+  if (rows.length === 0) {
+    consola.error(
+      'No emulators or simulators found. Create an Android emulator in Android Studio or install an iOS simulator via Xcode.',
+    );
+    process.exit(1);
+  }
+  console.table(rows);
+};
 
 /**
  * Ensure the build can be run locally and return its package name.
