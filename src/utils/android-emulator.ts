@@ -9,8 +9,10 @@ const BOOT_POLL_INTERVAL_IN_MS = 2000;
 const BOOT_TIMEOUT_IN_MS = 300000;
 
 export interface AndroidEmulator {
+  id: string;
   name: string;
   running: boolean;
+  sdkVersion: string | null;
   serial: string | null;
 }
 
@@ -18,14 +20,21 @@ export interface AndroidEmulator {
  * Find all Android emulators (AVDs) installed on this machine.
  */
 export const findAllAndroidEmulators = (): AndroidEmulator[] => {
-  const names = runEmulator(['-list-avds'])
+  const ids = runEmulator(['-list-avds'])
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean);
-  const serialByName = findAllRunningAndroidEmulators();
-  return names.map((name) => {
-    const serial = serialByName.get(name) ?? null;
-    return { name, running: !!serial, serial };
+  const serialById = findAllRunningAndroidEmulators();
+  return ids.map((id) => {
+    const serial = serialById.get(id) ?? null;
+    const { displayName, sdkVersion } = getAndroidEmulatorConfig(id);
+    return {
+      id,
+      name: displayName ?? id,
+      running: !!serial,
+      sdkVersion,
+      serial,
+    };
   });
 };
 
@@ -38,7 +47,7 @@ export const bootAndroidEmulator = async (emulator: AndroidEmulator): Promise<st
   if (emulator.serial) {
     return emulator.serial;
   }
-  const child = spawn(getAndroidToolPath('emulator', 'emulator'), ['-avd', emulator.name], {
+  const child = spawn(getAndroidToolPath('emulator', 'emulator'), ['-avd', emulator.id], {
     detached: true,
     stdio: 'ignore',
   });
@@ -46,7 +55,7 @@ export const bootAndroidEmulator = async (emulator: AndroidEmulator): Promise<st
   const deadline = Date.now() + BOOT_TIMEOUT_IN_MS;
   while (Date.now() < deadline) {
     await wait(BOOT_POLL_INTERVAL_IN_MS);
-    const serial = findAllRunningAndroidEmulators().get(emulator.name);
+    const serial = findAllRunningAndroidEmulators().get(emulator.id);
     if (serial && isAndroidEmulatorBooted(serial)) {
       return serial;
     }
@@ -69,7 +78,7 @@ export const launchAndroidApp = (serial: string, packageName: string): void => {
 };
 
 /**
- * Map the AVD name of every running emulator to its serial.
+ * Map the AVD ID of every running emulator to its serial.
  */
 const findAllRunningAndroidEmulators = (): Map<string, string> => {
   const serials = runAdb(['devices'])
@@ -77,21 +86,45 @@ const findAllRunningAndroidEmulators = (): Map<string, string> => {
     .slice(1)
     .map((line) => line.split('\t')[0]?.trim())
     .filter((serial) => !!serial && serial.startsWith('emulator-'));
-  const serialByName = new Map<string, string>();
+  const serialById = new Map<string, string>();
   for (const serial of serials) {
     if (!serial) {
       continue;
     }
     try {
-      const name = runAdb(['-s', serial, 'emu', 'avd', 'name']).split('\n')[0]?.trim();
-      if (name) {
-        serialByName.set(name, serial);
+      const id = runAdb(['-s', serial, 'emu', 'avd', 'name']).split('\n')[0]?.trim();
+      if (id) {
+        serialById.set(id, serial);
       }
     } catch {
       // Ignore emulators that do not respond to the console command.
     }
   }
-  return serialByName;
+  return serialById;
+};
+
+/**
+ * Read the display name and API level of an emulator from its AVD configuration.
+ */
+const getAndroidEmulatorConfig = (id: string): { displayName: string | null; sdkVersion: string | null } => {
+  try {
+    const config = fs.readFileSync(path.join(getAndroidAvdHome(), `${id}.avd`, 'config.ini'), 'utf-8');
+    return {
+      displayName: config.match(/^avd\.ini\.displayname=(.+)$/m)?.[1]?.trim() ?? null,
+      sdkVersion: config.match(/android-(\d+)/)?.[1] ?? null,
+    };
+  } catch {
+    return { displayName: null, sdkVersion: null };
+  }
+};
+
+const getAndroidAvdHome = (): string => {
+  const avdHome = process.env.ANDROID_AVD_HOME;
+  if (avdHome) {
+    return avdHome;
+  }
+  const sdkHome = process.env.ANDROID_SDK_HOME;
+  return sdkHome ? path.join(sdkHome, '.android', 'avd') : path.join(os.homedir(), '.android', 'avd');
 };
 
 const isAndroidEmulatorBooted = (serial: string): boolean => {
@@ -112,7 +145,7 @@ const run = (command: string, args: string[], toolName: string): string => {
   } catch (error) {
     if (getCodeFromUnknownError(error) === 'ENOENT') {
       throw new UserError(
-        `Could not find "${toolName}". Make sure the Android SDK is installed and the ANDROID_HOME environment variable is set.`,
+        `Could not find "${toolName}". Make sure the Android SDK is installed and either the ANDROID_HOME or ANDROID_SDK_ROOT environment variable points to it.`,
       );
     }
     const stderr = (error as { stderr?: string }).stderr?.trim();

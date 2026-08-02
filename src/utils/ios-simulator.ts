@@ -8,10 +8,10 @@ interface SimctlDevice {
 }
 
 export interface IosSimulator {
+  id: string;
   name: string;
-  runtime: string;
   running: boolean;
-  udid: string;
+  sdkVersion: string;
 }
 
 /**
@@ -24,10 +24,10 @@ export const findAllIosSimulators = (): IosSimulator[] => {
     .filter(([runtime]) => runtime.includes('iOS'))
     .flatMap(([runtime, devices]) =>
       devices.map((device) => ({
+        id: device.udid,
         name: device.name,
-        runtime: getRuntimeName(runtime),
         running: device.state === 'Booted',
-        udid: device.udid,
+        sdkVersion: getRuntimeVersion(runtime),
       })),
     );
 };
@@ -36,31 +36,31 @@ export const findAllIosSimulators = (): IosSimulator[] => {
  * Boot an iOS simulator, wait until it has finished booting and bring it to the front.
  */
 export const bootIosSimulator = (simulator: IosSimulator): void => {
-  runSimctl(['bootstatus', simulator.udid, '-b']);
+  runSimctl(['bootstatus', simulator.id, '-b']);
   run('open', ['-a', 'Simulator'], 'open');
 };
 
 /**
  * Install an app bundle on a booted iOS simulator.
  */
-export const installIosApp = (udid: string, appPath: string): void => {
-  runSimctl(['install', udid, appPath]);
+export const installIosApp = (id: string, appPath: string): void => {
+  runSimctl(['install', id, appPath]);
 };
 
 /**
  * Launch an app on a booted iOS simulator.
  */
-export const launchIosApp = (udid: string, packageName: string): void => {
-  runSimctl(['launch', udid, packageName]);
+export const launchIosApp = (id: string, packageName: string): void => {
+  runSimctl(['launch', id, packageName]);
 };
 
 /**
- * Convert a simulator runtime identifier into a readable name (e.g. `iOS 18.2`).
+ * Extract the version from a simulator runtime identifier (e.g. `18.2`).
  */
-const getRuntimeName = (runtime: string): string => {
+const getRuntimeVersion = (runtime: string): string => {
   const identifier = runtime.split('.').pop() ?? runtime;
-  const [platform, ...version] = identifier.split('-');
-  return version.length > 0 ? `${platform} ${version.join('.')}` : identifier;
+  const [, ...version] = identifier.split('-');
+  return version.join('.');
 };
 
 const runSimctl = (args: string[]): string => run('xcrun', ['simctl', ...args], 'simctl');
