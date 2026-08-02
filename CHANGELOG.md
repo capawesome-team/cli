@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.18.0](https://github.com/capawesome-team/cli/compare/v4.17.3...v4.18.0) (2026-08-02)
+
+
+### Features
+
+* **apps:** add `apps:builds:run` command ([#198](https://github.com/capawesome-team/cli/issues/198)) ([a3926fd](https://github.com/capawesome-team/cli/commit/a3926fd1514f2534f9132fccb1e9d7f7eb75565c))
+* **apps:** add apps:automations commands ([#199](https://github.com/capawesome-team/cli/issues/199)) ([6e95719](https://github.com/capawesome-team/cli/commit/6e9571914754df2ba64c61e2d2172f2b2031785c))
+* **apps:** add commands to manage native configurations ([#196](https://github.com/capawesome-team/cli/issues/196)) ([5a3480e](https://github.com/capawesome-team/cli/commit/5a3480e094e16a72ada5baac1ff1cbc8ffbfd512))
+
 ## [4.17.3](https://github.com/capawesome-team/cli/compare/v4.17.2...v4.17.3) (2026-07-21)
 
 
