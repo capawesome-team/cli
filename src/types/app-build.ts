@@ -6,7 +6,7 @@ export interface AppBuildArtifactDto {
   fileName: string;
   fileSizeInBytes: number;
   status: 'pending' | 'ready';
-  type: 'apk' | 'aab' | 'ipa' | 'zip';
+  type: 'apk' | 'aab' | 'app' | 'ipa' | 'zip';
 }
 
 export interface AppBuildDto {
@@ -22,6 +22,7 @@ export interface AppBuildDto {
   job?: JobDto;
   jobId: string;
   numberAsString: string;
+  packageName: string | null;
   platform: 'ios' | 'android' | 'web';
   type: string;
 }
