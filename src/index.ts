@@ -37,6 +37,7 @@ const config = defineConfig({
     'apps:builds:get': await import('@/commands/apps/builds/get.js').then((mod) => mod.default),
     'apps:builds:list': await import('@/commands/apps/builds/list.js').then((mod) => mod.default),
     'apps:builds:logs': await import('@/commands/apps/builds/logs.js').then((mod) => mod.default),
+    'apps:builds:run': await import('@/commands/apps/builds/run.js').then((mod) => mod.default),
     'apps:builds:share': await import('@/commands/apps/builds/share.js').then((mod) => mod.default),
     'apps:builds:unshare': await import('@/commands/apps/builds/unshare.js').then((mod) => mod.default),
     'apps:builds:download': await import('@/commands/apps/builds/download.js').then((mod) => mod.default),

@@ -6,12 +6,18 @@ import path from 'path';
 const MAX_ZIP_ENTRIES = 65535;
 
 interface Zip {
+  unzipToFolder(buffer: Buffer, targetFolder: string): Promise<void>;
   zipFolder(sourceFolder: string): Promise<Buffer>;
   zipFolderWithGitignore(sourceFolder: string): Promise<Buffer>;
   isZipped(path: string): boolean;
 }
 
 class ZipImpl implements Zip {
+  async unzipToFolder(buffer: Buffer, targetFolder: string): Promise<void> {
+    const zip = new AdmZip(buffer);
+    zip.extractAllTo(targetFolder, true);
+  }
+
   async zipFolder(sourceFolder: string): Promise<Buffer> {
     const zip = new AdmZip();
     zip.addLocalFolder(sourceFolder);
