@@ -14,6 +14,7 @@ export interface AppBuildDto {
   appBuildArtifactId: string | null;
   appBuildArtifacts?: AppBuildArtifactDto[];
   appCertificateId?: string;
+  appConfigurationId?: string;
   appEnvironmentId?: string;
   appBuildSourceId?: string;
   appId: string;
@@ -29,6 +30,7 @@ export interface CreateAppBuildDto {
   adHocEnvironmentVariables?: Record<string, string>;
   appBuildSourceId?: string;
   appCertificateName?: string;
+  appConfigurationName?: string;
   appEnvironmentName?: string;
   appId: string;
   stack?: 'macos-sequoia' | 'macos-tahoe';

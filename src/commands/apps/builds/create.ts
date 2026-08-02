@@ -2,6 +2,7 @@ import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appBuildSourcesService from '@/services/app-build-sources.js';
 import appBuildsService from '@/services/app-builds.js';
 import appCertificatesService from '@/services/app-certificates.js';
+import appConfigurationsService from '@/services/app-configurations.js';
 import appEnvironmentsService from '@/services/app-environments.js';
 import appsService from '@/services/apps.js';
 import { AppBuildArtifactDto } from '@/types/app-build.js';
@@ -44,6 +45,7 @@ export default defineCommand({
         .describe('App ID to create the build for.'),
       certificate: z.string().optional().describe('The name of the certificate to use for the build.'),
       channel: z.string().optional().describe('The name of the channel to deploy to (Web only).'),
+      configuration: z.string().optional().describe('The name of the native configuration (Android/iOS only).'),
       destination: z.string().optional().describe('The name of the destination to deploy to (Android/iOS only).'),
       detached: z
         .boolean()
@@ -110,7 +112,19 @@ export default defineCommand({
     { y: 'yes' },
   ),
   action: withAuth(async (options) => {
-    let { appId, platform, type, gitRef, environment, certificate, json, stack, path: sourcePath, url } = options;
+    let {
+      appId,
+      platform,
+      type,
+      gitRef,
+      environment,
+      certificate,
+      configuration,
+      json,
+      stack,
+      path: sourcePath,
+      url,
+    } = options;
 
     // Validate that detached flag cannot be used with artifact flags
     if (options.detached && (options.apk || options.aab || options.ipa || options.zip)) {
@@ -279,6 +293,13 @@ export default defineCommand({
       process.exit(1);
     }
 
+    // Validate that configuration is only used with the platforms that support it
+    const supportsConfiguration = platform === 'android' || platform === 'ios';
+    if (options.configuration && !supportsConfiguration) {
+      consola.error('The --configuration flag can only be used with the android and ios platforms.');
+      process.exit(1);
+    }
+
     // Prompt for environment if not provided
     if (!environment && !options.yes && isInteractive()) {
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
@@ -316,6 +337,27 @@ export default defineCommand({
           certificate = await prompt('Select the certificate for the build:', {
             type: 'select',
             options: certificates.map((cert) => ({ label: cert.name, value: cert.name })),
+          });
+        }
+      }
+    }
+
+    // Prompt for configuration if not provided
+    if (!configuration && supportsConfiguration && !options.yes && isInteractive()) {
+      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+      const selectConfiguration = await prompt('Do you want to select a native configuration?', {
+        type: 'confirm',
+        initial: false,
+      });
+      if (selectConfiguration) {
+        const configurations = await appConfigurationsService.findAll({ appId });
+        if (configurations.length === 0) {
+          consola.warn('No native configurations found for this app.');
+        } else {
+          // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+          configuration = await prompt('Select the native configuration for the build:', {
+            type: 'select',
+            options: configurations.map((config) => ({ label: config.name, value: config.name })),
           });
         }
       }
@@ -381,6 +423,7 @@ export default defineCommand({
       adHocEnvironmentVariables,
       appBuildSourceId,
       appCertificateName: certificate,
+      appConfigurationName: configuration,
       appEnvironmentName: environment,
       appId,
       stack,
