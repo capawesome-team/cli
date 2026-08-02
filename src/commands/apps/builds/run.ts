@@ -67,7 +67,7 @@ export default defineCommand({
         .string()
         .optional()
         .describe(
-          'Run on a target device by name with a specific SDK version when using --target-name (e.g. "18.2" for iOS 18.2 or "35" for Android API 35).',
+          'Run on a target device by name with a specific SDK version when using --target-name (e.g. "26.5" for iOS 26.5 or "35" for Android API 35).',
         ),
     }),
   ),
