@@ -27,6 +27,8 @@ const config = defineConfig({
     'apps:create': await import('@/commands/apps/create.js').then((mod) => mod.default),
     'apps:delete': await import('@/commands/apps/delete.js').then((mod) => mod.default),
     'apps:get': await import('@/commands/apps/get.js').then((mod) => mod.default),
+    // Relative path because tsc-alias fails to rewrite the alias after the key `'apps:import'`
+    'apps:import': await import('./commands/apps/import.js').then((mod) => mod.default),
     'apps:link': await import('@/commands/apps/link.js').then((mod) => mod.default),
     'apps:list': await import('@/commands/apps/list.js').then((mod) => mod.default),
     'apps:transfer': await import('@/commands/apps/transfer.js').then((mod) => mod.default),

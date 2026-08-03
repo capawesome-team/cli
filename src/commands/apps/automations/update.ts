@@ -65,9 +65,9 @@ export default defineCommand({
         .optional()
         .describe('What triggers the automation. Supported values are `branch` and `tag`.'),
       type: z
-        .enum(['app-store', 'ad-hoc', 'debug', 'development', 'release', 'simulator'], {
+        .enum(['app-store', 'ad-hoc', 'debug', 'development', 'enterprise', 'release', 'simulator'], {
           message:
-            'Build type must be one of `app-store`, `ad-hoc`, `debug`, `development`, `release`, or `simulator`.',
+            'Build type must be one of `app-store`, `ad-hoc`, `debug`, `development`, `enterprise`, `release`, or `simulator`.',
         })
         .optional()
         .describe('The type of build to create.'),

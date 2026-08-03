@@ -35,6 +35,7 @@ export interface CreateAppAutomationDto {
   buildStack?: string | null;
   buildType?: string | null;
   commitMessagePattern?: string | null;
+  enabled?: boolean;
   name: string;
   platform?: AppAutomationPlatform;
   triggerPattern?: string | null;
