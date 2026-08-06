@@ -1,5 +1,6 @@
 import appBuildsService from '@/services/app-builds.js';
 import { AppBuildDto } from '@/types/app-build.js';
+import { defineCommand, defineOptions } from 'zodline';
 import {
   AndroidEmulator,
   bootAndroidEmulator,
@@ -18,7 +19,6 @@ import {
 } from '@/utils/ios-simulator.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import zip from '@/utils/zip.js';
-import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import fs from 'fs/promises';
 import os from 'os';

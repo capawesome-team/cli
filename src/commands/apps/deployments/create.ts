@@ -7,9 +7,9 @@ import { isInteractive } from '@/utils/environment.js';
 import { offerJobFailureSummary } from '@/utils/job-failure-summary.js';
 import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
-import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { z } from 'zod';
+import { defineCommand, defineOptions } from 'zodline';
 
 export default defineCommand({
   description: 'Create a new app deployment on Capawesome Cloud.',

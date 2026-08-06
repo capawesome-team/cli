@@ -1,8 +1,8 @@
 import authorizationService from '@/services/authorization-service.js';
 import usersService from '@/services/users.js';
-import { defineCommand } from '@robingenz/zli';
 import { AxiosError } from 'axios';
 import consola from 'consola';
+import { defineCommand } from 'zodline';
 
 export default defineCommand({
   description: 'Show current user',

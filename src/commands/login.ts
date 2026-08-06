@@ -7,11 +7,11 @@ import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
 import credentialStore from '@/utils/credential-store.js';
 import userConfig from '@/utils/user-config.js';
-import { defineCommand, defineOptions } from '@robingenz/zli';
 import { AxiosError } from 'axios';
 import consola from 'consola';
 import open from 'open';
 import { z } from 'zod';
+import { defineCommand, defineOptions } from 'zodline';
 
 export default defineCommand({
   description: 'Sign in to the Capawesome Cloud Console.',

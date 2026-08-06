@@ -1,4 +1,5 @@
 import { isInteractive } from '@/utils/environment.js';
+import { defineCommand, defineOptions } from 'zodline';
 import {
   directoryContainsSourceMaps,
   directoryContainsSymlinks,
@@ -9,7 +10,6 @@ import {
 import { generateManifestJson } from '@/utils/manifest.js';
 import { prompt } from '@/utils/prompt.js';
 import zip from '@/utils/zip.js';
-import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import fs from 'fs';
 import pathModule from 'path';
