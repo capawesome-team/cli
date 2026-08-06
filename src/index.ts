@@ -4,12 +4,12 @@ import telemetryService from '@/services/telemetry.js';
 import updateService from '@/services/update.js';
 import { getMessageFromUnknownError, UserError } from '@/utils/error.js';
 import userConfig from '@/utils/user-config.js';
-import { defineConfig, processConfig, ZliError } from '@robingenz/zli';
 import * as Sentry from '@sentry/node';
 import { AxiosError } from 'axios';
 import consola from 'consola';
 import { createRequire } from 'module';
 import { ZodError } from 'zod';
+import { defineConfig, processConfig, ZodlineError } from 'zodline';
 const require = createRequire(import.meta.url);
 const pkg = require('../package.json');
 
@@ -121,7 +121,7 @@ const captureException = async (error: unknown) => {
     return;
   }
   // Ignore errors from the CLI itself (e.g. "No command found.")
-  if (error instanceof ZliError) {
+  if (error instanceof ZodlineError) {
     return;
   }
   // Ignore validation errors

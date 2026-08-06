@@ -16,11 +16,11 @@ import { isDirectory, isReadable } from '@/utils/file.js';
 import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import zip from '@/utils/zip.js';
-import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import fs from 'fs/promises';
 import path from 'path';
 import { z } from 'zod';
+import { defineCommand, defineOptions } from 'zodline';
 
 const IOS_BUILD_TYPES = ['simulator', 'development', 'ad-hoc', 'app-store', 'enterprise'] as const;
 const ANDROID_BUILD_TYPES = ['debug', 'release'] as const;

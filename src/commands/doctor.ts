@@ -1,7 +1,7 @@
 import { createRequire } from 'module';
-import { defineCommand } from '@robingenz/zli';
 import consola from 'consola';
 import systeminformation from 'systeminformation';
+import { defineCommand } from 'zodline';
 const require = createRequire(import.meta.url);
 const pkg = require('../../package.json');
 

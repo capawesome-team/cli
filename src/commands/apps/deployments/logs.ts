@@ -3,10 +3,10 @@ import { unescapeAnsi } from '@/utils/ansi.js';
 import { withAuth } from '@/utils/auth.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import { wait } from '@/utils/wait.js';
-import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { isInteractive } from '@/utils/environment.js';
 import { z } from 'zod';
+import { defineCommand, defineOptions } from 'zodline';
 
 export default defineCommand({
   description: 'View the deployment logs of an app.',

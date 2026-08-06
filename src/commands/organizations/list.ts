@@ -1,8 +1,8 @@
 import organizationsService from '@/services/organizations.js';
 import { withAuth } from '@/utils/auth.js';
-import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { z } from 'zod';
+import { defineCommand, defineOptions } from 'zodline';
 
 export default defineCommand({
   description: 'Retrieve a list of existing organizations.',

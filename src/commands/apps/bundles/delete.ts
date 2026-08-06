@@ -1,6 +1,6 @@
-import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { z } from 'zod';
+import { defineCommand, defineOptions } from 'zodline';
 
 export default defineCommand({
   description: 'Delete an app bundle. Deprecated.',

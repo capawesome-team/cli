@@ -11,9 +11,9 @@ import { formatPrivateKey } from '@/utils/private-key.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import { createSignature } from '@/utils/signature.js';
 import zip from '@/utils/zip.js';
-import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { z } from 'zod';
+import { defineCommand, defineOptions } from 'zodline';
 
 export default defineCommand({
   description: 'Register a self-hosted bundle URL for serving artifacts from your own infrastructure.',
