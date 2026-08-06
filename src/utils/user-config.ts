@@ -4,6 +4,9 @@ import { resolve } from 'node:path';
 import { readUser, writeUser } from 'rc9';
 
 export interface IUserConfig {
+  // The random id of this CLI installation, sent to the API to recognize logins
+  // from a new machine. See `@/utils/installation-id.js`.
+  installationId?: string;
   // The non-secret id of the active session, persisted so `logout` can delete
   // the correct session. The session token is kept in the secure credential store.
   sessionId?: string;

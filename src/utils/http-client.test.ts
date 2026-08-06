@@ -1,4 +1,5 @@
 import configService from '@/services/config.js';
+import { getInstallationId } from '@/utils/installation-id.js';
 import nock from 'nock';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -7,6 +8,10 @@ vi.mock('@/services/config.js', () => ({
   default: {
     getValueForKey: vi.fn().mockResolvedValue('https://api.example.com'),
   },
+}));
+
+vi.mock('@/utils/installation-id.js', () => ({
+  getInstallationId: vi.fn().mockReturnValue('aa4b5a1c-1d0e-4a51-9c8f-3f1b2d9e7a10'),
 }));
 
 describe('http-client', () => {
@@ -120,6 +125,52 @@ describe('http-client', () => {
 
     expect(response.status).toBe(200);
     expect(response.data).toEqual({ success: true });
+  });
+
+  it('should send the installation id header on API requests', async () => {
+    vi.mocked(configService.getValueForKey).mockResolvedValue('https://api.example.com');
+
+    nock('https://api.example.com', {
+      reqheaders: { 'x-capawesome-installation-id': 'aa4b5a1c-1d0e-4a51-9c8f-3f1b2d9e7a10' },
+    })
+      .get('/installation-id')
+      .reply(200, { success: true });
+
+    const { default: httpClient } = await import('./http-client.js');
+
+    const response = await httpClient.get('/installation-id');
+
+    expect(response.status).toBe(200);
+    expect(nock.isDone()).toBe(true);
+  });
+
+  it('should omit the installation id header when it is not available', async () => {
+    vi.mocked(configService.getValueForKey).mockResolvedValue('https://api.example.com');
+    vi.mocked(getInstallationId).mockReturnValueOnce(undefined);
+
+    nock('https://api.example.com', { badheaders: ['x-capawesome-installation-id'] })
+      .get('/no-installation-id')
+      .reply(200, { success: true });
+
+    const { default: httpClient } = await import('./http-client.js');
+
+    const response = await httpClient.get('/no-installation-id');
+
+    expect(response.status).toBe(200);
+    expect(nock.isDone()).toBe(true);
+  });
+
+  it('should not send the installation id header to third-party hosts', async () => {
+    nock('https://registry.example.com', { badheaders: ['x-capawesome-installation-id'] })
+      .get('/package')
+      .reply(200, { success: true });
+
+    const { default: httpClient } = await import('./http-client.js');
+
+    const response = await httpClient.get('https://registry.example.com/package');
+
+    expect(response.status).toBe(200);
+    expect(nock.isDone()).toBe(true);
   });
 
   // Note: Testing actual proxy behavior with nock is not reliable as nock intercepts

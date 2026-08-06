@@ -1,5 +1,6 @@
 import { createRequire } from 'module';
 import configService from '@/services/config.js';
+import { getInstallationId } from '@/utils/installation-id.js';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import axiosRetry from 'axios-retry';
 import { HttpProxyAgent } from 'http-proxy-agent';
@@ -48,73 +49,58 @@ export interface HttpClient {
 }
 
 class HttpClientImpl implements HttpClient {
-  private readonly baseHeaders = {
-    'User-Agent': `Capawesome CLI v${pkg.version}`,
-  };
-
   async delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
-    const baseUrl = await configService.getValueForKey('API_BASE_URL');
-    const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
-    const proxyAgent = getProxyAgent(urlWithHost);
-    const axiosConfig: AxiosRequestConfig = {
-      ...config,
-      headers: { ...this.baseHeaders, ...config?.headers },
-      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
-      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
-    };
-    return axios.delete<T>(urlWithHost, axiosConfig);
+    const request = await this.createRequest(url, config);
+    return axios.delete<T>(request.url, request.config);
   }
 
   async get<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
-    const baseUrl = await configService.getValueForKey('API_BASE_URL');
-    const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
-    const proxyAgent = getProxyAgent(urlWithHost);
-    const axiosConfig: AxiosRequestConfig = {
-      ...config,
-      headers: { ...this.baseHeaders, ...config?.headers },
-      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
-      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
-    };
-    return axios.get<T>(urlWithHost, axiosConfig);
+    const request = await this.createRequest(url, config);
+    return axios.get<T>(request.url, request.config);
   }
 
   async patch<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
-    const baseUrl = await configService.getValueForKey('API_BASE_URL');
-    const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
-    const proxyAgent = getProxyAgent(urlWithHost);
-    const axiosConfig: AxiosRequestConfig = {
-      ...config,
-      headers: { ...this.baseHeaders, ...config?.headers },
-      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
-      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
-    };
-    return axios.patch<T>(urlWithHost, data, axiosConfig);
+    const request = await this.createRequest(url, config);
+    return axios.patch<T>(request.url, data, request.config);
   }
 
   async post<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
-    const baseUrl = await configService.getValueForKey('API_BASE_URL');
-    const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
-    const proxyAgent = getProxyAgent(urlWithHost);
-    const axiosConfig: AxiosRequestConfig = {
-      ...config,
-      headers: { ...this.baseHeaders, ...config?.headers },
-      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
-      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
-    };
-    return axios.post<T>(urlWithHost, data, axiosConfig);
+    const request = await this.createRequest(url, config);
+    return axios.post<T>(request.url, data, request.config);
   }
 
   async put<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
+    const request = await this.createRequest(url, config);
+    return axios.put<T>(request.url, data, request.config);
+  }
+
+  private async createRequest(
+    url: string,
+    config: AxiosRequestConfig<any> | undefined,
+  ): Promise<{ config: AxiosRequestConfig; url: string }> {
+    // Only relative urls target the Capawesome API. Absolute urls point to third parties
+    // (e.g. the npm registry) and must not receive the installation id.
+    const isApiRequest = !url.startsWith('http');
     const baseUrl = await configService.getValueForKey('API_BASE_URL');
-    const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
+    const urlWithHost = isApiRequest ? baseUrl + url : url;
     const proxyAgent = getProxyAgent(urlWithHost);
-    const axiosConfig: AxiosRequestConfig = {
-      ...config,
-      headers: { ...this.baseHeaders, ...config?.headers },
-      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
-      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
+    return {
+      config: {
+        ...config,
+        headers: { ...this.createBaseHeaders(isApiRequest), ...config?.headers },
+        ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
+        ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
+      },
+      url: urlWithHost,
     };
-    return axios.put<T>(urlWithHost, data, axiosConfig);
+  }
+
+  private createBaseHeaders(isApiRequest: boolean): Record<string, string> {
+    const installationId = isApiRequest ? getInstallationId() : undefined;
+    return {
+      'User-Agent': `Capawesome CLI v${pkg.version}`,
+      ...(installationId ? { 'X-Capawesome-Installation-Id': installationId } : {}),
+    };
   }
 }
 
