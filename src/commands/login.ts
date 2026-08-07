@@ -55,14 +55,12 @@ export default defineCommand({
           process.exit(1);
         }
         // Open the authorization URL in the user's default browser
-        consola.start('Opening browser...');
         const authorizationUrl = `${consoleBaseUrl}/login/device`;
+        consola.start(`Opening browser at ${authorizationUrl}...`);
         try {
           open(authorizationUrl);
         } catch (error) {
-          consola.warn(
-            `Could not open browser automatically. Please open the following URL manually: ${authorizationUrl}`,
-          );
+          consola.warn('Could not open browser automatically. Please open the URL above manually.');
         }
         // Wait for the user to authenticate
         consola.start('Waiting for authentication...');
@@ -124,7 +122,7 @@ export default defineCommand({
 });
 
 const createSession = async (deviceCode: string): Promise<SessionDto | null> => {
-  const maxAttempts = 20;
+  const maxAttempts = 60;
   const interval = 3 * 1000; // 3 seconds
   let attempts = 0;
   let session: SessionDto | null = null;
