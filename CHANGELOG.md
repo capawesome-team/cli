@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.18.1](https://github.com/capawesome-team/cli/compare/v4.18.0...v4.18.1) (2026-08-07)
+
+
+### Bug Fixes
+
+* **deps:** replace deprecated `@robingenz/zli` with `zodline` ([#202](https://github.com/capawesome-team/cli/issues/202)) ([8700ce3](https://github.com/capawesome-team/cli/commit/8700ce3f8abd09751f9158f730463bb97b1d1552))
+* **login:** extend browser auth timeout to 180s and always print the login URL ([24773c1](https://github.com/capawesome-team/cli/commit/24773c1da03dcb67fe2b7093ab3f0d97eb67723d))
+
 ## [4.18.0](https://github.com/capawesome-team/cli/compare/v4.17.3...v4.18.0) (2026-08-02)
 
 
