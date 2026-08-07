@@ -83,6 +83,18 @@ export default defineCommand({
         .describe(
           'A custom property to assign to the bundle. Must be in the format `key=value`. Can be specified multiple times.',
         ),
+      electronMax: z
+        .string()
+        .optional()
+        .describe('The maximum Electron app version (`app.getVersion()`) that the bundle supports.'),
+      electronMin: z
+        .string()
+        .optional()
+        .describe('The minimum Electron app version (`app.getVersion()`) that the bundle supports.'),
+      electronEq: z
+        .string()
+        .optional()
+        .describe('The exact Electron app version (`app.getVersion()`) that the bundle does not support.'),
       expiresInDays: z.coerce
         .number({
           message: 'Expiration days must be an integer.',
@@ -148,6 +160,9 @@ export default defineCommand({
       commitRef,
       commitSha,
       customProperty,
+      electronEq,
+      electronMax,
+      electronMin,
       expiresInDays,
       gitRef,
       iosEq,
@@ -311,6 +326,7 @@ export default defineCommand({
       artifactType,
       channelName: channel,
       eqAndroidAppVersionCode: androidEq,
+      eqElectronAppVersionCode: electronEq,
       eqIosAppVersionCode: iosEq,
       gitCommitMessage: commitMessage,
       gitCommitRef: commitRef,
@@ -318,8 +334,10 @@ export default defineCommand({
       gitRef,
       customProperties: parseCustomProperties(customProperty),
       maxAndroidAppVersionCode: androidMax,
+      maxElectronAppVersionCode: electronMax,
       maxIosAppVersionCode: iosMax,
       minAndroidAppVersionCode: androidMin,
+      minElectronAppVersionCode: electronMin,
       minIosAppVersionCode: iosMin,
       // Convert percentage from 0-100 to 0-1 for API
       rolloutPercentage: (rolloutPercentage ?? 100) / 100,

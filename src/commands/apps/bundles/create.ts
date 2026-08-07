@@ -45,6 +45,18 @@ export default defineCommand({
         .describe(
           'A custom property to assign to the bundle. Must be in the format `key=value`. Can be specified multiple times.',
         ),
+      electronMax: z
+        .string()
+        .optional()
+        .describe('The maximum Electron app version (`app.getVersion()`) that the bundle supports.'),
+      electronMin: z
+        .string()
+        .optional()
+        .describe('The minimum Electron app version (`app.getVersion()`) that the bundle supports.'),
+      electronEq: z
+        .string()
+        .optional()
+        .describe('The exact Electron app version (`app.getVersion()`) that the bundle does not support.'),
       expiresInDays: z.coerce
         .number({
           message: 'Expiration days must be an integer.',
