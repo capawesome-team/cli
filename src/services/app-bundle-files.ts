@@ -1,4 +1,8 @@
-import { MAX_CONCURRENT_PART_UPLOADS } from '@/config/index.js';
+import {
+  MAX_CONCURRENT_PART_UPLOADS,
+  MULTIPART_UPLOAD_THRESHOLD_IN_BYTES,
+  UPLOAD_PART_SIZE_IN_BYTES,
+} from '@/config/index.js';
 import authorizationService from '@/services/authorization-service.js';
 import { AppBundleFileDto, CreateAppBundleFileDto } from '@/types/app-bundle-file.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
@@ -23,7 +27,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
     onProgress?: (currentPart: number, totalParts: number) => void,
   ): Promise<AppBundleFileDto> {
     const sizeInBytes = dto.buffer.byteLength;
-    const useMultipartUpload = sizeInBytes >= 50 * 1024 * 1024; // 50 MB
+    const useMultipartUpload = sizeInBytes >= MULTIPART_UPLOAD_THRESHOLD_IN_BYTES;
     const formData = new FormData();
     formData.append('checksum', dto.checksum);
     if (!useMultipartUpload) {
@@ -117,8 +121,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
     onProgress?: (currentPart: number, totalParts: number) => void,
   ): Promise<AppBundleFileUploadPartDto[]> {
     const uploadedParts: AppBundleFileUploadPartDto[] = [];
-    const partSize = 10 * 1024 * 1024; // 10 MB. 5 MB is the minimum part size except for the last part.
-    const totalParts = Math.ceil(dto.buffer.byteLength / partSize);
+    const totalParts = Math.ceil(dto.buffer.byteLength / UPLOAD_PART_SIZE_IN_BYTES);
     let partNumber = 0;
     const uploadNextPart = async () => {
       if (partNumber >= totalParts) {
@@ -126,8 +129,8 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
       }
       partNumber++;
       onProgress?.(partNumber, totalParts);
-      const start = (partNumber - 1) * partSize;
-      const end = Math.min(start + partSize, dto.buffer.byteLength);
+      const start = (partNumber - 1) * UPLOAD_PART_SIZE_IN_BYTES;
+      const end = Math.min(start + UPLOAD_PART_SIZE_IN_BYTES, dto.buffer.byteLength);
       const partBuffer = dto.buffer.subarray(start, end);
 
       const uploadedPart = await this.createUploadPart({
