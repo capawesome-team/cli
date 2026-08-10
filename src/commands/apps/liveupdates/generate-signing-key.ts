@@ -1,10 +1,10 @@
-import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { promises as fs } from 'fs';
 import pathModule from 'path';
 import { z } from 'zod';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt } from '@/utils/prompt.js';
+import { defineCommand, defineOptions } from 'zodline';
 
 const APP_TYPES = ['capacitor', 'cordova'] as const;
 type SigningKeyAppType = (typeof APP_TYPES)[number];

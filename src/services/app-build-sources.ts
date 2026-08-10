@@ -1,4 +1,4 @@
-import { MAX_CONCURRENT_PART_UPLOADS } from '@/config/index.js';
+import { MAX_CONCURRENT_PART_UPLOADS, UPLOAD_PART_SIZE_IN_BYTES } from '@/config/index.js';
 import authorizationService from '@/services/authorization-service.js';
 import { AppBuildSourceDto, CreateAppBuildSourceDto } from '@/types/app-build-source.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
@@ -110,8 +110,7 @@ class AppBuildSourcesServiceImpl implements AppBuildSourcesService {
     onProgress?: (currentPart: number, totalParts: number) => void,
   ): Promise<AppBuildSourceUploadPartDto[]> {
     const uploadedParts: AppBuildSourceUploadPartDto[] = [];
-    const partSize = 10 * 1024 * 1024; // 10 MB
-    const totalParts = Math.ceil(dto.buffer.byteLength / partSize);
+    const totalParts = Math.ceil(dto.buffer.byteLength / UPLOAD_PART_SIZE_IN_BYTES);
     let partNumber = 0;
     const uploadNextPart = async () => {
       if (partNumber >= totalParts) {
@@ -119,8 +118,8 @@ class AppBuildSourcesServiceImpl implements AppBuildSourcesService {
       }
       partNumber++;
       onProgress?.(partNumber, totalParts);
-      const start = (partNumber - 1) * partSize;
-      const end = Math.min(start + partSize, dto.buffer.byteLength);
+      const start = (partNumber - 1) * UPLOAD_PART_SIZE_IN_BYTES;
+      const end = Math.min(start + UPLOAD_PART_SIZE_IN_BYTES, dto.buffer.byteLength);
       const partBuffer = dto.buffer.subarray(start, end);
 
       const uploadedPart = await this.createUploadPart({

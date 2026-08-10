@@ -3,9 +3,9 @@ import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { getGitRemoteInfo } from '@/utils/git.js';
 import { promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
-import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { z } from 'zod';
+import { defineCommand, defineOptions } from 'zodline';
 
 export default defineCommand({
   description: 'Connect a git repository to an app.',

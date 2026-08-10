@@ -12,11 +12,11 @@ import { isReadable } from '@/utils/file.js';
 import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import zip from '@/utils/zip.js';
-import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import fs from 'fs/promises';
 import path from 'path';
 import { z } from 'zod';
+import { defineCommand, defineOptions } from 'zodline';
 
 export default defineCommand({
   description: 'Create a new live update by building and deploying web assets using Capawesome Cloud Runners.',

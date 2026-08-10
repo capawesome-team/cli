@@ -4,9 +4,9 @@ import appDeploymentsService from '@/services/app-deployments.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
-import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { z } from 'zod';
+import { defineCommand, defineOptions } from 'zodline';
 
 export default defineCommand({
   description: 'Update the rollout percentage of the active build in a channel.',

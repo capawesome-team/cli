@@ -1,6 +1,6 @@
 import { createRequire } from 'module';
-import { defineConfig, processConfig } from '@robingenz/zli';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { defineConfig, processConfig } from 'zodline';
 const require = createRequire(import.meta.url);
 const pkg = require('../package.json');
 

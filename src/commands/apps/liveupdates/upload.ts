@@ -5,6 +5,7 @@ import appsService from '@/services/apps.js';
 import { AppBundleFileDto } from '@/types/app-bundle-file.js';
 import { withAuth } from '@/utils/auth.js';
 import { parseCustomProperties } from '@/utils/custom-properties.js';
+import { defineCommand, defineOptions } from 'zodline';
 import {
   createBufferFromPath,
   createBufferFromReadStream,
@@ -25,7 +26,6 @@ import { formatPrivateKey } from '@/utils/private-key.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import { createSignature } from '@/utils/signature.js';
 import zip from '@/utils/zip.js';
-import { defineCommand, defineOptions } from '@robingenz/zli';
 import consola from 'consola';
 import { createReadStream } from 'fs';
 import pathModule from 'path';
