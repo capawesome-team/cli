@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.18.2](https://github.com/capawesome-team/cli/compare/v4.18.1...v4.18.2) (2026-08-10)
+
+
+### Bug Fixes
+
+* **uploads:** lower multipart upload threshold to 10 MB ([#204](https://github.com/capawesome-team/cli/issues/204)) ([1fc97c7](https://github.com/capawesome-team/cli/commit/1fc97c78879755196f4cce5bd3791ed62fd2c4bc))
+
 ## [4.18.1](https://github.com/capawesome-team/cli/compare/v4.18.0...v4.18.1) (2026-08-07)
 
 
