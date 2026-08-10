@@ -317,6 +317,54 @@ describe('apps-import', () => {
     expect(output.apps.map((app: any) => app.sourceName)).toEqual(['App One', 'App Three']);
   });
 
+  it('should resolve the ambiguous app type `ionic` with the ionic app type option', async () => {
+    await writeExportFile([
+      {
+        folder: 'Legacy App-11111111',
+        files: { 'app-detail.json': { id: '11111111', name: 'Legacy App', appType: 'ionic' } },
+      },
+    ]);
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .get('/v1/apps')
+      .query({ organizationId, limit: 50, offset: 0 })
+      .reply(200, [])
+      .post('/v1/apps', { name: 'Legacy App', type: 'cordova' })
+      .query({ organizationId })
+      .reply(201, { id: 'app-1', name: 'Legacy App', type: 'cordova' })
+      .get('/v1/apps/app-1/channels')
+      .reply(200, []);
+
+    await importCommand.action({ file: exportFile, organizationId, ionicAppType: 'cordova', json: true }, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    const output = getJsonOutput();
+    expect(output.apps[0].notes).toContainEqual(expect.stringContaining('`cordova`'));
+  });
+
+  it('should skip apps with the ambiguous app type `ionic` in non-interactive environment without the ionic app type option', async () => {
+    await writeExportFile([
+      {
+        folder: 'Legacy App-11111111',
+        files: { 'app-detail.json': { id: '11111111', name: 'Legacy App', appType: 'ionic' } },
+      },
+    ]);
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .get('/v1/apps')
+      .query({ organizationId, limit: 50, offset: 0 })
+      .reply(200, []);
+
+    await importCommand.action({ file: exportFile, organizationId, json: true }, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    const output = getJsonOutput();
+    expect(output.apps).toEqual([]);
+    expect(output.skippedApps).toEqual([
+      { sourceId: '11111111', sourceName: 'Legacy App', reason: expect.stringContaining('--ionic-app-type') },
+    ]);
+  });
+
   it('should report skipped apps with an unsupported app type', async () => {
     await writeExportFile([
       {

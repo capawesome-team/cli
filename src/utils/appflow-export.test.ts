@@ -218,7 +218,7 @@ describe('appflow-export', () => {
     expect(app.notes).toContainEqual(expect.stringContaining('Live Update plugin settings'));
   });
 
-  it('should map the app type `ionic` to `capacitor` with a note', async () => {
+  it('should keep the ambiguous app type `ionic` as source app type', async () => {
     writeAppFiles('Legacy App-11111111', {
       'app-detail.json': { id: '11111111', name: 'Legacy App', appType: 'ionic' },
     });
@@ -226,8 +226,8 @@ describe('appflow-export', () => {
     const { apps } = await parseAppflowExport(exportDirectory);
 
     expect(apps).toHaveLength(1);
-    expect(apps[0]!.type).toBe('capacitor');
-    expect(apps[0]!.notes).toContainEqual(expect.stringContaining('`ionic`'));
+    expect(apps[0]!.sourceAppType).toBe('ionic');
+    expect(apps[0]!.notes).toEqual([]);
   });
 
   it('should skip apps with an unsupported app type', async () => {

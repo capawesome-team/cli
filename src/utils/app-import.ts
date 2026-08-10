@@ -6,6 +6,7 @@ import { GitRemoteInfo } from '@/utils/git.js';
 export interface AppImport {
   sourceId: string;
   sourceName: string;
+  sourceAppType: string;
   name: string;
   type: AppType;
   notes: string[];

@@ -178,6 +178,8 @@ const mapAppType = (appType: string): AppImport['type'] | undefined => {
     case 'ios':
       return appType;
     case 'ionic':
+      // Placeholder only: `ionic` can mean Capacitor or Cordova. The import command
+      // resolves the actual type based on the `sourceAppType` before importing.
       return 'capacitor';
     default:
       return undefined;
@@ -186,9 +188,6 @@ const mapAppType = (appType: string): AppImport['type'] | undefined => {
 
 const parseApp = (appFolder: string, detail: z.infer<typeof appDetailSchema>, type: AppImport['type']): AppImport => {
   const notes: string[] = [];
-  if (detail.appType === 'ionic') {
-    notes.push('App type `ionic` was mapped to `capacitor`.');
-  }
   const environments = parseJsonFileIfExists(path.join(appFolder, 'environments.json'), environmentsSchema) ?? [];
   const channels =
     parseJsonFileIfExists(path.join(appFolder, 'live-update-channels.json'), liveUpdateChannelsSchema) ?? [];
@@ -198,6 +197,7 @@ const parseApp = (appFolder: string, detail: z.infer<typeof appDetailSchema>, ty
   return {
     sourceId: detail.id,
     sourceName: detail.name,
+    sourceAppType: detail.appType,
     name: detail.name,
     type,
     notes,

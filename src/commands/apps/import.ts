@@ -16,7 +16,7 @@ import { getMessageFromUnknownError, UserError } from '@/utils/error.js';
 import { isReadable } from '@/utils/file.js';
 import { prompt, promptOrganizationSelection } from '@/utils/prompt.js';
 import zip from '@/utils/zip.js';
-import { defineCommand, defineOptions } from '@robingenz/zli';
+import { defineCommand, defineOptions } from 'zodline';
 import consola from 'consola';
 import fs from 'fs';
 import os from 'os';
@@ -49,12 +49,20 @@ export default defineCommand({
         .describe(
           'Filter which apps to import by name or ID. Can be specified multiple times or comma-separated. Defaults to all apps.',
         ),
+      ionicAppType: z
+        .enum(['capacitor', 'cordova'], {
+          message: 'Ionic app type must be either `capacitor` or `cordova`.',
+        })
+        .optional()
+        .describe(
+          'The actual app type of apps exported with the ambiguous app type `ionic`. Prompted for each app if not provided.',
+        ),
       json: z.boolean().optional().describe('Output in JSON format.'),
       organizationId: z.string().optional().describe('ID of the organization to import the apps into.'),
     }),
   ),
   action: withAuth(async (options, args) => {
-    let { dryRun, file, include, json, organizationId } = options;
+    let { dryRun, file, include, ionicAppType, json, organizationId } = options;
 
     if (!file) {
       if (!isInteractive()) {
@@ -94,10 +102,12 @@ export default defineCommand({
       if (selectedApps.length === 0 && selectedSkippedApps.length === 0) {
         throw new UserError('No apps found in the export that match the provided filters.');
       }
+      const { resolvedApps, skippedApps: unresolvedApps } = await resolveIonicAppTypes(selectedApps, ionicAppType);
+      selectedSkippedApps.push(...unresolvedApps);
 
-      await assignUniqueAppNames(selectedApps, organizationId);
+      await assignUniqueAppNames(resolvedApps, organizationId);
       const outcomes: AppImportOutcome[] = [];
-      for (const app of selectedApps) {
+      for (const app of resolvedApps) {
         const outcome: AppImportOutcome = {
           app,
           errors: [],
@@ -170,6 +180,48 @@ const selectApps = async (
     };
   }
   return { selectedApps: apps, selectedSkippedApps: skippedApps };
+};
+
+const resolveIonicAppTypes = async (
+  apps: AppImport[],
+  ionicAppType: 'capacitor' | 'cordova' | undefined,
+): Promise<{ resolvedApps: AppImport[]; skippedApps: SkippedAppImport[] }> => {
+  const resolvedApps: AppImport[] = [];
+  const skippedApps: SkippedAppImport[] = [];
+  for (const app of apps) {
+    if (app.sourceAppType !== 'ionic') {
+      resolvedApps.push(app);
+      continue;
+    }
+    let type = ionicAppType;
+    if (!type && isInteractive()) {
+      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+      type = await prompt(
+        `The app \`${app.sourceName}\` was exported with the app type \`ionic\` which can mean Capacitor or Cordova. Which framework does the app use?`,
+        {
+          type: 'select',
+          options: [
+            { label: 'Capacitor', value: 'capacitor' },
+            { label: 'Cordova', value: 'cordova' },
+          ],
+        },
+      );
+    }
+    if (!type) {
+      skippedApps.push({
+        sourceId: app.sourceId,
+        sourceName: app.sourceName,
+        reason:
+          'The app was exported with the ambiguous app type `ionic` which can mean Capacitor or Cordova. Provide the `--ionic-app-type` option or run the import interactively.',
+        retryLater: false,
+      });
+      continue;
+    }
+    app.type = type;
+    app.notes.push(`The app type \`ionic\` was resolved to \`${type}\`.`);
+    resolvedApps.push(app);
+  }
+  return { resolvedApps, skippedApps };
 };
 
 const assignUniqueAppNames = async (apps: AppImport[], organizationId: string): Promise<void> => {
