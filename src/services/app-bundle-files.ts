@@ -23,7 +23,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
     onProgress?: (currentPart: number, totalParts: number) => void,
   ): Promise<AppBundleFileDto> {
     const sizeInBytes = dto.buffer.byteLength;
-    const useMultipartUpload = sizeInBytes >= 50 * 1024 * 1024; // 50 MB
+    const useMultipartUpload = sizeInBytes >= 10 * 1024 * 1024; // 10 MB
     const formData = new FormData();
     formData.append('checksum', dto.checksum);
     if (!useMultipartUpload) {
