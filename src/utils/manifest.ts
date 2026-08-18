@@ -25,7 +25,7 @@ export const generateManifestJson = async (path: string) => {
     });
   }
   // Write the manifest file
-  writeFile(`${path}/${MANIFEST_JSON_FILE_NAME}`, JSON.stringify(manifestItems, null, 2));
+  await writeFile(`${path}/${MANIFEST_JSON_FILE_NAME}`, JSON.stringify(manifestItems, null, 2));
 };
 
 interface ManifestItem {
