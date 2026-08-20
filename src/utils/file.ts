@@ -1,6 +1,10 @@
 import fs from 'fs';
 import mime from 'mime';
 import pathModule from 'path';
+import { createBufferFromPath } from './buffer.js';
+import { getCodeFromUnknownError, UserError } from './error.js';
+
+const unreadableFileErrorCodes = ['EACCES', 'EBUSY', 'ENOENT', 'EPERM'];
 
 export const getFilesInDirectoryAndSubdirectories = async (
   path: string,
@@ -38,6 +42,24 @@ export const getFilesInDirectoryAndSubdirectories = async (
   };
   await walk(path);
   return files;
+};
+
+/**
+ * Reads a file that was found by `getFilesInDirectoryAndSubdirectories`.
+ * Such files can vanish or get locked in the meantime (e.g. by a running build or a file sync client).
+ */
+export const readFileFromDirectory = async (path: string): Promise<Buffer> => {
+  try {
+    return await createBufferFromPath(path);
+  } catch (error) {
+    const code = getCodeFromUnknownError(error);
+    if (code && unreadableFileErrorCodes.includes(code)) {
+      throw new UserError(
+        `The file could not be read: ${path}. Make sure that no other process (e.g. a build or file sync client) modifies the folder while the command is running.`,
+      );
+    }
+    throw error;
+  }
 };
 
 export const directoryContainsSymlinks = async (path: string): Promise<boolean> => {
