@@ -4,7 +4,16 @@ import pathModule from 'path';
 import { createBufferFromPath } from './buffer.js';
 import { getCodeFromUnknownError, UserError } from './error.js';
 
-const unreadableFileErrorCodes = ['EACCES', 'EBUSY', 'ENOENT', 'EPERM'];
+const concurrentModificationHint =
+  'Make sure that no other process (e.g. a build or file sync client) modifies the folder while the command is running.';
+const permissionHint = 'Make sure that you have permission to read the file.';
+
+const unreadableFileErrorHints: Record<string, string> = {
+  EACCES: permissionHint,
+  EBUSY: concurrentModificationHint,
+  ENOENT: concurrentModificationHint,
+  EPERM: permissionHint,
+};
 
 export const getFilesInDirectoryAndSubdirectories = async (
   path: string,
@@ -46,17 +55,16 @@ export const getFilesInDirectoryAndSubdirectories = async (
 
 /**
  * Reads a file that was found by `getFilesInDirectoryAndSubdirectories`.
- * Such files can vanish or get locked in the meantime (e.g. by a running build or a file sync client).
+ * Such files can vanish, get locked or become inaccessible in the meantime (e.g. by a running build or a file sync client).
  */
 export const readFileFromDirectory = async (path: string): Promise<Buffer> => {
   try {
     return await createBufferFromPath(path);
   } catch (error) {
     const code = getCodeFromUnknownError(error);
-    if (code && unreadableFileErrorCodes.includes(code)) {
-      throw new UserError(
-        `The file could not be read: ${path}. Make sure that no other process (e.g. a build or file sync client) modifies the folder while the command is running.`,
-      );
+    const hint = code ? unreadableFileErrorHints[code] : undefined;
+    if (hint) {
+      throw new UserError(`The file could not be read: ${path}. ${hint}`);
     }
     throw error;
   }
