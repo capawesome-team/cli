@@ -1,6 +1,5 @@
 import { MANIFEST_JSON_FILE_NAME } from '@/config/index.js';
-import { createBufferFromPath } from './buffer.js';
-import { getFilesInDirectoryAndSubdirectories, writeFile } from './file.js';
+import { getFilesInDirectoryAndSubdirectories, readFileFromDirectory, writeFile } from './file.js';
 import { createHash } from './hash.js';
 
 const ignoreFiles = ['.DS_Store', MANIFEST_JSON_FILE_NAME];
@@ -11,7 +10,7 @@ export const generateManifestJson = async (path: string) => {
   const files = await getFilesInDirectoryAndSubdirectories(path);
   // Iterate over each file
   for (const [index, file] of files.entries()) {
-    const fileBuffer = await createBufferFromPath(file.path);
+    const fileBuffer = await readFileFromDirectory(file.path);
     const checksum = await createHash(fileBuffer);
     const sizeInBytes = fileBuffer.byteLength;
     // Skip ignored files

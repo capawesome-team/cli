@@ -19,6 +19,7 @@ import {
   isReadable,
   getFilesInDirectoryAndSubdirectories,
   isDirectory,
+  readFileFromDirectory,
 } from '@/utils/file.js';
 import { createHash } from '@/utils/hash.js';
 import { generateManifestJson } from '@/utils/manifest.js';
@@ -442,7 +443,7 @@ const uploadFiles = async (options: {
     fileIndex++;
 
     consola.start(`Uploading file (${fileIndex}/${files.length})...`);
-    const buffer = await createBufferFromPath(file.path);
+    const buffer = await readFileFromDirectory(file.path);
 
     await uploadFile({
       appId,
