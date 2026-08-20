@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.18.4](https://github.com/capawesome-team/cli/compare/v4.18.3...v4.18.4) (2026-08-20)
+
+
+### Bug Fixes
+
+* report unreadable files with an actionable error message ([#208](https://github.com/capawesome-team/cli/issues/208)) ([cc18dee](https://github.com/capawesome-team/cli/commit/cc18dee898658c99affd660c99e64ef8e45cdf9a))
+
 ## [4.18.3](https://github.com/capawesome-team/cli/compare/v4.18.2...v4.18.3) (2026-08-18)
 
 
