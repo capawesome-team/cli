@@ -10,6 +10,7 @@ export interface CreateAppBundleDto {
   channelName?: string;
   checksum?: string;
   eqAndroidAppVersionCode?: string;
+  eqElectronAppVersionCode?: string;
   eqIosAppVersionCode?: string;
   gitCommitMessage?: string;
   gitCommitRef?: string;
@@ -19,8 +20,10 @@ export interface CreateAppBundleDto {
   expiresAt?: string;
   url?: string;
   maxAndroidAppVersionCode?: string;
+  maxElectronAppVersionCode?: string;
   maxIosAppVersionCode?: string;
   minAndroidAppVersionCode?: string;
+  minElectronAppVersionCode?: string;
   minIosAppVersionCode?: string;
   rolloutPercentage?: number;
   signature?: string;
@@ -37,10 +40,13 @@ export interface UpdateAppBundleDto {
   appId: string;
   artifactStatus?: 'pending' | 'ready';
   maxAndroidAppVersionCode?: string;
+  maxElectronAppVersionCode?: string;
   maxIosAppVersionCode?: string;
   minAndroidAppVersionCode?: string;
+  minElectronAppVersionCode?: string;
   minIosAppVersionCode?: string;
   eqAndroidAppVersionCode?: string;
+  eqElectronAppVersionCode?: string;
   eqIosAppVersionCode?: string;
   rolloutPercentage?: number;
 }
