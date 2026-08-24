@@ -16,16 +16,24 @@ import { z } from 'zod';
 export interface ParsedAppflowExport {
   apps: AppImport[];
   skippedApps: SkippedAppImport[];
+  warnings: string[];
 }
+
+const SUPPORTED_MANIFEST_MAJOR_VERSION = 'v1';
 
 const WEBHOOKS_DOCS_URL = 'https://capawesome.io/docs/cloud/webhooks/';
 const LIVE_UPDATES_DOCS_URL = 'https://capawesome.io/docs/cloud/live-updates/';
 const SUPPORTED_BUILD_TYPES = ['ad-hoc', 'app-store', 'debug', 'development', 'enterprise', 'release', 'simulator'];
 
+const manifestSchema = z.object({
+  version: z.string().nullish(),
+});
+
 const appDetailSchema = z.object({
   id: z.string(),
   name: z.string(),
   appType: z.string(),
+  latestBuildNumber: z.number().nullish(),
 });
 
 const repoAssociationSchema = z.union([
@@ -120,6 +128,7 @@ const playStoreDestinationSchema = z.object({
   artifactType: z.string().nullish(),
   packageName: z.string().nullish(),
   track: z.string().nullish(),
+  releaseStatus: z.string().nullish(),
 });
 
 const appStoreDestinationSchema = z.object({
@@ -140,6 +149,14 @@ export const parseAppflowExport = async (directory: string): Promise<ParsedAppfl
   }
   const apps: AppImport[] = [];
   const skippedApps: SkippedAppImport[] = [];
+  const warnings: string[] = [];
+  const manifest = parseJsonFileIfExists(path.join(directory, 'manifest.json'), manifestSchema);
+  const majorVersion = manifest?.version?.split('.')[0];
+  if (majorVersion && majorVersion !== SUPPORTED_MANIFEST_MAJOR_VERSION) {
+    warnings.push(
+      `The export has the format version \`${manifest?.version}\` which is not yet supported by this CLI version. The import may be incomplete. Please update the CLI to the latest version.`,
+    );
+  }
   const appFolders = fs
     .readdirSync(appsDirectory, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
@@ -167,7 +184,7 @@ export const parseAppflowExport = async (directory: string): Promise<ParsedAppfl
       });
     }
   }
-  return { apps, skippedApps };
+  return { apps, skippedApps, warnings };
 };
 
 const mapAppType = (appType: string): AppImport['type'] | undefined => {
@@ -200,6 +217,7 @@ const parseApp = (appFolder: string, detail: z.infer<typeof appDetailSchema>, ty
     sourceAppType: detail.appType,
     name: detail.name,
     type,
+    latestBuildNumber: detail.latestBuildNumber ?? undefined,
     notes,
     automations: parseAutomations(
       appFolder,
@@ -347,6 +365,10 @@ const parseDestinations = (appFolder: string): ParsedDestination[] => {
         androidPackageName: metadata.packageName ?? undefined,
         androidBuildArtifactType:
           metadata.artifactType === 'aab' || metadata.artifactType === 'apk' ? metadata.artifactType : undefined,
+        androidReleaseStatus:
+          metadata.releaseStatus === 'completed' || metadata.releaseStatus === 'draft'
+            ? metadata.releaseStatus
+            : undefined,
         googlePlayTrack: metadata.track ?? undefined,
         googleServiceAccountKeyPath: fs.existsSync(googleServiceAccountKeyPath)
           ? googleServiceAccountKeyPath

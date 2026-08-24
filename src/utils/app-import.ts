@@ -9,6 +9,7 @@ export interface AppImport {
   sourceAppType: string;
   name: string;
   type: AppType;
+  latestBuildNumber?: number;
   notes: string[];
   automations: AppImportAutomation[];
   certificates: AppImportCertificate[];
@@ -53,6 +54,7 @@ export interface AppImportDestination {
   platform: 'android' | 'ios';
   androidPackageName?: string;
   androidBuildArtifactType?: 'aab' | 'apk';
+  androidReleaseStatus?: 'completed' | 'draft';
   googlePlayTrack?: string;
   googleServiceAccountKeyPath?: string;
   appleId?: string;

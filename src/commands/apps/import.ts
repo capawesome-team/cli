@@ -97,7 +97,10 @@ export default defineCommand({
     const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'capawesome-appflow-import-'));
     try {
       await zip.unzipToFolder(fs.readFileSync(file), tempDirectory);
-      const { apps, skippedApps } = await parseAppflowExport(tempDirectory);
+      const { apps, skippedApps, warnings } = await parseAppflowExport(tempDirectory);
+      for (const warning of warnings) {
+        consola.warn(warning);
+      }
       const { selectedApps, selectedSkippedApps } = await selectApps(apps, skippedApps, include);
       if (selectedApps.length === 0 && selectedSkippedApps.length === 0) {
         throw new UserError('No apps found in the export that match the provided filters.');
@@ -129,7 +132,7 @@ export default defineCommand({
 
       const errorCount = outcomes.reduce((count, outcome) => count + outcome.errors.length, 0);
       if (json) {
-        printJsonSummary(outcomes, selectedSkippedApps, dryRun === true);
+        printJsonSummary(outcomes, selectedSkippedApps, warnings, dryRun === true);
       } else {
         printSummary(outcomes, selectedSkippedApps, dryRun === true, file);
       }
@@ -263,6 +266,18 @@ const importApp = async (organizationId: string, outcome: AppImportOutcome): Pro
     consola.error(`Failed to create app \`${app.name}\`.`);
     return;
   }
+  if (app.latestBuildNumber && app.latestBuildNumber > 0) {
+    const nextAppBuildNumber = app.latestBuildNumber + 1;
+    try {
+      await appsService.update({ appId, nextAppBuildNumber });
+      app.notes.push(
+        `The next build number was set to \`${nextAppBuildNumber}\` to continue after the latest build number \`${app.latestBuildNumber}\`.`,
+      );
+      consola.success(`Set the next build number to ${nextAppBuildNumber}.`);
+    } catch (error) {
+      outcome.errors.push(`Failed to set the next build number: ${getMessageFromUnknownError(error)}`);
+    }
+  }
   for (const certificate of app.certificates) {
     try {
       const provisioningProfileIds: string[] = [];
@@ -373,6 +388,7 @@ const importApp = async (organizationId: string, outcome: AppImportOutcome): Pro
         platform: destination.platform,
         androidPackageName: destination.androidPackageName,
         androidBuildArtifactType: destination.androidBuildArtifactType,
+        androidReleaseStatus: destination.androidReleaseStatus,
         googlePlayTrack: destination.googlePlayTrack,
         appGoogleServiceAccountKeyId,
         appleId: destination.appleId,
@@ -488,11 +504,17 @@ const formatCount = (created: number, total: number, dryRun: boolean): string =>
   return dryRun ? `${total}` : `${created}/${total}`;
 };
 
-const printJsonSummary = (outcomes: AppImportOutcome[], skippedApps: SkippedAppImport[], dryRun: boolean): void => {
+const printJsonSummary = (
+  outcomes: AppImportOutcome[],
+  skippedApps: SkippedAppImport[],
+  warnings: string[],
+  dryRun: boolean,
+): void => {
   console.log(
     JSON.stringify(
       {
         dryRun,
+        warnings,
         apps: outcomes.map((outcome) => ({
           id: outcome.id ?? null,
           name: outcome.app.name,

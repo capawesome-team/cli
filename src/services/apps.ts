@@ -8,6 +8,7 @@ import {
   LinkAppRepositoryDto,
   TransferAppDto,
   UnlinkAppRepositoryDto,
+  UpdateAppDto,
 } from '@/types/app.js';
 import httpClient, { HttpClient } from '@/utils/http-client.js';
 
@@ -19,6 +20,7 @@ export interface AppsService {
   linkRepository(dto: LinkAppRepositoryDto): Promise<AppDto>;
   transfer(dto: TransferAppDto): Promise<AppDto>;
   unlinkRepository(dto: UnlinkAppRepositoryDto): Promise<void>;
+  update(dto: UpdateAppDto): Promise<AppDto>;
 }
 
 class AppsServiceImpl implements AppsService {
@@ -98,6 +100,16 @@ class AppsServiceImpl implements AppsService {
         Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
       },
     });
+  }
+
+  async update(dto: UpdateAppDto): Promise<AppDto> {
+    const { appId, ...bodyData } = dto;
+    const response = await this.httpClient.patch<AppDto>(`/v1/apps/${appId}`, bodyData, {
+      headers: {
+        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+      },
+    });
+    return response.data;
   }
 }
 

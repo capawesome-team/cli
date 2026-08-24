@@ -124,6 +124,7 @@ describe('appflow-export', () => {
         artifactType: 'aab',
         packageName: 'dev.robingenz.app',
         track: 'internal',
+        releaseStatus: 'completed',
       },
       'store-destinations/android/Prod-27890/json-key.json': { type: 'service_account' },
     });
@@ -167,6 +168,7 @@ describe('appflow-export', () => {
         platform: 'android',
         androidPackageName: 'dev.robingenz.app',
         androidBuildArtifactType: 'aab',
+        androidReleaseStatus: 'completed',
         googlePlayTrack: 'internal',
         googleServiceAccountKeyPath: expect.stringContaining('json-key.json'),
       },
@@ -283,6 +285,41 @@ describe('appflow-export', () => {
 
     expect(apps[0]!.certificates).toEqual([]);
     expect(apps[0]!.notes).toContainEqual(expect.stringContaining('keystore.jks'));
+  });
+
+  it.each(['v2.0.0', 'v10.0.0'])('should warn about the unsupported export format version %s', async (version) => {
+    writeAppFiles('My App-6668c18c', {
+      'app-detail.json': { id: '6668c18c', name: 'My App', appType: 'capacitor' },
+    });
+    fs.writeFileSync(path.join(exportDirectory, 'manifest.json'), JSON.stringify({ version }));
+
+    const { warnings } = await parseAppflowExport(exportDirectory);
+
+    expect(warnings).toEqual([expect.stringContaining(`\`${version}\``)]);
+  });
+
+  it('should not warn about a supported export format version', async () => {
+    writeAppFiles('My App-6668c18c', {
+      'app-detail.json': { id: '6668c18c', name: 'My App', appType: 'capacitor' },
+    });
+    fs.writeFileSync(
+      path.join(exportDirectory, 'manifest.json'),
+      JSON.stringify({ version: 'v1.0.0', exportedAt: '2026-08-24T15:07:00Z' }),
+    );
+
+    const { warnings } = await parseAppflowExport(exportDirectory);
+
+    expect(warnings).toEqual([]);
+  });
+
+  it('should not warn about a missing manifest', async () => {
+    writeAppFiles('My App-6668c18c', {
+      'app-detail.json': { id: '6668c18c', name: 'My App', appType: 'capacitor' },
+    });
+
+    const { warnings } = await parseAppflowExport(exportDirectory);
+
+    expect(warnings).toEqual([]);
   });
 
   it('should skip an app with an invalid app detail file', async () => {
