@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.18.4](https://github.com/capawesome-team/cli/compare/v4.18.3...v4.18.4) (2026-08-20)
+
+
+### Bug Fixes
+
+* report unreadable files with an actionable error message ([#208](https://github.com/capawesome-team/cli/issues/208)) ([cc18dee](https://github.com/capawesome-team/cli/commit/cc18dee898658c99affd660c99e64ef8e45cdf9a))
+
+## [4.18.3](https://github.com/capawesome-team/cli/compare/v4.18.2...v4.18.3) (2026-08-18)
+
+
+### Bug Fixes
+
+* write the manifest file before uploading a bundle ([#206](https://github.com/capawesome-team/cli/issues/206)) ([631e99b](https://github.com/capawesome-team/cli/commit/631e99bff0b9426260e1f997d00c3fd36e840e78))
+
 ## [4.18.2](https://github.com/capawesome-team/cli/compare/v4.18.1...v4.18.2) (2026-08-10)
 
 
