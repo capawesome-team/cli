@@ -44,7 +44,10 @@ export default defineCommand({
         .optional()
         .describe('App ID to create the build for.'),
       certificate: z.string().optional().describe('The name of the certificate to use for the build.'),
-      channel: z.string().optional().describe('The name of the channel to deploy to (Web only).'),
+      channel: z
+        .array(z.string())
+        .optional()
+        .describe('The name of a channel to deploy to (Web only). Can be specified multiple times or comma-separated.'),
       configuration: z.string().optional().describe('The name of the native configuration (Android/iOS only).'),
       destination: z.string().optional().describe('The name of the destination to deploy to (Android/iOS only).'),
       detached: z
@@ -126,15 +129,20 @@ export default defineCommand({
       url,
     } = options;
 
+    const channels = options.channel
+      ?.flatMap((value) => value.split(','))
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0);
+
     // Validate that detached flag cannot be used with artifact flags
     if (options.detached && (options.apk || options.aab || options.ipa || options.zip)) {
       consola.error('The --detached flag cannot be used with --apk, --aab, --ipa, or --zip flags.');
       process.exit(1);
     }
 
-    // Validate that detached flag cannot be used with channel or destination
-    if (options.detached && (options.channel || options.destination)) {
-      consola.error('The --detached flag cannot be used with --channel or --destination flags.');
+    // Validate that detached flag cannot be used with destination
+    if (options.detached && options.destination) {
+      consola.error('The --detached flag cannot be used with the --destination flag.');
       process.exit(1);
     }
 
@@ -157,7 +165,7 @@ export default defineCommand({
     }
 
     // Validate that channel and destination cannot be used together
-    if (options.channel && options.destination) {
+    if (channels?.length && options.destination) {
       consola.error('The --channel and --destination flags cannot be used together.');
       process.exit(1);
     }
@@ -282,7 +290,7 @@ export default defineCommand({
     }
 
     // Validate that channel is only used with web platform
-    if (options.channel && platform !== 'web') {
+    if (channels?.length && platform !== 'web') {
       consola.error('The --channel flag can only be used with the web platform.');
       process.exit(1);
     }
@@ -423,6 +431,7 @@ export default defineCommand({
       adHocEnvironmentVariables,
       appBuildSourceId,
       appCertificateName: certificate,
+      appChannelNames: channels,
       appConfigurationName: configuration,
       appEnvironmentName: environment,
       appId,
@@ -435,6 +444,11 @@ export default defineCommand({
     consola.info(`Build Number: ${response.numberAsString}`);
     consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
     consola.success('Build created successfully.');
+    if (channels?.length) {
+      consola.info(
+        `The build will be deployed to the following ${channels.length === 1 ? 'channel' : 'channels'} once it succeeds: ${channels.join(', ')}.`,
+      );
+    }
 
     // Wait for build job to complete by default, unless --detached flag is set
     const shouldWait = !options.detached;
@@ -523,14 +537,11 @@ export default defineCommand({
         }
       }
 
-      // Create deployment if channel or destination is set
-      if (options.channel || options.destination) {
+      // Create deployment if destination is set
+      if (options.destination) {
         await (
           await import('@/commands/apps/deployments/create.js').then((mod) => mod.default)
-        ).action(
-          { appId, buildId: response.id, channel: options.channel, destination: options.destination },
-          undefined,
-        );
+        ).action({ appId, buildId: response.id, destination: options.destination }, undefined);
       }
 
       // Output JSON if json flag is set

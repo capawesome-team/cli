@@ -154,6 +154,75 @@ describe('apps-builds-create', () => {
     expect(mockConsola.error).not.toHaveBeenCalled();
   });
 
+  it('should send the channels as appChannelNames', async () => {
+    const options = { appId, platform: 'web' as const, gitRef: 'main', channel: ['beta', 'alpha'], detached: true };
+
+    const buildScope = nock(DEFAULT_API_BASE_URL)
+      .post(
+        `/v1/apps/${appId}/builds`,
+        (body) => JSON.stringify(body.appChannelNames) === JSON.stringify(['beta', 'alpha']),
+      )
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: buildId, jobId: 'job-1', numberAsString: '42' });
+
+    await createCommand.action(options, undefined);
+
+    expect(buildScope.isDone()).toBe(true);
+    expect(mockConsola.error).not.toHaveBeenCalled();
+  });
+
+  it('should split comma-separated channels into separate appChannelNames', async () => {
+    const options = { appId, platform: 'web' as const, gitRef: 'main', channel: ['beta, alpha'], detached: true };
+
+    const buildScope = nock(DEFAULT_API_BASE_URL)
+      .post(
+        `/v1/apps/${appId}/builds`,
+        (body) => JSON.stringify(body.appChannelNames) === JSON.stringify(['beta', 'alpha']),
+      )
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: buildId, jobId: 'job-1', numberAsString: '42' });
+
+    await createCommand.action(options, undefined);
+
+    expect(buildScope.isDone()).toBe(true);
+    expect(mockConsola.error).not.toHaveBeenCalled();
+  });
+
+  it('should accept --channel combined with --detached', async () => {
+    const options = { appId, platform: 'web' as const, gitRef: 'main', channel: ['beta'], detached: true };
+
+    const buildScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/builds`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: buildId, jobId: 'job-1', numberAsString: '42' });
+
+    await createCommand.action(options, undefined);
+
+    expect(buildScope.isDone()).toBe(true);
+    expect(mockConsola.error).not.toHaveBeenCalled();
+  });
+
+  it('should reject --detached combined with --destination', async () => {
+    const options = { appId, platform: 'ios' as const, gitRef: 'main', destination: 'testflight', detached: true };
+
+    await expect(createCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
+
+    expect(mockConsola.error).toHaveBeenCalledWith('The --detached flag cannot be used with the --destination flag.');
+  });
+
+  it('should parse a single channel into an array', () => {
+    const schema = createCommand.options?.schema;
+
+    const result = schema?.safeParse({
+      appId: validAppId,
+      platform: 'web',
+      gitRef: 'main',
+      channel: ['beta'],
+    });
+    expect(result?.success).toBe(true);
+    expect(result?.data?.channel).toEqual(['beta']);
+  });
+
   it('should reject a non-positive shareExpiresInDays value', () => {
     const schema = createCommand.options?.schema;
 
