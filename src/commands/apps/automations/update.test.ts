@@ -50,14 +50,14 @@ describe('apps-automations-update', () => {
       automationId,
       configuration: 'Production',
       name: 'renamed',
-      triggerPattern: ['release/*'],
+      triggerPattern: ['v*', '!v*-*'],
     };
 
     const scope = nock(DEFAULT_API_BASE_URL)
       .patch(`/v1/apps/${appId}/automations/${automationId}`, {
         appConfigurationName: 'Production',
         name: 'renamed',
-        triggerPatterns: ['release/*'],
+        triggerPatterns: ['v*', '!v*-*'],
       })
       .matchHeader('Authorization', 'Bearer test-token')
       .reply(204);
