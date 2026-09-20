@@ -53,7 +53,7 @@ describe('apps-automations-create', () => {
       name: 'nightly',
       platform: 'android' as const,
       stack: 'macos-tahoe' as const,
-      triggerPattern: 'main',
+      triggerPattern: ['main'],
       triggerType: 'branch' as const,
       type: 'release' as const,
     };
@@ -67,7 +67,7 @@ describe('apps-automations-create', () => {
         buildType: 'release',
         name: 'nightly',
         platform: 'android',
-        triggerPattern: 'main',
+        triggerPatterns: ['main'],
         triggerType: 'branch',
       })
       .matchHeader('Authorization', 'Bearer test-token')
