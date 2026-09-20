@@ -36,9 +36,11 @@ export default defineCommand({
         .optional()
         .describe('The build stack to use for the build process.'),
       triggerPattern: z
-        .string()
+        .array(z.string())
         .optional()
-        .describe('Only trigger for branches or tags matching this pattern. Defaults to all.'),
+        .describe(
+          'Only trigger for branches or tags matching this pattern. Prefix with `!` to exclude. Can be specified multiple times. Defaults to all.',
+        ),
       triggerType: z
         .enum(['branch', 'tag'], {
           message: 'Trigger type must be either `branch` or `tag`.',
@@ -137,7 +139,7 @@ export default defineCommand({
       commitMessagePattern: options.commitMessagePattern,
       name,
       platform,
-      triggerPattern: options.triggerPattern,
+      triggerPatterns: options.triggerPattern,
       triggerType,
     });
     if (json) {
