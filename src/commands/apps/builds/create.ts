@@ -62,7 +62,7 @@ export default defineCommand({
         })
         .optional()
         .describe(
-          'The form factor of the Android artifact to download with `--apk` or `--aab`. Supported values are `mobile`, `watch`, `tv`, and `automotive`. Defaults to `mobile`. The build always includes every application module.',
+          'The form factor of the Android artifact to download with `--apk` or `--aab`. Supported values are `mobile`, `watch`, `tv`, and `automotive`. Without it, the first artifact in the order `mobile`, `watch`, `tv`, `automotive` is downloaded. The build always includes every application module.',
         ),
       gitRef: z.string().optional().describe('The Git reference (branch, tag, or commit SHA) to build.'),
       ipa: z

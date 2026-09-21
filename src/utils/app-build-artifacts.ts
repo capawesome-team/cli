@@ -75,7 +75,7 @@ export const downloadAppBuildArtifact = async (options: {
       appBuildId: buildId,
       artifactId: artifact.id,
     });
-    const outputPath = path.resolve(filePath ?? getAppBuildArtifactFileName(buildId, artifact));
+    const outputPath = path.resolve(filePath || getAppBuildArtifactFileName(buildId, artifact));
     await fs.writeFile(outputPath, Buffer.from(artifactData));
 
     consola.success(`${typeInUpperCase} downloaded successfully: ${outputPath}`);

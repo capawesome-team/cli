@@ -29,7 +29,7 @@ export default defineCommand({
         })
         .optional()
         .describe(
-          'The form factor of the Android artifact to download. Supported values are `mobile`, `watch`, `tv`, and `automotive`. Defaults to `mobile`.',
+          'The form factor of the Android artifact to download. Supported values are `mobile`, `watch`, `tv`, and `automotive`. Without it, the first artifact in the order `mobile`, `watch`, `tv`, `automotive` is downloaded.',
         ),
       apk: z
         .union([z.boolean(), z.string()])
