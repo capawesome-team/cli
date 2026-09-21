@@ -1,9 +1,8 @@
 import appBuildsService from '@/services/app-builds.js';
+import { APP_BUILD_ARTIFACT_FORM_FACTORS, downloadAppBuildArtifact } from '@/utils/app-build-artifacts.js';
 import { withAuth } from '@/utils/auth.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import consola from 'consola';
-import fs from 'fs/promises';
-import path from 'path';
 import { isInteractive } from '@/utils/environment.js';
 import { z } from 'zod';
 import { defineCommand, defineOptions } from 'zodline';
@@ -24,6 +23,14 @@ export default defineCommand({
         })
         .optional()
         .describe('Build ID to download.'),
+      formFactor: z
+        .enum(APP_BUILD_ARTIFACT_FORM_FACTORS, {
+          message: 'Invalid form factor. Must be one of `mobile`, `watch`, `tv`, or `automotive`.',
+        })
+        .optional()
+        .describe(
+          'The form factor of the Android artifact to download. Supported values are `mobile`, `watch`, `tv`, and `automotive`. Defaults to `mobile`.',
+        ),
       apk: z
         .union([z.boolean(), z.string()])
         .optional()
@@ -80,8 +87,10 @@ export default defineCommand({
       }
     }
 
+    const appBuildId = buildId;
+
     // Fetch the build details to get the job ID
-    const build = await appBuildsService.findOne({ appId, appBuildId: buildId, relations: 'appBuildArtifacts,job' });
+    const build = await appBuildsService.findOne({ appId, appBuildId, relations: 'appBuildArtifacts,job' });
     if (build.job?.status !== 'succeeded') {
       consola.error('The build has not succeeded yet. Cannot download artifacts for incomplete builds.');
       process.exit(1);
@@ -165,95 +174,44 @@ export default defineCommand({
 
     // Download artifacts if flags are set
     if (downloadApk) {
-      await handleArtifactDownload({
+      await downloadAppBuildArtifact({
         appId,
-        buildId: buildId!,
-        buildArtifacts: build.appBuildArtifacts,
-        artifactType: 'apk',
+        buildId: appBuildId,
+        artifacts: build.appBuildArtifacts,
+        type: 'apk',
+        formFactor: options.formFactor,
         filePath: typeof options.apk === 'string' ? options.apk : undefined,
       });
     }
     if (downloadAab) {
-      await handleArtifactDownload({
+      await downloadAppBuildArtifact({
         appId,
-        buildId: buildId!,
-        buildArtifacts: build.appBuildArtifacts,
-        artifactType: 'aab',
+        buildId: appBuildId,
+        artifacts: build.appBuildArtifacts,
+        type: 'aab',
+        formFactor: options.formFactor,
         filePath: typeof options.aab === 'string' ? options.aab : undefined,
       });
     }
     if (downloadIpa) {
-      await handleArtifactDownload({
+      await downloadAppBuildArtifact({
         appId,
-        buildId: buildId!,
-        buildArtifacts: build.appBuildArtifacts,
-        artifactType: 'ipa',
+        buildId: appBuildId,
+        artifacts: build.appBuildArtifacts,
+        type: 'ipa',
+        formFactor: options.formFactor,
         filePath: typeof options.ipa === 'string' ? options.ipa : undefined,
       });
     }
     if (downloadZip) {
-      await handleArtifactDownload({
+      await downloadAppBuildArtifact({
         appId,
-        buildId: buildId!,
-        buildArtifacts: build.appBuildArtifacts,
-        artifactType: 'zip',
+        buildId: appBuildId,
+        artifacts: build.appBuildArtifacts,
+        type: 'zip',
+        formFactor: options.formFactor,
         filePath: typeof options.zip === 'string' ? options.zip : undefined,
       });
     }
   }),
 });
-
-/**
- * Download a build artifact (APK, AAB, IPA, or ZIP).
- */
-const handleArtifactDownload = async (options: {
-  appId: string;
-  buildId: string;
-  buildArtifacts: any[] | undefined;
-  artifactType: 'apk' | 'aab' | 'ipa' | 'zip';
-  filePath?: string;
-}): Promise<void> => {
-  const { appId, buildId, buildArtifacts, artifactType, filePath } = options;
-
-  try {
-    const artifactTypeUpper = artifactType.toUpperCase();
-    consola.start(`Downloading ${artifactTypeUpper}...`);
-
-    // Find the artifact
-    const artifact = buildArtifacts?.find((artifact) => artifact.type === artifactType);
-
-    if (!artifact) {
-      consola.warn(`No ${artifactTypeUpper} artifact found for this build.`);
-      return;
-    }
-
-    if (artifact.status !== 'ready') {
-      consola.warn(`${artifactTypeUpper} artifact is not ready (status: ${artifact.status}).`);
-      return;
-    }
-
-    // Download the artifact
-    const artifactData = await appBuildsService.downloadArtifact({
-      appId,
-      appBuildId: buildId,
-      artifactId: artifact.id,
-    });
-
-    // Determine the file path
-    let outputPath: string;
-    if (filePath) {
-      // Use provided path (can be relative or absolute)
-      outputPath = path.resolve(filePath);
-    } else {
-      // Default to current working directory with build ID as filename
-      outputPath = path.resolve(`${buildId}.${artifactType}`);
-    }
-
-    // Save the file
-    await fs.writeFile(outputPath, Buffer.from(artifactData));
-
-    consola.success(`${artifactTypeUpper} downloaded successfully: ${outputPath}`);
-  } catch (error) {
-    consola.error(`Failed to download ${artifactType.toUpperCase()}:`, error);
-  }
-};
