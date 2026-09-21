@@ -5,7 +5,7 @@ import appCertificatesService from '@/services/app-certificates.js';
 import appConfigurationsService from '@/services/app-configurations.js';
 import appEnvironmentsService from '@/services/app-environments.js';
 import appsService from '@/services/apps.js';
-import { APP_BUILD_ARTIFACT_FORM_FACTORS, downloadAppBuildArtifact } from '@/utils/app-build-artifacts.js';
+import { APP_BUILD_ARTIFACT_FORM_FACTORS, handleAppBuildArtifactDownload } from '@/utils/app-build-artifacts.js';
 import { getAppBuildShareUrls } from '@/utils/app-build-shares.js';
 import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
@@ -470,7 +470,7 @@ export default defineCommand({
 
       // Download artifacts if flags are set
       if (options.apk && platform === 'android') {
-        await downloadAppBuildArtifact({
+        await handleAppBuildArtifactDownload({
           appId,
           buildId: response.id,
           artifacts: appBuild.appBuildArtifacts,
@@ -480,7 +480,7 @@ export default defineCommand({
         });
       }
       if (options.aab && platform === 'android') {
-        await downloadAppBuildArtifact({
+        await handleAppBuildArtifactDownload({
           appId,
           buildId: response.id,
           artifacts: appBuild.appBuildArtifacts,
@@ -490,7 +490,7 @@ export default defineCommand({
         });
       }
       if (options.ipa && platform === 'ios') {
-        await downloadAppBuildArtifact({
+        await handleAppBuildArtifactDownload({
           appId,
           buildId: response.id,
           artifacts: appBuild.appBuildArtifacts,
@@ -500,7 +500,7 @@ export default defineCommand({
         });
       }
       if (options.zip && platform === 'web') {
-        await downloadAppBuildArtifact({
+        await handleAppBuildArtifactDownload({
           appId,
           buildId: response.id,
           artifacts: appBuild.appBuildArtifacts,

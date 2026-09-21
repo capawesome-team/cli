@@ -1,5 +1,5 @@
 import appBuildsService from '@/services/app-builds.js';
-import { APP_BUILD_ARTIFACT_FORM_FACTORS, downloadAppBuildArtifact } from '@/utils/app-build-artifacts.js';
+import { APP_BUILD_ARTIFACT_FORM_FACTORS, handleAppBuildArtifactDownload } from '@/utils/app-build-artifacts.js';
 import { withAuth } from '@/utils/auth.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import consola from 'consola';
@@ -174,7 +174,7 @@ export default defineCommand({
 
     // Download artifacts if flags are set
     if (downloadApk) {
-      await downloadAppBuildArtifact({
+      await handleAppBuildArtifactDownload({
         appId,
         buildId: appBuildId,
         artifacts: build.appBuildArtifacts,
@@ -184,7 +184,7 @@ export default defineCommand({
       });
     }
     if (downloadAab) {
-      await downloadAppBuildArtifact({
+      await handleAppBuildArtifactDownload({
         appId,
         buildId: appBuildId,
         artifacts: build.appBuildArtifacts,
@@ -194,7 +194,7 @@ export default defineCommand({
       });
     }
     if (downloadIpa) {
-      await downloadAppBuildArtifact({
+      await handleAppBuildArtifactDownload({
         appId,
         buildId: appBuildId,
         artifacts: build.appBuildArtifacts,
@@ -204,7 +204,7 @@ export default defineCommand({
       });
     }
     if (downloadZip) {
-      await downloadAppBuildArtifact({
+      await handleAppBuildArtifactDownload({
         appId,
         buildId: appBuildId,
         artifacts: build.appBuildArtifacts,

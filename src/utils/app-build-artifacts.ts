@@ -40,9 +40,11 @@ export const getAppBuildArtifactFileName = (buildId: string, artifact: AppBuildA
     : `${buildId}-${artifact.formFactor}.${artifact.type}`;
 
 /**
- * Download a build artifact (APK, AAB, IPA, or ZIP).
+ * Download the build artifact of the given type and report the outcome to the user.
+ *
+ * Skips the download with a warning if no matching artifact exists or it is not ready yet.
  */
-export const downloadAppBuildArtifact = async (options: {
+export const handleAppBuildArtifactDownload = async (options: {
   appId: string;
   buildId: string;
   artifacts: AppBuildArtifactDto[] | undefined;
@@ -70,16 +72,32 @@ export const downloadAppBuildArtifact = async (options: {
       return;
     }
 
-    const artifactData = await appBuildsService.downloadArtifact({
-      appId,
-      appBuildId: buildId,
-      artifactId: artifact.id,
-    });
-    const outputPath = path.resolve(filePath || getAppBuildArtifactFileName(buildId, artifact));
-    await fs.writeFile(outputPath, Buffer.from(artifactData));
+    const outputPath = await downloadAppBuildArtifact({ appId, buildId, artifact, filePath });
 
     consola.success(`${typeInUpperCase} downloaded successfully: ${outputPath}`);
   } catch (error) {
     consola.error(`Failed to download ${typeInUpperCase}:`, error);
   }
+};
+
+/**
+ * Download a build artifact to disk and return the output path.
+ */
+export const downloadAppBuildArtifact = async (options: {
+  appId: string;
+  buildId: string;
+  artifact: AppBuildArtifactDto;
+  filePath?: string;
+}): Promise<string> => {
+  const { appId, buildId, artifact, filePath } = options;
+
+  const artifactData = await appBuildsService.downloadArtifact({
+    appId,
+    appBuildId: buildId,
+    artifactId: artifact.id,
+  });
+  const outputPath = path.resolve(filePath || getAppBuildArtifactFileName(buildId, artifact));
+  await fs.writeFile(outputPath, Buffer.from(artifactData));
+
+  return outputPath;
 };
