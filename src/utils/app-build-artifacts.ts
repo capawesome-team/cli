@@ -23,7 +23,7 @@ export const findAppBuildArtifact = (
   const artifactsOfType = artifacts?.filter((artifact) => artifact.type === options.type) ?? [];
   const formFactors = options.formFactor ? [options.formFactor] : APP_BUILD_ARTIFACT_FORM_FACTORS;
   for (const formFactor of formFactors) {
-    const artifact = artifactsOfType.find((artifact) => getFormFactor(artifact) === formFactor);
+    const artifact = artifactsOfType.find((artifact) => artifact.formFactor === formFactor);
     if (artifact) {
       return artifact;
     }
@@ -34,10 +34,10 @@ export const findAppBuildArtifact = (
 /**
  * Build the default file name for a build artifact.
  */
-export const getAppBuildArtifactFileName = (buildId: string, artifact: AppBuildArtifactDto): string => {
-  const formFactor = getFormFactor(artifact);
-  return formFactor === 'mobile' ? `${buildId}.${artifact.type}` : `${buildId}-${formFactor}.${artifact.type}`;
-};
+export const getAppBuildArtifactFileName = (buildId: string, artifact: AppBuildArtifactDto): string =>
+  artifact.formFactor === 'mobile'
+    ? `${buildId}.${artifact.type}`
+    : `${buildId}-${artifact.formFactor}.${artifact.type}`;
 
 /**
  * Download a build artifact (APK, AAB, IPA, or ZIP).
@@ -83,5 +83,3 @@ export const downloadAppBuildArtifact = async (options: {
     consola.error(`Failed to download ${typeInUpperCase}:`, error);
   }
 };
-
-const getFormFactor = (artifact: AppBuildArtifactDto): AppBuildArtifactFormFactor => artifact.formFactor ?? 'mobile';

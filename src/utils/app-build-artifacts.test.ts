@@ -7,18 +7,13 @@ const createArtifact = (artifact: Partial<AppBuildArtifactDto>): AppBuildArtifac
   fileMimeType: 'application/octet-stream',
   fileName: 'app.aab',
   fileSizeInBytes: 1,
+  formFactor: 'mobile',
   status: 'ready',
   type: 'aab',
   ...artifact,
 });
 
 describe('findAppBuildArtifact', () => {
-  it('should treat an artifact without a form factor as mobile', () => {
-    const artifact = createArtifact({ id: 'legacy', formFactor: null });
-
-    expect(findAppBuildArtifact([artifact], { type: 'aab', formFactor: 'mobile' })).toBe(artifact);
-  });
-
   it('should return the artifacts in the selection order', () => {
     const watchArtifact = createArtifact({ id: 'watch', formFactor: 'watch' });
     const mobileArtifact = createArtifact({ id: 'mobile', formFactor: 'mobile' });
@@ -63,12 +58,6 @@ describe('findAppBuildArtifact', () => {
 describe('getAppBuildArtifactFileName', () => {
   it('should not add a suffix for a mobile artifact', () => {
     const artifact = createArtifact({ formFactor: 'mobile' });
-
-    expect(getAppBuildArtifactFileName('build-id', artifact)).toBe('build-id.aab');
-  });
-
-  it('should not add a suffix for an artifact without a form factor', () => {
-    const artifact = createArtifact({ formFactor: null });
 
     expect(getAppBuildArtifactFileName('build-id', artifact)).toBe('build-id.aab');
   });
