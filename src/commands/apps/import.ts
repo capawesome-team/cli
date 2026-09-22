@@ -15,6 +15,7 @@ import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { getMessageFromUnknownError, UserError } from '@/utils/error.js';
 import { isReadable } from '@/utils/file.js';
+import { getGitRepositoryPath } from '@/utils/git.js';
 import { prompt, promptOrganizationSelection } from '@/utils/prompt.js';
 import zip from '@/utils/zip.js';
 import { defineCommand, defineOptions } from 'zodline';
@@ -25,9 +26,6 @@ import path from 'path';
 import { z } from 'zod';
 
 const SIGNALS = ['SIGHUP', 'SIGINT', 'SIGTERM'] as const;
-
-// Maps the providers of `parseGitRemoteUrl` to the providers of git connections.
-const GIT_CONNECTION_PROVIDERS: Record<string, string> = { azure: 'azure_devops' };
 
 interface AppImportOutcome {
   app: AppImport;
@@ -128,8 +126,11 @@ export default defineCommand({
       selectedSkippedApps.push(...unresolvedApps);
 
       await assignUniqueAppNames(resolvedApps, organizationId);
-      const unconnectedGitProviders = await findUnconnectedGitProviders(resolvedApps, organizationId);
-      for (const provider of unconnectedGitProviders) {
+      const gitConnectionIds = await findGitConnectionIds(resolvedApps, organizationId);
+      for (const provider of getGitProviders(resolvedApps)) {
+        if (gitConnectionIds.has(provider)) {
+          continue;
+        }
         const appCount = resolvedApps.filter((app) => app.repository?.provider === provider).length;
         consola.warn(
           `The organization has no \`${provider}\` git connection, so the repositories of ${appCount} app(s) will not be linked. Connect the git provider at ${DEFAULT_CONSOLE_BASE_URL}/organizations/${organizationId}/git before running the import to link them automatically, or link the repositories manually in the Capawesome Cloud Console afterwards.`,
@@ -153,7 +154,7 @@ export default defineCommand({
         if (dryRun) {
           continue;
         }
-        await importApp(organizationId, outcome, unconnectedGitProviders);
+        await importApp(organizationId, outcome, gitConnectionIds);
       }
 
       const errorCount = outcomes.reduce((count, outcome) => count + outcome.errors.length, 0);
@@ -280,26 +281,29 @@ const assignUniqueAppNames = async (apps: AppImport[], organizationId: string): 
   }
 };
 
-const findUnconnectedGitProviders = async (apps: AppImport[], organizationId: string): Promise<Set<string>> => {
-  const providers = new Set(apps.flatMap((app) => (app.repository ? [app.repository.provider] : [])));
-  const unconnectedProviders = new Set<string>();
-  for (const provider of providers) {
-    const gitConnections = await gitConnectionsService.findAll({
+const getGitProviders = (apps: AppImport[]): Set<string> =>
+  new Set(apps.flatMap((app) => (app.repository ? [app.repository.provider] : [])));
+
+const findGitConnectionIds = async (apps: AppImport[], organizationId: string): Promise<Map<string, string>> => {
+  const gitConnectionIds = new Map<string, string>();
+  for (const provider of getGitProviders(apps)) {
+    const [gitConnection] = await gitConnectionsService.findAll({
       organizationId,
-      provider: GIT_CONNECTION_PROVIDERS[provider] ?? provider,
+      provider,
+      restricted: false,
       limit: 1,
     });
-    if (gitConnections.length === 0) {
-      unconnectedProviders.add(provider);
+    if (gitConnection) {
+      gitConnectionIds.set(provider, gitConnection.id);
     }
   }
-  return unconnectedProviders;
+  return gitConnectionIds;
 };
 
 const importApp = async (
   organizationId: string,
   outcome: AppImportOutcome,
-  unconnectedGitProviders: Set<string>,
+  gitConnectionIds: Map<string, string>,
 ): Promise<void> => {
   const { app } = outcome;
   consola.start(`Importing app \`${app.sourceName}\`...`);
@@ -472,24 +476,22 @@ const importApp = async (
       outcome.errors.push(`Failed to create automation \`${automation.name}\`: ${getMessageFromUnknownError(error)}`);
     }
   }
-  if (app.repository && unconnectedGitProviders.has(app.repository.provider)) {
-    app.notes.push(
-      `The repository \`${app.repository.ownerSlug}/${app.repository.repositorySlug}\` was not linked because the organization has no \`${app.repository.provider}\` git connection.`,
-    );
-  } else if (app.repository) {
-    try {
-      await appsService.linkRepository({
-        appId,
-        ownerSlug: app.repository.ownerSlug,
-        provider: app.repository.provider,
-        repositorySlug: app.repository.repositorySlug,
-        projectSlug: app.repository.projectSlug,
-      });
-      consola.success(`Linked repository \`${app.repository.ownerSlug}/${app.repository.repositorySlug}\`.`);
-    } catch (error) {
+  if (app.repository) {
+    const gitConnectionId = gitConnectionIds.get(app.repository.provider);
+    const repositoryPath = getGitRepositoryPath(app.repository);
+    if (!gitConnectionId) {
       app.notes.push(
-        `The repository \`${app.repository.ownerSlug}/${app.repository.repositorySlug}\` could not be linked: ${getMessageFromUnknownError(error)} Make sure the git provider is connected in the Capawesome Cloud Console and link the repository manually.`,
+        `The repository \`${repositoryPath}\` was not linked because the organization has no \`${app.repository.provider}\` git connection.`,
       );
+    } else {
+      try {
+        await appsService.linkRepository({ appId, gitConnectionId, path: repositoryPath });
+        consola.success(`Linked repository \`${repositoryPath}\`.`);
+      } catch (error) {
+        app.notes.push(
+          `The repository \`${repositoryPath}\` could not be linked: ${getMessageFromUnknownError(error)} Link the repository manually in the Capawesome Cloud Console.`,
+        );
+      }
     }
   }
 };

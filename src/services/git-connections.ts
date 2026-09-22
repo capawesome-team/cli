@@ -24,6 +24,9 @@ class GitConnectionsServiceImpl implements GitConnectionsService {
     if (dto.provider !== undefined) {
       params.provider = dto.provider;
     }
+    if (dto.restricted !== undefined) {
+      params.restricted = dto.restricted.toString();
+    }
     const response = await this.httpClient.get<GitConnectionDto[]>(
       `/v1/organizations/${dto.organizationId}/git-connections`,
       {
