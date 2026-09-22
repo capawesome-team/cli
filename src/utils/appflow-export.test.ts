@@ -412,6 +412,23 @@ describe('appflow-export', () => {
     ]);
   });
 
+  it.each([
+    ['https://user:secret-token@git.example.com/owner/repo.git', 'https://git.example.com/owner/repo.git'],
+    ['https://user:secret-token@', 'https://'],
+    ['user:secret-token@git.example.com:owner/repo.git', 'git.example.com:owner/repo.git'],
+  ])('should not echo credentials of the unsupported repository url %s', async (cloneUrl, sanitizedUrl) => {
+    writeAppFiles('Private Repo-99999999', {
+      'app-detail.json': { id: '99999999', name: 'Private Repo', appType: 'capacitor' },
+      'repo-association.json': { gitProvider: 'gitlab_enterprise', cloneUrl },
+    });
+
+    const { apps } = await parseAppflowExport(exportDirectory);
+
+    expect(apps[0]!.repository).toBeNull();
+    expect(apps[0]!.notes).toContainEqual(expect.stringContaining(`\`${sanitizedUrl}\``));
+    expect(JSON.stringify(apps[0]!.notes)).not.toContain('secret-token');
+  });
+
   it('should skip an app with an invalid app detail file', async () => {
     writeAppFiles('Invalid-66666666', {
       'app-detail.json': 'not json',

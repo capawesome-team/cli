@@ -275,11 +275,15 @@ const parseRepository = (appFolder: string, notes: string[]): AppImport['reposit
     return parseGitRemoteUrl(repoAssociation.cloneUrl);
   } catch {
     notes.push(
-      `The git repository \`${repoAssociation.cloneUrl}\` (provider \`${repoAssociation.gitProvider}\`) is not supported and was not linked. You can link a repository manually in the Capawesome Cloud Console.`,
+      `The git repository \`${stripCredentials(repoAssociation.cloneUrl)}\` (provider \`${repoAssociation.gitProvider}\`) is not supported and was not linked. You can link a repository manually in the Capawesome Cloud Console.`,
     );
     return null;
   }
 };
+
+// Removes `user:password@` from URLs as well as from scp-like locations
+// such as `user@host:owner/repo.git`, including malformed ones.
+const stripCredentials = (url: string): string => url.replace(/^([a-z+]+:\/\/)?[^/@]*@/i, '$1');
 
 const parseConfigurations = (
   nativeConfigs: z.infer<typeof nativeConfigsSchema>,
