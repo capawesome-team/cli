@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.20.0](https://github.com/capawesome-team/cli/compare/v4.19.0...v4.20.0) (2026-09-22)
+
+
+### Features
+
+* **apps:** warn about missing git connections before importing apps ([#221](https://github.com/capawesome-team/cli/issues/221)) ([2b4646d](https://github.com/capawesome-team/cli/commit/2b4646d4c2cbcc3c8dd54c68021a9f1ed47c9521))
+
+
+### Bug Fixes
+
+* **apps:** remove extracted export on cancelled prompts and signals ([#219](https://github.com/capawesome-team/cli/issues/219)) ([0356500](https://github.com/capawesome-team/cli/commit/035650041f456d5831ecf2fff8cee5fb231db8db))
+* **apps:** rename imported resources whose names only differ in case ([#218](https://github.com/capawesome-team/cli/issues/218)) ([135b577](https://github.com/capawesome-team/cli/commit/135b577e86620dd71d9297a4124a2db2fd1cf15f))
+
 ## [4.19.0](https://github.com/capawesome-team/cli/compare/v4.18.4...v4.19.0) (2026-09-22)
 
 
