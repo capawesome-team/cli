@@ -132,7 +132,7 @@ export default defineCommand({
       for (const provider of unconnectedGitProviders) {
         const appCount = resolvedApps.filter((app) => app.repository?.provider === provider).length;
         consola.warn(
-          `The organization has no \`${provider}\` git connection, so the repositories of ${appCount} app(s) will not be linked. Connect the git provider first at ${DEFAULT_CONSOLE_BASE_URL}/organizations/${organizationId}/git to link them automatically.`,
+          `The organization has no \`${provider}\` git connection, so the repositories of ${appCount} app(s) will not be linked. Connect the git provider at ${DEFAULT_CONSOLE_BASE_URL}/organizations/${organizationId}/git before running the import to link them automatically, or link the repositories manually in the Capawesome Cloud Console afterwards.`,
         );
       }
       const outcomes: AppImportOutcome[] = [];

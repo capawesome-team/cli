@@ -444,6 +444,46 @@ describe('apps-import', () => {
     ]);
   });
 
+  it('should link an Azure DevOps repository using the matching git connection', async () => {
+    await writeExportFile([
+      {
+        folder: 'My App-6668c18c',
+        files: {
+          'app-detail.json': { id: '6668c18c', name: 'My App', appType: 'capacitor' },
+          'repo-association.json': {
+            gitProvider: 'azure_devops',
+            cloneUrl: 'https://dev.azure.com/my-org/my-project/_git/my-repo',
+          },
+        },
+      },
+    ]);
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .get('/v1/apps')
+      .query({ organizationId, limit: 50, offset: 0 })
+      .reply(200, [])
+      .get(`/v1/organizations/${organizationId}/git-connections`)
+      .query({ provider: 'azure_devops', limit: 1 })
+      .reply(200, [{ id: 'git-connection-1', provider: 'azure_devops' }])
+      .post('/v1/apps', { name: 'My App', type: 'capacitor' })
+      .query({ organizationId })
+      .reply(201, { id: 'app-1', name: 'My App', type: 'capacitor' })
+      .get('/v1/apps/app-1/channels')
+      .reply(200, [])
+      .put('/v1/apps/app-1/repository', {
+        ownerSlug: 'my-org',
+        provider: 'azure',
+        repositorySlug: 'my-repo',
+        projectSlug: 'my-project',
+      })
+      .reply(200, { id: 'app-1' });
+
+    await importCommand.action({ file: exportFile, organizationId, json: true }, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    expect(getJsonOutput().apps[0].notes).toEqual([]);
+  });
+
   it('should not link repositories if the git provider is not connected', async () => {
     await writeExportFile([
       {
