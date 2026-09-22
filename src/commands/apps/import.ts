@@ -411,7 +411,7 @@ const importApp = async (organizationId: string, outcome: AppImportOutcome): Pro
         name: automation.name,
         platform: automation.platform,
         triggerType: 'branch',
-        triggerPattern: automation.triggerPattern,
+        triggerPatterns: [automation.triggerPattern],
         buildType: automation.buildType,
         enabled: automation.enabled,
         appCertificateName: automation.appCertificateName,

@@ -17,7 +17,7 @@ export interface AppAutomationDto {
   lastTriggeredAt: string | null;
   name: string;
   platform: AppAutomationPlatform;
-  triggerPattern: string | null;
+  triggerPatterns: string[];
   triggerType: AppAutomationTriggerType;
   createdAt: string;
   createdBy: string;
@@ -38,7 +38,7 @@ export interface CreateAppAutomationDto {
   enabled?: boolean;
   name: string;
   platform?: AppAutomationPlatform;
-  triggerPattern?: string | null;
+  triggerPatterns?: string[];
   triggerType: AppAutomationTriggerType;
 }
 
@@ -55,7 +55,7 @@ export interface UpdateAppAutomationDto {
   commitMessagePattern?: string | null;
   name?: string;
   platform?: AppAutomationPlatform;
-  triggerPattern?: string | null;
+  triggerPatterns?: string[];
   triggerType?: AppAutomationTriggerType;
 }
 

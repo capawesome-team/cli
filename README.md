@@ -22,7 +22,7 @@ The Capawesome Cloud CLI can be invoked with the `@capawesome/cli` command.
 npx @capawesome/cli <command> [options]
 ```
 
-You can find a list of available commands in the [Command Reference](https://capawesome.io/cloud/cli/).
+You can find a list of available commands in the [Command Reference](https://capawesome.io/docs/cloud/cli/commands/).
 
 ## Help
 

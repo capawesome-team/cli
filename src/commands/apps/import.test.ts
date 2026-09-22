@@ -154,7 +154,7 @@ describe('apps-import', () => {
           body.name === 'Android Release' &&
           body.platform === 'android' &&
           body.triggerType === 'branch' &&
-          body.triggerPattern === 'main' &&
+          JSON.stringify(body.triggerPatterns) === JSON.stringify(['main']) &&
           body.buildType === 'release' &&
           body.enabled === false &&
           body.appCertificateName === 'Debug' &&
