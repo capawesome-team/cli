@@ -95,6 +95,18 @@ export default defineCommand({
     }
 
     const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'capawesome-appflow-import-'));
+    // The extracted export contains secrets, so it must also be removed when the
+    // process exits via `process.exit` (e.g. a cancelled prompt) or a signal,
+    // which would skip the `finally` block.
+    const removeTempDirectory = () => fs.rmSync(tempDirectory, { recursive: true, force: true, maxRetries: 3 });
+    process.once('exit', removeTempDirectory);
+    for (const signal of ['SIGHUP', 'SIGINT', 'SIGTERM'] as const) {
+      process.once(signal, () => {
+        removeTempDirectory();
+        // Re-raise the signal to keep the default exit code (128 + signal number).
+        process.kill(process.pid, signal);
+      });
+    }
     try {
       await zip.unzipToFolder(fs.readFileSync(file), tempDirectory);
       const { apps, skippedApps, warnings } = await parseAppflowExport(tempDirectory);
@@ -137,12 +149,10 @@ export default defineCommand({
         printSummary(outcomes, selectedSkippedApps, dryRun === true, file);
       }
       if (errorCount > 0) {
-        // Set the exit code instead of calling `process.exit` so the `finally` block
-        // still deletes the extracted export, which contains secrets.
         process.exitCode = 1;
       }
     } finally {
-      fs.rmSync(tempDirectory, { recursive: true, force: true });
+      removeTempDirectory();
     }
   }),
 });

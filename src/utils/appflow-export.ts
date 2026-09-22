@@ -258,9 +258,21 @@ const parseRepository = (appFolder: string, notes: string[]): AppImport['reposit
     return parseGitRemoteUrl(repoAssociation.cloneUrl);
   } catch {
     notes.push(
-      `The git repository \`${repoAssociation.cloneUrl}\` (provider \`${repoAssociation.gitProvider}\`) is not supported and was not linked. You can link a repository manually in the Capawesome Cloud Console.`,
+      `The git repository \`${stripCredentials(repoAssociation.cloneUrl)}\` (provider \`${repoAssociation.gitProvider}\`) is not supported and was not linked. You can link a repository manually in the Capawesome Cloud Console.`,
     );
     return null;
+  }
+};
+
+const stripCredentials = (url: string): string => {
+  try {
+    const parsedUrl = new URL(url);
+    parsedUrl.username = '';
+    parsedUrl.password = '';
+    return parsedUrl.toString();
+  } catch {
+    // Not a URL (e.g. `git@host:owner/repo.git`), which cannot carry a password.
+    return url;
   }
 };
 
