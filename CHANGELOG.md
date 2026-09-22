@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.21.0](https://github.com/capawesome-team/cli/compare/v4.20.0...v4.21.0) (2026-09-22)
+
+
+### Features
+
+* **apps:** link repositories via git connections ([#222](https://github.com/capawesome-team/cli/issues/222)) ([f567ea6](https://github.com/capawesome-team/cli/commit/f567ea6d0e836b4aea8e4d57ff10d934a6788fe2))
+
+
+### Bug Fixes
+
+* retry rate limited requests ([#223](https://github.com/capawesome-team/cli/issues/223)) ([47d9733](https://github.com/capawesome-team/cli/commit/47d9733ec28bf0bb3235b8dccdd5b353ec24d0b5))
+
 ## [4.20.0](https://github.com/capawesome-team/cli/compare/v4.19.0...v4.20.0) (2026-09-22)
 
 
