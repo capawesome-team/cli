@@ -1,22 +1,32 @@
 import { createRequire } from 'module';
 import configService from '@/services/config.js';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axiosRetry from 'axios-retry';
+import consola from 'consola';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 const require = createRequire(import.meta.url);
 const pkg = require('../../package.json');
 
+const isRateLimitError = (error: AxiosError): boolean => error.response?.status === 429;
+
 // Register middleware to retry failed requests
 axiosRetry(axios, {
   retries: 3,
+  // Waits at least as long as the `Retry-After` header of rate limited responses
   retryDelay: axiosRetry.exponentialDelay,
   retryCondition: (error) => {
-    // Network errors and 5xx responses are retried
+    // Network errors, rate limited requests and 5xx responses are retried
     return (
       axiosRetry.isNetworkOrIdempotentRequestError(error) ||
+      isRateLimitError(error) ||
       (error.response?.status !== undefined && error.response.status >= 500)
     );
+  },
+  onRetry: (_retryCount, error) => {
+    if (isRateLimitError(error)) {
+      consola.warn('Rate limit reached. Retrying...');
+    }
   },
 });
 
