@@ -240,10 +240,10 @@ describe('apps-import', () => {
       .post(`/v1/apps/${appId}/channels`, { appId, name: 'Production' })
       .reply(201, { id: 'channel-1', name: 'Production' });
 
-    await expect(importCommand.action({ file: exportFile, organizationId, json: true }, undefined)).rejects.toThrow(
-      'Process exited with code 1',
-    );
+    await importCommand.action({ file: exportFile, organizationId, json: true }, undefined);
 
+    expect(process.exitCode).toBe(1);
+    process.exitCode = undefined;
     expect(scope.isDone()).toBe(true);
     const output = getJsonOutput();
     expect(output.apps[0].created).toMatchObject({ channels: 1, environments: 0 });

@@ -137,7 +137,9 @@ export default defineCommand({
         printSummary(outcomes, selectedSkippedApps, dryRun === true, file);
       }
       if (errorCount > 0) {
-        process.exit(1);
+        // Set the exit code instead of calling `process.exit` so the `finally` block
+        // still deletes the extracted export, which contains secrets.
+        process.exitCode = 1;
       }
     } finally {
       fs.rmSync(tempDirectory, { recursive: true, force: true });
