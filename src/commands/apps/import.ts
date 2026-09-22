@@ -8,7 +8,7 @@ import appEnvironmentsService from '@/services/app-environments.js';
 import appGoogleServiceAccountKeysService from '@/services/app-google-service-account-keys.js';
 import appProvisioningProfilesService from '@/services/app-provisioning-profiles.js';
 import appsService from '@/services/apps.js';
-import { AppImport, generateUniqueAppName, SkippedAppImport } from '@/utils/app-import.js';
+import { AppImport, generateUniqueName, isNameTaken, SkippedAppImport } from '@/utils/app-import.js';
 import { parseAppflowExport } from '@/utils/appflow-export.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
@@ -230,25 +230,23 @@ const resolveIonicAppTypes = async (
 };
 
 const assignUniqueAppNames = async (apps: AppImport[], organizationId: string): Promise<void> => {
-  const takenNames = new Set<string>();
+  const takenNames: string[] = [];
   const limit = 50;
   let offset = 0;
   while (true) {
     const page = await appsService.findAll({ organizationId, limit, offset });
-    for (const app of page) {
-      takenNames.add(app.name);
-    }
+    takenNames.push(...page.map((app) => app.name));
     if (page.length < limit) {
       break;
     }
     offset += limit;
   }
   for (const app of apps) {
-    app.name = generateUniqueAppName(app.sourceName, takenNames);
-    takenNames.add(app.name);
+    app.name = generateUniqueName(app.sourceName, takenNames);
+    takenNames.push(app.name);
     if (app.name !== app.sourceName) {
-      app.notes.push(
-        `An app with the name \`${app.sourceName}\` already exists in the organization. The app is imported as \`${app.name}\`.`,
+      app.renames.push(
+        `The app \`${app.sourceName}\` was renamed to \`${app.name}\` because its name is already taken in the organization.`,
       );
     }
   }
@@ -337,15 +335,15 @@ const importApp = async (organizationId: string, outcome: AppImportOutcome): Pro
       outcome.errors.push(`Failed to create environment \`${environment.name}\`: ${getMessageFromUnknownError(error)}`);
     }
   }
-  let existingChannelNames = new Set<string>();
+  let existingChannelNames: string[] = [];
   try {
     const existingChannels = await appChannelsService.findAll({ appId });
-    existingChannelNames = new Set(existingChannels.map((channel) => channel.name));
+    existingChannelNames = existingChannels.map((channel) => channel.name);
   } catch {
     // If the lookup fails, channel creation errors are reported individually below.
   }
   for (const channel of app.channels) {
-    if (existingChannelNames.has(channel)) {
+    if (isNameTaken(channel, existingChannelNames)) {
       outcome.created.channels++;
       continue;
     }
@@ -468,16 +466,21 @@ const printSummary = (
     })),
   );
   for (const outcome of outcomes) {
-    if (outcome.app.notes.length === 0 && outcome.errors.length === 0) {
+    if (outcome.app.notes.length === 0 && outcome.app.renames.length === 0 && outcome.errors.length === 0) {
       continue;
     }
     consola.log(`\n${outcome.app.sourceName}:`);
-    for (const note of outcome.app.notes) {
+    for (const note of [...outcome.app.notes, ...outcome.app.renames]) {
       consola.warn(note);
     }
     for (const error of outcome.errors) {
       consola.error(error);
     }
+  }
+  if (outcomes.some((outcome) => outcome.app.renames.length > 0)) {
+    consola.info(
+      'Some resources were renamed because their names were already taken. Make sure to update any CI/CD workflows or scripts that reference the old names.',
+    );
   }
   for (const outcome of outcomes) {
     if (outcome.id) {
@@ -525,6 +528,7 @@ const printJsonSummary = (
           webUrl: outcome.id ? `${DEFAULT_CONSOLE_BASE_URL}/apps/${outcome.id}` : null,
           created: outcome.created,
           notes: outcome.app.notes,
+          renames: outcome.app.renames,
           errors: outcome.errors,
         })),
         skippedApps: skippedApps.map((app) => ({
