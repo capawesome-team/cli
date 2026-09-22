@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.19.0](https://github.com/capawesome-team/cli/compare/v4.18.4...v4.19.0) (2026-09-22)
+
+
+### Features
+
+* add `apps:import` command ([#217](https://github.com/capawesome-team/cli/issues/217)) ([db90d04](https://github.com/capawesome-team/cli/commit/db90d04d3001e517fa105f37b79be82c146260ba))
+* **apps:** support multiple and negated trigger patterns ([#214](https://github.com/capawesome-team/cli/issues/214)) ([0f56afa](https://github.com/capawesome-team/cli/commit/0f56afadfb24c3411f63d380d66188055a23388c))
+
 ## [4.18.4](https://github.com/capawesome-team/cli/compare/v4.18.3...v4.18.4) (2026-08-20)
 
 
