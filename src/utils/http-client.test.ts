@@ -27,6 +27,7 @@ describe('http-client', () => {
   afterEach(() => {
     // Restore original environment variables
     process.env = originalEnv;
+    vi.useRealTimers();
   });
 
   it('should retry requests on 5xx status codes', async () => {
@@ -61,6 +62,36 @@ describe('http-client', () => {
     const { default: httpClient } = await import('./http-client.js');
 
     await expect(httpClient.get('/not-found')).rejects.toThrow();
+    expect(nock.isDone()).toBe(true);
+  });
+
+  it('should retry rate limited requests after the `Retry-After` delay', async () => {
+    vi.mocked(configService.getValueForKey).mockResolvedValue('https://api.example.com');
+
+    // Mock a 429 response followed by success
+    nock('https://api.example.com')
+      .post('/rate-limited')
+      .reply(429, { error: 'Too Many Requests' }, { 'Retry-After': '10' })
+      .post('/rate-limited')
+      .reply(200, { success: true });
+
+    const { default: httpClient } = await import('./http-client.js');
+
+    // Only fake `setTimeout` so the request itself is still served by nock
+    vi.useFakeTimers({ toFake: ['setTimeout'] });
+
+    const responsePromise = httpClient.post('/rate-limited');
+
+    // Wait until the retry has been scheduled
+    await vi.waitFor(() => expect(vi.getTimerCount()).toBe(1));
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(nock.isDone()).toBe(false);
+
+    await vi.runAllTimersAsync();
+    const response = await responsePromise;
+
+    expect(response.status).toBe(200);
+    expect(response.data).toEqual({ success: true });
     expect(nock.isDone()).toBe(true);
   });
 
