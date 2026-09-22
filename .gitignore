@@ -11,6 +11,7 @@ test-folder.zip
 *.jks
 *.p12
 *.mobileprovision
+*.zip
 www
 www_large
 www.zip

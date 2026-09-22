@@ -39,6 +39,11 @@ export interface TransferAppDto {
   organizationId: string;
 }
 
+export interface UpdateAppDto {
+  appId: string;
+  nextAppBuildNumber?: number;
+}
+
 export interface UnlinkAppRepositoryDto {
   appId: string;
 }
