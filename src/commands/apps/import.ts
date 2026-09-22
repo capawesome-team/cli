@@ -8,6 +8,7 @@ import appEnvironmentsService from '@/services/app-environments.js';
 import appGoogleServiceAccountKeysService from '@/services/app-google-service-account-keys.js';
 import appProvisioningProfilesService from '@/services/app-provisioning-profiles.js';
 import appsService from '@/services/apps.js';
+import gitConnectionsService from '@/services/git-connections.js';
 import { AppImport, generateUniqueName, isNameTaken, SkippedAppImport } from '@/utils/app-import.js';
 import { parseAppflowExport } from '@/utils/appflow-export.js';
 import { withAuth } from '@/utils/auth.js';
@@ -24,6 +25,9 @@ import path from 'path';
 import { z } from 'zod';
 
 const SIGNALS = ['SIGHUP', 'SIGINT', 'SIGTERM'] as const;
+
+// Maps the providers of `parseGitRemoteUrl` to the providers of git connections.
+const GIT_CONNECTION_PROVIDERS: Record<string, string> = { azure: 'azure_devops' };
 
 interface AppImportOutcome {
   app: AppImport;
@@ -124,6 +128,13 @@ export default defineCommand({
       selectedSkippedApps.push(...unresolvedApps);
 
       await assignUniqueAppNames(resolvedApps, organizationId);
+      const unconnectedGitProviders = await findUnconnectedGitProviders(resolvedApps, organizationId);
+      for (const provider of unconnectedGitProviders) {
+        const appCount = resolvedApps.filter((app) => app.repository?.provider === provider).length;
+        consola.warn(
+          `The organization has no \`${provider}\` git connection, so the repositories of ${appCount} app(s) will not be linked. Connect the git provider first at ${DEFAULT_CONSOLE_BASE_URL}/organizations/${organizationId}/git to link them automatically.`,
+        );
+      }
       const outcomes: AppImportOutcome[] = [];
       for (const app of resolvedApps) {
         const outcome: AppImportOutcome = {
@@ -142,7 +153,7 @@ export default defineCommand({
         if (dryRun) {
           continue;
         }
-        await importApp(organizationId, outcome);
+        await importApp(organizationId, outcome, unconnectedGitProviders);
       }
 
       const errorCount = outcomes.reduce((count, outcome) => count + outcome.errors.length, 0);
@@ -269,7 +280,27 @@ const assignUniqueAppNames = async (apps: AppImport[], organizationId: string): 
   }
 };
 
-const importApp = async (organizationId: string, outcome: AppImportOutcome): Promise<void> => {
+const findUnconnectedGitProviders = async (apps: AppImport[], organizationId: string): Promise<Set<string>> => {
+  const providers = new Set(apps.flatMap((app) => (app.repository ? [app.repository.provider] : [])));
+  const unconnectedProviders = new Set<string>();
+  for (const provider of providers) {
+    const gitConnections = await gitConnectionsService.findAll({
+      organizationId,
+      provider: GIT_CONNECTION_PROVIDERS[provider] ?? provider,
+      limit: 1,
+    });
+    if (gitConnections.length === 0) {
+      unconnectedProviders.add(provider);
+    }
+  }
+  return unconnectedProviders;
+};
+
+const importApp = async (
+  organizationId: string,
+  outcome: AppImportOutcome,
+  unconnectedGitProviders: Set<string>,
+): Promise<void> => {
   const { app } = outcome;
   consola.start(`Importing app \`${app.sourceName}\`...`);
   let appId: string;
@@ -441,7 +472,11 @@ const importApp = async (organizationId: string, outcome: AppImportOutcome): Pro
       outcome.errors.push(`Failed to create automation \`${automation.name}\`: ${getMessageFromUnknownError(error)}`);
     }
   }
-  if (app.repository) {
+  if (app.repository && unconnectedGitProviders.has(app.repository.provider)) {
+    app.notes.push(
+      `The repository \`${app.repository.ownerSlug}/${app.repository.repositorySlug}\` was not linked because the organization has no \`${app.repository.provider}\` git connection.`,
+    );
+  } else if (app.repository) {
     try {
       await appsService.linkRepository({
         appId,

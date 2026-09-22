@@ -163,6 +163,9 @@ describe('apps-import', () => {
         );
       })
       .reply(201, { id: 'automation-1', name: 'Android Release' })
+      .get(`/v1/organizations/${organizationId}/git-connections`)
+      .query({ provider: 'github', limit: 1 })
+      .reply(200, [{ id: 'git-connection-1', provider: 'github' }])
       .put(`/v1/apps/${appId}/repository`, {
         ownerSlug: 'robingenz',
         provider: 'github',
@@ -439,6 +442,41 @@ describe('apps-import', () => {
     expect(output.skippedApps).toEqual([
       { sourceId: '22222222', sourceName: 'RN App', reason: expect.stringContaining('react_native') },
     ]);
+  });
+
+  it('should not link repositories if the git provider is not connected', async () => {
+    await writeExportFile([
+      {
+        folder: 'My App-6668c18c',
+        files: {
+          'app-detail.json': { id: '6668c18c', name: 'My App', appType: 'capacitor' },
+          'repo-association.json': {
+            gitProvider: 'github',
+            cloneUrl: 'https://github.com/robingenz/appflow-export-test.git',
+          },
+        },
+      },
+    ]);
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .get('/v1/apps')
+      .query({ organizationId, limit: 50, offset: 0 })
+      .reply(200, [])
+      .get(`/v1/organizations/${organizationId}/git-connections`)
+      .query({ provider: 'github', limit: 1 })
+      .reply(200, [])
+      .post('/v1/apps', { name: 'My App', type: 'capacitor' })
+      .query({ organizationId })
+      .reply(201, { id: 'app-1', name: 'My App', type: 'capacitor' })
+      .get('/v1/apps/app-1/channels')
+      .reply(200, []);
+
+    await importCommand.action({ file: exportFile, organizationId, json: true }, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    expect(vi.mocked(consola).warn).toHaveBeenCalledWith(expect.stringContaining('no `github` git connection'));
+    const output = getJsonOutput();
+    expect(output.apps[0].notes).toContainEqual(expect.stringContaining('was not linked'));
   });
 
   it('should error in non-interactive environment if no file is provided', async () => {
