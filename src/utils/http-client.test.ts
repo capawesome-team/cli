@@ -1,4 +1,5 @@
 import configService from '@/services/config.js';
+import consola from 'consola';
 import nock from 'nock';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -8,6 +9,7 @@ vi.mock('@/services/config.js', () => ({
     getValueForKey: vi.fn().mockResolvedValue('https://api.example.com'),
   },
 }));
+vi.mock('consola');
 
 describe('http-client', () => {
   let originalEnv: NodeJS.ProcessEnv;
@@ -93,6 +95,7 @@ describe('http-client', () => {
     expect(response.status).toBe(200);
     expect(response.data).toEqual({ success: true });
     expect(nock.isDone()).toBe(true);
+    expect(consola.warn).toHaveBeenCalledWith('Rate limit reached. Retrying...');
   });
 
   it('should eventually fail after maximum retries on persistent 5xx errors', async () => {
