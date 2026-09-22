@@ -5,6 +5,7 @@ import {
   AppImportConfiguration,
   AppImportDestination,
   AppImportEnvironment,
+  generateUniqueName,
   SkippedAppImport,
 } from '@/utils/app-import.js';
 import { getMessageFromUnknownError, UserError } from '@/utils/error.js';
@@ -205,12 +206,41 @@ const mapAppType = (appType: string): AppImport['type'] | undefined => {
 
 const parseApp = (appFolder: string, detail: z.infer<typeof appDetailSchema>, type: AppImport['type']): AppImport => {
   const notes: string[] = [];
-  const environments = parseJsonFileIfExists(path.join(appFolder, 'environments.json'), environmentsSchema) ?? [];
-  const channels =
-    parseJsonFileIfExists(path.join(appFolder, 'live-update-channels.json'), liveUpdateChannelsSchema) ?? [];
-  const nativeConfigs = parseJsonFileIfExists(path.join(appFolder, 'native-configs.json'), nativeConfigsSchema) ?? [];
-  const certificates = parseCertificates(appFolder, notes);
-  const destinations = parseDestinations(appFolder);
+  const renames: string[] = [];
+  // Duplicates are renamed before the id-to-name maps are built so that
+  // automations reference the renamed resources.
+  const environments = renameDuplicates(
+    parseJsonFileIfExists(path.join(appFolder, 'environments.json'), environmentsSchema) ?? [],
+    'environment',
+    renames,
+  );
+  const channels = renameDuplicates(
+    parseJsonFileIfExists(path.join(appFolder, 'live-update-channels.json'), liveUpdateChannelsSchema) ?? [],
+    'channel',
+    renames,
+  );
+  const nativeConfigs = renameDuplicates(
+    parseJsonFileIfExists(path.join(appFolder, 'native-configs.json'), nativeConfigsSchema) ?? [],
+    'configuration',
+    renames,
+  );
+  const certificates = renameDuplicates(parseCertificates(appFolder, notes), 'certificate', renames);
+  const destinations = renameDuplicates(parseDestinations(appFolder), 'destination', renames);
+  const automations = renameDuplicates(
+    parseAutomations(
+      appFolder,
+      {
+        certificateNamesById: toNameMap(certificates),
+        channelNamesById: new Map(channels.map((channel) => [channel.id, channel.name])),
+        configurationNamesById: toNameMap(nativeConfigs),
+        destinationNamesById: toNameMap(destinations),
+        environmentNamesById: toNameMap(environments),
+      },
+      notes,
+    ),
+    'automation',
+    renames,
+  );
   return {
     sourceId: detail.id,
     sourceName: detail.name,
@@ -219,25 +249,12 @@ const parseApp = (appFolder: string, detail: z.infer<typeof appDetailSchema>, ty
     type,
     latestBuildNumber: detail.latestBuildNumber ?? undefined,
     notes,
-    automations: parseAutomations(
-      appFolder,
-      {
-        certificateNamesById: toNameMap(
-          certificates.map((certificate) => ({ id: certificate.id, name: certificate.certificate.name })),
-        ),
-        channelNamesById: new Map(channels.map((channel) => [channel.id, channel.name])),
-        configurationNamesById: toNameMap(nativeConfigs),
-        destinationNamesById: toNameMap(
-          destinations.map((destination) => ({ id: destination.id, name: destination.destination.name })),
-        ),
-        environmentNamesById: toNameMap(environments),
-      },
-      notes,
-    ),
-    certificates: certificates.map((certificate) => certificate.certificate),
+    renames,
+    automations,
+    certificates: certificates.map(({ id, ...certificate }) => certificate),
     channels: channels.map((channel) => channel.name),
     configurations: parseConfigurations(nativeConfigs, notes),
-    destinations: destinations.map((destination) => destination.destination),
+    destinations: destinations.map(({ id, ...destination }) => destination),
     environments: environments.map(
       (environment): AppImportEnvironment => ({
         name: environment.name,
@@ -285,9 +302,8 @@ const parseConfigurations = (
   }));
 };
 
-interface ParsedCertificate {
+interface ParsedCertificate extends AppImportCertificate {
   id: number;
-  certificate: AppImportCertificate;
 }
 
 const parseCertificates = (appFolder: string, notes: string[]): ParsedCertificate[] => {
@@ -312,15 +328,13 @@ const parseCertificates = (appFolder: string, notes: string[]): ParsedCertificat
     }
     certificates.push({
       id: metadata.id,
-      certificate: {
-        name: metadata.name,
-        platform: 'android',
-        filePath,
-        password: metadata.keystorePassword,
-        keyAlias: metadata.keyAlias,
-        keyPassword: metadata.keyPassword,
-        provisioningProfilePaths: [],
-      },
+      name: metadata.name,
+      platform: 'android',
+      filePath,
+      password: metadata.keystorePassword,
+      keyAlias: metadata.keyAlias,
+      keyPassword: metadata.keyPassword,
+      provisioningProfilePaths: [],
     });
   }
   for (const folder of getSubfolders(path.join(appFolder, 'signing-certificates', 'ios'))) {
@@ -357,21 +371,18 @@ const parseCertificates = (appFolder: string, notes: string[]): ParsedCertificat
     }
     certificates.push({
       id: metadata.id,
-      certificate: {
-        name: metadata.name,
-        platform: 'ios',
-        filePath,
-        password: metadata.p12Password,
-        provisioningProfilePaths,
-      },
+      name: metadata.name,
+      platform: 'ios',
+      filePath,
+      password: metadata.p12Password,
+      provisioningProfilePaths,
     });
   }
   return certificates;
 };
 
-interface ParsedDestination {
+interface ParsedDestination extends AppImportDestination {
   id: number;
-  destination: AppImportDestination;
 }
 
 const parseDestinations = (appFolder: string): ParsedDestination[] => {
@@ -381,35 +392,29 @@ const parseDestinations = (appFolder: string): ParsedDestination[] => {
     const googleServiceAccountKeyPath = path.join(folder, 'json-key.json');
     destinations.push({
       id: metadata.id,
-      destination: {
-        name: metadata.name,
-        platform: 'android',
-        androidPackageName: metadata.packageName ?? undefined,
-        androidBuildArtifactType:
-          metadata.artifactType === 'aab' || metadata.artifactType === 'apk' ? metadata.artifactType : undefined,
-        androidReleaseStatus:
-          metadata.releaseStatus === 'completed' || metadata.releaseStatus === 'draft'
-            ? metadata.releaseStatus
-            : undefined,
-        googlePlayTrack: metadata.track ?? undefined,
-        googleServiceAccountKeyPath: fs.existsSync(googleServiceAccountKeyPath)
-          ? googleServiceAccountKeyPath
+      name: metadata.name,
+      platform: 'android',
+      androidPackageName: metadata.packageName ?? undefined,
+      androidBuildArtifactType:
+        metadata.artifactType === 'aab' || metadata.artifactType === 'apk' ? metadata.artifactType : undefined,
+      androidReleaseStatus:
+        metadata.releaseStatus === 'completed' || metadata.releaseStatus === 'draft'
+          ? metadata.releaseStatus
           : undefined,
-      },
+      googlePlayTrack: metadata.track ?? undefined,
+      googleServiceAccountKeyPath: fs.existsSync(googleServiceAccountKeyPath) ? googleServiceAccountKeyPath : undefined,
     });
   }
   for (const folder of getSubfolders(path.join(appFolder, 'store-destinations', 'ios'))) {
     const metadata = parseJsonFile(path.join(folder, 'app-store-destination.json'), appStoreDestinationSchema);
     destinations.push({
       id: metadata.id,
-      destination: {
-        name: metadata.name,
-        platform: 'ios',
-        appleId: metadata.appleId ?? undefined,
-        appleAppId: metadata.appAppleId ?? undefined,
-        appleTeamId: metadata.teamId ?? undefined,
-        appleAppPassword: metadata.appPassword ?? undefined,
-      },
+      name: metadata.name,
+      platform: 'ios',
+      appleId: metadata.appleId ?? undefined,
+      appleAppId: metadata.appAppleId ?? undefined,
+      appleTeamId: metadata.teamId ?? undefined,
+      appleAppPassword: metadata.appPassword ?? undefined,
     });
   }
   return destinations;
@@ -543,6 +548,18 @@ const resolveName = <TId>(
 
 const toNameMap = (entities: { id: number; name: string }[]): Map<number, string> => {
   return new Map(entities.map((entity) => [entity.id, entity.name]));
+};
+
+const renameDuplicates = <T extends { name: string }>(items: T[], label: string, renames: string[]): T[] => {
+  const takenNames: string[] = [];
+  return items.map((item) => {
+    const name = generateUniqueName(item.name, takenNames);
+    takenNames.push(name);
+    if (name !== item.name) {
+      renames.push(`The ${label} \`${item.name}\` was renamed to \`${name}\` because its name is already taken.`);
+    }
+    return { ...item, name };
+  });
 };
 
 // Guards against path traversal: the file names come from the export's JSON and

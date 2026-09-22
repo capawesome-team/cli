@@ -363,6 +363,55 @@ describe('appflow-export', () => {
     expect(app.notes).toContainEqual(expect.stringContaining('`../../../../etc/hosts`'));
   });
 
+  it('should rename resources whose names only differ in case', async () => {
+    writeAppFiles('Dupes-88888888', {
+      'app-detail.json': { id: '88888888', name: 'Dupes', appType: 'capacitor' },
+      'environments.json': [
+        { id: 1, name: 'Staging', vars: {}, secrets: null },
+        { id: 2, name: 'staging', vars: {}, secrets: null },
+      ],
+      'native-build-automations.json': [
+        {
+          name: 'Android Release',
+          gitBranch: 'main',
+          platform: 'android',
+          buildType: 'release',
+          environmentId: 2,
+          webhook: null,
+          automationEnabled: true,
+          nativeConfigId: null,
+          signingCertificateId: null,
+          destinationId: 27892,
+        },
+      ],
+      'store-destinations/android/Prod-27890/play-store-destination.json': {
+        id: 27890,
+        name: 'Prod',
+        artifactType: 'aab',
+        packageName: 'dev.example.app',
+        track: 'internal',
+      },
+      'store-destinations/android/prod-27892/play-store-destination.json': {
+        id: 27892,
+        name: 'prod',
+        artifactType: 'aab',
+        packageName: 'dev.example.app',
+        track: 'production',
+      },
+    });
+
+    const { apps } = await parseAppflowExport(exportDirectory);
+
+    const app = apps[0]!;
+    expect(app.environments.map((environment) => environment.name)).toEqual(['Staging', 'staging (2)']);
+    expect(app.destinations.map((destination) => destination.name)).toEqual(['Prod', 'prod (2)']);
+    expect(app.automations[0]).toMatchObject({ appEnvironmentName: 'staging (2)', appDestinationName: 'prod (2)' });
+    expect(app.renames).toEqual([
+      'The environment `staging` was renamed to `staging (2)` because its name is already taken.',
+      'The destination `prod` was renamed to `prod (2)` because its name is already taken.',
+    ]);
+  });
+
   it.each([
     ['https://user:secret-token@git.example.com/owner/repo.git', 'https://git.example.com/owner/repo.git'],
     ['https://user:secret-token@', 'https://'],

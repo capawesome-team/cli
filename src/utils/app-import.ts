@@ -11,6 +11,7 @@ export interface AppImport {
   type: AppType;
   latestBuildNumber?: number;
   notes: string[];
+  renames: string[];
   automations: AppImportAutomation[];
   certificates: AppImportCertificate[];
   channels: string[];
@@ -76,13 +77,16 @@ export interface SkippedAppImport {
   retryLater: boolean;
 }
 
-export const generateUniqueAppName = (name: string, takenNames: Set<string>): string => {
-  if (!takenNames.has(name)) {
-    return name;
-  }
+// Capawesome Cloud enforces name uniqueness on the lowercased name.
+export const isNameTaken = (name: string, takenNames: string[]): boolean =>
+  takenNames.some((takenName) => takenName.toLowerCase() === name.toLowerCase());
+
+export const generateUniqueName = (name: string, takenNames: string[]): string => {
+  let uniqueName = name;
   let counter = 2;
-  while (takenNames.has(`${name} (${counter})`)) {
+  while (isNameTaken(uniqueName, takenNames)) {
+    uniqueName = `${name} (${counter})`;
     counter++;
   }
-  return `${name} (${counter})`;
+  return uniqueName;
 };
