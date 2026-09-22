@@ -9,4 +9,5 @@ export interface FindAllGitConnectionsDto {
   limit?: number;
   offset?: number;
   provider?: string;
+  restricted?: boolean;
 }

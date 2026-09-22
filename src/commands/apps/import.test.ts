@@ -164,12 +164,11 @@ describe('apps-import', () => {
       })
       .reply(201, { id: 'automation-1', name: 'Android Release' })
       .get(`/v1/organizations/${organizationId}/git-connections`)
-      .query({ provider: 'github', limit: 1 })
+      .query({ provider: 'github', restricted: 'false', limit: 1 })
       .reply(200, [{ id: 'git-connection-1', provider: 'github' }])
       .put(`/v1/apps/${appId}/repository`, {
-        ownerSlug: 'robingenz',
-        provider: 'github',
-        repositorySlug: 'appflow-export-test',
+        gitConnectionId: 'git-connection-1',
+        path: 'robingenz/appflow-export-test',
       })
       .reply(200, { id: appId });
 
@@ -463,19 +462,14 @@ describe('apps-import', () => {
       .query({ organizationId, limit: 50, offset: 0 })
       .reply(200, [])
       .get(`/v1/organizations/${organizationId}/git-connections`)
-      .query({ provider: 'azure_devops', limit: 1 })
+      .query({ provider: 'azure_devops', restricted: 'false', limit: 1 })
       .reply(200, [{ id: 'git-connection-1', provider: 'azure_devops' }])
       .post('/v1/apps', { name: 'My App', type: 'capacitor' })
       .query({ organizationId })
       .reply(201, { id: 'app-1', name: 'My App', type: 'capacitor' })
       .get('/v1/apps/app-1/channels')
       .reply(200, [])
-      .put('/v1/apps/app-1/repository', {
-        ownerSlug: 'my-org',
-        provider: 'azure',
-        repositorySlug: 'my-repo',
-        projectSlug: 'my-project',
-      })
+      .put('/v1/apps/app-1/repository', { gitConnectionId: 'git-connection-1', path: 'my-org/my-project/my-repo' })
       .reply(200, { id: 'app-1' });
 
     await importCommand.action({ file: exportFile, organizationId, json: true }, undefined);
@@ -503,7 +497,7 @@ describe('apps-import', () => {
       .query({ organizationId, limit: 50, offset: 0 })
       .reply(200, [])
       .get(`/v1/organizations/${organizationId}/git-connections`)
-      .query({ provider: 'github', limit: 1 })
+      .query({ provider: 'github', restricted: 'false', limit: 1 })
       .reply(200, [])
       .post('/v1/apps', { name: 'My App', type: 'capacitor' })
       .query({ organizationId })
