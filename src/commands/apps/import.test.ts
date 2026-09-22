@@ -210,7 +210,31 @@ describe('apps-import', () => {
     expect(scope.isDone()).toBe(true);
     const output = getJsonOutput();
     expect(output.apps[0].name).toBe('My App (2)');
-    expect(output.apps[0].notes).toContainEqual(expect.stringContaining('`My App (2)`'));
+    expect(output.apps[0].renames).toContainEqual(expect.stringContaining('`My App (2)`'));
+  });
+
+  it('should rename the app if the name is already taken in a different case', async () => {
+    await writeExportFile([
+      {
+        folder: 'test-6668c18c',
+        files: { 'app-detail.json': { id: '6668c18c', name: 'test', appType: 'capacitor' } },
+      },
+    ]);
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .get('/v1/apps')
+      .query({ organizationId, limit: 50, offset: 0 })
+      .reply(200, [{ id: 'app-1', name: 'Test', type: 'capacitor' }])
+      .post('/v1/apps', { name: 'test (2)', type: 'capacitor' })
+      .query({ organizationId })
+      .reply(201, { id: 'app-789', name: 'test (2)', type: 'capacitor' })
+      .get('/v1/apps/app-789/channels')
+      .reply(200, []);
+
+    await importCommand.action({ file: exportFile, organizationId, json: true }, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    expect(getJsonOutput().apps[0].name).toBe('test (2)');
   });
 
   it('should continue with the remaining resources if one fails', async () => {
