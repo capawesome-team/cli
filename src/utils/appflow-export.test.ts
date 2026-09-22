@@ -322,6 +322,47 @@ describe('appflow-export', () => {
     expect(warnings).toEqual([]);
   });
 
+  it('should skip certificate files that resolve outside the export', async () => {
+    writeAppFiles('Evil-77777777', {
+      'app-detail.json': { id: '77777777', name: 'Evil', appType: 'capacitor' },
+      'signing-certificates/android/Debug-1/android-signing-certificate.json': {
+        id: 1,
+        name: 'Debug',
+        keystoreFile: '../../../outside.jks',
+        keystorePassword: 'test',
+        keyAlias: 'key',
+        keyPassword: 'test',
+      },
+      'signing-certificates/ios/Dev-2/ios-signing-certificate.json': {
+        id: 2,
+        name: 'Dev',
+        p12File: '/etc/hosts',
+        p12Password: 'test',
+        provisioningProfiles: [],
+      },
+      'signing-certificates/ios/Prod-3/ios-signing-certificate.json': {
+        id: 3,
+        name: 'Prod',
+        p12File: 'ios-certificate.p12',
+        p12Password: 'test',
+        provisioningProfiles: ['Test.mobileprovision', '../../../../etc/hosts'],
+      },
+      'signing-certificates/ios/Prod-3/ios-certificate.p12': Buffer.from('p12'),
+      'signing-certificates/ios/Prod-3/Test.mobileprovision': Buffer.from('profile'),
+    });
+
+    const { apps } = await parseAppflowExport(exportDirectory);
+
+    const app = apps[0]!;
+    expect(app.certificates).toHaveLength(1);
+    expect(app.certificates[0]!.name).toBe('Prod');
+    expect(app.certificates[0]!.provisioningProfilePaths).toHaveLength(1);
+    expect(app.certificates[0]!.provisioningProfilePaths[0]).toContain('Test.mobileprovision');
+    expect(app.notes).toContainEqual(expect.stringContaining('`../../../outside.jks` is invalid'));
+    expect(app.notes).toContainEqual(expect.stringContaining('`/etc/hosts` is invalid'));
+    expect(app.notes).toContainEqual(expect.stringContaining('`../../../../etc/hosts`'));
+  });
+
   it('should skip an app with an invalid app detail file', async () => {
     writeAppFiles('Invalid-66666666', {
       'app-detail.json': 'not json',

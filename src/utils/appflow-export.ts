@@ -293,7 +293,13 @@ const parseCertificates = (appFolder: string, notes: string[]): ParsedCertificat
       path.join(folder, 'android-signing-certificate.json'),
       androidSigningCertificateSchema,
     );
-    const filePath = path.join(folder, metadata.keystoreFile);
+    const filePath = resolvePathWithinFolder(folder, metadata.keystoreFile);
+    if (!filePath) {
+      notes.push(
+        `The signing certificate \`${metadata.name}\` was skipped because the file path \`${metadata.keystoreFile}\` is invalid.`,
+      );
+      continue;
+    }
     if (!fs.existsSync(filePath)) {
       notes.push(
         `The signing certificate \`${metadata.name}\` was skipped because the file \`${metadata.keystoreFile}\` is missing in the export.`,
@@ -315,7 +321,13 @@ const parseCertificates = (appFolder: string, notes: string[]): ParsedCertificat
   }
   for (const folder of getSubfolders(path.join(appFolder, 'signing-certificates', 'ios'))) {
     const metadata = parseJsonFile(path.join(folder, 'ios-signing-certificate.json'), iosSigningCertificateSchema);
-    const filePath = path.join(folder, metadata.p12File);
+    const filePath = resolvePathWithinFolder(folder, metadata.p12File);
+    if (!filePath) {
+      notes.push(
+        `The signing certificate \`${metadata.name}\` was skipped because the file path \`${metadata.p12File}\` is invalid.`,
+      );
+      continue;
+    }
     if (!fs.existsSync(filePath)) {
       notes.push(
         `The signing certificate \`${metadata.name}\` was skipped because the file \`${metadata.p12File}\` is missing in the export.`,
@@ -324,7 +336,13 @@ const parseCertificates = (appFolder: string, notes: string[]): ParsedCertificat
     }
     const provisioningProfilePaths: string[] = [];
     for (const profileFile of new Set(metadata.provisioningProfiles ?? [])) {
-      const profilePath = path.join(folder, profileFile);
+      const profilePath = resolvePathWithinFolder(folder, profileFile);
+      if (!profilePath) {
+        notes.push(
+          `The provisioning profile \`${profileFile}\` of the signing certificate \`${metadata.name}\` has an invalid file path and was skipped.`,
+        );
+        continue;
+      }
       if (!fs.existsSync(profilePath)) {
         notes.push(
           `The provisioning profile \`${profileFile}\` of the signing certificate \`${metadata.name}\` is missing in the export and was skipped.`,
@@ -521,6 +539,13 @@ const resolveName = <TId>(
 
 const toNameMap = (entities: { id: number; name: string }[]): Map<number, string> => {
   return new Map(entities.map((entity) => [entity.id, entity.name]));
+};
+
+// Guards against path traversal: the file names come from the export's JSON and
+// must never resolve outside the folder they were extracted to.
+const resolvePathWithinFolder = (folder: string, fileName: string): string | undefined => {
+  const filePath = path.resolve(folder, fileName);
+  return filePath.startsWith(folder + path.sep) ? filePath : undefined;
 };
 
 const getSubfolders = (directory: string): string[] => {
