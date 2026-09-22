@@ -264,17 +264,9 @@ const parseRepository = (appFolder: string, notes: string[]): AppImport['reposit
   }
 };
 
-const stripCredentials = (url: string): string => {
-  try {
-    const parsedUrl = new URL(url);
-    parsedUrl.username = '';
-    parsedUrl.password = '';
-    return parsedUrl.toString();
-  } catch {
-    // Not a URL (e.g. `git@host:owner/repo.git`), which cannot carry a password.
-    return url;
-  }
-};
+// Removes `user:password@` from URLs as well as from scp-like locations
+// such as `user@host:owner/repo.git`, including malformed ones.
+const stripCredentials = (url: string): string => url.replace(/^([a-z+]+:\/\/)?[^/@]*@/i, '$1');
 
 const parseConfigurations = (
   nativeConfigs: z.infer<typeof nativeConfigsSchema>,

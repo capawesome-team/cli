@@ -23,6 +23,8 @@ import os from 'os';
 import path from 'path';
 import { z } from 'zod';
 
+const SIGNALS = ['SIGHUP', 'SIGINT', 'SIGTERM'] as const;
+
 interface AppImportOutcome {
   app: AppImport;
   id?: string;
@@ -99,13 +101,14 @@ export default defineCommand({
     // process exits via `process.exit` (e.g. a cancelled prompt) or a signal,
     // which would skip the `finally` block.
     const removeTempDirectory = () => fs.rmSync(tempDirectory, { recursive: true, force: true, maxRetries: 3 });
+    const handleSignal = (signal: NodeJS.Signals) => {
+      removeTempDirectory();
+      // Re-raise the signal to keep the default exit code (128 + signal number).
+      process.kill(process.pid, signal);
+    };
     process.once('exit', removeTempDirectory);
-    for (const signal of ['SIGHUP', 'SIGINT', 'SIGTERM'] as const) {
-      process.once(signal, () => {
-        removeTempDirectory();
-        // Re-raise the signal to keep the default exit code (128 + signal number).
-        process.kill(process.pid, signal);
-      });
+    for (const signal of SIGNALS) {
+      process.once(signal, handleSignal);
     }
     try {
       await zip.unzipToFolder(fs.readFileSync(file), tempDirectory);
@@ -153,6 +156,10 @@ export default defineCommand({
       }
     } finally {
       removeTempDirectory();
+      process.off('exit', removeTempDirectory);
+      for (const signal of SIGNALS) {
+        process.off(signal, handleSignal);
+      }
     }
   }),
 });
