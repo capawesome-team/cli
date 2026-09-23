@@ -5,7 +5,7 @@ import appCertificatesService from '@/services/app-certificates.js';
 import appConfigurationsService from '@/services/app-configurations.js';
 import appEnvironmentsService from '@/services/app-environments.js';
 import appsService from '@/services/apps.js';
-import { AppBuildArtifactDto } from '@/types/app-build.js';
+import { APP_BUILD_ARTIFACT_TYPES_BY_PLATFORM, downloadAppBuildArtifact } from '@/utils/app-build-artifacts.js';
 import { getAppBuildShareUrls } from '@/utils/app-build-shares.js';
 import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
@@ -37,6 +37,12 @@ export default defineCommand({
         .union([z.boolean(), z.string()])
         .optional()
         .describe('Download the generated APK file (Android only). Optionally provide a file path.'),
+      app: z
+        .union([z.boolean(), z.string()])
+        .optional()
+        .describe(
+          'Download the generated APP file, a zipped `.app` bundle (iOS simulator builds only). Optionally provide a file path.',
+        ),
       appId: z
         .uuid({
           message: 'App ID must be a UUID.',
@@ -127,8 +133,8 @@ export default defineCommand({
     } = options;
 
     // Validate that detached flag cannot be used with artifact flags
-    if (options.detached && (options.apk || options.aab || options.ipa || options.zip)) {
-      consola.error('The --detached flag cannot be used with --apk, --aab, --ipa, or --zip flags.');
+    if (options.detached && (options.apk || options.aab || options.ipa || options.app || options.zip)) {
+      consola.error('The --detached flag cannot be used with --apk, --aab, --ipa, --app, or --zip flags.');
       process.exit(1);
     }
 
@@ -461,41 +467,17 @@ export default defineCommand({
       console.log();
 
       // Download artifacts if flags are set
-      if (options.apk && platform === 'android') {
-        await handleArtifactDownload({
-          appId,
-          buildId: response.id,
-          buildArtifacts: appBuild.appBuildArtifacts,
-          artifactType: 'apk',
-          filePath: typeof options.apk === 'string' ? options.apk : undefined,
-        });
-      }
-      if (options.aab && platform === 'android') {
-        await handleArtifactDownload({
-          appId,
-          buildId: response.id,
-          buildArtifacts: appBuild.appBuildArtifacts,
-          artifactType: 'aab',
-          filePath: typeof options.aab === 'string' ? options.aab : undefined,
-        });
-      }
-      if (options.ipa && platform === 'ios') {
-        await handleArtifactDownload({
-          appId,
-          buildId: response.id,
-          buildArtifacts: appBuild.appBuildArtifacts,
-          artifactType: 'ipa',
-          filePath: typeof options.ipa === 'string' ? options.ipa : undefined,
-        });
-      }
-      if (options.zip && platform === 'web') {
-        await handleArtifactDownload({
-          appId,
-          buildId: response.id,
-          buildArtifacts: appBuild.appBuildArtifacts,
-          artifactType: 'zip',
-          filePath: typeof options.zip === 'string' ? options.zip : undefined,
-        });
+      for (const artifactType of APP_BUILD_ARTIFACT_TYPES_BY_PLATFORM[platform]) {
+        const option = options[artifactType];
+        if (option) {
+          await downloadAppBuildArtifact({
+            appId,
+            buildId: response.id,
+            buildArtifacts: appBuild.appBuildArtifacts,
+            artifactType,
+            filePath: typeof option === 'string' ? option : undefined,
+          });
+        }
       }
       // Create a public share link if requested
       let appBuildShare: { id: string; qrCodeUrl: string; webUrl: string; expiresAt: string | null } | undefined;
@@ -568,58 +550,3 @@ export default defineCommand({
     }
   }),
 });
-
-/**
- * Download a build artifact (APK, AAB, IPA, or ZIP).
- */
-const handleArtifactDownload = async (options: {
-  appId: string;
-  buildId: string;
-  buildArtifacts: AppBuildArtifactDto[] | undefined;
-  artifactType: 'apk' | 'aab' | 'ipa' | 'zip';
-  filePath?: string;
-}): Promise<void> => {
-  const { appId, buildId, buildArtifacts, artifactType, filePath } = options;
-
-  try {
-    const artifactTypeUpper = artifactType.toUpperCase();
-    consola.start(`Downloading ${artifactTypeUpper}...`);
-
-    // Find the artifact
-    const artifact = buildArtifacts?.find((artifact) => artifact.type === artifactType);
-
-    if (!artifact) {
-      consola.warn(`No ${artifactTypeUpper} artifact found for this build.`);
-      return;
-    }
-
-    if (artifact.status !== 'ready') {
-      consola.warn(`${artifactTypeUpper} artifact is not ready (status: ${artifact.status}).`);
-      return;
-    }
-
-    // Download the artifact
-    const artifactData = await appBuildsService.downloadArtifact({
-      appId,
-      appBuildId: buildId,
-      artifactId: artifact.id,
-    });
-
-    // Determine the file path
-    let outputPath: string;
-    if (filePath) {
-      // Use provided path (can be relative or absolute)
-      outputPath = path.resolve(filePath);
-    } else {
-      // Default to current working directory with build ID as filename
-      outputPath = path.resolve(`${buildId}.${artifactType}`);
-    }
-
-    // Save the file
-    await fs.writeFile(outputPath, Buffer.from(artifactData));
-
-    consola.success(`${artifactTypeUpper} downloaded successfully: ${outputPath}`);
-  } catch (error) {
-    consola.error(`Failed to download ${artifactType.toUpperCase()}:`, error);
-  }
-};
