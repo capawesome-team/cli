@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.21.0](https://github.com/capawesome-team/cli/compare/v4.20.0...v4.21.0) (2026-09-22)
+
+
+### Features
+
+* **apps:** link repositories via git connections ([#222](https://github.com/capawesome-team/cli/issues/222)) ([f567ea6](https://github.com/capawesome-team/cli/commit/f567ea6d0e836b4aea8e4d57ff10d934a6788fe2))
+
+
+### Bug Fixes
+
+* retry rate limited requests ([#223](https://github.com/capawesome-team/cli/issues/223)) ([47d9733](https://github.com/capawesome-team/cli/commit/47d9733ec28bf0bb3235b8dccdd5b353ec24d0b5))
+
+## [4.20.0](https://github.com/capawesome-team/cli/compare/v4.19.0...v4.20.0) (2026-09-22)
+
+
+### Features
+
+* **apps:** warn about missing git connections before importing apps ([#221](https://github.com/capawesome-team/cli/issues/221)) ([2b4646d](https://github.com/capawesome-team/cli/commit/2b4646d4c2cbcc3c8dd54c68021a9f1ed47c9521))
+
+
+### Bug Fixes
+
+* **apps:** remove extracted export on cancelled prompts and signals ([#219](https://github.com/capawesome-team/cli/issues/219)) ([0356500](https://github.com/capawesome-team/cli/commit/035650041f456d5831ecf2fff8cee5fb231db8db))
+* **apps:** rename imported resources whose names only differ in case ([#218](https://github.com/capawesome-team/cli/issues/218)) ([135b577](https://github.com/capawesome-team/cli/commit/135b577e86620dd71d9297a4124a2db2fd1cf15f))
+
+## [4.19.0](https://github.com/capawesome-team/cli/compare/v4.18.4...v4.19.0) (2026-09-22)
+
+
+### Features
+
+* add `apps:import` command ([#217](https://github.com/capawesome-team/cli/issues/217)) ([db90d04](https://github.com/capawesome-team/cli/commit/db90d04d3001e517fa105f37b79be82c146260ba))
+* **apps:** support multiple and negated trigger patterns ([#214](https://github.com/capawesome-team/cli/issues/214)) ([0f56afa](https://github.com/capawesome-team/cli/commit/0f56afadfb24c3411f63d380d66188055a23388c))
+
 ## [4.18.4](https://github.com/capawesome-team/cli/compare/v4.18.3...v4.18.4) (2026-08-20)
 
 

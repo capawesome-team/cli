@@ -5,7 +5,11 @@ import appCertificatesService from '@/services/app-certificates.js';
 import appConfigurationsService from '@/services/app-configurations.js';
 import appEnvironmentsService from '@/services/app-environments.js';
 import appsService from '@/services/apps.js';
-import { APP_BUILD_ARTIFACT_FORM_FACTORS, handleAppBuildArtifactDownload } from '@/utils/app-build-artifacts.js';
+import {
+  APP_BUILD_ARTIFACT_FORM_FACTORS,
+  APP_BUILD_ARTIFACT_TYPES_BY_PLATFORM,
+  handleAppBuildArtifactDownload,
+} from '@/utils/app-build-artifacts.js';
 import { getAppBuildShareUrls } from '@/utils/app-build-shares.js';
 import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
@@ -37,6 +41,12 @@ export default defineCommand({
         .union([z.boolean(), z.string()])
         .optional()
         .describe('Download the generated APK file (Android only). Optionally provide a file path.'),
+      app: z
+        .union([z.boolean(), z.string()])
+        .optional()
+        .describe(
+          'Download the generated APP file, a zipped `.app` bundle (iOS simulator builds only). Optionally provide a file path.',
+        ),
       appId: z
         .uuid({
           message: 'App ID must be a UUID.',
@@ -135,8 +145,8 @@ export default defineCommand({
     } = options;
 
     // Validate that detached flag cannot be used with artifact flags
-    if (options.detached && (options.apk || options.aab || options.ipa || options.zip)) {
-      consola.error('The --detached flag cannot be used with --apk, --aab, --ipa, or --zip flags.');
+    if (options.detached && (options.apk || options.aab || options.ipa || options.app || options.zip)) {
+      consola.error('The --detached flag cannot be used with --apk, --aab, --ipa, --app, or --zip flags.');
       process.exit(1);
     }
 
@@ -469,45 +479,18 @@ export default defineCommand({
       console.log();
 
       // Download artifacts if flags are set
-      if (options.apk && platform === 'android') {
-        await handleAppBuildArtifactDownload({
-          appId,
-          buildId: response.id,
-          artifacts: appBuild.appBuildArtifacts,
-          type: 'apk',
-          formFactor: options.formFactor,
-          filePath: typeof options.apk === 'string' ? options.apk : undefined,
-        });
-      }
-      if (options.aab && platform === 'android') {
-        await handleAppBuildArtifactDownload({
-          appId,
-          buildId: response.id,
-          artifacts: appBuild.appBuildArtifacts,
-          type: 'aab',
-          formFactor: options.formFactor,
-          filePath: typeof options.aab === 'string' ? options.aab : undefined,
-        });
-      }
-      if (options.ipa && platform === 'ios') {
-        await handleAppBuildArtifactDownload({
-          appId,
-          buildId: response.id,
-          artifacts: appBuild.appBuildArtifacts,
-          type: 'ipa',
-          formFactor: options.formFactor,
-          filePath: typeof options.ipa === 'string' ? options.ipa : undefined,
-        });
-      }
-      if (options.zip && platform === 'web') {
-        await handleAppBuildArtifactDownload({
-          appId,
-          buildId: response.id,
-          artifacts: appBuild.appBuildArtifacts,
-          type: 'zip',
-          formFactor: options.formFactor,
-          filePath: typeof options.zip === 'string' ? options.zip : undefined,
-        });
+      for (const artifactType of APP_BUILD_ARTIFACT_TYPES_BY_PLATFORM[platform]) {
+        const option = options[artifactType];
+        if (option) {
+          await handleAppBuildArtifactDownload({
+            appId,
+            buildId: response.id,
+            buildArtifacts: appBuild.appBuildArtifacts,
+            artifactType,
+            formFactor: options.formFactor,
+            filePath: typeof option === 'string' ? option : undefined,
+          });
+        }
       }
       // Create a public share link if requested
       let appBuildShare: { id: string; qrCodeUrl: string; webUrl: string; expiresAt: string | null } | undefined;

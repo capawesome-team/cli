@@ -1,11 +1,25 @@
 import appBuildsService from '@/services/app-builds.js';
-import { APP_BUILD_ARTIFACT_FORM_FACTORS, handleAppBuildArtifactDownload } from '@/utils/app-build-artifacts.js';
+import {
+  APP_BUILD_ARTIFACT_FORM_FACTORS,
+  APP_BUILD_ARTIFACT_LABELS,
+  APP_BUILD_ARTIFACT_TYPES_BY_PLATFORM,
+  AppBuildArtifactType,
+  handleAppBuildArtifactDownload,
+} from '@/utils/app-build-artifacts.js';
 import { withAuth } from '@/utils/auth.js';
+import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import consola from 'consola';
-import { isInteractive } from '@/utils/environment.js';
 import { z } from 'zod';
 import { defineCommand, defineOptions } from 'zodline';
+
+const ARTIFACT_TYPES: AppBuildArtifactType[] = ['apk', 'aab', 'ipa', 'app', 'zip'];
+
+const PLATFORM_LABELS = {
+  android: 'Android',
+  ios: 'iOS',
+  web: 'Web',
+};
 
 export default defineCommand({
   description: 'Download an app build.',
@@ -34,19 +48,25 @@ export default defineCommand({
       apk: z
         .union([z.boolean(), z.string()])
         .optional()
-        .describe('Download the APK artifact. Optionally provide a file path.'),
+        .describe('Download the APK artifact (Android only). Optionally provide a file path.'),
       aab: z
         .union([z.boolean(), z.string()])
         .optional()
-        .describe('Download the AAB artifact. Optionally provide a file path.'),
+        .describe('Download the AAB artifact (Android only). Optionally provide a file path.'),
       ipa: z
         .union([z.boolean(), z.string()])
         .optional()
-        .describe('Download the IPA artifact. Optionally provide a file path.'),
+        .describe('Download the IPA artifact (iOS only). Optionally provide a file path.'),
+      app: z
+        .union([z.boolean(), z.string()])
+        .optional()
+        .describe(
+          'Download the APP artifact, a zipped `.app` bundle (iOS simulator builds only). Optionally provide a file path.',
+        ),
       zip: z
         .union([z.boolean(), z.string()])
         .optional()
-        .describe('Download the ZIP artifact. Optionally provide a file path.'),
+        .describe('Download the ZIP artifact (Web only). Optionally provide a file path.'),
     }),
   ),
   action: withAuth(async (options) => {
@@ -87,130 +107,64 @@ export default defineCommand({
       }
     }
 
-    const appBuildId = buildId;
-
-    // Fetch the build details to get the job ID
-    const build = await appBuildsService.findOne({ appId, appBuildId, relations: 'appBuildArtifacts,job' });
+    const build = await appBuildsService.findOne({ appId, appBuildId: buildId, relations: 'appBuildArtifacts,job' });
     if (build.job?.status !== 'succeeded') {
       consola.error('The build has not succeeded yet. Cannot download artifacts for incomplete builds.');
       process.exit(1);
     }
 
-    // Validate platform-specific artifact flags
-    if (build.platform === 'android' && options.ipa) {
-      consola.error('Cannot download IPA artifact for an Android build.');
+    // Reject artifact flags that do not exist for the build's platform
+    const supportedArtifactTypes = APP_BUILD_ARTIFACT_TYPES_BY_PLATFORM[build.platform];
+    const requestedArtifactTypes = ARTIFACT_TYPES.filter((artifactType) => options[artifactType]);
+    const unsupportedArtifactType = requestedArtifactTypes.find(
+      (artifactType) => !supportedArtifactTypes.includes(artifactType),
+    );
+    if (unsupportedArtifactType) {
+      consola.error(
+        `The ${APP_BUILD_ARTIFACT_LABELS[unsupportedArtifactType]} artifact is not available for ${PLATFORM_LABELS[build.platform]} builds.`,
+      );
       process.exit(1);
     }
-    if (build.platform === 'ios' && (options.apk || options.aab)) {
-      consola.error('Cannot download APK or AAB artifacts for an iOS build.');
-      process.exit(1);
-    }
-    if (build.platform === 'web' && (options.apk || options.aab || options.ipa)) {
-      consola.error('Cannot download APK, AAB, or IPA artifacts for a Web build.');
-      process.exit(1);
-    }
-
-    // Determine which artifacts to download
-    let downloadApk = options.apk;
-    let downloadAab = options.aab;
-    let downloadIpa = options.ipa;
-    let downloadZip = options.zip;
 
     // Prompt for artifact types if none were provided
-    if (!downloadApk && !downloadAab && !downloadIpa && !downloadZip) {
+    let artifactTypesToDownload = requestedArtifactTypes;
+    if (artifactTypesToDownload.length === 0) {
       if (!isInteractive()) {
         consola.error(
-          'You must specify at least one artifact type (--apk, --aab, --ipa, or --zip) when running in non-interactive environment.',
+          'You must specify at least one artifact type (--apk, --aab, --ipa, --app, or --zip) when running in non-interactive environment.',
         );
         process.exit(1);
       }
-
-      // Get available artifact types from the build
-      const availableArtifacts =
-        build.appBuildArtifacts?.filter((artifact) => artifact.status === 'ready').map((artifact) => artifact.type) ||
-        [];
-
-      if (availableArtifacts.length === 0) {
+      const availableArtifactTypes = supportedArtifactTypes.filter((artifactType) =>
+        build.appBuildArtifacts?.some((artifact) => artifact.type === artifactType && artifact.status === 'ready'),
+      );
+      if (availableArtifactTypes.length === 0) {
         consola.error('No artifacts available for download.');
         process.exit(1);
       }
-
-      // Create options based on available artifacts and platform
-      const artifactOptions = [];
-      if (build.platform === 'android') {
-        if (availableArtifacts.includes('apk')) {
-          artifactOptions.push({ label: 'APK', value: 'apk' });
-        }
-        if (availableArtifacts.includes('aab')) {
-          artifactOptions.push({ label: 'AAB', value: 'aab' });
-        }
-      } else if (build.platform === 'ios') {
-        if (availableArtifacts.includes('ipa')) {
-          artifactOptions.push({ label: 'IPA', value: 'ipa' });
-        }
-      } else if (build.platform === 'web') {
-        if (availableArtifacts.includes('zip')) {
-          artifactOptions.push({ label: 'ZIP', value: 'zip' });
-        }
-      }
-
       // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-      const selectedArtifacts: string[] = await prompt('Which artifact type(s) do you want to download:', {
+      artifactTypesToDownload = await prompt('Which artifact type(s) do you want to download:', {
         type: 'multiselect',
-        options: artifactOptions,
+        options: availableArtifactTypes.map((artifactType) => ({
+          label: APP_BUILD_ARTIFACT_LABELS[artifactType],
+          value: artifactType,
+        })),
       });
-
-      if (!selectedArtifacts || selectedArtifacts.length === 0) {
+      if (!artifactTypesToDownload || artifactTypesToDownload.length === 0) {
         consola.error('You must select at least one artifact type to download.');
         process.exit(1);
       }
-
-      // Set flags based on selection
-      downloadApk = (selectedArtifacts as string[]).includes('apk');
-      downloadAab = (selectedArtifacts as string[]).includes('aab');
-      downloadIpa = (selectedArtifacts as string[]).includes('ipa');
-      downloadZip = (selectedArtifacts as string[]).includes('zip');
     }
 
-    // Download artifacts if flags are set
-    if (downloadApk) {
+    for (const artifactType of artifactTypesToDownload) {
+      const option = options[artifactType];
       await handleAppBuildArtifactDownload({
         appId,
-        buildId: appBuildId,
-        artifacts: build.appBuildArtifacts,
-        type: 'apk',
+        buildId,
+        buildArtifacts: build.appBuildArtifacts,
+        artifactType,
         formFactor: options.formFactor,
-        filePath: typeof options.apk === 'string' ? options.apk : undefined,
-      });
-    }
-    if (downloadAab) {
-      await handleAppBuildArtifactDownload({
-        appId,
-        buildId: appBuildId,
-        artifacts: build.appBuildArtifacts,
-        type: 'aab',
-        formFactor: options.formFactor,
-        filePath: typeof options.aab === 'string' ? options.aab : undefined,
-      });
-    }
-    if (downloadIpa) {
-      await handleAppBuildArtifactDownload({
-        appId,
-        buildId: appBuildId,
-        artifacts: build.appBuildArtifacts,
-        type: 'ipa',
-        formFactor: options.formFactor,
-        filePath: typeof options.ipa === 'string' ? options.ipa : undefined,
-      });
-    }
-    if (downloadZip) {
-      await handleAppBuildArtifactDownload({
-        appId,
-        buildId: appBuildId,
-        artifacts: build.appBuildArtifacts,
-        type: 'zip',
-        formFactor: options.formFactor,
-        filePath: typeof options.zip === 'string' ? options.zip : undefined,
+        filePath: typeof option === 'string' ? option : undefined,
       });
     }
   }),

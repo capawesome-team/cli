@@ -2,7 +2,10 @@ import { DEFAULT_API_BASE_URL, DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.
 import authorizationService from '@/services/authorization-service.js';
 import userConfig from '@/utils/user-config.js';
 import consola from 'consola';
+import fs from 'fs/promises';
 import nock from 'nock';
+import os from 'os';
+import path from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import createCommand from './create.js';
 
@@ -98,6 +101,43 @@ describe('apps-builds-create', () => {
         2,
       ),
     );
+  });
+
+  it('should download the app artifact of an iOS simulator build with --app', async () => {
+    const outputDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'capawesome-cli-create-'));
+    const outputPath = path.join(outputDirectory, 'simulator.app.zip');
+    const artifactId = 'artifact-1';
+    const artifactContent = 'zipped app bundle';
+    const options = { appId, platform: 'ios' as const, type: 'simulator', gitRef: 'main', app: outputPath };
+
+    const buildScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/builds`, (body) => body.platform === 'ios' && body.type === 'simulator')
+      .reply(201, { id: buildId, jobId: 'job-1', numberAsString: '42' });
+    const findScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}/builds/${buildId}`)
+      .query({ relations: 'appBuildArtifacts' })
+      .reply(200, {
+        id: buildId,
+        appBuildArtifacts: [
+          { id: 'artifact-0', status: 'ready', type: 'xcarchive' },
+          { formFactor: 'mobile', id: artifactId, status: 'ready', type: 'app' },
+        ],
+      });
+    const downloadScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}/builds/${buildId}/artifacts/${artifactId}/download`)
+      .reply(200, artifactContent);
+
+    try {
+      await createCommand.action(options, undefined);
+
+      expect(buildScope.isDone()).toBe(true);
+      expect(findScope.isDone()).toBe(true);
+      expect(downloadScope.isDone()).toBe(true);
+      expect(await fs.readFile(outputPath, 'utf-8')).toBe(artifactContent);
+      expect(mockConsola.success).toHaveBeenCalledWith(`APP downloaded successfully: ${outputPath}`);
+    } finally {
+      await fs.rm(outputDirectory, { force: true, recursive: true });
+    }
   });
 
   it('should reject --share combined with --detached', async () => {

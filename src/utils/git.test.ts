@@ -98,7 +98,7 @@ describe('parseGitRemoteUrl', () => {
     const result = parseGitRemoteUrl('https://dev.azure.com/my-org/my-project/_git/my-repo');
     expect(result).toEqual({
       ownerSlug: 'my-org',
-      provider: 'azure',
+      provider: 'azure_devops',
       repositorySlug: 'my-repo',
       projectSlug: 'my-project',
     });
@@ -108,7 +108,7 @@ describe('parseGitRemoteUrl', () => {
     const result = parseGitRemoteUrl('git@ssh.dev.azure.com:v3/my-org/my-project/my-repo');
     expect(result).toEqual({
       ownerSlug: 'my-org',
-      provider: 'azure',
+      provider: 'azure_devops',
       repositorySlug: 'my-repo',
       projectSlug: 'my-project',
     });
@@ -118,7 +118,7 @@ describe('parseGitRemoteUrl', () => {
     const result = parseGitRemoteUrl('https://my-org.visualstudio.com/my-project/_git/my-repo');
     expect(result).toEqual({
       ownerSlug: 'my-org',
-      provider: 'azure',
+      provider: 'azure_devops',
       repositorySlug: 'my-repo',
       projectSlug: 'my-project',
     });
