@@ -83,6 +83,19 @@ describe('apps-builds-download', () => {
     expect(mockConsola.success).toHaveBeenCalledWith(`APP downloaded successfully: ${outputPath}`);
   });
 
+  it('should write the app artifact to `<build-id>.app.zip` by default', async () => {
+    vi.spyOn(process, 'cwd').mockReturnValue(outputDirectory);
+    mockSimulatorBuild();
+    nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}/builds/${buildId}/artifacts/${artifactId}/download`)
+      .reply(200, artifactContent);
+
+    await downloadCommand.action({ appId, buildId, app: true }, undefined);
+
+    const outputPath = path.join(outputDirectory, `${buildId}.app.zip`);
+    expect(await fs.readFile(outputPath, 'utf-8')).toBe(artifactContent);
+  });
+
   it('should reject --zip for an iOS build', async () => {
     mockSimulatorBuild();
 
