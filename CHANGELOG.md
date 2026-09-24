@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.22.0](https://github.com/capawesome-team/cli/compare/v4.21.0...v4.22.0) (2026-09-24)
+
+
+### Features
+
+* **apps:** add `--app` flag to download the simulator app bundle ([#225](https://github.com/capawesome-team/cli/issues/225)) ([ee40c92](https://github.com/capawesome-team/cli/commit/ee40c92f2d73e878b7fa1f9089cdf9420daa2ae4))
+* **apps:** add the `macos-golden-gate` build stack ([#226](https://github.com/capawesome-team/cli/issues/226)) ([23d4d39](https://github.com/capawesome-team/cli/commit/23d4d3961a752a6bf087f86aa9e93805a9026647))
+* **apps:** download build artifacts by form factor ([#216](https://github.com/capawesome-team/cli/issues/216)) ([cd06192](https://github.com/capawesome-team/cli/commit/cd061920c69ac796e271a00141ec2284cc0ae526))
+
 ## [4.21.0](https://github.com/capawesome-team/cli/compare/v4.20.0...v4.21.0) (2026-09-22)
 
 
