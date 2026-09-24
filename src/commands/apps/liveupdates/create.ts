@@ -58,8 +58,8 @@ export default defineCommand({
         .optional()
         .describe('The rollout percentage for the deployment (0-100). Default: 100.'),
       stack: z
-        .enum(['macos-sequoia', 'macos-tahoe'], {
-          message: 'Build stack must be either `macos-sequoia` or `macos-tahoe`.',
+        .enum(['macos-sequoia', 'macos-tahoe', 'macos-golden-gate'], {
+          message: 'Build stack must be one of `macos-sequoia`, `macos-tahoe`, or `macos-golden-gate`.',
         })
         .optional()
         .describe('The build stack to use for the build process.'),

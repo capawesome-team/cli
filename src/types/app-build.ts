@@ -35,7 +35,7 @@ export interface CreateAppBuildDto {
   appConfigurationName?: string;
   appEnvironmentName?: string;
   appId: string;
-  stack?: 'macos-sequoia' | 'macos-tahoe';
+  stack?: 'macos-sequoia' | 'macos-tahoe' | 'macos-golden-gate';
   gitRef?: string;
   platform: 'ios' | 'android' | 'web';
   type?: string;
