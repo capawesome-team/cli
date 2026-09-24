@@ -1,9 +1,10 @@
 import appBuildsService from '@/services/app-builds.js';
 import {
+  APP_BUILD_ARTIFACT_FORM_FACTORS,
   APP_BUILD_ARTIFACT_LABELS,
   APP_BUILD_ARTIFACT_TYPES_BY_PLATFORM,
   AppBuildArtifactType,
-  downloadAppBuildArtifact,
+  handleAppBuildArtifactDownload,
 } from '@/utils/app-build-artifacts.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
@@ -36,6 +37,14 @@ export default defineCommand({
         })
         .optional()
         .describe('Build ID to download.'),
+      formFactor: z
+        .enum(APP_BUILD_ARTIFACT_FORM_FACTORS, {
+          message: 'Invalid form factor. Must be one of `mobile`, `watch`, `tv`, or `automotive`.',
+        })
+        .optional()
+        .describe(
+          'The form factor of the Android artifact to download. Supported values are `mobile`, `watch`, `tv`, and `automotive`. Without it, the first artifact in the order `mobile`, `watch`, `tv`, `automotive` is downloaded.',
+        ),
       apk: z
         .union([z.boolean(), z.string()])
         .optional()
@@ -149,11 +158,12 @@ export default defineCommand({
 
     for (const artifactType of artifactTypesToDownload) {
       const option = options[artifactType];
-      await downloadAppBuildArtifact({
+      await handleAppBuildArtifactDownload({
         appId,
         buildId,
         buildArtifacts: build.appBuildArtifacts,
         artifactType,
+        formFactor: options.formFactor,
         filePath: typeof option === 'string' ? option : undefined,
       });
     }

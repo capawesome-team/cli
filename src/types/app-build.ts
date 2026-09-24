@@ -5,6 +5,7 @@ export interface AppBuildArtifactDto {
   fileMimeType: string;
   fileName: string;
   fileSizeInBytes: number;
+  formFactor: 'automotive' | 'mobile' | 'tv' | 'watch';
   status: 'pending' | 'ready';
   type: 'apk' | 'aab' | 'app' | 'ipa' | 'zip';
 }

@@ -120,7 +120,7 @@ describe('apps-builds-create', () => {
         id: buildId,
         appBuildArtifacts: [
           { id: 'artifact-0', status: 'ready', type: 'xcarchive' },
-          { id: artifactId, status: 'ready', type: 'app' },
+          { formFactor: 'mobile', id: artifactId, status: 'ready', type: 'app' },
         ],
       });
     const downloadScope = nock(DEFAULT_API_BASE_URL)

@@ -8,6 +8,7 @@ import {
   installAndroidApp,
   launchAndroidApp,
 } from '@/utils/android-emulator.js';
+import { findAppBuildArtifact } from '@/utils/app-build-artifacts.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import {
@@ -141,8 +142,9 @@ export default defineCommand({
     }
 
     const artifactType = isAndroid ? 'apk' : 'app';
-    const artifact = build.appBuildArtifacts?.find(
-      (artifact) => artifact.type === artifactType && artifact.status === 'ready',
+    const artifact = findAppBuildArtifact(
+      build.appBuildArtifacts?.filter((artifact) => artifact.status === 'ready'),
+      { type: artifactType },
     );
     if (!artifact) {
       consola.error(`No ${artifactType.toUpperCase()} artifact is available for this build.`);

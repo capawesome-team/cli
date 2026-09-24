@@ -5,7 +5,11 @@ import appCertificatesService from '@/services/app-certificates.js';
 import appConfigurationsService from '@/services/app-configurations.js';
 import appEnvironmentsService from '@/services/app-environments.js';
 import appsService from '@/services/apps.js';
-import { APP_BUILD_ARTIFACT_TYPES_BY_PLATFORM, downloadAppBuildArtifact } from '@/utils/app-build-artifacts.js';
+import {
+  APP_BUILD_ARTIFACT_FORM_FACTORS,
+  APP_BUILD_ARTIFACT_TYPES_BY_PLATFORM,
+  handleAppBuildArtifactDownload,
+} from '@/utils/app-build-artifacts.js';
 import { getAppBuildShareUrls } from '@/utils/app-build-shares.js';
 import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
@@ -62,6 +66,14 @@ export default defineCommand({
         .boolean()
         .optional()
         .describe('Request an AI-powered failure summary (Capawesome Cloud Assist) if the build fails.'),
+      formFactor: z
+        .enum(APP_BUILD_ARTIFACT_FORM_FACTORS, {
+          message: 'Invalid form factor. Must be one of `mobile`, `watch`, `tv`, or `automotive`.',
+        })
+        .optional()
+        .describe(
+          'The form factor of the Android artifact to download with `--apk` or `--aab`. Supported values are `mobile`, `watch`, `tv`, and `automotive`. Without it, the first artifact in the order `mobile`, `watch`, `tv`, `automotive` is downloaded. The build always includes every application module.',
+        ),
       gitRef: z.string().optional().describe('The Git reference (branch, tag, or commit SHA) to build.'),
       ipa: z
         .union([z.boolean(), z.string()])
@@ -470,11 +482,12 @@ export default defineCommand({
       for (const artifactType of APP_BUILD_ARTIFACT_TYPES_BY_PLATFORM[platform]) {
         const option = options[artifactType];
         if (option) {
-          await downloadAppBuildArtifact({
+          await handleAppBuildArtifactDownload({
             appId,
             buildId: response.id,
             buildArtifacts: appBuild.appBuildArtifacts,
             artifactType,
+            formFactor: options.formFactor,
             filePath: typeof option === 'string' ? option : undefined,
           });
         }
