@@ -37,7 +37,7 @@ export default defineCommand({
         .array(z.string())
         .optional()
         .describe(
-          'The alias of a Firebase tester group to distribute to. Can be specified multiple times or comma-separated.',
+          'The alias of a Firebase tester group to distribute to. Can be specified multiple times or comma-separated. Pass `--firebase-tester-group=` to remove all groups.',
         ),
       huaweiAppId: z.string().optional().describe('Huawei AppGallery app ID for the destination.'),
       huaweiClientId: z.string().optional().describe('Huawei AppGallery Connect API client ID for the destination.'),

@@ -71,7 +71,7 @@ describe('apps-destinations-update', () => {
     expect(mockConsola.success).toHaveBeenCalledWith('Destination updated successfully.');
   });
 
-  it('should clear the Firebase tester groups when an empty value is passed', async () => {
+  it('should clear the Firebase tester groups when `--firebase-tester-group=` is passed', async () => {
     const options = { appId, destinationId, firebaseTesterGroup: [''] };
 
     const scope = nock(DEFAULT_API_BASE_URL)
@@ -80,6 +80,19 @@ describe('apps-destinations-update', () => {
         destinationId,
         firebaseTesterGroups: [],
       })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: destinationId });
+
+    await updateDestinationCommand.action(options, undefined);
+
+    expect(scope.isDone()).toBe(true);
+  });
+
+  it('should not send the Firebase tester groups when `--firebase-tester-group` is not passed', async () => {
+    const options = { appId, destinationId, huaweiAppId: '112233445' };
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .patch(`/v1/apps/${appId}/destinations/${destinationId}`, (body) => !('firebaseTesterGroups' in body))
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(200, { id: destinationId });
 
