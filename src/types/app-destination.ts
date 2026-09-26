@@ -10,7 +10,7 @@ export interface AppDestinationDto {
   name: string;
   nameLower: string;
   platform: 'android' | 'ios';
-  type: AppDestinationType | null;
+  type: AppDestinationType;
   appleId: string | null;
   appleAppId: string | null;
   appleTeamId: string | null;
