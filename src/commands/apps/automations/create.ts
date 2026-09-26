@@ -30,15 +30,17 @@ export default defineCommand({
         .optional()
         .describe('The platform for the build. Supported values are `android`, `ios`, and `web`.'),
       stack: z
-        .enum(['macos-sequoia', 'macos-tahoe'], {
-          message: 'Build stack must be either `macos-sequoia` or `macos-tahoe`.',
+        .enum(['macos-sequoia', 'macos-tahoe', 'macos-golden-gate'], {
+          message: 'Build stack must be one of `macos-sequoia`, `macos-tahoe`, or `macos-golden-gate`.',
         })
         .optional()
         .describe('The build stack to use for the build process.'),
       triggerPattern: z
-        .string()
+        .array(z.string())
         .optional()
-        .describe('Only trigger for branches or tags matching this pattern. Defaults to all.'),
+        .describe(
+          'Only trigger for branches or tags matching this pattern. Prefix with `!` to exclude. Can be specified multiple times. Defaults to all.',
+        ),
       triggerType: z
         .enum(['branch', 'tag'], {
           message: 'Trigger type must be either `branch` or `tag`.',
@@ -46,9 +48,9 @@ export default defineCommand({
         .optional()
         .describe('What triggers the automation. Supported values are `branch` and `tag`.'),
       type: z
-        .enum(['app-store', 'ad-hoc', 'debug', 'development', 'release', 'simulator'], {
+        .enum(['app-store', 'ad-hoc', 'debug', 'development', 'enterprise', 'release', 'simulator'], {
           message:
-            'Build type must be one of `app-store`, `ad-hoc`, `debug`, `development`, `release`, or `simulator`.',
+            'Build type must be one of `app-store`, `ad-hoc`, `debug`, `development`, `enterprise`, `release`, or `simulator`.',
         })
         .optional()
         .describe('The type of build to create.'),
@@ -137,7 +139,7 @@ export default defineCommand({
       commitMessagePattern: options.commitMessagePattern,
       name,
       platform,
-      triggerPattern: options.triggerPattern,
+      triggerPatterns: options.triggerPattern,
       triggerType,
     });
     if (json) {

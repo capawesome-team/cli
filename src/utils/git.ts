@@ -13,8 +13,8 @@ const HOSTNAME_TO_PROVIDER: Record<string, string> = {
   'github.com': 'github',
   'gitlab.com': 'gitlab',
   'bitbucket.org': 'bitbucket',
-  'dev.azure.com': 'azure',
-  'ssh.dev.azure.com': 'azure',
+  'dev.azure.com': 'azure_devops',
+  'ssh.dev.azure.com': 'azure_devops',
 };
 
 export const getGitRemoteInfo = (): GitRemoteInfo => {
@@ -38,7 +38,7 @@ export const parseGitRemoteUrl = (remoteUrl: string): GitRemoteInfo => {
   if (azureHttpsMatch && azureHttpsMatch[1] && azureHttpsMatch[2] && azureHttpsMatch[3]) {
     return {
       ownerSlug: azureHttpsMatch[1],
-      provider: 'azure',
+      provider: 'azure_devops',
       repositorySlug: azureHttpsMatch[3],
       projectSlug: azureHttpsMatch[2],
     };
@@ -49,7 +49,7 @@ export const parseGitRemoteUrl = (remoteUrl: string): GitRemoteInfo => {
   if (azureSshMatch && azureSshMatch[1] && azureSshMatch[2] && azureSshMatch[3]) {
     return {
       ownerSlug: azureSshMatch[1],
-      provider: 'azure',
+      provider: 'azure_devops',
       repositorySlug: azureSshMatch[3],
       projectSlug: azureSshMatch[2],
     };
@@ -60,7 +60,7 @@ export const parseGitRemoteUrl = (remoteUrl: string): GitRemoteInfo => {
   if (vsHttpsMatch && vsHttpsMatch[1] && vsHttpsMatch[2] && vsHttpsMatch[3]) {
     return {
       ownerSlug: vsHttpsMatch[1],
-      provider: 'azure',
+      provider: 'azure_devops',
       repositorySlug: vsHttpsMatch[3],
       projectSlug: vsHttpsMatch[2],
     };
@@ -107,3 +107,6 @@ export const parseGitRemoteUrl = (remoteUrl: string): GitRemoteInfo => {
 
   throw new UserError('Could not parse git remote URL.');
 };
+
+export const getGitRepositoryPath = (remoteInfo: GitRemoteInfo): string =>
+  [remoteInfo.ownerSlug, remoteInfo.projectSlug, remoteInfo.repositorySlug].filter(Boolean).join('/');

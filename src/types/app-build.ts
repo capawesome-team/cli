@@ -5,6 +5,7 @@ export interface AppBuildArtifactDto {
   fileMimeType: string;
   fileName: string;
   fileSizeInBytes: number;
+  formFactor: 'automotive' | 'mobile' | 'tv' | 'watch';
   status: 'pending' | 'ready';
   type: 'apk' | 'aab' | 'app' | 'ipa' | 'zip';
 }
@@ -35,7 +36,7 @@ export interface CreateAppBuildDto {
   appConfigurationName?: string;
   appEnvironmentName?: string;
   appId: string;
-  stack?: 'macos-sequoia' | 'macos-tahoe';
+  stack?: 'macos-sequoia' | 'macos-tahoe' | 'macos-golden-gate';
   gitRef?: string;
   platform: 'ios' | 'android' | 'web';
   type?: string;
