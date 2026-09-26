@@ -32,6 +32,7 @@ export interface CreateAppBuildDto {
   adHocEnvironmentVariables?: Record<string, string>;
   appBuildSourceId?: string;
   appCertificateName?: string;
+  appChannelNames?: string[];
   appConfigurationName?: string;
   appEnvironmentName?: string;
   appId: string;
