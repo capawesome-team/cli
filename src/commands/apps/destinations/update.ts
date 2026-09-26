@@ -1,4 +1,5 @@
 import appDestinationsService from '@/services/app-destinations.js';
+import { parseFirebaseTesterGroups } from '@/utils/app-destinations.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
@@ -31,6 +32,19 @@ export default defineCommand({
         .optional()
         .describe('App Google Service Account Key ID for the destination.'),
       googlePlayTrack: z.string().optional().describe('Google Play track for the destination.'),
+      firebaseAppId: z.string().optional().describe('Firebase app ID for the destination.'),
+      firebaseTesterGroup: z
+        .array(z.string())
+        .optional()
+        .describe(
+          'The alias of a Firebase tester group to distribute to. Can be specified multiple times or comma-separated. Pass `--firebase-tester-group=` to remove all groups.',
+        ),
+      huaweiAppId: z.string().optional().describe('Huawei AppGallery app ID for the destination.'),
+      huaweiClientId: z.string().optional().describe('Huawei AppGallery Connect API client ID for the destination.'),
+      huaweiClientSecret: z
+        .string()
+        .optional()
+        .describe('Huawei AppGallery Connect API client secret for the destination.'),
     }),
   ),
   action: withAuth(async (options, args) => {
@@ -50,6 +64,11 @@ export default defineCommand({
       androidReleaseStatus,
       appGoogleServiceAccountKeyId,
       googlePlayTrack,
+      firebaseAppId,
+      firebaseTesterGroup,
+      huaweiAppId,
+      huaweiClientId,
+      huaweiClientSecret,
     } = options;
 
     if (!appId) {
@@ -84,6 +103,11 @@ export default defineCommand({
       androidReleaseStatus,
       appGoogleServiceAccountKeyId,
       googlePlayTrack,
+      firebaseAppId,
+      firebaseTesterGroups: parseFirebaseTesterGroups(firebaseTesterGroup),
+      huaweiAppId,
+      huaweiClientId,
+      huaweiClientSecret,
     });
     consola.success('Destination updated successfully.');
   }),
