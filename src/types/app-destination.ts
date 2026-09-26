@@ -1,9 +1,16 @@
+export type AppDestinationType =
+  | 'app-store-connect'
+  | 'firebase-app-distribution'
+  | 'google-play'
+  | 'huawei-appgallery';
+
 export interface AppDestinationDto {
   id: string;
   appId: string;
   name: string;
   nameLower: string;
   platform: 'android' | 'ios';
+  type: AppDestinationType | null;
   appleId: string | null;
   appleAppId: string | null;
   appleTeamId: string | null;
@@ -16,6 +23,10 @@ export interface AppDestinationDto {
   androidReleaseStatus: 'completed' | 'draft' | null;
   appGoogleServiceAccountKeyId: string | null;
   googlePlayTrack: string | null;
+  firebaseAppId: string | null;
+  firebaseTesterGroups: string[];
+  huaweiAppId: string | null;
+  huaweiClientId: string | null;
   createdAt: string;
   createdBy: string;
   updatedAt: string;
@@ -26,6 +37,7 @@ export interface CreateAppDestinationDto {
   appId: string;
   name: string;
   platform: 'android' | 'ios';
+  type?: AppDestinationType;
   appleId?: string;
   appleAppId?: string;
   appleTeamId?: string;
@@ -38,6 +50,11 @@ export interface CreateAppDestinationDto {
   androidReleaseStatus?: 'completed' | 'draft';
   appGoogleServiceAccountKeyId?: string;
   googlePlayTrack?: string;
+  firebaseAppId?: string;
+  firebaseTesterGroups?: string[];
+  huaweiAppId?: string;
+  huaweiClientId?: string;
+  huaweiClientSecret?: string;
 }
 
 export interface UpdateAppDestinationDto {
@@ -56,6 +73,11 @@ export interface UpdateAppDestinationDto {
   androidReleaseStatus?: 'completed' | 'draft';
   appGoogleServiceAccountKeyId?: string;
   googlePlayTrack?: string;
+  firebaseAppId?: string;
+  firebaseTesterGroups?: string[];
+  huaweiAppId?: string;
+  huaweiClientId?: string;
+  huaweiClientSecret?: string;
 }
 
 export interface DeleteAppDestinationDto {
