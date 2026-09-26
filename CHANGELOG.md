@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.23.0](https://github.com/capawesome-team/cli/compare/v4.22.0...v4.23.0) (2026-09-26)
+
+
+### Features
+
+* deploy builds to channels server-side and support multiple channels ([#210](https://github.com/capawesome-team/cli/issues/210)) ([c1722b9](https://github.com/capawesome-team/cli/commit/c1722b9d40b3d491228cedae95ee8e7a172d2cd9))
+
 ## [4.22.0](https://github.com/capawesome-team/cli/compare/v4.21.0...v4.22.0) (2026-09-24)
 
 
