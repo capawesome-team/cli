@@ -2,6 +2,8 @@ import appAppleApiKeysService from '@/services/app-apple-api-keys.js';
 import appDestinationsService from '@/services/app-destinations.js';
 import appGoogleServiceAccountKeysService from '@/services/app-google-service-account-keys.js';
 import appsService from '@/services/apps.js';
+import { AppDestinationType } from '@/types/app-destination.js';
+import { parseFirebaseTesterGroups } from '@/utils/app-destinations.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { isReadable } from '@/utils/file.js';
@@ -20,6 +22,12 @@ export default defineCommand({
       json: z.boolean().optional().describe('Output in JSON format.'),
       name: z.string().optional().describe('Name of the destination.'),
       platform: z.enum(['android', 'ios']).optional().describe('Platform of the destination (android, ios).'),
+      type: z
+        .enum(['app-store-connect', 'firebase-app-distribution', 'google-play', 'huawei-appgallery'])
+        .optional()
+        .describe(
+          'Type of the destination (app-store-connect, firebase-app-distribution, google-play, huawei-appgallery). Defaults to `google-play` for android and `app-store-connect` for ios in non-interactive environments.',
+        ),
       appleId: z.string().optional().describe('Apple ID for the destination.'),
       appleAppId: z.string().optional().describe('Apple App ID for the destination.'),
       appleTeamId: z.string().optional().describe('Apple Team ID for the destination.'),
@@ -34,6 +42,19 @@ export default defineCommand({
         .describe('Android release status (completed, draft).'),
       googleServiceAccountKeyFile: z.string().optional().describe('Path to the Google service account key JSON file.'),
       googlePlayTrack: z.string().optional().describe('Google Play track for the destination.'),
+      firebaseAppId: z.string().optional().describe('Firebase app ID for the destination.'),
+      firebaseTesterGroup: z
+        .array(z.string())
+        .optional()
+        .describe(
+          'The alias of a Firebase tester group to distribute to. Can be specified multiple times or comma-separated.',
+        ),
+      huaweiAppId: z.string().optional().describe('Huawei AppGallery app ID for the destination.'),
+      huaweiClientId: z.string().optional().describe('Huawei AppGallery Connect API client ID for the destination.'),
+      huaweiClientSecret: z
+        .string()
+        .optional()
+        .describe('Huawei AppGallery Connect API client secret for the destination.'),
     }),
   ),
   action: withAuth(async (options, args) => {
@@ -42,6 +63,7 @@ export default defineCommand({
       json,
       name,
       platform,
+      type,
       appleId,
       appleAppId,
       appleTeamId,
@@ -53,6 +75,11 @@ export default defineCommand({
       androidReleaseStatus,
       googleServiceAccountKeyFile,
       googlePlayTrack,
+      firebaseAppId,
+      firebaseTesterGroup,
+      huaweiAppId,
+      huaweiClientId,
+      huaweiClientSecret,
     } = options;
     let appleApiKeyId: string | undefined;
     let appAppleApiKeyId: string | undefined;
@@ -106,7 +133,30 @@ export default defineCommand({
       }
     }
 
-    if (platform === 'android') {
+    // Select destination type
+    if (type) {
+      const supportedTypes = destinationTypeOptionsByPlatform[platform].map((option) => option.value);
+      if (!supportedTypes.includes(type)) {
+        consola.error(
+          `The destination type \`${type}\` is not supported for the ${platform} platform. Supported types: ${supportedTypes.join(', ')}.`,
+        );
+        process.exit(1);
+      }
+    } else if (isInteractive()) {
+      // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+      type = await prompt('Select the destination type:', {
+        type: 'select',
+        options: destinationTypeOptionsByPlatform[platform],
+      });
+      if (!type) {
+        consola.error('You must select a destination type.');
+        process.exit(1);
+      }
+    } else {
+      type = defaultDestinationTypeByPlatform[platform];
+    }
+
+    if (type === 'google-play') {
       // 4. Ask for track
       if (!googlePlayTrack) {
         if (!isInteractive()) {
@@ -133,79 +183,60 @@ export default defineCommand({
       }
       // 6. Ask for publishing format
       if (!androidBuildArtifactType) {
-        if (!isInteractive()) {
-          consola.error(
-            'You must provide the Android build artifact type when running in non-interactive environment.',
-          );
-          process.exit(1);
-        }
-        // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-        androidBuildArtifactType = await prompt('Select the publishing format:', {
-          type: 'select',
-          options: [
-            { label: 'AAB', value: 'aab' },
-            { label: 'APK', value: 'apk' },
-          ],
-        });
-        if (!androidBuildArtifactType) {
-          consola.error('You must select a publishing format.');
-          process.exit(1);
-        }
+        androidBuildArtifactType = await promptAndroidBuildArtifactType();
       }
       // 7. Ask for release status
       if (!androidReleaseStatus) {
-        if (!isInteractive()) {
-          consola.error('You must provide the Android release status when running in non-interactive environment.');
-          process.exit(1);
-        }
-        // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
-        androidReleaseStatus = await prompt('Select the release status:', {
-          type: 'select',
-          options: [
-            { label: 'Draft', value: 'draft' },
-            { label: 'Completed', value: 'completed' },
-          ],
-        });
-        if (!androidReleaseStatus) {
-          consola.error('You must select a release status.');
-          process.exit(1);
-        }
+        androidReleaseStatus = await promptAndroidReleaseStatus();
       }
       // 8. Ask for JSON key path
       if (!googleServiceAccountKeyFile) {
-        if (!isInteractive()) {
-          consola.error(
-            'You must provide the Google service account key file when running in non-interactive environment.',
-          );
-          process.exit(1);
-        }
-        googleServiceAccountKeyFile = await prompt('Enter the path to the Google service account key JSON file:', {
-          type: 'text',
-        });
-        if (!googleServiceAccountKeyFile) {
-          consola.error('You must provide a Google service account key file path.');
-          process.exit(1);
-        }
+        googleServiceAccountKeyFile = await promptGoogleServiceAccountKeyFile();
       }
-      // Upload Google service account key file
-      const googleServiceAccountKeyFileReadable = await isReadable(googleServiceAccountKeyFile);
-      if (!googleServiceAccountKeyFileReadable) {
-        consola.error(
-          `The Google service account key file does not exist or is not accessible: ${googleServiceAccountKeyFile}`,
-        );
-        process.exit(1);
-      }
-      const buffer = fs.readFileSync(googleServiceAccountKeyFile);
-      const fileName = path.basename(googleServiceAccountKeyFile);
-      const key = await appGoogleServiceAccountKeysService.create({
-        appId,
-        buffer,
-        fileName,
-      });
-      appGoogleServiceAccountKeyId = key.id;
+      appGoogleServiceAccountKeyId = await uploadGoogleServiceAccountKeyFile(appId, googleServiceAccountKeyFile);
     }
 
-    if (platform === 'ios') {
+    if (type === 'huawei-appgallery') {
+      if (!huaweiAppId) {
+        huaweiAppId = await promptRequiredText('Huawei AppGallery app ID');
+      }
+      if (!huaweiClientId) {
+        huaweiClientId = await promptRequiredText('Huawei AppGallery client ID');
+      }
+      if (!huaweiClientSecret) {
+        huaweiClientSecret = await promptRequiredText('Huawei AppGallery client secret');
+      }
+      if (!androidBuildArtifactType) {
+        androidBuildArtifactType = await promptAndroidBuildArtifactType();
+      }
+      if (!androidReleaseStatus) {
+        androidReleaseStatus = await promptAndroidReleaseStatus();
+      }
+    }
+
+    if (type === 'firebase-app-distribution') {
+      if (!firebaseAppId) {
+        firebaseAppId = await promptRequiredText('Firebase app ID');
+      }
+      if (!firebaseTesterGroup && isInteractive()) {
+        const firebaseTesterGroupInput = await prompt(
+          'Enter the Firebase tester group aliases, comma-separated (leave empty to skip):',
+          { type: 'text' },
+        );
+        if (firebaseTesterGroupInput) {
+          firebaseTesterGroup = [firebaseTesterGroupInput];
+        }
+      }
+      if (platform === 'android' && !androidBuildArtifactType) {
+        androidBuildArtifactType = await promptAndroidBuildArtifactType();
+      }
+      if (!googleServiceAccountKeyFile) {
+        googleServiceAccountKeyFile = await promptGoogleServiceAccountKeyFile();
+      }
+      appGoogleServiceAccountKeyId = await uploadGoogleServiceAccountKeyFile(appId, googleServiceAccountKeyFile);
+    }
+
+    if (type === 'app-store-connect') {
       // 9. Ask for authentication method
       let authMethod: string | undefined;
       if (appleApiKeyFile || appleIssuerId) {
@@ -342,6 +373,7 @@ export default defineCommand({
       appId,
       name,
       platform: platform!,
+      type,
       appleId,
       appleAppId,
       appleTeamId,
@@ -354,6 +386,11 @@ export default defineCommand({
       androidReleaseStatus,
       appGoogleServiceAccountKeyId,
       googlePlayTrack,
+      firebaseAppId,
+      firebaseTesterGroups: parseFirebaseTesterGroups(firebaseTesterGroup),
+      huaweiAppId,
+      huaweiClientId,
+      huaweiClientSecret,
     });
     if (json) {
       console.log(JSON.stringify({ id: response.id }, null, 2));
@@ -363,3 +400,109 @@ export default defineCommand({
     }
   }),
 });
+
+const destinationTypeOptionsByPlatform: Record<'android' | 'ios', { label: string; value: AppDestinationType }[]> = {
+  android: [
+    { label: 'Google Play', value: 'google-play' },
+    { label: 'Firebase App Distribution', value: 'firebase-app-distribution' },
+    { label: 'Huawei AppGallery', value: 'huawei-appgallery' },
+  ],
+  ios: [
+    { label: 'App Store Connect', value: 'app-store-connect' },
+    { label: 'Firebase App Distribution', value: 'firebase-app-distribution' },
+  ],
+};
+
+const defaultDestinationTypeByPlatform: Record<'android' | 'ios', AppDestinationType> = {
+  android: 'google-play',
+  ios: 'app-store-connect',
+};
+
+const promptRequiredText = async (label: string): Promise<string> => {
+  if (!isInteractive()) {
+    consola.error(`You must provide the ${label} when running in non-interactive environment.`);
+    process.exit(1);
+  }
+  const value = await prompt(`Enter the ${label}:`, { type: 'text' });
+  if (!value) {
+    consola.error(`You must provide the ${label}.`);
+    process.exit(1);
+  }
+  return value;
+};
+
+const promptAndroidBuildArtifactType = async (): Promise<'aab' | 'apk'> => {
+  if (!isInteractive()) {
+    consola.error('You must provide the Android build artifact type when running in non-interactive environment.');
+    process.exit(1);
+  }
+  // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+  const androidBuildArtifactType: 'aab' | 'apk' = await prompt('Select the publishing format:', {
+    type: 'select',
+    options: [
+      { label: 'AAB', value: 'aab' },
+      { label: 'APK', value: 'apk' },
+    ],
+  });
+  if (!androidBuildArtifactType) {
+    consola.error('You must select a publishing format.');
+    process.exit(1);
+  }
+  return androidBuildArtifactType;
+};
+
+const promptAndroidReleaseStatus = async (): Promise<'completed' | 'draft'> => {
+  if (!isInteractive()) {
+    consola.error('You must provide the Android release status when running in non-interactive environment.');
+    process.exit(1);
+  }
+  // @ts-ignore wait till https://github.com/unjs/consola/pull/280 is merged
+  const androidReleaseStatus: 'completed' | 'draft' = await prompt('Select the release status:', {
+    type: 'select',
+    options: [
+      { label: 'Draft', value: 'draft' },
+      { label: 'Completed', value: 'completed' },
+    ],
+  });
+  if (!androidReleaseStatus) {
+    consola.error('You must select a release status.');
+    process.exit(1);
+  }
+  return androidReleaseStatus;
+};
+
+const promptGoogleServiceAccountKeyFile = async (): Promise<string> => {
+  if (!isInteractive()) {
+    consola.error('You must provide the Google service account key file when running in non-interactive environment.');
+    process.exit(1);
+  }
+  const googleServiceAccountKeyFile = await prompt('Enter the path to the Google service account key JSON file:', {
+    type: 'text',
+  });
+  if (!googleServiceAccountKeyFile) {
+    consola.error('You must provide a Google service account key file path.');
+    process.exit(1);
+  }
+  return googleServiceAccountKeyFile;
+};
+
+const uploadGoogleServiceAccountKeyFile = async (
+  appId: string,
+  googleServiceAccountKeyFile: string,
+): Promise<string> => {
+  const googleServiceAccountKeyFileReadable = await isReadable(googleServiceAccountKeyFile);
+  if (!googleServiceAccountKeyFileReadable) {
+    consola.error(
+      `The Google service account key file does not exist or is not accessible: ${googleServiceAccountKeyFile}`,
+    );
+    process.exit(1);
+  }
+  const buffer = fs.readFileSync(googleServiceAccountKeyFile);
+  const fileName = path.basename(googleServiceAccountKeyFile);
+  const key = await appGoogleServiceAccountKeysService.create({
+    appId,
+    buffer,
+    fileName,
+  });
+  return key.id;
+};
