@@ -429,6 +429,61 @@ describe('appflow-export', () => {
     expect(JSON.stringify(apps[0]!.notes)).not.toContain('secret-token');
   });
 
+  it('should rename the Appflow tool version variables', async () => {
+    writeAppFiles('My App-6668c18c', {
+      'app-detail.json': { id: '6668c18c', name: 'My App', appType: 'capacitor' },
+      'environments.json': [
+        {
+          id: 1,
+          name: 'Production',
+          vars: { OVERRIDE_JAVA_VERSION: '21', OVERRIDE_NODE_VERSION: '22' },
+          secrets: null,
+        },
+      ],
+    });
+
+    const { apps } = await parseAppflowExport(exportDirectory);
+
+    expect(apps[0]!.environments[0]!.variables).toEqual([
+      { key: 'JAVA_VERSION', value: '21' },
+      { key: 'NODE_VERSION', value: '22' },
+    ]);
+    expect(apps[0]!.notes).toContainEqual(expect.stringContaining('`OVERRIDE_NODE_VERSION`'));
+  });
+
+  it('should keep an Appflow tool version variable if the Capawesome Cloud name is taken', async () => {
+    writeAppFiles('My App-6668c18c', {
+      'app-detail.json': { id: '6668c18c', name: 'My App', appType: 'capacitor' },
+      'environments.json': [
+        { id: 1, name: 'Production', vars: { NODE_VERSION: '20', OVERRIDE_NODE_VERSION: '22' }, secrets: null },
+      ],
+    });
+
+    const { apps } = await parseAppflowExport(exportDirectory);
+
+    expect(apps[0]!.environments[0]!.variables).toEqual([
+      { key: 'NODE_VERSION', value: '20' },
+      { key: 'OVERRIDE_NODE_VERSION', value: '22' },
+    ]);
+    expect(apps[0]!.notes).toContainEqual(expect.stringContaining('contains both'));
+  });
+
+  it('should trim the keys and values of environment variables and secrets', async () => {
+    writeAppFiles('My App-6668c18c', {
+      'app-detail.json': { id: '6668c18c', name: 'My App', appType: 'capacitor' },
+      'environments.json': [
+        { id: 1, name: 'Production', vars: { ' APP_ID ': ' com.example.app' }, secrets: { API_KEY: 'secret\n' } },
+      ],
+    });
+
+    const { apps } = await parseAppflowExport(exportDirectory);
+
+    expect(apps[0]!.environments[0]).toMatchObject({
+      variables: [{ key: 'APP_ID', value: 'com.example.app' }],
+      secrets: [{ key: 'API_KEY', value: 'secret' }],
+    });
+  });
+
   it('should skip an app with an invalid app detail file', async () => {
     writeAppFiles('Invalid-66666666', {
       'app-detail.json': 'not json',

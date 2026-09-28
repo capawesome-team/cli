@@ -1,3 +1,4 @@
+import { EnvironmentVariable } from '@/types/app-environment.js';
 import {
   AppImport,
   AppImportAutomation,
@@ -25,6 +26,12 @@ const SUPPORTED_MANIFEST_MAJOR_VERSION = 'v1';
 const WEBHOOKS_DOCS_URL = 'https://capawesome.io/docs/cloud/webhooks/';
 const LIVE_UPDATES_DOCS_URL = 'https://capawesome.io/docs/cloud/live-updates/';
 const SUPPORTED_BUILD_TYPES = ['ad-hoc', 'app-store', 'debug', 'development', 'enterprise', 'release', 'simulator'];
+
+// Appflow pins tool versions through these variables. Capawesome Cloud reads them under its own names.
+const APPFLOW_VARIABLE_RENAMES = new Map([
+  ['OVERRIDE_JAVA_VERSION', 'JAVA_VERSION'],
+  ['OVERRIDE_NODE_VERSION', 'NODE_VERSION'],
+]);
 
 const manifestSchema = z.object({
   version: z.string().nullish(),
@@ -255,15 +262,46 @@ const parseApp = (appFolder: string, detail: z.infer<typeof appDetailSchema>, ty
     channels: channels.map((channel) => channel.name),
     configurations: parseConfigurations(nativeConfigs, notes),
     destinations: destinations.map(({ id, ...destination }) => destination),
-    environments: environments.map(
-      (environment): AppImportEnvironment => ({
-        name: environment.name,
-        variables: Object.entries(environment.vars ?? {}).map(([key, value]) => ({ key, value })),
-        secrets: Object.entries(environment.secrets ?? {}).map(([key, value]) => ({ key, value })),
-      }),
-    ),
+    environments: environments.map((environment) => parseEnvironment(environment, notes)),
     repository: parseRepository(appFolder, notes),
   };
+};
+
+const parseEnvironment = (
+  environment: z.infer<typeof environmentsSchema>[number],
+  notes: string[],
+): AppImportEnvironment => ({
+  name: environment.name,
+  variables: renameAppflowVariables(environment.name, toTrimmedEnvironmentVariables(environment.vars), notes),
+  secrets: toTrimmedEnvironmentVariables(environment.secrets),
+});
+
+// Trimmed like in the Capawesome Cloud Console, where stray whitespace cannot be entered.
+const toTrimmedEnvironmentVariables = (record: Record<string, string> | null | undefined): EnvironmentVariable[] =>
+  Object.entries(record ?? {}).map(([key, value]) => ({ key: key.trim(), value: value.trim() }));
+
+const renameAppflowVariables = (
+  environmentName: string,
+  variables: EnvironmentVariable[],
+  notes: string[],
+): EnvironmentVariable[] => {
+  const keys = new Set(variables.map((variable) => variable.key));
+  return variables.map((variable) => {
+    const renamedKey = APPFLOW_VARIABLE_RENAMES.get(variable.key);
+    if (!renamedKey) {
+      return variable;
+    }
+    if (keys.has(renamedKey)) {
+      notes.push(
+        `The environment \`${environmentName}\` contains both \`${variable.key}\` and \`${renamedKey}\`. Capawesome Cloud only reads \`${renamedKey}\`.`,
+      );
+      return variable;
+    }
+    notes.push(
+      `The variable \`${variable.key}\` of the environment \`${environmentName}\` was renamed to \`${renamedKey}\`, the name Capawesome Cloud reads.`,
+    );
+    return { ...variable, key: renamedKey };
+  });
 };
 
 const parseRepository = (appFolder: string, notes: string[]): AppImport['repository'] => {
