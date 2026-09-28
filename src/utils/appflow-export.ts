@@ -272,13 +272,12 @@ const parseEnvironment = (
   notes: string[],
 ): AppImportEnvironment => ({
   name: environment.name,
-  variables: renameAppflowVariables(environment.name, toTrimmedEnvironmentVariables(environment.vars), notes),
-  secrets: toTrimmedEnvironmentVariables(environment.secrets),
+  variables: renameAppflowVariables(environment.name, toEnvironmentVariables(environment.vars), notes),
+  secrets: toEnvironmentVariables(environment.secrets),
 });
 
-// Trimmed like in the Capawesome Cloud Console, where stray whitespace cannot be entered.
-const toTrimmedEnvironmentVariables = (record: Record<string, string> | null | undefined): EnvironmentVariable[] =>
-  Object.entries(record ?? {}).map(([key, value]) => ({ key: key.trim(), value: value.trim() }));
+const toEnvironmentVariables = (record: Record<string, string> | null | undefined): EnvironmentVariable[] =>
+  Object.entries(record ?? {}).map(([key, value]) => ({ key, value }));
 
 const renameAppflowVariables = (
   environmentName: string,
