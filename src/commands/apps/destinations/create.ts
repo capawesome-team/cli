@@ -23,7 +23,13 @@ export default defineCommand({
       name: z.string().optional().describe('Name of the destination.'),
       platform: z.enum(['android', 'ios']).optional().describe('Platform of the destination (android, ios).'),
       type: z
-        .enum(['apple-app-store-connect', 'firebase-app-distribution', 'google-play', 'huawei-appgallery'])
+        .enum([
+          'app-store-connect',
+          'apple-app-store-connect',
+          'firebase-app-distribution',
+          'google-play',
+          'huawei-appgallery',
+        ])
         .optional()
         .describe(
           'Type of the destination (apple-app-store-connect, firebase-app-distribution, google-play, huawei-appgallery). Defaults to `google-play` for android and `apple-app-store-connect` for ios in non-interactive environments.',
@@ -112,6 +118,11 @@ export default defineCommand({
       huaweiClientSecret,
       defaultLanguage,
     } = options;
+
+    if (type === 'app-store-connect') {
+      consola.warn('The destination type `app-store-connect` is deprecated. Use `apple-app-store-connect` instead.');
+      type = 'apple-app-store-connect';
+    }
     let appleApiKeyId: string | undefined;
     let appAppleApiKeyId: string | undefined;
     let appGoogleServiceAccountKeyId: string | undefined;
