@@ -10,7 +10,7 @@ export const parseReleaseNotes = async (options: {
   releaseNotesLocale?: string[];
 }): Promise<Record<string, string> | undefined> => {
   const { releaseNotes, releaseNotesFile, releaseNotesLocale } = options;
-  if (releaseNotesFile) {
+  if (releaseNotesFile !== undefined) {
     if (releaseNotes !== undefined || releaseNotesLocale !== undefined) {
       consola.error(
         'The --release-notes-file flag cannot be used together with --release-notes or --release-notes-locale.',
@@ -37,7 +37,12 @@ const parseLocalizedReleaseNotes = (entries: string[]): Record<string, string> =
       consola.error(`Invalid release notes locale \`${entry}\`. Use the format \`<locale>=<text>\`.`);
       process.exit(1);
     }
-    localizedReleaseNotes[entry.slice(0, separatorIndex)] = entry.slice(separatorIndex + 1);
+    const locale = entry.slice(0, separatorIndex);
+    if (locale === 'default') {
+      consola.error('The locale `default` is reserved. Use --release-notes for the default text.');
+      process.exit(1);
+    }
+    localizedReleaseNotes[locale] = entry.slice(separatorIndex + 1);
   }
   return localizedReleaseNotes;
 };

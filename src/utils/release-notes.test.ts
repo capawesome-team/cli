@@ -61,6 +61,16 @@ describe('parseReleaseNotes', () => {
     );
   });
 
+  it('should reject translated release notes for the reserved `default` locale', async () => {
+    await expect(
+      parseReleaseNotes({ releaseNotes: 'Bug fixes', releaseNotesLocale: ['default=Fehlerbehebungen'] }),
+    ).rejects.toThrow('Process exited with code 1');
+
+    expect(mockConsola.error).toHaveBeenCalledWith(
+      'The locale `default` is reserved. Use --release-notes for the default text.',
+    );
+  });
+
   it('should read the release notes from a file', async () => {
     await fs.writeFile(releaseNotesFile, JSON.stringify({ default: 'Bug fixes', 'de-DE': 'Fehlerbehebungen' }));
 
@@ -98,5 +108,11 @@ describe('parseReleaseNotes', () => {
     expect(mockConsola.error).toHaveBeenCalledWith(
       `The release notes file is missing or contains invalid JSON: ${releaseNotesFile}`,
     );
+  });
+
+  it('should reject an empty file path', async () => {
+    await expect(parseReleaseNotes({ releaseNotesFile: '' })).rejects.toThrow('Process exited with code 1');
+
+    expect(mockConsola.error).toHaveBeenCalledWith('The release notes file is missing or contains invalid JSON: ');
   });
 });
