@@ -14,11 +14,13 @@ import { getAppBuildShareUrls } from '@/utils/app-build-shares.js';
 import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
 import { createBufferFromPath } from '@/utils/buffer.js';
+import { parseListOption } from '@/utils/cli-options.js';
 import { isInteractive } from '@/utils/environment.js';
 import { offerJobFailureSummary } from '@/utils/job-failure-summary.js';
 import { isDirectory, isReadable } from '@/utils/file.js';
 import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
+import { parseReleaseNotes } from '@/utils/release-notes.js';
 import zip from '@/utils/zip.js';
 import consola from 'consola';
 import fs from 'fs/promises';
@@ -90,6 +92,22 @@ export default defineCommand({
         })
         .optional()
         .describe('The platform for the build. Supported values are `ios`, `android`, and `web`.'),
+      releaseNotes: z
+        .string()
+        .optional()
+        .describe('Release notes for the deployment (default text). Requires --destination.'),
+      releaseNotesFile: z
+        .string()
+        .optional()
+        .describe(
+          'Path to a JSON file with release notes by locale, e.g. `{"default": "…", "de-DE": "…"}`. Requires --destination.',
+        ),
+      releaseNotesLocale: z
+        .array(z.string())
+        .optional()
+        .describe(
+          'Translated release notes as `<locale>=<text>`, e.g. `de-DE=Fehlerbehebungen`. Can be specified multiple times. Requires --destination.',
+        ),
       share: z.boolean().optional().describe('Create a public share link for the build after it succeeds.'),
       shareDescription: z
         .string()
@@ -147,10 +165,7 @@ export default defineCommand({
       url,
     } = options;
 
-    const channels = options.channel
-      ?.flatMap((value) => value.split(','))
-      .map((value) => value.trim())
-      .filter((value) => value.length > 0);
+    const channels = parseListOption(options.channel);
 
     // Validate that detached flag cannot be used with artifact flags
     if (options.detached && (options.apk || options.aab || options.ipa || options.app || options.zip)) {
@@ -185,6 +200,15 @@ export default defineCommand({
     // Validate that channel and destination cannot be used together
     if (channels?.length && options.destination) {
       consola.error('The --channel and --destination flags cannot be used together.');
+      process.exit(1);
+    }
+
+    // Validate the release notes before the build starts since they are only used for the deployment afterwards
+    const releaseNotes = await parseReleaseNotes(options);
+    if (releaseNotes && !options.destination) {
+      consola.error(
+        'The --release-notes, --release-notes-file, and --release-notes-locale flags require --destination.',
+      );
       process.exit(1);
     }
 
@@ -536,7 +560,17 @@ export default defineCommand({
       if (options.destination) {
         await (
           await import('@/commands/apps/deployments/create.js').then((mod) => mod.default)
-        ).action({ appId, buildId: response.id, destination: options.destination }, undefined);
+        ).action(
+          {
+            appId,
+            buildId: response.id,
+            destination: options.destination,
+            releaseNotes: options.releaseNotes,
+            releaseNotesFile: options.releaseNotesFile,
+            releaseNotesLocale: options.releaseNotesLocale,
+          },
+          undefined,
+        );
       }
 
       // Output JSON if json flag is set

@@ -250,6 +250,54 @@ describe('apps-builds-create', () => {
     expect(mockConsola.error).toHaveBeenCalledWith('The --detached flag cannot be used with the --destination flag.');
   });
 
+  it('should reject release notes without --destination', async () => {
+    const options = { appId, platform: 'android' as const, gitRef: 'main', releaseNotes: 'Bug fixes' };
+
+    await expect(createCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
+
+    expect(mockConsola.error).toHaveBeenCalledWith(
+      'The --release-notes, --release-notes-file, and --release-notes-locale flags require --destination.',
+    );
+  });
+
+  it('should send the release notes with the deployment to the destination', async () => {
+    const options = {
+      appId,
+      platform: 'android' as const,
+      gitRef: 'main',
+      destination: 'Google Play',
+      releaseNotes: 'Bug fixes',
+      releaseNotesLocale: ['de-DE=Fehlerbehebungen'],
+    };
+
+    const buildScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/builds`)
+      .reply(201, { id: buildId, jobId: 'job-1', numberAsString: '42' });
+    const findScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}/builds/${buildId}`)
+      .query({ relations: 'appBuildArtifacts' })
+      .reply(200, { id: buildId, appBuildArtifacts: [] });
+    const deploymentBuildScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}/builds/${buildId}`)
+      .reply(200, { id: buildId, platform: 'android' });
+    const deploymentScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/deployments`, {
+        appId,
+        appBuildId: buildId,
+        appDestinationName: 'Google Play',
+        releaseNotes: { default: 'Bug fixes', 'de-DE': 'Fehlerbehebungen' },
+      })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: 'deployment-1', jobId: 'job-2' });
+
+    await createCommand.action(options, undefined);
+
+    expect(buildScope.isDone()).toBe(true);
+    expect(findScope.isDone()).toBe(true);
+    expect(deploymentBuildScope.isDone()).toBe(true);
+    expect(deploymentScope.isDone()).toBe(true);
+  });
+
   it('should parse a single channel into an array', () => {
     const schema = createCommand.options?.schema;
 

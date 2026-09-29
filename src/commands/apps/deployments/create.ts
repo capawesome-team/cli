@@ -7,6 +7,7 @@ import { isInteractive } from '@/utils/environment.js';
 import { offerJobFailureSummary } from '@/utils/job-failure-summary.js';
 import { waitForJobCompletion } from '@/utils/job.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
+import { parseReleaseNotes } from '@/utils/release-notes.js';
 import consola from 'consola';
 import { z } from 'zod';
 import { defineCommand, defineOptions } from 'zodline';
@@ -39,10 +40,22 @@ export default defineCommand({
         .optional()
         .describe('Request an AI-powered failure summary (Capawesome Cloud Assist) if the deployment fails.'),
       json: z.boolean().optional().describe('Output in JSON format.'),
+      releaseNotes: z.string().optional().describe('Release notes for the deployment (default text).'),
+      releaseNotesFile: z
+        .string()
+        .optional()
+        .describe('Path to a JSON file with release notes by locale, e.g. `{"default": "…", "de-DE": "…"}`.'),
+      releaseNotesLocale: z
+        .array(z.string())
+        .optional()
+        .describe(
+          'Translated release notes as `<locale>=<text>`, e.g. `de-DE=Fehlerbehebungen`. Can be specified multiple times.',
+        ),
     }),
   ),
   action: withAuth(async (options) => {
     let { appId, buildId, buildNumber, channel, destination, json } = options;
+    const releaseNotes = await parseReleaseNotes(options);
 
     // Prompt for app ID if not provided
     if (!appId) {
@@ -168,6 +181,7 @@ export default defineCommand({
       appBuildId: buildId,
       appDestinationName: build.platform === 'web' ? undefined : destination,
       appChannelName: build.platform === 'web' ? channel : undefined,
+      releaseNotes,
     });
     consola.info(`Deployment ID: ${response.id}`);
     consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.id}`);
