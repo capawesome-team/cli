@@ -22,7 +22,7 @@ class AppGoogleServiceAccountKeysServiceImpl implements AppGoogleServiceAccountK
     formData.append('file', dto.buffer, { filename: dto.fileName });
     const response = await this.httpClient.post<AppGoogleServiceAccountKeyDto>(
       `/v1/apps/${dto.appId}/google-service-account-keys`,
-      formData,
+      formData.getBuffer(),
       {
         headers: {
           Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,

@@ -163,6 +163,45 @@ describe('apps-liveupdates-upload', () => {
     expect(mockConsola.success).toHaveBeenCalledWith('Live Update successfully uploaded.');
   });
 
+  it('should resend the file after a network error', async () => {
+    const appId = 'app-123';
+    const bundleId = 'bundle-456';
+
+    const options = {
+      appId,
+      path: './dist',
+      artifactType: 'zip' as const,
+      rollout: 1,
+    };
+
+    mockIsReadable.mockResolvedValue(true);
+    mockIsDirectory.mockResolvedValue(true);
+    mockGetFilesInDirectoryAndSubdirectories.mockResolvedValue([
+      { href: 'index.html', mimeType: 'text/html', name: 'index.html', path: 'index.html' },
+    ]);
+
+    const mockZip = await import('@/utils/zip.js');
+    const mockHash = await import('@/utils/hash.js');
+
+    vi.mocked(mockZip.default.isZipped).mockReturnValue(false);
+    vi.mocked(mockZip.default.zipFolder).mockResolvedValue(Buffer.from('test'));
+    vi.mocked(mockHash.createHash).mockResolvedValue('test-hash');
+
+    nock(DEFAULT_API_BASE_URL).get(`/v1/apps/${appId}`).reply(200, { id: appId, name: 'Test App' });
+    nock(DEFAULT_API_BASE_URL).post(`/v1/apps/${appId}/bundles`).reply(201, { id: bundleId });
+    const uploadScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/bundles/${bundleId}/files`)
+      .replyWithError(Object.assign(new Error('socket hang up'), { code: 'ECONNRESET' }))
+      .post(`/v1/apps/${appId}/bundles/${bundleId}/files`, (body: string) => body.includes('test-hash'))
+      .reply(201, { id: 'file-123' });
+    nock(DEFAULT_API_BASE_URL).patch(`/v1/apps/${appId}/bundles/${bundleId}`).reply(200, { id: bundleId });
+
+    await uploadCommand.action(options, undefined);
+
+    expect(uploadScope.isDone()).toBe(true);
+    expect(mockConsola.success).toHaveBeenCalledWith('Live Update successfully uploaded.');
+  });
+
   it('should pass gitRef to API when provided', async () => {
     const appId = 'app-123';
     const bundlePath = './dist';

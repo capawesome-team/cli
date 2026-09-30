@@ -44,7 +44,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
     formData.append('sizeInBytes', sizeInBytes.toString());
     const response = await this.httpClient.post<AppBundleFileDto>(
       `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files`,
-      formData,
+      formData.getBuffer(),
       {
         headers: {
           Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
@@ -105,7 +105,7 @@ class AppBundleFilesServiceImpl implements AppBundleFilesService {
     return this.httpClient
       .put<AppBundleFileUploadPartDto>(
         `/v1/apps/${dto.appId}/bundles/${dto.appBundleId}/files/${dto.appBundleFileId}/upload?action=mpu-uploadpart&uploadId=${dto.uploadId}`,
-        formData,
+        formData.getBuffer(),
         {
           headers: {
             Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
