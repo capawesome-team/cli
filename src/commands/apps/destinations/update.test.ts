@@ -71,6 +71,78 @@ describe('apps-destinations-update', () => {
     expect(mockConsola.success).toHaveBeenCalledWith('Destination updated successfully.');
   });
 
+  it('should update the Apple submission settings', async () => {
+    const options = {
+      appId,
+      destinationId,
+      appleBetaGroup: ['External Testers,QA'],
+      appleSubmitForReview: false,
+      appleReleaseType: 'manual' as const,
+      appleRejectIfPossible: true,
+    };
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .patch(`/v1/apps/${appId}/destinations/${destinationId}`, {
+        appId,
+        destinationId,
+        appleBetaGroups: ['External Testers', 'QA'],
+        appleRejectIfPossible: true,
+        appleReleaseType: 'manual',
+        appleSubmitForReview: false,
+      })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: destinationId });
+
+    await updateDestinationCommand.action(options, undefined);
+
+    expect(scope.isDone()).toBe(true);
+  });
+
+  it('should update the default language', async () => {
+    const options = { appId, destinationId, defaultLanguage: 'en-US' };
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .patch(`/v1/apps/${appId}/destinations/${destinationId}`, { appId, destinationId, defaultLanguage: 'en-US' })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: destinationId });
+
+    await updateDestinationCommand.action(options, undefined);
+
+    expect(scope.isDone()).toBe(true);
+  });
+
+  it('should clear the default language when `--default-language=` is passed', async () => {
+    const options = { appId, destinationId, defaultLanguage: '' };
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .patch(`/v1/apps/${appId}/destinations/${destinationId}`, { appId, destinationId, defaultLanguage: null })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: destinationId });
+
+    await updateDestinationCommand.action(options, undefined);
+
+    expect(scope.isDone()).toBe(true);
+  });
+
+  it('should parse the boolean Apple flags from `true` and `false` values', () => {
+    const schema = updateDestinationCommand.options?.schema;
+
+    const result = schema?.safeParse({ appleSubmitForReview: 'false', appleRejectIfPossible: true });
+
+    expect(result?.success).toBe(true);
+    expect(result?.data?.appleSubmitForReview).toBe(false);
+    expect(result?.data?.appleRejectIfPossible).toBe(true);
+  });
+
+  it('should reject a boolean Apple flag with an invalid value', () => {
+    const schema = updateDestinationCommand.options?.schema;
+
+    const result = schema?.safeParse({ appleSubmitForReview: 'maybe' });
+
+    expect(result?.success).toBe(false);
+    expect(result?.error?.issues[0]?.message).toBe('Apple submit for review must be either `true` or `false`.');
+  });
+
   it('should clear the Firebase tester groups when `--firebase-tester-group=` is passed', async () => {
     const options = { appId, destinationId, firebaseTesterGroup: [''] };
 

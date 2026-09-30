@@ -1,5 +1,5 @@
 export type AppDestinationType =
-  | 'app-store-connect'
+  | 'apple-app-store-connect'
   | 'firebase-app-distribution'
   | 'google-play'
   | 'huawei-appgallery';
@@ -18,6 +18,10 @@ export interface AppDestinationDto {
   appleApiKeyId: string | null;
   appleIssuerId: string | null;
   appAppleApiKeyId: string | null;
+  appleBetaGroups: string[];
+  appleRejectIfPossible: boolean;
+  appleReleaseType: 'after-approval' | 'manual';
+  appleSubmitForReview: boolean;
   androidPackageName: string | null;
   androidBuildArtifactType: 'aab' | 'apk' | null;
   androidReleaseStatus: 'completed' | 'draft' | null;
@@ -27,6 +31,7 @@ export interface AppDestinationDto {
   firebaseTesterGroups: string[];
   huaweiAppId: string | null;
   huaweiClientId: string | null;
+  defaultLanguage: string | null;
   createdAt: string;
   createdBy: string;
   updatedAt: string;
@@ -45,6 +50,10 @@ export interface CreateAppDestinationDto {
   appleApiKeyId?: string;
   appleIssuerId?: string;
   appAppleApiKeyId?: string;
+  appleBetaGroups?: string[];
+  appleRejectIfPossible?: boolean;
+  appleReleaseType?: 'after-approval' | 'manual';
+  appleSubmitForReview?: boolean;
   androidPackageName?: string;
   androidBuildArtifactType?: 'aab' | 'apk';
   androidReleaseStatus?: 'completed' | 'draft';
@@ -55,6 +64,7 @@ export interface CreateAppDestinationDto {
   huaweiAppId?: string;
   huaweiClientId?: string;
   huaweiClientSecret?: string;
+  defaultLanguage?: string;
 }
 
 export interface UpdateAppDestinationDto {
@@ -68,6 +78,10 @@ export interface UpdateAppDestinationDto {
   appleApiKeyId?: string;
   appleIssuerId?: string;
   appAppleApiKeyId?: string;
+  appleBetaGroups?: string[];
+  appleRejectIfPossible?: boolean;
+  appleReleaseType?: 'after-approval' | 'manual';
+  appleSubmitForReview?: boolean;
   androidPackageName?: string;
   androidBuildArtifactType?: 'aab' | 'apk';
   androidReleaseStatus?: 'completed' | 'draft';
@@ -78,6 +92,7 @@ export interface UpdateAppDestinationDto {
   huaweiAppId?: string;
   huaweiClientId?: string;
   huaweiClientSecret?: string;
+  defaultLanguage?: string | null;
 }
 
 export interface DeleteAppDestinationDto {

@@ -12,6 +12,7 @@ import gitConnectionsService from '@/services/git-connections.js';
 import { AppImport, generateUniqueName, isNameTaken, SkippedAppImport } from '@/utils/app-import.js';
 import { parseAppflowExport } from '@/utils/appflow-export.js';
 import { withAuth } from '@/utils/auth.js';
+import { parseListOption } from '@/utils/cli-options.js';
 import { isInteractive } from '@/utils/environment.js';
 import { getMessageFromUnknownError, UserError } from '@/utils/error.js';
 import { isReadable } from '@/utils/file.js';
@@ -181,10 +182,7 @@ const selectApps = async (
   skippedApps: SkippedAppImport[],
   include: string[] | undefined,
 ): Promise<{ selectedApps: AppImport[]; selectedSkippedApps: SkippedAppImport[] }> => {
-  const filters = include
-    ?.flatMap((value) => value.split(','))
-    .map((value) => value.trim())
-    .filter((value) => value.length > 0);
+  const filters = parseListOption(include);
   if (filters && filters.length > 0) {
     const matchesFilter = (sourceId: string, sourceName: string): boolean =>
       filters.some((filter) => filter === sourceId || filter === sourceName);

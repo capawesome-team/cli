@@ -1,6 +1,6 @@
 import appDestinationsService from '@/services/app-destinations.js';
-import { parseFirebaseTesterGroups } from '@/utils/app-destinations.js';
 import { withAuth } from '@/utils/auth.js';
+import { clearableValue, parseListOption } from '@/utils/cli-options.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import consola from 'consola';
@@ -21,6 +21,28 @@ export default defineCommand({
       appleApiKeyId: z.string().optional().describe('Apple API Key ID for the destination.'),
       appleIssuerId: z.string().optional().describe('Apple Issuer ID for the destination.'),
       appAppleApiKeyId: z.string().optional().describe('App Apple API Key ID for the destination.'),
+      appleBetaGroup: z
+        .array(z.string())
+        .optional()
+        .describe(
+          'Name of an external TestFlight beta group to distribute to. Can be specified multiple times or comma-separated. Pass `--apple-beta-group=` to remove all groups.',
+        ),
+      appleSubmitForReview: z
+        .union([z.boolean(), z.stringbool()], {
+          message: 'Apple submit for review must be either `true` or `false`.',
+        })
+        .optional()
+        .describe('Submit the build for App Review after the upload (App Store Connect only, requires an API key).'),
+      appleReleaseType: z
+        .enum(['after-approval', 'manual'])
+        .optional()
+        .describe('Release type of the App Store version after approval (App Store Connect only).'),
+      appleRejectIfPossible: z
+        .union([z.boolean(), z.stringbool()], {
+          message: 'Apple reject if possible must be either `true` or `false`.',
+        })
+        .optional()
+        .describe('Cancel a submission waiting for review before submitting the new build (App Store Connect only).'),
       androidPackageName: z.string().optional().describe('Android package name for the destination.'),
       androidBuildArtifactType: z.enum(['aab', 'apk']).optional().describe('Android build artifact type (aab, apk).'),
       androidReleaseStatus: z
@@ -45,6 +67,12 @@ export default defineCommand({
         .string()
         .optional()
         .describe('Huawei AppGallery Connect API client secret for the destination.'),
+      defaultLanguage: z
+        .string()
+        .optional()
+        .describe(
+          'Language of the default release notes text, e.g. `en-US` (Google Play and Huawei AppGallery only). Pass `--default-language=` to clear it.',
+        ),
     }),
   ),
   action: withAuth(async (options, args) => {
@@ -59,6 +87,10 @@ export default defineCommand({
       appleApiKeyId,
       appleIssuerId,
       appAppleApiKeyId,
+      appleBetaGroup,
+      appleSubmitForReview,
+      appleReleaseType,
+      appleRejectIfPossible,
       androidPackageName,
       androidBuildArtifactType,
       androidReleaseStatus,
@@ -69,6 +101,7 @@ export default defineCommand({
       huaweiAppId,
       huaweiClientId,
       huaweiClientSecret,
+      defaultLanguage,
     } = options;
 
     if (!appId) {
@@ -98,16 +131,21 @@ export default defineCommand({
       appleApiKeyId,
       appleIssuerId,
       appAppleApiKeyId,
+      appleBetaGroups: parseListOption(appleBetaGroup),
+      appleRejectIfPossible,
+      appleReleaseType,
+      appleSubmitForReview,
       androidPackageName,
       androidBuildArtifactType,
       androidReleaseStatus,
       appGoogleServiceAccountKeyId,
       googlePlayTrack,
       firebaseAppId,
-      firebaseTesterGroups: parseFirebaseTesterGroups(firebaseTesterGroup),
+      firebaseTesterGroups: parseListOption(firebaseTesterGroup),
       huaweiAppId,
       huaweiClientId,
       huaweiClientSecret,
+      defaultLanguage: clearableValue(defaultLanguage),
     });
     consola.success('Destination updated successfully.');
   }),

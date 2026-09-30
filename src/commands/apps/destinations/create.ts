@@ -3,8 +3,8 @@ import appDestinationsService from '@/services/app-destinations.js';
 import appGoogleServiceAccountKeysService from '@/services/app-google-service-account-keys.js';
 import appsService from '@/services/apps.js';
 import { AppDestinationType } from '@/types/app-destination.js';
-import { parseFirebaseTesterGroups } from '@/utils/app-destinations.js';
 import { withAuth } from '@/utils/auth.js';
+import { parseListOption } from '@/utils/cli-options.js';
 import { isInteractive } from '@/utils/environment.js';
 import { isReadable } from '@/utils/file.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
@@ -23,10 +23,16 @@ export default defineCommand({
       name: z.string().optional().describe('Name of the destination.'),
       platform: z.enum(['android', 'ios']).optional().describe('Platform of the destination (android, ios).'),
       type: z
-        .enum(['app-store-connect', 'firebase-app-distribution', 'google-play', 'huawei-appgallery'])
+        .enum([
+          'app-store-connect',
+          'apple-app-store-connect',
+          'firebase-app-distribution',
+          'google-play',
+          'huawei-appgallery',
+        ])
         .optional()
         .describe(
-          'Type of the destination (app-store-connect, firebase-app-distribution, google-play, huawei-appgallery). Defaults to `google-play` for android and `app-store-connect` for ios in non-interactive environments.',
+          'Type of the destination (apple-app-store-connect, firebase-app-distribution, google-play, huawei-appgallery). Defaults to `google-play` for android and `apple-app-store-connect` for ios in non-interactive environments.',
         ),
       appleId: z.string().optional().describe('Apple ID for the destination.'),
       appleAppId: z.string().optional().describe('Apple App ID for the destination.'),
@@ -34,6 +40,28 @@ export default defineCommand({
       appleAppPassword: z.string().optional().describe('Apple app-specific password for the destination.'),
       appleApiKeyFile: z.string().optional().describe('Path to the Apple API key (.p8) file.'),
       appleIssuerId: z.string().optional().describe('Apple Issuer ID for the destination.'),
+      appleBetaGroup: z
+        .array(z.string())
+        .optional()
+        .describe(
+          'Name of an external TestFlight beta group to distribute to. Can be specified multiple times or comma-separated.',
+        ),
+      appleSubmitForReview: z
+        .union([z.boolean(), z.stringbool()], {
+          message: 'Apple submit for review must be either `true` or `false`.',
+        })
+        .optional()
+        .describe('Submit the build for App Review after the upload (App Store Connect only, requires an API key).'),
+      appleReleaseType: z
+        .enum(['after-approval', 'manual'])
+        .optional()
+        .describe('Release type of the App Store version after approval (App Store Connect only).'),
+      appleRejectIfPossible: z
+        .union([z.boolean(), z.stringbool()], {
+          message: 'Apple reject if possible must be either `true` or `false`.',
+        })
+        .optional()
+        .describe('Cancel a submission waiting for review before submitting the new build (App Store Connect only).'),
       androidPackageName: z.string().optional().describe('Android package name for the destination.'),
       androidBuildArtifactType: z.enum(['aab', 'apk']).optional().describe('Android build artifact type (aab, apk).'),
       androidReleaseStatus: z
@@ -55,6 +83,10 @@ export default defineCommand({
         .string()
         .optional()
         .describe('Huawei AppGallery Connect API client secret for the destination.'),
+      defaultLanguage: z
+        .string()
+        .optional()
+        .describe('Language of the default release notes text, e.g. `en-US` (Google Play and Huawei AppGallery only).'),
     }),
   ),
   action: withAuth(async (options, args) => {
@@ -70,6 +102,10 @@ export default defineCommand({
       appleAppPassword,
       appleApiKeyFile,
       appleIssuerId,
+      appleBetaGroup,
+      appleSubmitForReview,
+      appleReleaseType,
+      appleRejectIfPossible,
       androidPackageName,
       androidBuildArtifactType,
       androidReleaseStatus,
@@ -80,7 +116,13 @@ export default defineCommand({
       huaweiAppId,
       huaweiClientId,
       huaweiClientSecret,
+      defaultLanguage,
     } = options;
+
+    if (type === 'app-store-connect') {
+      consola.warn('The destination type `app-store-connect` is deprecated. Use `apple-app-store-connect` instead.');
+      type = 'apple-app-store-connect';
+    }
     let appleApiKeyId: string | undefined;
     let appAppleApiKeyId: string | undefined;
     let appGoogleServiceAccountKeyId: string | undefined;
@@ -236,7 +278,7 @@ export default defineCommand({
       appGoogleServiceAccountKeyId = await uploadGoogleServiceAccountKeyFile(appId, googleServiceAccountKeyFile);
     }
 
-    if (type === 'app-store-connect') {
+    if (type === 'apple-app-store-connect') {
       // 9. Ask for authentication method
       let authMethod: string | undefined;
       if (appleApiKeyFile || appleIssuerId) {
@@ -381,16 +423,21 @@ export default defineCommand({
       appleApiKeyId,
       appleIssuerId,
       appAppleApiKeyId,
+      appleBetaGroups: parseListOption(appleBetaGroup),
+      appleRejectIfPossible,
+      appleReleaseType,
+      appleSubmitForReview,
       androidPackageName,
       androidBuildArtifactType,
       androidReleaseStatus,
       appGoogleServiceAccountKeyId,
       googlePlayTrack,
       firebaseAppId,
-      firebaseTesterGroups: parseFirebaseTesterGroups(firebaseTesterGroup),
+      firebaseTesterGroups: parseListOption(firebaseTesterGroup),
       huaweiAppId,
       huaweiClientId,
       huaweiClientSecret,
+      defaultLanguage,
     });
     if (json) {
       console.log(JSON.stringify({ id: response.id }, null, 2));
@@ -408,14 +455,14 @@ const destinationTypeOptionsByPlatform: Record<'android' | 'ios', { label: strin
     { label: 'Huawei AppGallery', value: 'huawei-appgallery' },
   ],
   ios: [
-    { label: 'App Store Connect', value: 'app-store-connect' },
+    { label: 'App Store Connect', value: 'apple-app-store-connect' },
     { label: 'Firebase App Distribution', value: 'firebase-app-distribution' },
   ],
 };
 
 const defaultDestinationTypeByPlatform: Record<'android' | 'ios', AppDestinationType> = {
   android: 'google-play',
-  ios: 'app-store-connect',
+  ios: 'apple-app-store-connect',
 };
 
 const promptRequiredText = async (label: string): Promise<string> => {

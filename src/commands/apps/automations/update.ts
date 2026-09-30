@@ -1,12 +1,11 @@
 import appAutomationsService from '@/services/app-automations.js';
 import { withAuth } from '@/utils/auth.js';
+import { clearableValue } from '@/utils/cli-options.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import consola from 'consola';
 import { z } from 'zod';
 import { defineCommand, defineOptions } from 'zodline';
-
-const clearableValue = (value: string | undefined): string | null | undefined => (value === '' ? null : value);
 
 const clearableValues = (values: string[] | undefined): string[] | undefined => values?.filter((value) => value !== '');
 

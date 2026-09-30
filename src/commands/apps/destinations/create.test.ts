@@ -28,6 +28,7 @@ describe('apps-destinations-create', () => {
   const appId = 'app-123';
   const destinationId = 'destination-456';
   const googleServiceAccountKeyId = 'key-789';
+  const appleApiKeyId = 'apple-key-012';
   const testToken = 'test-token';
   let tempDirectory: string;
   let googleServiceAccountKeyFile: string;
@@ -66,6 +67,7 @@ describe('apps-destinations-create', () => {
       huaweiClientSecret: 'client-secret',
       androidBuildArtifactType: 'aab' as const,
       androidReleaseStatus: 'draft' as const,
+      defaultLanguage: 'en-US',
     };
 
     const scope = nock(DEFAULT_API_BASE_URL)
@@ -79,6 +81,7 @@ describe('apps-destinations-create', () => {
         huaweiAppId: '112233445',
         huaweiClientId: 'client-id',
         huaweiClientSecret: 'client-secret',
+        defaultLanguage: 'en-US',
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(201, { id: destinationId });
@@ -87,6 +90,105 @@ describe('apps-destinations-create', () => {
 
     expect(scope.isDone()).toBe(true);
     expect(mockConsola.success).toHaveBeenCalledWith('Destination created successfully.');
+  });
+
+  it('should create an App Store Connect destination with the Apple submission settings', async () => {
+    mockIsInteractive.mockReturnValue(true);
+    mockPrompt.mockResolvedValueOnce('ABC123DEFG');
+    const appleApiKeyFile = path.join(tempDirectory, 'AuthKey.p8');
+    await fs.writeFile(appleApiKeyFile, 'private-key');
+    const options = {
+      appId,
+      name: 'App Store',
+      platform: 'ios' as const,
+      type: 'apple-app-store-connect' as const,
+      appleApiKeyFile,
+      appleIssuerId: 'issuer-id',
+      appleTeamId: 'team-id',
+      appleBetaGroup: ['External Testers, QA'],
+      appleSubmitForReview: true,
+      appleReleaseType: 'after-approval' as const,
+      appleRejectIfPossible: false,
+    };
+
+    const keyScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/apple-api-keys`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: appleApiKeyId });
+    const destinationScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/destinations`, {
+        appId,
+        name: 'App Store',
+        platform: 'ios',
+        type: 'apple-app-store-connect',
+        appleTeamId: 'team-id',
+        appleApiKeyId: 'ABC123DEFG',
+        appleIssuerId: 'issuer-id',
+        appAppleApiKeyId: appleApiKeyId,
+        appleBetaGroups: ['External Testers', 'QA'],
+        appleRejectIfPossible: false,
+        appleReleaseType: 'after-approval',
+        appleSubmitForReview: true,
+      })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: destinationId });
+
+    await createDestinationCommand.action(options, undefined);
+
+    expect(keyScope.isDone()).toBe(true);
+    expect(destinationScope.isDone()).toBe(true);
+    expect(mockPrompt).toHaveBeenCalledTimes(1);
+  });
+
+  it('should map the deprecated destination type app-store-connect to apple-app-store-connect', async () => {
+    mockIsInteractive.mockReturnValue(true);
+    mockPrompt.mockResolvedValueOnce('ABC123DEFG');
+    const appleApiKeyFile = path.join(tempDirectory, 'AuthKey.p8');
+    await fs.writeFile(appleApiKeyFile, 'private-key');
+    const options = {
+      appId,
+      name: 'App Store',
+      platform: 'ios' as const,
+      type: 'app-store-connect' as const,
+      appleApiKeyFile,
+      appleIssuerId: 'issuer-id',
+      appleTeamId: 'team-id',
+      appleBetaGroup: ['External Testers, QA'],
+      appleSubmitForReview: true,
+      appleReleaseType: 'after-approval' as const,
+      appleRejectIfPossible: false,
+    };
+
+    const keyScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/apple-api-keys`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: appleApiKeyId });
+    const destinationScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/destinations`, {
+        appId,
+        name: 'App Store',
+        platform: 'ios',
+        type: 'apple-app-store-connect',
+        appleTeamId: 'team-id',
+        appleApiKeyId: 'ABC123DEFG',
+        appleIssuerId: 'issuer-id',
+        appAppleApiKeyId: appleApiKeyId,
+        appleBetaGroups: ['External Testers', 'QA'],
+        appleRejectIfPossible: false,
+        appleReleaseType: 'after-approval',
+        appleSubmitForReview: true,
+      })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: destinationId });
+
+    await createDestinationCommand.action(options, undefined);
+
+    expect(keyScope.isDone()).toBe(true);
+    expect(destinationScope.isDone()).toBe(true);
+    expect(mockPrompt).toHaveBeenCalledTimes(1);
+    expect(mockConsola.warn).toHaveBeenCalledWith(
+      'The destination type `app-store-connect` is deprecated. Use `apple-app-store-connect` instead.',
+    );
   });
 
   it('should create a Firebase App Distribution destination for iOS', async () => {
@@ -152,7 +254,7 @@ describe('apps-destinations-create', () => {
     await expect(createDestinationCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
 
     expect(mockConsola.error).toHaveBeenCalledWith(
-      'The destination type `huawei-appgallery` is not supported for the ios platform. Supported types: app-store-connect, firebase-app-distribution.',
+      'The destination type `huawei-appgallery` is not supported for the ios platform. Supported types: apple-app-store-connect, firebase-app-distribution.',
     );
   });
 
@@ -225,7 +327,7 @@ describe('apps-destinations-create', () => {
     expect(mockPrompt).toHaveBeenCalledWith('Select the destination type:', {
       type: 'select',
       options: [
-        { label: 'App Store Connect', value: 'app-store-connect' },
+        { label: 'App Store Connect', value: 'apple-app-store-connect' },
         { label: 'Firebase App Distribution', value: 'firebase-app-distribution' },
       ],
     });

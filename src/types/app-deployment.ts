@@ -11,6 +11,7 @@ export interface AppDeploymentDto {
   appChannelName?: string;
   jobId: string;
   job?: JobDto;
+  releaseNotes?: Record<string, string> | null;
   rolloutPercentage?: number;
 }
 
@@ -19,6 +20,7 @@ export interface CreateAppDeploymentDto {
   appBuildId: string;
   appDestinationName?: string;
   appChannelName?: string;
+  releaseNotes?: Record<string, string>;
   rolloutPercentage?: number;
 }
 
