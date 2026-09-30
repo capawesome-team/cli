@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.23.0](https://github.com/capawesome-team/cli/compare/v4.22.0...v4.23.0) (2026-09-30)
+
+
+### Features
+
+* **apps:** add release notes and App Store submission flags ([#232](https://github.com/capawesome-team/cli/issues/232)) ([e32b057](https://github.com/capawesome-team/cli/commit/e32b057e0b06cd4e78c1d6c0dba25bceb2323e7e))
+* **apps:** support Huawei AppGallery and Firebase App Distribution destinations ([#229](https://github.com/capawesome-team/cli/issues/229)) ([78d3859](https://github.com/capawesome-team/cli/commit/78d38595feebfc5d1f81ca411ec6fe1aa5f7943f))
+* deploy builds to channels server-side and support multiple channels ([#210](https://github.com/capawesome-team/cli/issues/210)) ([c1722b9](https://github.com/capawesome-team/cli/commit/c1722b9d40b3d491228cedae95ee8e7a172d2cd9))
+
+
+### Bug Fixes
+
+* **apps:** rename Appflow tool version variables on import ([#230](https://github.com/capawesome-team/cli/issues/230)) ([b155a3a](https://github.com/capawesome-team/cli/commit/b155a3aa0eb62a67f922bb9783bf0740f345ffe0))
+
 ## [4.22.0](https://github.com/capawesome-team/cli/compare/v4.21.0...v4.22.0) (2026-09-24)
 
 
