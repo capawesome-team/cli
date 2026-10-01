@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.23.1](https://github.com/capawesome-team/cli/compare/v4.23.0...v4.23.1) (2026-10-01)
+
+
+### Bug Fixes
+
+* resend the request body when retrying uploads ([#234](https://github.com/capawesome-team/cli/issues/234)) ([be2dc8f](https://github.com/capawesome-team/cli/commit/be2dc8f210a26e230ab9cbffe6b50de2c5cc7514))
+
 ## [4.23.0](https://github.com/capawesome-team/cli/compare/v4.22.0...v4.23.0) (2026-09-30)
 
 
