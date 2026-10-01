@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.24.0](https://github.com/capawesome-team/cli/compare/v4.23.1...v4.24.0) (2026-10-01)
+
+
+### Features
+
+* **apps:** add the `apps:update` command ([#237](https://github.com/capawesome-team/cli/issues/237)) ([274cd09](https://github.com/capawesome-team/cli/commit/274cd09ce2898aa309d2a6613d059e8fa999e5d9))
+
 ## [4.23.1](https://github.com/capawesome-team/cli/compare/v4.23.0...v4.23.1) (2026-10-01)
 
 
