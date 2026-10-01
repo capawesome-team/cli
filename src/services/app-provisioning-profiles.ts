@@ -27,7 +27,7 @@ class AppProvisioningProfilesServiceImpl implements AppProvisioningProfilesServi
     }
     const response = await this.httpClient.post<AppProvisioningProfileDto>(
       `/v1/apps/${dto.appId}/provisioning-profiles`,
-      formData,
+      formData.getBuffer(),
       {
         headers: {
           Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,

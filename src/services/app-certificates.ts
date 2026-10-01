@@ -39,12 +39,16 @@ class AppCertificatesServiceImpl implements AppCertificatesService {
     if (dto.keyPassword) {
       formData.append('keyPassword', dto.keyPassword);
     }
-    const response = await this.httpClient.post<AppCertificateDto>(`/v1/apps/${dto.appId}/certificates`, formData, {
-      headers: {
-        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
-        ...formData.getHeaders(),
+    const response = await this.httpClient.post<AppCertificateDto>(
+      `/v1/apps/${dto.appId}/certificates`,
+      formData.getBuffer(),
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+          ...formData.getHeaders(),
+        },
       },
-    });
+    );
     return response.data;
   }
 

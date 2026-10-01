@@ -17,12 +17,16 @@ class AppAppleApiKeysServiceImpl implements AppAppleApiKeysService {
   async create(dto: CreateAppAppleApiKeyDto): Promise<AppAppleApiKeyDto> {
     const formData = new FormData();
     formData.append('file', dto.buffer, { filename: dto.fileName });
-    const response = await this.httpClient.post<AppAppleApiKeyDto>(`/v1/apps/${dto.appId}/apple-api-keys`, formData, {
-      headers: {
-        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
-        ...formData.getHeaders(),
+    const response = await this.httpClient.post<AppAppleApiKeyDto>(
+      `/v1/apps/${dto.appId}/apple-api-keys`,
+      formData.getBuffer(),
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+          ...formData.getHeaders(),
+        },
       },
-    });
+    );
     return response.data;
   }
 }

@@ -94,7 +94,7 @@ class AppBuildSourcesServiceImpl implements AppBuildSourcesService {
     return this.httpClient
       .put<AppBuildSourceUploadPartDto>(
         `/v1/apps/${dto.appId}/build-sources/${dto.appBuildSourceId}/upload?action=mpu-uploadpart&uploadId=${dto.uploadId}`,
-        formData,
+        formData.getBuffer(),
         {
           headers: {
             Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
