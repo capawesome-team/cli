@@ -33,6 +33,7 @@ const config = defineConfig({
     'apps:list': await import('@/commands/apps/list.js').then((mod) => mod.default),
     'apps:transfer': await import('@/commands/apps/transfer.js').then((mod) => mod.default),
     'apps:unlink': await import('@/commands/apps/unlink.js').then((mod) => mod.default),
+    'apps:update': await import('@/commands/apps/update.js').then((mod) => mod.default),
     'apps:automations:create': await import('@/commands/apps/automations/create.js').then((mod) => mod.default),
     'apps:automations:delete': await import('@/commands/apps/automations/delete.js').then((mod) => mod.default),
     'apps:automations:get': await import('@/commands/apps/automations/get.js').then((mod) => mod.default),

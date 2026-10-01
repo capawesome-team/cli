@@ -1,4 +1,5 @@
-export const clearableValue = (value: string | undefined): string | null | undefined => (value === '' ? null : value);
+export const clearableValue = <T extends string>(value: T | '' | undefined): T | null | undefined =>
+  value === '' ? null : value;
 
 export const parseListOption = (values: string[] | undefined): string[] | undefined => {
   return values

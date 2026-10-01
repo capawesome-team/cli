@@ -28,6 +28,8 @@ export interface AppBuildDto {
   type: string;
 }
 
+export type AppBuildStack = 'macos-sequoia' | 'macos-tahoe' | 'macos-golden-gate';
+
 export interface CreateAppBuildDto {
   adHocEnvironmentVariables?: Record<string, string>;
   appBuildSourceId?: string;
@@ -36,7 +38,7 @@ export interface CreateAppBuildDto {
   appConfigurationName?: string;
   appEnvironmentName?: string;
   appId: string;
-  stack?: 'macos-sequoia' | 'macos-tahoe' | 'macos-golden-gate';
+  stack?: AppBuildStack;
   gitRef?: string;
   platform: 'ios' | 'android' | 'web';
   type?: string;
