@@ -73,7 +73,7 @@
     "semver": "7.6.3",
     "systeminformation": "5.31.17",
     "zod": "4.0.17",
-    "zodline": "0.3.0"
+    "zodline": "0.3.2"
   },
   "devDependencies": {
     "@ionic/prettier-config": "4.0.0",

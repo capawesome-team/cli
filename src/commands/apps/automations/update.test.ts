@@ -88,6 +88,23 @@ describe('apps-automations-update', () => {
     expect(mockConsola.success).toHaveBeenCalledWith('Automation updated successfully.');
   });
 
+  it('should clear the build stack when an empty string is passed', async () => {
+    const appId = 'app-123';
+    const automationId = 'automation-456';
+
+    const options = { appId, automationId, stack: '' as const };
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .patch(`/v1/apps/${appId}/automations/${automationId}`, { buildStack: null })
+      .matchHeader('Authorization', 'Bearer test-token')
+      .reply(204);
+
+    await updateAutomationCommand.action(options, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    expect(mockConsola.success).toHaveBeenCalledWith('Automation updated successfully.');
+  });
+
   it('should output JSON when json flag is set', async () => {
     const appId = 'app-123';
     const automationId = 'automation-456';

@@ -1,3 +1,5 @@
+import { AppBuildStack } from './app-build.js';
+
 export interface AppDto {
   id: string;
   name: string;
@@ -39,8 +41,15 @@ export interface TransferAppDto {
 }
 
 export interface UpdateAppDto {
+  appChannelDiscoveryEnabled?: boolean;
+  appChannelName?: string | null;
+  appConfigurationName?: string | null;
+  appEnvironmentName?: string | null;
   appId: string;
+  buildStack?: AppBuildStack | null;
+  name?: string;
   nextAppBuildNumber?: number;
+  type?: AppType;
 }
 
 export interface UnlinkAppRepositoryDto {

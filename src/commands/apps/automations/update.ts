@@ -50,11 +50,13 @@ export default defineCommand({
         .optional()
         .describe('The platform for the build. Supported values are `android`, `ios`, and `web`.'),
       stack: z
-        .enum(['macos-sequoia', 'macos-tahoe', 'macos-golden-gate'], {
+        .union([z.enum(['macos-sequoia', 'macos-tahoe', 'macos-golden-gate']), z.literal('')], {
           message: 'Build stack must be one of `macos-sequoia`, `macos-tahoe`, or `macos-golden-gate`.',
         })
         .optional()
-        .describe('The build stack to use for the build process.'),
+        .describe(
+          "The build stack to use for the build process. Pass an empty string to use the app's default build stack.",
+        ),
       triggerPattern: z
         .array(z.string())
         .optional()
@@ -113,7 +115,7 @@ export default defineCommand({
       appEnvironmentName: clearableValue(options.environment),
       appId,
       automationId,
-      buildStack: options.stack,
+      buildStack: clearableValue(options.stack),
       buildType: options.type,
       commitMessagePattern: clearableValue(options.commitMessagePattern),
       name: options.name,
