@@ -28,7 +28,7 @@ export interface AppImportAutomation {
   buildType?: string;
   enabled: boolean;
   appCertificateName?: string;
-  appChannelName?: string;
+  appChannelNames?: string[];
   appConfigurationName?: string;
   appDestinationName?: string;
   appEnvironmentName?: string;

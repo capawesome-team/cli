@@ -463,7 +463,7 @@ const importApp = async (
         buildType: automation.buildType,
         enabled: automation.enabled,
         appCertificateName: automation.appCertificateName,
-        appChannelName: automation.appChannelName,
+        appChannelNames: automation.appChannelNames,
         appConfigurationName: automation.appConfigurationName,
         appDestinationName: automation.appDestinationName,
         appEnvironmentName: automation.appEnvironmentName,

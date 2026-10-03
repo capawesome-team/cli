@@ -541,26 +541,14 @@ const parseAutomations = (
       'environment',
       notes,
     );
-    if (channelNames.length === 0) {
-      automations.push({
-        name: automation.name,
-        platform: 'web',
-        triggerPattern: automation.gitBranch,
-        enabled: automation.automationEnabled,
-        appEnvironmentName,
-      });
-      continue;
-    }
-    for (const channelName of channelNames) {
-      automations.push({
-        name: channelNames.length > 1 ? `${automation.name} (${channelName})` : automation.name,
-        platform: 'web',
-        triggerPattern: automation.gitBranch,
-        enabled: automation.automationEnabled,
-        appChannelName: channelName,
-        appEnvironmentName,
-      });
-    }
+    automations.push({
+      name: automation.name,
+      platform: 'web',
+      triggerPattern: automation.gitBranch,
+      enabled: automation.automationEnabled,
+      appChannelNames: channelNames,
+      appEnvironmentName,
+    });
   }
   return automations;
 };

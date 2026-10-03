@@ -88,6 +88,40 @@ describe('apps-automations-update', () => {
     expect(mockConsola.success).toHaveBeenCalledWith('Automation updated successfully.');
   });
 
+  it('should send the channels as appChannelNames', async () => {
+    const appId = 'app-123';
+    const automationId = 'automation-456';
+
+    const options = { appId, automationId, channel: ['beta, alpha', 'gamma'] };
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .patch(`/v1/apps/${appId}/automations/${automationId}`, { appChannelNames: ['beta', 'alpha', 'gamma'] })
+      .matchHeader('Authorization', 'Bearer test-token')
+      .reply(204);
+
+    await updateAutomationCommand.action(options, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    expect(mockConsola.success).toHaveBeenCalledWith('Automation updated successfully.');
+  });
+
+  it('should clear the channels when an empty string is passed', async () => {
+    const appId = 'app-123';
+    const automationId = 'automation-456';
+
+    const options = { appId, automationId, channel: [''] };
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .patch(`/v1/apps/${appId}/automations/${automationId}`, { appChannelNames: [] })
+      .matchHeader('Authorization', 'Bearer test-token')
+      .reply(204);
+
+    await updateAutomationCommand.action(options, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    expect(mockConsola.success).toHaveBeenCalledWith('Automation updated successfully.');
+  });
+
   it('should clear the build stack when an empty string is passed', async () => {
     const appId = 'app-123';
     const automationId = 'automation-456';

@@ -197,19 +197,11 @@ describe('appflow-export', () => {
         appEnvironmentName: undefined,
       },
       {
-        name: 'Web Prod (Staging)',
+        name: 'Web Prod',
         platform: 'web',
         triggerPattern: 'main',
         enabled: true,
-        appChannelName: 'Staging',
-        appEnvironmentName: 'Production',
-      },
-      {
-        name: 'Web Prod (Production)',
-        platform: 'web',
-        triggerPattern: 'main',
-        enabled: true,
-        appChannelName: 'Production',
+        appChannelNames: ['Staging', 'Production'],
         appEnvironmentName: 'Production',
       },
     ]);

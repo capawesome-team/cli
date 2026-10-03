@@ -6,7 +6,7 @@ export interface AppAutomationDto {
   id: string;
   appId: string;
   appCertificateId: string | null;
-  appChannelId: string | null;
+  appChannelIds: string[];
   appConfigurationId: string | null;
   appDestinationId: string | null;
   appEnvironmentId: string | null;
@@ -28,7 +28,7 @@ export interface AppAutomationDto {
 export interface CreateAppAutomationDto {
   appId: string;
   appCertificateName?: string | null;
-  appChannelName?: string | null;
+  appChannelNames?: string[];
   appConfigurationName?: string | null;
   appDestinationName?: string | null;
   appEnvironmentName?: string | null;
@@ -46,7 +46,7 @@ export interface UpdateAppAutomationDto {
   appId: string;
   automationId: string;
   appCertificateName?: string | null;
-  appChannelName?: string | null;
+  appChannelNames?: string[];
   appConfigurationName?: string | null;
   appDestinationName?: string | null;
   appEnvironmentName?: string | null;
