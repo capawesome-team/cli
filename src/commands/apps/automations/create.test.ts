@@ -80,6 +80,62 @@ describe('apps-automations-create', () => {
     expect(mockConsola.success).toHaveBeenCalledWith('Automation created successfully.');
   });
 
+  it('should send the channels as appChannelNames', async () => {
+    const appId = 'app-123';
+    const automationId = 'automation-456';
+
+    const options = {
+      appId,
+      channel: ['beta', 'alpha'],
+      name: 'nightly',
+      platform: 'web' as const,
+      triggerType: 'branch' as const,
+    };
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/automations`, {
+        appChannelNames: ['beta', 'alpha'],
+        name: 'nightly',
+        platform: 'web',
+        triggerType: 'branch',
+      })
+      .matchHeader('Authorization', 'Bearer test-token')
+      .reply(201, { id: automationId, name: 'nightly' });
+
+    await createAutomationCommand.action(options, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    expect(mockConsola.success).toHaveBeenCalledWith('Automation created successfully.');
+  });
+
+  it('should split comma-separated channels into separate appChannelNames', async () => {
+    const appId = 'app-123';
+    const automationId = 'automation-456';
+
+    const options = {
+      appId,
+      channel: ['beta, alpha'],
+      name: 'nightly',
+      platform: 'web' as const,
+      triggerType: 'branch' as const,
+    };
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/automations`, {
+        appChannelNames: ['beta', 'alpha'],
+        name: 'nightly',
+        platform: 'web',
+        triggerType: 'branch',
+      })
+      .matchHeader('Authorization', 'Bearer test-token')
+      .reply(201, { id: automationId, name: 'nightly' });
+
+    await createAutomationCommand.action(options, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    expect(mockConsola.success).toHaveBeenCalledWith('Automation created successfully.');
+  });
+
   it('should output JSON when json flag is set', async () => {
     const appId = 'app-123';
     const automationId = 'automation-456';

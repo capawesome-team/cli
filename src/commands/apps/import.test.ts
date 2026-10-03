@@ -109,7 +109,18 @@ describe('apps-import', () => {
               destinationId: null,
             },
           ],
-          'web-build-automations.json': [],
+          'web-build-automations.json': [
+            {
+              name: 'Web Prod',
+              gitBranch: 'main',
+              platform: 'web-deploy',
+              environmentId: null,
+              webhook: null,
+              automationEnabled: true,
+              channelIds: ['channel-uuid'],
+              webPreviewEnabled: false,
+            },
+          ],
           'signing-certificates/android/Debug-3/android-signing-certificate.json': {
             id: 3,
             name: 'Debug',
@@ -163,6 +174,14 @@ describe('apps-import', () => {
         );
       })
       .reply(201, { id: 'automation-1', name: 'Android Release' })
+      .post(`/v1/apps/${appId}/automations`, (body) => {
+        return (
+          body.name === 'Web Prod' &&
+          body.platform === 'web' &&
+          JSON.stringify(body.appChannelNames) === JSON.stringify(['Production'])
+        );
+      })
+      .reply(201, { id: 'automation-2', name: 'Web Prod' })
       .get(`/v1/organizations/${organizationId}/git-connections`)
       .query({ provider: 'github', restricted: 'false', limit: 1 })
       .reply(200, [{ id: 'git-connection-1', provider: 'github' }])
@@ -183,7 +202,7 @@ describe('apps-import', () => {
       name: 'My App',
       sourceId: '6668c18c',
       sourceName: 'My App',
-      created: { automations: 1, certificates: 1, channels: 1, configurations: 1, destinations: 0, environments: 1 },
+      created: { automations: 2, certificates: 1, channels: 1, configurations: 1, destinations: 0, environments: 1 },
       errors: [],
     });
     expect(output.apps[0].webUrl).toContain(appId);

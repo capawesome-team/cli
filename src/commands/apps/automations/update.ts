@@ -1,6 +1,6 @@
 import appAutomationsService from '@/services/app-automations.js';
 import { withAuth } from '@/utils/auth.js';
-import { clearableValue } from '@/utils/cli-options.js';
+import { clearableValue, parseListOption } from '@/utils/cli-options.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import consola from 'consola';
@@ -20,9 +20,11 @@ export default defineCommand({
         .optional()
         .describe('The name of the certificate to use for the build. Pass an empty string to clear it.'),
       channel: z
-        .string()
+        .array(z.string())
         .optional()
-        .describe('The name of the channel to deploy to (Web only). Pass an empty string to clear it.'),
+        .describe(
+          'The name of a channel to deploy to (Web only). Can be specified multiple times or comma-separated. Pass an empty string to clear them.',
+        ),
       commitMessagePattern: z
         .string()
         .optional()
@@ -109,7 +111,7 @@ export default defineCommand({
 
     await appAutomationsService.update({
       appCertificateName: clearableValue(options.certificate),
-      appChannelName: clearableValue(options.channel),
+      appChannelNames: parseListOption(options.channel),
       appConfigurationName: clearableValue(options.configuration),
       appDestinationName: clearableValue(options.destination),
       appEnvironmentName: clearableValue(options.environment),
