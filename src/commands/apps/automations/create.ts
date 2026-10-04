@@ -1,6 +1,7 @@
 import appAutomationsService from '@/services/app-automations.js';
 import appsService from '@/services/apps.js';
 import { withAuth } from '@/utils/auth.js';
+import { parseListOption } from '@/utils/cli-options.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import consola from 'consola';
@@ -13,7 +14,10 @@ export default defineCommand({
     z.object({
       appId: z.string().optional().describe('ID of the app.'),
       certificate: z.string().optional().describe('The name of the certificate to use for the build.'),
-      channel: z.string().optional().describe('The name of the channel to deploy to (Web only).'),
+      channel: z
+        .array(z.string())
+        .optional()
+        .describe('The name of a channel to deploy to (Web only). Can be specified multiple times or comma-separated.'),
       commitMessagePattern: z
         .string()
         .optional()
@@ -129,7 +133,7 @@ export default defineCommand({
 
     const automation = await appAutomationsService.create({
       appCertificateName: options.certificate,
-      appChannelName: options.channel,
+      appChannelNames: parseListOption(options.channel),
       appConfigurationName: options.configuration,
       appDestinationName: options.destination,
       appEnvironmentName: options.environment,
