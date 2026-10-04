@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.25.0](https://github.com/capawesome-team/cli/compare/v4.24.0...v4.25.0) (2026-10-04)
+
+
+### Features
+
+* **apps:** deploy automation builds to multiple channels ([#239](https://github.com/capawesome-team/cli/issues/239)) ([4904d60](https://github.com/capawesome-team/cli/commit/4904d607ec40f976bc002d9c4a44ed8374baec71))
+
 ## [4.24.0](https://github.com/capawesome-team/cli/compare/v4.23.1...v4.24.0) (2026-10-01)
 
 
