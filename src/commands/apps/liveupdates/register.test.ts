@@ -172,6 +172,51 @@ describe('apps-liveupdates-register', () => {
     expect(mockConsola.success).toHaveBeenCalledWith('Live Update successfully registered.');
   });
 
+  it('should pass Electron version constraints to API when provided', async () => {
+    const appId = 'app-123';
+    const bundleUrl = 'https://example.com/bundle.zip';
+    const bundleId = 'bundle-456';
+    const testToken = 'test-token';
+    const electronEq = '1.0.0';
+    const electronMin = '2.0.0';
+    const electronMax = '3.0.0';
+
+    const options = {
+      appId,
+      url: bundleUrl,
+      rolloutPercentage: 1,
+      electronEq,
+      electronMin,
+      electronMax,
+      yes: true,
+    };
+
+    const appScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { id: appId, name: 'Test App' });
+
+    const bundleScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/bundles`, {
+        appId,
+        url: bundleUrl,
+        artifactType: 'zip',
+        eqElectronAppVersionCode: electronEq,
+        minElectronAppVersionCode: electronMin,
+        maxElectronAppVersionCode: electronMax,
+        rolloutPercentage: 0.01,
+      })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: bundleId, appBuildId: 'build-789' });
+
+    await registerCommand.action(options, undefined);
+
+    expect(appScope.isDone()).toBe(true);
+    expect(bundleScope.isDone()).toBe(true);
+    expect(mockConsola.info).toHaveBeenCalledWith(`Bundle Artifact ID: ${bundleId}`);
+    expect(mockConsola.success).toHaveBeenCalledWith('Live Update successfully registered.');
+  });
+
   it('should register bundle with checksum when path is provided', async () => {
     const appId = 'app-123';
     const bundleUrl = 'https://example.com/bundle.zip';
