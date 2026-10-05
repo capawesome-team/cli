@@ -1,7 +1,8 @@
-import { DEFAULT_CONSOLE_BASE_URL, MAX_CONCURRENT_FILE_UPLOADS } from '@/config/index.js';
+import { MAX_CONCURRENT_FILE_UPLOADS } from '@/config/index.js';
 import appBundleFilesService from '@/services/app-bundle-files.js';
 import appBundlesService from '@/services/app-bundles.js';
 import appsService from '@/services/apps.js';
+import configService from '@/services/config.js';
 import { AppBundleFileDto } from '@/types/app-bundle-file.js';
 import { withAuth } from '@/utils/auth.js';
 import { parseCustomProperties } from '@/utils/custom-properties.js';
@@ -346,8 +347,9 @@ export default defineCommand({
 
     consola.info(`Build Artifact ID: ${createBundleResponse.id}`);
     if (updateBundleResponse.appDeploymentId) {
+      const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
       consola.info(
-        `Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${updateBundleResponse.appDeploymentId}`,
+        `Deployment URL: ${consoleBaseUrl}/apps/${appId}/deployments/${updateBundleResponse.appDeploymentId}`,
       );
     }
     consola.success('Live Update successfully uploaded.');

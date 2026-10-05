@@ -1,5 +1,5 @@
-import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appsService from '@/services/apps.js';
+import configService from '@/services/config.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptOrganizationSelection } from '@/utils/prompt.js';
@@ -44,7 +44,8 @@ export default defineCommand({
     const response = await appsService.create({ name, organizationId, type });
     if (!json) {
       consola.info(`App ID: ${response.id}`);
-      consola.info(`App URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${response.id}`);
+      const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
+      consola.info(`App URL: ${consoleBaseUrl}/apps/${response.id}`);
       consola.success('App created successfully.');
     }
 

@@ -1,9 +1,9 @@
-import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appBuildSourcesService from '@/services/app-build-sources.js';
 import appBuildsService from '@/services/app-builds.js';
 import appCertificatesService from '@/services/app-certificates.js';
 import appDeploymentsService from '@/services/app-deployments.js';
 import appEnvironmentsService from '@/services/app-environments.js';
+import configService from '@/services/config.js';
 import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
 import { parseCustomProperties } from '@/utils/custom-properties.js';
@@ -260,7 +260,8 @@ export default defineCommand({
     });
     consola.info(`Build ID: ${response.id}`);
     consola.info(`Build Number: ${response.numberAsString}`);
-    consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
+    const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
+    consola.info(`Build URL: ${consoleBaseUrl}/apps/${appId}/builds/${response.id}`);
     consola.success('Build created successfully.');
 
     // Wait for build to complete
@@ -307,7 +308,7 @@ export default defineCommand({
       });
       appDeploymentIds.push(deployment.id);
       consola.info(`Deployment ID: ${deployment.id}`);
-      consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${deployment.id}`);
+      consola.info(`Deployment URL: ${consoleBaseUrl}/apps/${appId}/deployments/${deployment.id}`);
       consola.success('Deployment created successfully.');
     }
 

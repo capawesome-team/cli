@@ -1,6 +1,6 @@
-import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appChannelsService from '@/services/app-channels.js';
 import appDeploymentsService from '@/services/app-deployments.js';
+import configService from '@/services/config.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
@@ -148,7 +148,8 @@ export default defineCommand({
     });
 
     consola.info(`Deployment ID: ${response.id}`);
-    consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.id}`);
+    const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
+    consola.info(`Deployment URL: ${consoleBaseUrl}/apps/${appId}/deployments/${response.id}`);
     consola.success(
       `Rolled back to Build #${selectedAppDeployment.appBuild?.numberAsString} (${selectedIndex} step${selectedIndex === 1 ? '' : 's'} back).`,
     );

@@ -1,6 +1,6 @@
-import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appBundlesService from '@/services/app-bundles.js';
 import appsService from '@/services/apps.js';
+import configService from '@/services/config.js';
 import { withAuth } from '@/utils/auth.js';
 import { parseCustomProperties } from '@/utils/custom-properties.js';
 import { createBufferFromPath, createBufferFromString, isPrivateKeyContent } from '@/utils/buffer.js';
@@ -285,7 +285,8 @@ export default defineCommand({
 
     consola.info(`Bundle Artifact ID: ${response.id}`);
     if (response.appDeploymentId) {
-      consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.appDeploymentId}`);
+      const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
+      consola.info(`Deployment URL: ${consoleBaseUrl}/apps/${appId}/deployments/${response.appDeploymentId}`);
     }
     consola.success('Live Update successfully registered.');
 

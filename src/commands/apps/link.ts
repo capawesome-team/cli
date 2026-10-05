@@ -1,5 +1,5 @@
-import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appsService from '@/services/apps.js';
+import configService from '@/services/config.js';
 import gitConnectionsService from '@/services/git-connections.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
@@ -43,8 +43,9 @@ export default defineCommand({
         limit: 1,
       });
       if (!gitConnection) {
+        const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
         consola.error(
-          `No \`${gitRemoteInfo.provider}\` git connection found in the organization. Connect the git provider first at ${DEFAULT_CONSOLE_BASE_URL}/organizations/${app.organizationId}/git.`,
+          `No \`${gitRemoteInfo.provider}\` git connection found in the organization. Connect the git provider first at ${consoleBaseUrl}/organizations/${app.organizationId}/git.`,
         );
         process.exit(1);
       }

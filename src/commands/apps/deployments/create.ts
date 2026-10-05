@@ -1,7 +1,7 @@
-import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appBuildsService from '@/services/app-builds.js';
 import appDeploymentsService from '@/services/app-deployments.js';
 import appDestinationsService from '@/services/app-destinations.js';
+import configService from '@/services/config.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { offerJobFailureSummary } from '@/utils/job-failure-summary.js';
@@ -184,7 +184,8 @@ export default defineCommand({
       releaseNotes,
     });
     consola.info(`Deployment ID: ${response.id}`);
-    consola.info(`Deployment URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/deployments/${response.id}`);
+    const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
+    consola.info(`Deployment URL: ${consoleBaseUrl}/apps/${appId}/deployments/${response.id}`);
     consola.success('Deployment created successfully.');
 
     // Wait for deployment job to complete by default, unless --detached flag is set
