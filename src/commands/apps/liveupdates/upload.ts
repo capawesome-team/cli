@@ -5,6 +5,7 @@ import appsService from '@/services/apps.js';
 import configService from '@/services/config.js';
 import { AppBundleFileDto } from '@/types/app-bundle-file.js';
 import { withAuth } from '@/utils/auth.js';
+import { stringOption } from '@/utils/cli-options.js';
 import { parseCustomProperties } from '@/utils/custom-properties.js';
 import { defineCommand, defineOptions } from 'zodline';
 import {
@@ -65,7 +66,7 @@ export default defineCommand({
         .optional()
         .describe('The type of artifact to deploy. Must be either `manifest` or `zip`. The default is `zip`.')
         .default('zip'),
-      channel: z.string().optional().describe('Channel to associate the bundle with.'),
+      channel: stringOption.describe('Channel to associate the bundle with.'),
       commitMessage: z
         .string()
         .optional()
