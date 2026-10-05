@@ -1,6 +1,6 @@
 import appAutomationsService from '@/services/app-automations.js';
 import { withAuth } from '@/utils/auth.js';
-import { clearableValue, parseListOption } from '@/utils/cli-options.js';
+import { clearableStringOption, clearableValue, parseListOption } from '@/utils/cli-options.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import consola from 'consola';
@@ -15,34 +15,27 @@ export default defineCommand({
     z.object({
       appId: z.string().optional().describe('ID of the app.'),
       automationId: z.string().optional().describe('ID of the automation.'),
-      certificate: z
-        .string()
-        .optional()
-        .describe('The name of the certificate to use for the build. Pass an empty string to clear it.'),
+      certificate: clearableStringOption.describe(
+        'The name of the certificate to use for the build. Pass an empty string to clear it.',
+      ),
       channel: z
         .array(z.string())
         .optional()
         .describe(
           'The name of a channel to deploy to (Web only). Can be specified multiple times or comma-separated. Pass an empty string to clear them.',
         ),
-      commitMessagePattern: z
-        .string()
-        .optional()
-        .describe(
-          'Only trigger for commits whose message matches this pattern (branch triggers only). Pass an empty string to clear it.',
-        ),
-      configuration: z
-        .string()
-        .optional()
-        .describe('The name of the native configuration (Android/iOS only). Pass an empty string to clear it.'),
-      destination: z
-        .string()
-        .optional()
-        .describe('The name of the destination to deploy to (Android/iOS only). Pass an empty string to clear it.'),
-      environment: z
-        .string()
-        .optional()
-        .describe('The name of the environment to use for the build. Pass an empty string to clear it.'),
+      commitMessagePattern: clearableStringOption.describe(
+        'Only trigger for commits whose message matches this pattern (branch triggers only). Pass an empty string to clear it.',
+      ),
+      configuration: clearableStringOption.describe(
+        'The name of the native configuration (Android/iOS only). Pass an empty string to clear it.',
+      ),
+      destination: clearableStringOption.describe(
+        'The name of the destination to deploy to (Android/iOS only). Pass an empty string to clear it.',
+      ),
+      environment: clearableStringOption.describe(
+        'The name of the environment to use for the build. Pass an empty string to clear it.',
+      ),
       json: z.boolean().optional().describe('Output in JSON format.'),
       name: z.string().optional().describe('Name of the automation.'),
       platform: z
@@ -110,16 +103,16 @@ export default defineCommand({
     }
 
     await appAutomationsService.update({
-      appCertificateName: clearableValue(options.certificate),
+      appCertificateName: options.certificate,
       appChannelNames: parseListOption(options.channel),
-      appConfigurationName: clearableValue(options.configuration),
-      appDestinationName: clearableValue(options.destination),
-      appEnvironmentName: clearableValue(options.environment),
+      appConfigurationName: options.configuration,
+      appDestinationName: options.destination,
+      appEnvironmentName: options.environment,
       appId,
       automationId,
       buildStack: clearableValue(options.stack),
       buildType: options.type,
-      commitMessagePattern: clearableValue(options.commitMessagePattern),
+      commitMessagePattern: options.commitMessagePattern,
       name: options.name,
       platform: options.platform,
       triggerPatterns: clearableValues(options.triggerPattern),

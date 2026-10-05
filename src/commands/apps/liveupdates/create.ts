@@ -6,6 +6,7 @@ import appEnvironmentsService from '@/services/app-environments.js';
 import configService from '@/services/config.js';
 import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
+import { parseListOption, stringOption } from '@/utils/cli-options.js';
 import { parseCustomProperties } from '@/utils/custom-properties.js';
 import { isInteractive } from '@/utils/environment.js';
 import { isReadable } from '@/utils/file.js';
@@ -31,11 +32,11 @@ export default defineCommand({
         })
         .optional()
         .describe('App ID to create the live update for.'),
-      certificate: z.string().optional().describe('The name of the certificate to use for the build.'),
+      certificate: stringOption.describe('The name of the certificate to use for the build.'),
       channel: z
         .array(z.string())
         .optional()
-        .describe('The name of the channel to deploy to. Can be specified multiple times.'),
+        .describe('The name of the channel to deploy to. Can be specified multiple times or comma-separated.'),
       customProperty: z
         .array(z.string().min(1).max(100))
         .max(10)
@@ -43,7 +44,7 @@ export default defineCommand({
         .describe(
           'A custom property to assign to the build. Must be in the format `key=value`. Can be specified multiple times.',
         ),
-      environment: z.string().optional().describe('The name of the environment to use for the build.'),
+      environment: stringOption.describe('The name of the environment to use for the build.'),
       gitRef: z.string().optional().describe('The Git reference (branch, tag, or commit SHA) to build.'),
       iosEq: z.string().optional().describe('The exact iOS CFBundleVersion for the live update.'),
       iosMax: z.string().optional().describe('The maximum iOS CFBundleVersion for the live update.'),
@@ -77,7 +78,8 @@ export default defineCommand({
     { y: 'yes' },
   ),
   action: withAuth(async (options) => {
-    let { appId, certificate, channel, gitRef, environment, json, stack, path: sourcePath, url } = options;
+    let { appId, certificate, gitRef, environment, json, stack, path: sourcePath, url } = options;
+    let channel = parseListOption(options.channel);
 
     // Validate that path, url, and gitRef cannot be used together
     if (sourcePath && gitRef) {

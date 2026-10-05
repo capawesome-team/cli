@@ -1,7 +1,7 @@
 import appAutomationsService from '@/services/app-automations.js';
 import appsService from '@/services/apps.js';
 import { withAuth } from '@/utils/auth.js';
-import { parseListOption } from '@/utils/cli-options.js';
+import { parseListOption, stringOption } from '@/utils/cli-options.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import consola from 'consola';
@@ -13,18 +13,17 @@ export default defineCommand({
   options: defineOptions(
     z.object({
       appId: z.string().optional().describe('ID of the app.'),
-      certificate: z.string().optional().describe('The name of the certificate to use for the build.'),
+      certificate: stringOption.describe('The name of the certificate to use for the build.'),
       channel: z
         .array(z.string())
         .optional()
         .describe('The name of a channel to deploy to (Web only). Can be specified multiple times or comma-separated.'),
-      commitMessagePattern: z
-        .string()
-        .optional()
-        .describe('Only trigger for commits whose message matches this pattern (branch triggers only).'),
-      configuration: z.string().optional().describe('The name of the native configuration (Android/iOS only).'),
-      destination: z.string().optional().describe('The name of the destination to deploy to (Android/iOS only).'),
-      environment: z.string().optional().describe('The name of the environment to use for the build.'),
+      commitMessagePattern: stringOption.describe(
+        'Only trigger for commits whose message matches this pattern (branch triggers only).',
+      ),
+      configuration: stringOption.describe('The name of the native configuration (Android/iOS only).'),
+      destination: stringOption.describe('The name of the destination to deploy to (Android/iOS only).'),
+      environment: stringOption.describe('The name of the environment to use for the build.'),
       json: z.boolean().optional().describe('Output in JSON format.'),
       name: z.string().optional().describe('Name of the automation.'),
       platform: z

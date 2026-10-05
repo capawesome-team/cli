@@ -14,7 +14,7 @@ import { getAppBuildShareUrls } from '@/utils/app-build-shares.js';
 import { parseKeyValuePairs } from '@/utils/app-environments.js';
 import { withAuth } from '@/utils/auth.js';
 import { createBufferFromPath } from '@/utils/buffer.js';
-import { parseListOption } from '@/utils/cli-options.js';
+import { parseListOption, stringOption } from '@/utils/cli-options.js';
 import { isInteractive } from '@/utils/environment.js';
 import { offerJobFailureSummary } from '@/utils/job-failure-summary.js';
 import { isDirectory, isReadable } from '@/utils/file.js';
@@ -55,18 +55,18 @@ export default defineCommand({
         })
         .optional()
         .describe('App ID to create the build for.'),
-      certificate: z.string().optional().describe('The name of the certificate to use for the build.'),
+      certificate: stringOption.describe('The name of the certificate to use for the build.'),
       channel: z
         .array(z.string())
         .optional()
         .describe('The name of a channel to deploy to (Web only). Can be specified multiple times or comma-separated.'),
-      configuration: z.string().optional().describe('The name of the native configuration (Android/iOS only).'),
-      destination: z.string().optional().describe('The name of the destination to deploy to (Android/iOS only).'),
+      configuration: stringOption.describe('The name of the native configuration (Android/iOS only).'),
+      destination: stringOption.describe('The name of the destination to deploy to (Android/iOS only).'),
       detached: z
         .boolean()
         .optional()
         .describe('Exit immediately after creating the build without waiting for completion.'),
-      environment: z.string().optional().describe('The name of the environment to use for the build.'),
+      environment: stringOption.describe('The name of the environment to use for the build.'),
       failureSummary: z
         .boolean()
         .optional()

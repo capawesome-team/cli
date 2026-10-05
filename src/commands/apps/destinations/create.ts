@@ -4,7 +4,7 @@ import appGoogleServiceAccountKeysService from '@/services/app-google-service-ac
 import appsService from '@/services/apps.js';
 import { AppDestinationType } from '@/types/app-destination.js';
 import { withAuth } from '@/utils/auth.js';
-import { parseListOption } from '@/utils/cli-options.js';
+import { parseListOption, stringOption } from '@/utils/cli-options.js';
 import { isInteractive } from '@/utils/environment.js';
 import { isReadable } from '@/utils/file.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
@@ -83,10 +83,9 @@ export default defineCommand({
         .string()
         .optional()
         .describe('Huawei AppGallery Connect API client secret for the destination.'),
-      defaultLanguage: z
-        .string()
-        .optional()
-        .describe('Language of the default release notes text, e.g. `en-US` (Google Play and Huawei AppGallery only).'),
+      defaultLanguage: stringOption.describe(
+        'Language of the default release notes text, e.g. `en-US` (Google Play and Huawei AppGallery only).',
+      ),
     }),
   ),
   action: withAuth(async (options, args) => {

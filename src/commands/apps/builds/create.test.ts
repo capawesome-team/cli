@@ -228,6 +228,26 @@ describe('apps-builds-create', () => {
     expect(mockConsola.error).not.toHaveBeenCalled();
   });
 
+  it('should not send an empty environment', async () => {
+    const options = createCommand.options!.schema.parse({
+      appId: validAppId,
+      platform: 'web',
+      gitRef: 'main',
+      environment: '',
+      detached: true,
+    });
+
+    const buildScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${validAppId}/builds`, (body) => !('appEnvironmentName' in body))
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: buildId, jobId: 'job-1', numberAsString: '42' });
+
+    await createCommand.action(options, undefined);
+
+    expect(buildScope.isDone()).toBe(true);
+    expect(mockConsola.error).not.toHaveBeenCalled();
+  });
+
   it('should accept --channel combined with --detached', async () => {
     const options = { appId, platform: 'web' as const, gitRef: 'main', channel: ['beta'], detached: true };
 

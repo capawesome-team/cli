@@ -3,6 +3,7 @@ import appDeploymentsService from '@/services/app-deployments.js';
 import appDestinationsService from '@/services/app-destinations.js';
 import configService from '@/services/config.js';
 import { withAuth } from '@/utils/auth.js';
+import { stringOption } from '@/utils/cli-options.js';
 import { isInteractive } from '@/utils/environment.js';
 import { offerJobFailureSummary } from '@/utils/job-failure-summary.js';
 import { waitForJobCompletion } from '@/utils/job.js';
@@ -29,8 +30,8 @@ export default defineCommand({
         .optional()
         .describe('Build ID to deploy.'),
       buildNumber: z.string().optional().describe('Build number to deploy (e.g., "1", "42").'),
-      channel: z.string().optional().describe('The name of the channel to deploy to (Web only).'),
-      destination: z.string().optional().describe('The name of the destination to deploy to (Android/iOS only).'),
+      channel: stringOption.describe('The name of the channel to deploy to (Web only).'),
+      destination: stringOption.describe('The name of the destination to deploy to (Android/iOS only).'),
       detached: z
         .boolean()
         .optional()
