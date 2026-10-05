@@ -74,7 +74,7 @@ describe('apps-update', () => {
   it('should clear defaults when an empty string is passed', async () => {
     const appId = 'app-123';
 
-    const options = { appId, channel: '', environment: '', stack: '' as const };
+    const options = updateAppCommand.options!.schema.parse({ appId, channel: '', environment: '', stack: '' });
 
     const scope = nock(DEFAULT_API_BASE_URL)
       .patch(`/v1/apps/${appId}`, {

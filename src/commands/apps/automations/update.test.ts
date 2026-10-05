@@ -72,13 +72,35 @@ describe('apps-automations-update', () => {
     const appId = 'app-123';
     const automationId = 'automation-456';
 
-    const options = { appId, automationId, certificate: '', triggerPattern: [''] };
+    const options = updateAutomationCommand.options!.schema.parse({
+      appId,
+      automationId,
+      certificate: '',
+      triggerPattern: [''],
+    });
 
     const scope = nock(DEFAULT_API_BASE_URL)
       .patch(`/v1/apps/${appId}/automations/${automationId}`, {
         appCertificateName: null,
         triggerPatterns: [],
       })
+      .matchHeader('Authorization', 'Bearer test-token')
+      .reply(204);
+
+    await updateAutomationCommand.action(options, undefined);
+
+    expect(scope.isDone()).toBe(true);
+    expect(mockConsola.success).toHaveBeenCalledWith('Automation updated successfully.');
+  });
+
+  it('should clear a reference when a whitespace-only string is passed', async () => {
+    const appId = 'app-123';
+    const automationId = 'automation-456';
+
+    const options = updateAutomationCommand.options!.schema.parse({ appId, automationId, certificate: '   ' });
+
+    const scope = nock(DEFAULT_API_BASE_URL)
+      .patch(`/v1/apps/${appId}/automations/${automationId}`, { appCertificateName: null })
       .matchHeader('Authorization', 'Bearer test-token')
       .reply(204);
 

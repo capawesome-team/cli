@@ -1,6 +1,6 @@
 import appDestinationsService from '@/services/app-destinations.js';
 import { withAuth } from '@/utils/auth.js';
-import { clearableValue, parseListOption } from '@/utils/cli-options.js';
+import { clearableStringOption, parseListOption } from '@/utils/cli-options.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import consola from 'consola';
@@ -67,12 +67,9 @@ export default defineCommand({
         .string()
         .optional()
         .describe('Huawei AppGallery Connect API client secret for the destination.'),
-      defaultLanguage: z
-        .string()
-        .optional()
-        .describe(
-          'Language of the default release notes text, e.g. `en-US` (Google Play and Huawei AppGallery only). Pass `--default-language=` to clear it.',
-        ),
+      defaultLanguage: clearableStringOption.describe(
+        'Language of the default release notes text, e.g. `en-US` (Google Play and Huawei AppGallery only). Pass `--default-language=` to clear it.',
+      ),
     }),
   ),
   action: withAuth(async (options, args) => {
@@ -145,7 +142,7 @@ export default defineCommand({
       huaweiAppId,
       huaweiClientId,
       huaweiClientSecret,
-      defaultLanguage: clearableValue(defaultLanguage),
+      defaultLanguage,
     });
     consola.success('Destination updated successfully.');
   }),

@@ -1,6 +1,6 @@
 import appsService from '@/services/apps.js';
 import { withAuth } from '@/utils/auth.js';
-import { clearableValue } from '@/utils/cli-options.js';
+import { clearableStringOption, clearableValue } from '@/utils/cli-options.js';
 import { isInteractive } from '@/utils/environment.js';
 import { promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
 import consola from 'consola';
@@ -12,24 +12,21 @@ export default defineCommand({
   options: defineOptions(
     z.object({
       appId: z.string().optional().describe('ID of the app.'),
-      channel: z
-        .string()
-        .optional()
-        .describe('The name of the default channel for live updates. Pass an empty string to clear it.'),
+      channel: clearableStringOption.describe(
+        'The name of the default channel for live updates. Pass an empty string to clear it.',
+      ),
       channelDiscovery: z
         .union([z.boolean(), z.stringbool()], {
           message: 'Channel discovery must be either `true` or `false`.',
         })
         .optional()
         .describe('Enable or disable channel discovery. Supported values are `true` and `false`.'),
-      configuration: z
-        .string()
-        .optional()
-        .describe('The name of the default native configuration. Pass an empty string to clear it.'),
-      environment: z
-        .string()
-        .optional()
-        .describe('The name of the default environment. Pass an empty string to clear it.'),
+      configuration: clearableStringOption.describe(
+        'The name of the default native configuration. Pass an empty string to clear it.',
+      ),
+      environment: clearableStringOption.describe(
+        'The name of the default environment. Pass an empty string to clear it.',
+      ),
       json: z.boolean().optional().describe('Output in JSON format.'),
       name: z.string().optional().describe('Name of the app.'),
       nextBuildNumber: z.coerce
@@ -67,9 +64,9 @@ export default defineCommand({
 
     const app = await appsService.update({
       appChannelDiscoveryEnabled: options.channelDiscovery,
-      appChannelName: clearableValue(options.channel),
-      appConfigurationName: clearableValue(options.configuration),
-      appEnvironmentName: clearableValue(options.environment),
+      appChannelName: options.channel,
+      appConfigurationName: options.configuration,
+      appEnvironmentName: options.environment,
       appId,
       buildStack: clearableValue(options.stack),
       name: options.name,

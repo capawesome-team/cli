@@ -2,6 +2,7 @@ import appBundlesService from '@/services/app-bundles.js';
 import appsService from '@/services/apps.js';
 import configService from '@/services/config.js';
 import { withAuth } from '@/utils/auth.js';
+import { stringOption } from '@/utils/cli-options.js';
 import { parseCustomProperties } from '@/utils/custom-properties.js';
 import { createBufferFromPath, createBufferFromString, isPrivateKeyContent } from '@/utils/buffer.js';
 import { isInteractive } from '@/utils/environment.js';
@@ -40,7 +41,7 @@ export default defineCommand({
         })
         .optional()
         .describe('App ID to deploy to.'),
-      channel: z.string().optional().describe('Channel to associate the bundle with.'),
+      channel: stringOption.describe('Channel to associate the bundle with.'),
       commitMessage: z
         .string()
         .optional()

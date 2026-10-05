@@ -112,7 +112,7 @@ describe('apps-destinations-update', () => {
   });
 
   it('should clear the default language when `--default-language=` is passed', async () => {
-    const options = { appId, destinationId, defaultLanguage: '' };
+    const options = updateDestinationCommand.options!.schema.parse({ appId, destinationId, defaultLanguage: '' });
 
     const scope = nock(DEFAULT_API_BASE_URL)
       .patch(`/v1/apps/${appId}/destinations/${destinationId}`, { appId, destinationId, defaultLanguage: null })
