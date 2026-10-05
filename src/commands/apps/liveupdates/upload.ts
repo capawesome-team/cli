@@ -85,6 +85,24 @@ export default defineCommand({
         .describe(
           'A custom property to assign to the bundle. Must be in the format `key=value`. Can be specified multiple times.',
         ),
+      electronMax: z
+        .string()
+        .optional()
+        .describe(
+          'The maximum Electron app version (`app.getVersion()`, from `electron/package.json`) that the bundle supports. Must be in the format `major[.minor[.patch]]`. Prerelease suffixes are not supported.',
+        ),
+      electronMin: z
+        .string()
+        .optional()
+        .describe(
+          'The minimum Electron app version (`app.getVersion()`, from `electron/package.json`) that the bundle supports. Must be in the format `major[.minor[.patch]]`. Prerelease suffixes are not supported.',
+        ),
+      electronEq: z
+        .string()
+        .optional()
+        .describe(
+          'The exact Electron app version (`app.getVersion()`, from `electron/package.json`) that the bundle does not support. Must be in the format `major[.minor[.patch]]`. Prerelease suffixes are not supported.',
+        ),
       expiresInDays: z.coerce
         .number({
           message: 'Expiration days must be an integer.',
@@ -150,6 +168,9 @@ export default defineCommand({
       commitRef,
       commitSha,
       customProperty,
+      electronEq,
+      electronMax,
+      electronMin,
       expiresInDays,
       gitRef,
       iosEq,
@@ -313,6 +334,7 @@ export default defineCommand({
       artifactType,
       channelName: channel,
       eqAndroidAppVersionCode: androidEq,
+      eqElectronAppVersionCode: electronEq,
       eqIosAppVersionCode: iosEq,
       gitCommitMessage: commitMessage,
       gitCommitRef: commitRef,
@@ -320,8 +342,10 @@ export default defineCommand({
       gitRef,
       customProperties: parseCustomProperties(customProperty),
       maxAndroidAppVersionCode: androidMax,
+      maxElectronAppVersionCode: electronMax,
       maxIosAppVersionCode: iosMax,
       minAndroidAppVersionCode: androidMin,
+      minElectronAppVersionCode: electronMin,
       minIosAppVersionCode: iosMin,
       // Convert percentage from 0-100 to 0-1 for API
       rolloutPercentage: (rolloutPercentage ?? 100) / 100,
