@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.26.0](https://github.com/capawesome-team/cli/compare/v4.25.0...v4.26.0) (2026-10-05)
+
+
+### Features
+
+* add Electron app version constraint flags for live update bundles ([#185](https://github.com/capawesome-team/cli/issues/185)) ([b1109d6](https://github.com/capawesome-team/cli/commit/b1109d6b40c01325e35cbd9f0a2aa0d6c8123e7a))
+
+
+### Bug Fixes
+
+* use the configured console URL in printed links ([#241](https://github.com/capawesome-team/cli/issues/241)) ([511d220](https://github.com/capawesome-team/cli/commit/511d2201643aed8733f36a1ca9edef67b24cd850))
+
 ## [4.25.0](https://github.com/capawesome-team/cli/compare/v4.24.0...v4.25.0) (2026-10-04)
 
 
