@@ -1,4 +1,3 @@
-import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appAutomationsService from '@/services/app-automations.js';
 import appCertificatesService from '@/services/app-certificates.js';
 import appChannelsService from '@/services/app-channels.js';
@@ -8,6 +7,7 @@ import appEnvironmentsService from '@/services/app-environments.js';
 import appGoogleServiceAccountKeysService from '@/services/app-google-service-account-keys.js';
 import appProvisioningProfilesService from '@/services/app-provisioning-profiles.js';
 import appsService from '@/services/apps.js';
+import configService from '@/services/config.js';
 import gitConnectionsService from '@/services/git-connections.js';
 import { AppImport, generateUniqueName, isNameTaken, SkippedAppImport } from '@/utils/app-import.js';
 import { parseAppflowExport } from '@/utils/appflow-export.js';
@@ -128,13 +128,14 @@ export default defineCommand({
 
       await assignUniqueAppNames(resolvedApps, organizationId);
       const gitConnectionIds = await findGitConnectionIds(resolvedApps, organizationId);
+      const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
       for (const provider of getGitProviders(resolvedApps)) {
         if (gitConnectionIds.has(provider)) {
           continue;
         }
         const appCount = resolvedApps.filter((app) => app.repository?.provider === provider).length;
         consola.warn(
-          `The organization has no \`${provider}\` git connection, so the repositories of ${appCount} app(s) will not be linked. Connect the git provider at ${DEFAULT_CONSOLE_BASE_URL}/organizations/${organizationId}/git before running the import to link them automatically, or link the repositories manually in the Capawesome Cloud Console afterwards.`,
+          `The organization has no \`${provider}\` git connection, so the repositories of ${appCount} app(s) will not be linked. Connect the git provider at ${consoleBaseUrl}/organizations/${organizationId}/git before running the import to link them automatically, or link the repositories manually in the Capawesome Cloud Console afterwards.`,
         );
       }
       const outcomes: AppImportOutcome[] = [];
@@ -160,9 +161,9 @@ export default defineCommand({
 
       const errorCount = outcomes.reduce((count, outcome) => count + outcome.errors.length, 0);
       if (json) {
-        printJsonSummary(outcomes, selectedSkippedApps, warnings, dryRun === true);
+        printJsonSummary(outcomes, selectedSkippedApps, warnings, dryRun === true, consoleBaseUrl);
       } else {
-        printSummary(outcomes, selectedSkippedApps, dryRun === true, file);
+        printSummary(outcomes, selectedSkippedApps, dryRun === true, file, consoleBaseUrl);
       }
       if (errorCount > 0) {
         process.exitCode = 1;
@@ -499,6 +500,7 @@ const printSummary = (
   skippedApps: SkippedAppImport[],
   dryRun: boolean,
   file: string,
+  consoleBaseUrl: string,
 ): void => {
   consola.log('');
   if (dryRun) {
@@ -536,7 +538,7 @@ const printSummary = (
   }
   for (const outcome of outcomes) {
     if (outcome.id) {
-      consola.info(`App URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${outcome.id}`);
+      consola.info(`App URL: ${consoleBaseUrl}/apps/${outcome.id}`);
     }
   }
   const retryLaterApps = skippedApps.filter((app) => app.retryLater);
@@ -566,6 +568,7 @@ const printJsonSummary = (
   skippedApps: SkippedAppImport[],
   warnings: string[],
   dryRun: boolean,
+  consoleBaseUrl: string,
 ): void => {
   console.log(
     JSON.stringify(
@@ -577,7 +580,7 @@ const printJsonSummary = (
           name: outcome.app.name,
           sourceId: outcome.app.sourceId,
           sourceName: outcome.app.sourceName,
-          webUrl: outcome.id ? `${DEFAULT_CONSOLE_BASE_URL}/apps/${outcome.id}` : null,
+          webUrl: outcome.id ? `${consoleBaseUrl}/apps/${outcome.id}` : null,
           created: outcome.created,
           notes: outcome.app.notes,
           renames: outcome.app.renames,

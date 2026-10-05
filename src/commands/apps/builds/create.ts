@@ -1,10 +1,10 @@
-import { DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
 import appBuildSourcesService from '@/services/app-build-sources.js';
 import appBuildsService from '@/services/app-builds.js';
 import appCertificatesService from '@/services/app-certificates.js';
 import appConfigurationsService from '@/services/app-configurations.js';
 import appEnvironmentsService from '@/services/app-environments.js';
 import appsService from '@/services/apps.js';
+import configService from '@/services/config.js';
 import {
   APP_BUILD_ARTIFACT_FORM_FACTORS,
   APP_BUILD_ARTIFACT_TYPES_BY_PLATFORM,
@@ -484,7 +484,8 @@ export default defineCommand({
     });
     consola.info(`Build ID: ${response.id}`);
     consola.info(`Build Number: ${response.numberAsString}`);
-    consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
+    const consoleBaseUrl = await configService.getValueForKey('CONSOLE_BASE_URL');
+    consola.info(`Build URL: ${consoleBaseUrl}/apps/${appId}/builds/${response.id}`);
     consola.success('Build created successfully.');
     if (channels?.length) {
       consola.info(
@@ -512,7 +513,7 @@ export default defineCommand({
 
       consola.info(`Build ID: ${response.id}`);
       consola.info(`Build Number: ${response.numberAsString}`);
-      consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
+      consola.info(`Build URL: ${consoleBaseUrl}/apps/${appId}/builds/${response.id}`);
       consola.success('Build completed successfully.');
       console.log();
 
@@ -602,7 +603,7 @@ export default defineCommand({
       } else {
         consola.info(`Build ID: ${response.id}`);
         consola.info(`Build Number: ${response.numberAsString}`);
-        consola.info(`Build URL: ${DEFAULT_CONSOLE_BASE_URL}/apps/${appId}/builds/${response.id}`);
+        consola.info(`Build URL: ${consoleBaseUrl}/apps/${appId}/builds/${response.id}`);
         consola.success('Build started successfully.');
       }
     }
