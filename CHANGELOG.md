@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.26.1](https://github.com/capawesome-team/cli/compare/v4.26.0...v4.26.1) (2026-10-07)
+
+
+### Bug Fixes
+
+* **apps:liveupdates:generate-signing-key:** show actionable error message if key files cannot be written ([#246](https://github.com/capawesome-team/cli/issues/246)) ([14f477e](https://github.com/capawesome-team/cli/commit/14f477e5ac84bb3a62d94c959c30f84cbf524e84))
+
 ## [4.26.0](https://github.com/capawesome-team/cli/compare/v4.25.0...v4.26.0) (2026-10-05)
 
 
