@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 import pathModule from 'path';
 import { z } from 'zod';
 import { isInteractive } from '@/utils/environment.js';
+import { writeFile } from '@/utils/file.js';
 import { prompt } from '@/utils/prompt.js';
 import { defineCommand, defineOptions } from 'zodline';
 
@@ -64,8 +65,8 @@ export default defineCommand({
       await fs.mkdir(pathModule.dirname(absolutePrivateKeyPath), { recursive: true });
 
       // Write the keys to files
-      await fs.writeFile(absolutePublicKeyPath, publicKey, 'utf8');
-      await fs.writeFile(absolutePrivateKeyPath, privateKey, 'utf8');
+      await writeFile(absolutePublicKeyPath, publicKey);
+      await writeFile(absolutePrivateKeyPath, privateKey);
 
       consola.log('');
       consola.log('Public key saved to:  ' + absolutePublicKeyPath);

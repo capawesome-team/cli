@@ -3,7 +3,7 @@ import os from 'os';
 import pathModule from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { UserError } from './error.js';
-import { readFileFromDirectory } from './file.js';
+import { readFileFromDirectory, writeFile } from './file.js';
 
 const { mockCreateBufferFromPath } = vi.hoisted(() => ({ mockCreateBufferFromPath: vi.fn() }));
 
@@ -61,5 +61,45 @@ describe('readFileFromDirectory', () => {
     mockCreateBufferFromPath.mockRejectedValueOnce(error);
 
     await expect(readFileFromDirectory(pathModule.join(directory, 'assets'))).rejects.toBe(error);
+  });
+});
+
+describe('writeFile', () => {
+  let directory: string;
+
+  beforeEach(() => {
+    directory = fs.mkdtempSync(pathModule.join(os.tmpdir(), 'file-'));
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    fs.rmSync(directory, { force: true, recursive: true });
+  });
+
+  it('should write the file', async () => {
+    const path = pathModule.join(directory, 'public.pem');
+
+    await writeFile(path, 'key');
+
+    expect(fs.readFileSync(path, 'utf8')).toBe('key');
+  });
+
+  it.each(['EACCES', 'EPERM'])('should throw a user error if the file is not writable (%s)', async (code) => {
+    const path = pathModule.join(directory, 'public.pem');
+    vi.spyOn(fs.promises, 'writeFile').mockRejectedValueOnce(createErrorWithCode(code));
+
+    const promise = writeFile(path, 'key');
+
+    await expect(promise).rejects.toThrow(UserError);
+    await expect(promise).rejects.toThrow(
+      `The file could not be written: ${path}. Make sure that you have permission to write to the folder or choose a different path.`,
+    );
+  });
+
+  it('should rethrow errors that are not related to permissions', async () => {
+    const error = createErrorWithCode('EISDIR');
+    vi.spyOn(fs.promises, 'writeFile').mockRejectedValueOnce(error);
+
+    await expect(writeFile(directory, 'key')).rejects.toBe(error);
   });
 });

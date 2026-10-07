@@ -6,13 +6,14 @@ import { getCodeFromUnknownError, UserError } from './error.js';
 
 const concurrentModificationHint =
   'Make sure that no other process (e.g. a build or file sync client) modifies the folder while the command is running.';
-const permissionHint = 'Make sure that you have permission to read the file.';
+const readPermissionHint = 'Make sure that you have permission to read the file.';
+const writePermissionHint = 'Make sure that you have permission to write to the folder or choose a different path.';
 
 const unreadableFileErrorHints: Record<string, string> = {
-  EACCES: permissionHint,
+  EACCES: readPermissionHint,
   EBUSY: concurrentModificationHint,
   ENOENT: concurrentModificationHint,
-  EPERM: permissionHint,
+  EPERM: readPermissionHint,
 };
 
 export const getFilesInDirectoryAndSubdirectories = async (
@@ -104,14 +105,14 @@ export const isDirectory = async (path: string): Promise<boolean> => {
   });
 };
 
-export const writeFile = async (path: string, data: string) => {
-  return new Promise((resolve, reject) => {
-    fs.writeFile(path, data, (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(undefined);
-      }
-    });
-  });
+export const writeFile = async (path: string, data: string): Promise<void> => {
+  try {
+    await fs.promises.writeFile(path, data);
+  } catch (error) {
+    const code = getCodeFromUnknownError(error);
+    if (code === 'EACCES' || code === 'EPERM') {
+      throw new UserError(`The file could not be written: ${path}. ${writePermissionHint}`);
+    }
+    throw error;
+  }
 };
