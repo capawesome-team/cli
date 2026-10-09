@@ -320,20 +320,6 @@ export default defineCommand({
             process.exit(1);
           }
         }
-        // Upload Apple API key file
-        const appleApiKeyFileReadable = await isReadable(appleApiKeyFile);
-        if (!appleApiKeyFileReadable) {
-          consola.error(`The Apple API key file does not exist or is not accessible: ${appleApiKeyFile}`);
-          process.exit(1);
-        }
-        const buffer = fs.readFileSync(appleApiKeyFile);
-        const fileName = path.basename(appleApiKeyFile);
-        const key = await appAppleApiKeysService.create({
-          appId,
-          buffer,
-          fileName,
-        });
-        appAppleApiKeyId = key.id;
         // 11. Ask for key ID
         if (!appleApiKeyId) {
           if (!isInteractive()) {
@@ -408,6 +394,9 @@ export default defineCommand({
           consola.error('You must provide an Apple Team ID.');
           process.exit(1);
         }
+      }
+      if (appleApiKeyFile) {
+        appAppleApiKeyId = await uploadAppleApiKeyFile(appId, appleApiKeyFile);
       }
     }
 
@@ -547,6 +536,22 @@ const uploadGoogleServiceAccountKeyFile = async (
   const buffer = fs.readFileSync(googleServiceAccountKeyFile);
   const fileName = path.basename(googleServiceAccountKeyFile);
   const key = await appGoogleServiceAccountKeysService.create({
+    appId,
+    buffer,
+    fileName,
+  });
+  return key.id;
+};
+
+const uploadAppleApiKeyFile = async (appId: string, appleApiKeyFile: string): Promise<string> => {
+  const appleApiKeyFileReadable = await isReadable(appleApiKeyFile);
+  if (!appleApiKeyFileReadable) {
+    consola.error(`The Apple API key file does not exist or is not accessible: ${appleApiKeyFile}`);
+    process.exit(1);
+  }
+  const buffer = fs.readFileSync(appleApiKeyFile);
+  const fileName = path.basename(appleApiKeyFile);
+  const key = await appAppleApiKeysService.create({
     appId,
     buffer,
     fileName,
