@@ -28,7 +28,7 @@ describe('apps-destinations-create', () => {
   const appId = 'app-123';
   const destinationId = 'destination-456';
   const googleServiceAccountKeyId = 'key-789';
-  const appleApiKeyId = 'apple-key-012';
+  const appAppleApiKeyId = 'apple-key-012';
   const testToken = 'test-token';
   let tempDirectory: string;
   let googleServiceAccountKeyFile: string;
@@ -114,7 +114,7 @@ describe('apps-destinations-create', () => {
     const keyScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/apple-api-keys`)
       .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(201, { id: appleApiKeyId });
+      .reply(201, { id: appAppleApiKeyId });
     const destinationScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/destinations`, {
         appId,
@@ -124,7 +124,7 @@ describe('apps-destinations-create', () => {
         appleTeamId: 'team-id',
         appleApiKeyId: 'ABC123DEFG',
         appleIssuerId: 'issuer-id',
-        appAppleApiKeyId: appleApiKeyId,
+        appAppleApiKeyId,
         appleBetaGroups: ['External Testers', 'QA'],
         appleRejectIfPossible: false,
         appleReleaseType: 'after-approval',
@@ -138,6 +138,61 @@ describe('apps-destinations-create', () => {
     expect(keyScope.isDone()).toBe(true);
     expect(destinationScope.isDone()).toBe(true);
     expect(mockPrompt).toHaveBeenCalledTimes(1);
+  });
+
+  it('should create an App Store Connect destination with the Apple API key ID non-interactively', async () => {
+    const appleApiKeyFile = path.join(tempDirectory, 'AuthKey.p8');
+    await fs.writeFile(appleApiKeyFile, 'private-key');
+    const options = {
+      appId,
+      name: 'App Store',
+      platform: 'ios' as const,
+      type: 'apple-app-store-connect' as const,
+      appleApiKeyFile,
+      appleApiKeyId: 'ABC123DEFG',
+      appleIssuerId: 'issuer-id',
+      appleTeamId: 'team-id',
+    };
+
+    const keyScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/apple-api-keys`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: appAppleApiKeyId });
+    const destinationScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/destinations`, {
+        appId,
+        name: 'App Store',
+        platform: 'ios',
+        type: 'apple-app-store-connect',
+        appleTeamId: 'team-id',
+        appleApiKeyId: 'ABC123DEFG',
+        appleIssuerId: 'issuer-id',
+        appAppleApiKeyId,
+      })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: destinationId });
+
+    await createDestinationCommand.action(options, undefined);
+
+    expect(keyScope.isDone()).toBe(true);
+    expect(destinationScope.isDone()).toBe(true);
+    expect(mockPrompt).not.toHaveBeenCalled();
+  });
+
+  it('should require the Apple API key file when only the Apple API key ID is provided non-interactively', async () => {
+    const options = {
+      appId,
+      name: 'App Store',
+      platform: 'ios' as const,
+      type: 'apple-app-store-connect' as const,
+      appleApiKeyId: 'ABC123DEFG',
+    };
+
+    await expect(createDestinationCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
+
+    expect(mockConsola.error).toHaveBeenCalledWith(
+      'You must provide the Apple API key file when running in non-interactive environment.',
+    );
   });
 
   it('should map the deprecated destination type app-store-connect to apple-app-store-connect', async () => {
@@ -162,7 +217,7 @@ describe('apps-destinations-create', () => {
     const keyScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/apple-api-keys`)
       .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(201, { id: appleApiKeyId });
+      .reply(201, { id: appAppleApiKeyId });
     const destinationScope = nock(DEFAULT_API_BASE_URL)
       .post(`/v1/apps/${appId}/destinations`, {
         appId,
@@ -172,7 +227,7 @@ describe('apps-destinations-create', () => {
         appleTeamId: 'team-id',
         appleApiKeyId: 'ABC123DEFG',
         appleIssuerId: 'issuer-id',
-        appAppleApiKeyId: appleApiKeyId,
+        appAppleApiKeyId,
         appleBetaGroups: ['External Testers', 'QA'],
         appleRejectIfPossible: false,
         appleReleaseType: 'after-approval',
