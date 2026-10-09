@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.27.0](https://github.com/capawesome-team/cli/compare/v4.26.1...v4.27.0) (2026-10-09)
+
+
+### Features
+
+* **apps:** add `--apple-api-key-id` to `apps:destinations:create` ([#249](https://github.com/capawesome-team/cli/issues/249)) ([f8efdd8](https://github.com/capawesome-team/cli/commit/f8efdd8ff401ab4dbb1eb954db5ca044b6819501))
+
+
+### Bug Fixes
+
+* **apps:** upload Apple API key file only after all destination options are validated ([#250](https://github.com/capawesome-team/cli/issues/250)) ([ad0fadf](https://github.com/capawesome-team/cli/commit/ad0fadfa9b38792764d962ad7a5803448082ff1b))
+
 ## [4.26.1](https://github.com/capawesome-team/cli/compare/v4.26.0...v4.26.1) (2026-10-07)
 
 
