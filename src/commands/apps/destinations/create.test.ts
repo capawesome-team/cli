@@ -140,6 +140,45 @@ describe('apps-destinations-create', () => {
     expect(mockPrompt).toHaveBeenCalledTimes(1);
   });
 
+  it('should create an App Store Connect destination with the Apple API key ID non-interactively', async () => {
+    const appleApiKeyFile = path.join(tempDirectory, 'AuthKey.p8');
+    await fs.writeFile(appleApiKeyFile, 'private-key');
+    const options = {
+      appId,
+      name: 'App Store',
+      platform: 'ios' as const,
+      type: 'apple-app-store-connect' as const,
+      appleApiKeyFile,
+      appleApiKeyId: 'ABC123DEFG',
+      appleIssuerId: 'issuer-id',
+      appleTeamId: 'team-id',
+    };
+
+    const keyScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/apple-api-keys`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: appleApiKeyId });
+    const destinationScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/destinations`, {
+        appId,
+        name: 'App Store',
+        platform: 'ios',
+        type: 'apple-app-store-connect',
+        appleTeamId: 'team-id',
+        appleApiKeyId: 'ABC123DEFG',
+        appleIssuerId: 'issuer-id',
+        appAppleApiKeyId: appleApiKeyId,
+      })
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(201, { id: destinationId });
+
+    await createDestinationCommand.action(options, undefined);
+
+    expect(keyScope.isDone()).toBe(true);
+    expect(destinationScope.isDone()).toBe(true);
+    expect(mockPrompt).not.toHaveBeenCalled();
+  });
+
   it('should map the deprecated destination type app-store-connect to apple-app-store-connect', async () => {
     mockIsInteractive.mockReturnValue(true);
     mockPrompt.mockResolvedValueOnce('ABC123DEFG');

@@ -39,6 +39,7 @@ export default defineCommand({
       appleTeamId: z.string().optional().describe('Apple Team ID for the destination.'),
       appleAppPassword: z.string().optional().describe('Apple app-specific password for the destination.'),
       appleApiKeyFile: z.string().optional().describe('Path to the Apple API key (.p8) file.'),
+      appleApiKeyId: z.string().optional().describe('Apple API Key ID for the destination.'),
       appleIssuerId: z.string().optional().describe('Apple Issuer ID for the destination.'),
       appleBetaGroup: z
         .array(z.string())
@@ -100,6 +101,7 @@ export default defineCommand({
       appleTeamId,
       appleAppPassword,
       appleApiKeyFile,
+      appleApiKeyId,
       appleIssuerId,
       appleBetaGroup,
       appleSubmitForReview,
@@ -122,7 +124,6 @@ export default defineCommand({
       consola.warn('The destination type `app-store-connect` is deprecated. Use `apple-app-store-connect` instead.');
       type = 'apple-app-store-connect';
     }
-    let appleApiKeyId: string | undefined;
     let appAppleApiKeyId: string | undefined;
     let appGoogleServiceAccountKeyId: string | undefined;
 
@@ -280,7 +281,7 @@ export default defineCommand({
     if (type === 'apple-app-store-connect') {
       // 9. Ask for authentication method
       let authMethod: string | undefined;
-      if (appleApiKeyFile || appleIssuerId) {
+      if (appleApiKeyFile || appleApiKeyId || appleIssuerId) {
         authMethod = 'apiKey';
       } else if (appleId || appleAppId || appleAppPassword) {
         authMethod = 'password';
@@ -299,7 +300,7 @@ export default defineCommand({
         }
       } else {
         consola.error(
-          'You must provide authentication options when running in non-interactive environment. Either pass --apple-api-key-file and --apple-issuer-id for API Key authentication or --apple-id, --apple-app-id, and --apple-app-password for Password authentication.',
+          'You must provide authentication options when running in non-interactive environment. Either pass --apple-api-key-file, --apple-api-key-id, and --apple-issuer-id for API Key authentication or --apple-id, --apple-app-id, and --apple-app-password for Password authentication.',
         );
         process.exit(1);
       }
