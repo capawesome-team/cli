@@ -140,6 +140,27 @@ describe('apps-destinations-create', () => {
     expect(mockPrompt).toHaveBeenCalledTimes(1);
   });
 
+  it('should not upload the Apple API key file when required options are missing non-interactively', async () => {
+    const appleApiKeyFile = path.join(tempDirectory, 'AuthKey.p8');
+    await fs.writeFile(appleApiKeyFile, 'private-key');
+    const options = {
+      appId,
+      name: 'App Store',
+      platform: 'ios' as const,
+      type: 'apple-app-store-connect' as const,
+      appleApiKeyFile,
+      appleIssuerId: 'issuer-id',
+    };
+
+    const keyScope = nock(DEFAULT_API_BASE_URL)
+      .post(`/v1/apps/${appId}/apple-api-keys`)
+      .reply(201, { id: appleApiKeyId });
+
+    await expect(createDestinationCommand.action(options, undefined)).rejects.toThrow('Process exited with code 1');
+
+    expect(keyScope.isDone()).toBe(false);
+  });
+
   it('should map the deprecated destination type app-store-connect to apple-app-store-connect', async () => {
     mockIsInteractive.mockReturnValue(true);
     mockPrompt.mockResolvedValueOnce('ABC123DEFG');
