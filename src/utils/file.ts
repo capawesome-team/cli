@@ -4,7 +4,7 @@ import pathModule from 'path';
 import { createBufferFromPath } from './buffer.js';
 import { getCodeFromUnknownError, UserError } from './error.js';
 
-const concurrentModificationHint =
+export const concurrentModificationHint =
   'Make sure that no other process (e.g. a build or file sync client) modifies the folder while the command is running.';
 const readPermissionHint = 'Make sure that you have permission to read the file.';
 const writePermissionHint = 'Make sure that you have permission to write to the folder or choose a different path.';
@@ -65,11 +65,14 @@ export const readFileFromDirectory = async (path: string): Promise<Buffer> => {
     const code = getCodeFromUnknownError(error);
     const hint = code ? unreadableFileErrorHints[code] : undefined;
     if (hint) {
-      throw new UserError(`The file could not be read: ${path}. ${hint}`);
+      throw createUnreadableFileError(path, hint);
     }
     throw error;
   }
 };
+
+export const createUnreadableFileError = (path: string, hint: string): UserError =>
+  new UserError(`The file could not be read: ${path}. ${hint}`);
 
 export const directoryContainsSymlinks = async (path: string): Promise<boolean> => {
   const dirEntries = await fs.promises.readdir(path, { withFileTypes: true, recursive: true }).catch(() => []);

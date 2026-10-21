@@ -1,4 +1,5 @@
 import { UserError } from '@/utils/error.js';
+import { concurrentModificationHint, createUnreadableFileError } from '@/utils/file.js';
 import AdmZip from 'adm-zip';
 import { globby } from 'globby';
 import path from 'path';
@@ -20,7 +21,15 @@ class ZipImpl implements Zip {
 
   async zipFolder(sourceFolder: string): Promise<Buffer> {
     const zip = new AdmZip();
-    zip.addLocalFolder(sourceFolder);
+    try {
+      zip.addLocalFolder(sourceFolder);
+    } catch (error) {
+      const vanishedFilePath = getVanishedFilePath(error);
+      if (vanishedFilePath) {
+        throw createUnreadableFileError(vanishedFilePath, concurrentModificationHint);
+      }
+      throw error;
+    }
     // Strip external file attributes from every entry. `addLocalFolder` copies
     // the source's Unix mode bits onto each entry, so a directory with e.g.
     // `0500` on a CI checkout ends up in the bundle and makes `zip4j` on
@@ -74,6 +83,15 @@ class ZipImpl implements Zip {
     return filePath.endsWith('.zip');
   }
 }
+
+// adm-zip lists all files first and reads them afterwards. A file that was
+// deleted in between is reported with this message and without an error code.
+const getVanishedFilePath = (error: unknown): string | undefined => {
+  if (!(error instanceof Error)) {
+    return undefined;
+  }
+  return error.message.match(/^ADM-ZIP: File not found: "(.+)"$/)?.[1];
+};
 
 const zip: Zip = new ZipImpl();
 
