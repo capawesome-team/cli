@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.27.1](https://github.com/capawesome-team/cli/compare/v4.27.0...v4.27.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* **apps:liveupdates:upload:** report files that vanish while zipping as user error ([#254](https://github.com/capawesome-team/cli/issues/254)) ([9284255](https://github.com/capawesome-team/cli/commit/92842556ff71acae8ace7e1ec896e1b6035775b5))
+
 ## [4.27.0](https://github.com/capawesome-team/cli/compare/v4.26.1...v4.27.0) (2026-10-09)
 
 
