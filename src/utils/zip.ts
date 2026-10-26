@@ -75,7 +75,7 @@ class ZipImpl implements Zip {
     const realSourceFolder = fs.realpathSync(sourceFolder);
     for (const file of files) {
       const filePath = path.join(sourceFolder, file);
-      if (!isInsideFolder(filePath, realSourceFolder)) {
+      if (isOutsideFolder(filePath, realSourceFolder)) {
         continue;
       }
       const dirName = path.dirname(file);
@@ -99,15 +99,14 @@ const getVanishedFilePath = (error: unknown): string | undefined => {
 };
 
 // Matches `addLocalFolder` in `zipFolder`: symbolic links are only followed if
-// their target stays inside the folder. Dangling links are skipped as well.
-const isInsideFolder = (filePath: string, realFolder: string): boolean => {
-  let realFilePath: string;
+// their target stays inside the folder. A path that cannot be resolved is kept,
+// so that `addLocalFile` reports it as a vanished file.
+const isOutsideFolder = (filePath: string, realFolder: string): boolean => {
   try {
-    realFilePath = fs.realpathSync(filePath);
+    return !fs.realpathSync(filePath).startsWith(realFolder + path.sep);
   } catch {
     return false;
   }
-  return realFilePath.startsWith(realFolder + path.sep);
 };
 
 const zip: Zip = new ZipImpl();
