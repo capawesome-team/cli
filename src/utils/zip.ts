@@ -1,6 +1,7 @@
 import { UserError } from '@/utils/error.js';
 import { concurrentModificationHint, createUnreadableFileError } from '@/utils/file.js';
 import AdmZip from 'adm-zip';
+import fs from 'fs';
 import { globby } from 'globby';
 import path from 'path';
 
@@ -49,7 +50,8 @@ class ZipImpl implements Zip {
     // `apps:builds:create`, `apps:liveupdates:create`), which include
     // executables like `gradlew` whose `0755` mode must survive the round-trip
     // so the build runner can execute them.
-    const files = await globby(['**/*'], {
+    const realSourceFolder = fs.realpathSync(sourceFolder);
+    const globbedFiles = await globby(['**/*'], {
       cwd: sourceFolder,
       gitignore: true,
       ignore: [
@@ -64,6 +66,7 @@ class ZipImpl implements Zip {
       ],
       dot: true,
     });
+    const files = globbedFiles.filter((file) => !isOutsideFolder(path.join(sourceFolder, file), realSourceFolder));
     if (files.length > MAX_ZIP_ENTRIES) {
       throw new UserError(
         `The source folder contains ${files.length} files, which exceeds the ZIP limit of ${MAX_ZIP_ENTRIES} entries. ` +
@@ -91,6 +94,17 @@ const getVanishedFilePath = (error: unknown): string | undefined => {
     return undefined;
   }
   return error.message.match(/^ADM-ZIP: File not found: "(.+)"$/)?.[1];
+};
+
+// Matches `addLocalFolder` in `zipFolder`: symbolic links are only followed if
+// their target stays inside the folder. A path that cannot be resolved is kept,
+// so that `addLocalFile` reports it as a vanished file.
+const isOutsideFolder = (filePath: string, realFolder: string): boolean => {
+  try {
+    return !fs.realpathSync(filePath).startsWith(realFolder + path.sep);
+  } catch {
+    return false;
+  }
 };
 
 const zip: Zip = new ZipImpl();
