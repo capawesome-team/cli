@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.27.2](https://github.com/capawesome-team/cli/compare/v4.27.1...v4.27.2) (2026-10-26)
+
+
+### Bug Fixes
+
+* **apps:** skip symbolic links outside the source folder when zipping sources ([#258](https://github.com/capawesome-team/cli/issues/258)) ([46587c2](https://github.com/capawesome-team/cli/commit/46587c263d9e096de614fe87cf05f93fbffc21b2))
+
 ## [4.27.1](https://github.com/capawesome-team/cli/compare/v4.27.0...v4.27.1) (2026-10-21)
 
 
