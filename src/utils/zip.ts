@@ -1,6 +1,7 @@
 import { UserError } from '@/utils/error.js';
 import { concurrentModificationHint, createUnreadableFileError } from '@/utils/file.js';
 import AdmZip from 'adm-zip';
+import fs from 'fs';
 import { globby } from 'globby';
 import path from 'path';
 
@@ -71,8 +72,12 @@ class ZipImpl implements Zip {
       );
     }
     const zip = new AdmZip();
+    const realSourceFolder = fs.realpathSync(sourceFolder);
     for (const file of files) {
       const filePath = path.join(sourceFolder, file);
+      if (!isInsideFolder(filePath, realSourceFolder)) {
+        continue;
+      }
       const dirName = path.dirname(file);
       zip.addLocalFile(filePath, dirName === '.' ? '' : dirName);
     }
@@ -91,6 +96,18 @@ const getVanishedFilePath = (error: unknown): string | undefined => {
     return undefined;
   }
   return error.message.match(/^ADM-ZIP: File not found: "(.+)"$/)?.[1];
+};
+
+// Matches `addLocalFolder` in `zipFolder`: symbolic links are only followed if
+// their target stays inside the folder. Dangling links are skipped as well.
+const isInsideFolder = (filePath: string, realFolder: string): boolean => {
+  let realFilePath: string;
+  try {
+    realFilePath = fs.realpathSync(filePath);
+  } catch {
+    return false;
+  }
+  return realFilePath.startsWith(realFolder + path.sep);
 };
 
 const zip: Zip = new ZipImpl();
