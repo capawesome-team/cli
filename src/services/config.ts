@@ -1,33 +1,25 @@
 import { DEFAULT_API_BASE_URL, DEFAULT_CONSOLE_BASE_URL } from '@/config/consts.js';
-import { loadConfig, UserInputConfig } from 'c12';
+
+export type ConfigKey = 'API_BASE_URL' | 'CONSOLE_BASE_URL' | 'ENVIRONMENT';
 
 export interface ConfigService {
-  getValueForKey(key: string): Promise<string>;
+  getValueForKey(key: ConfigKey): Promise<string>;
 }
 
+const SETTINGS: Record<ConfigKey, { defaultValue: string; environmentVariable: string }> = {
+  API_BASE_URL: { defaultValue: DEFAULT_API_BASE_URL, environmentVariable: 'CAPAWESOME_API_BASE_URL' },
+  CONSOLE_BASE_URL: { defaultValue: DEFAULT_CONSOLE_BASE_URL, environmentVariable: 'CAPAWESOME_CONSOLE_BASE_URL' },
+  ENVIRONMENT: { defaultValue: 'production', environmentVariable: 'CAPAWESOME_ENVIRONMENT' },
+};
+
+/**
+ * Read only from environment variables, never from files in the working directory:
+ * a repository could otherwise redirect the API token and uploaded secrets to another host.
+ */
 class ConfigServiceImpl implements ConfigService {
-  private readonly config: Promise<UserInputConfig>;
-
-  constructor() {
-    this.config = this.loadConfig();
-  }
-
-  async getValueForKey(key: string): Promise<string> {
-    return (await this.config)[key];
-  }
-
-  private async loadConfig(): Promise<UserInputConfig> {
-    const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true';
-    const { config } = await loadConfig({
-      defaults: {
-        API_BASE_URL: DEFAULT_API_BASE_URL,
-        CONSOLE_BASE_URL: DEFAULT_CONSOLE_BASE_URL,
-        ENVIRONMENT: 'production',
-      },
-      name: 'capawesome',
-      rcFile: isTestEnvironment ? false : undefined,
-    });
-    return config;
+  async getValueForKey(key: ConfigKey): Promise<string> {
+    const { defaultValue, environmentVariable } = SETTINGS[key];
+    return process.env[environmentVariable] || defaultValue;
   }
 }
 

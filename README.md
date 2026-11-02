@@ -62,7 +62,7 @@ Run the following commands to get started with development:
     npm install
     ```
 
-3. Copy the `.capawesomerc.example` file to `.capawesomerc`
+3. Optional: copy `.env.example` to `.env` to point the CLI at another API, console or environment (`CAPAWESOME_API_BASE_URL`, `CAPAWESOME_CONSOLE_BASE_URL`, `CAPAWESOME_ENVIRONMENT`). `npm start` loads it (Node.js 20.19 or newer).
 4. Run your first command:
 
     ```bash
