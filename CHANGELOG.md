@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.27.3](https://github.com/capawesome-team/cli/compare/v4.27.2...v4.27.3) (2026-11-02)
+
+
+### Bug Fixes
+
+* **config:** read API and console base URLs only from environment variables ([#262](https://github.com/capawesome-team/cli/issues/262)) ([6240cfe](https://github.com/capawesome-team/cli/commit/6240cfe0ebe5f3185192d5e55e4b691d97e9b0c5))
+
 ## [4.27.2](https://github.com/capawesome-team/cli/compare/v4.27.1...v4.27.2) (2026-10-26)
 
 
