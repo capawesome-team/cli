@@ -40,6 +40,16 @@ describe('userConfig', () => {
       expect(() => userConfig.read()).toThrow(UserError);
     });
 
+    it('should throw UserError on EISDIR with the resolved path in the message', () => {
+      const error = Object.assign(new Error('EISDIR'), { code: 'EISDIR' });
+      mockReadUser.mockImplementation(() => {
+        throw error;
+      });
+      const expectedPath = resolve(process.env.XDG_CONFIG_HOME || homedir(), '.capawesome');
+      expect(() => userConfig.read()).toThrow(UserError);
+      expect(() => userConfig.read()).toThrow(`The config file ${expectedPath} is a directory.`);
+    });
+
     it('should fall back to the resolved home path when the error has no path', () => {
       const error = Object.assign(new Error('EACCES'), { code: 'EACCES' });
       mockReadUser.mockImplementation(() => {
