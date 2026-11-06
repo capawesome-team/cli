@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.27.4](https://github.com/capawesome-team/cli/compare/v4.27.3...v4.27.4) (2026-11-06)
+
+
+### Bug Fixes
+
+* friendly errors for a config path that is a directory and for unreadable folders ([#265](https://github.com/capawesome-team/cli/issues/265)) ([f01e2ae](https://github.com/capawesome-team/cli/commit/f01e2ae6fffdfea825bdad1d231a8f61f6adae37))
+
 ## [4.27.3](https://github.com/capawesome-team/cli/compare/v4.27.2...v4.27.3) (2026-11-02)
 
 
