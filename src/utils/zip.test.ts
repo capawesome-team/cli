@@ -5,10 +5,17 @@ import { describe, expect, it, vi } from 'vitest';
 import { UserError } from './error.js';
 import zip from './zip.js';
 
-const { mockAddLocalFile, mockAddLocalFolder } = vi.hoisted(() => ({
+const { mockAddLocalFile, mockAddLocalFolder, mockGlobby } = vi.hoisted(() => ({
   mockAddLocalFile: vi.fn(),
   mockAddLocalFolder: vi.fn(),
+  mockGlobby: vi.fn(),
 }));
+
+vi.mock('globby', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('globby')>();
+  mockGlobby.mockImplementation(actual.globby);
+  return { ...actual, globby: mockGlobby };
+});
 
 vi.mock('adm-zip', () => ({
   default: function () {
@@ -67,5 +74,15 @@ describe('zipFolderWithGitignore', () => {
 
     expect(mockAddLocalFile).toHaveBeenCalledTimes(1);
     expect(mockAddLocalFile).toHaveBeenCalledWith(path.join(sourceFolder, 'index.html'), '');
+  });
+
+  it('should throw a user error if a folder cannot be read', async () => {
+    const error = Object.assign(new Error('EPERM'), { code: 'EPERM', path: '/Users/me/Desktop/app/ios' });
+    mockGlobby.mockRejectedValueOnce(error);
+
+    const promise = zip.zipFolderWithGitignore(os.tmpdir());
+
+    await expect(promise).rejects.toThrow(UserError);
+    await expect(promise).rejects.toThrow('The folder could not be read: /Users/me/Desktop/app/ios.');
   });
 });

@@ -1,4 +1,4 @@
-import { UserError } from '@/utils/error.js';
+import { getCodeFromUnknownError, getPathFromUnknownError, UserError } from '@/utils/error.js';
 import { concurrentModificationHint, createUnreadableFileError } from '@/utils/file.js';
 import AdmZip from 'adm-zip';
 import fs from 'fs';
@@ -51,21 +51,7 @@ class ZipImpl implements Zip {
     // executables like `gradlew` whose `0755` mode must survive the round-trip
     // so the build runner can execute them.
     const realSourceFolder = fs.realpathSync(sourceFolder);
-    const globbedFiles = await globby(['**/*'], {
-      cwd: sourceFolder,
-      gitignore: true,
-      ignore: [
-        '.git/**',
-        '**/node_modules/**',
-        '**/ios/DerivedData/**',
-        '**/ios/Pods/**',
-        '**/ios/build/**',
-        '**/android/build/**',
-        '**/android/.gradle/**',
-        '**/android/app/build/**',
-      ],
-      dot: true,
-    });
+    const globbedFiles = await globSourceFiles(sourceFolder);
     const files = globbedFiles.filter((file) => !isOutsideFolder(path.join(sourceFolder, file), realSourceFolder));
     if (files.length > MAX_ZIP_ENTRIES) {
       throw new UserError(
@@ -86,6 +72,38 @@ class ZipImpl implements Zip {
     return filePath.endsWith('.zip');
   }
 }
+
+const globSourceFiles = async (sourceFolder: string): Promise<string[]> => {
+  try {
+    return await globby(['**/*'], {
+      cwd: sourceFolder,
+      gitignore: true,
+      ignore: [
+        '.git/**',
+        '**/node_modules/**',
+        '**/ios/DerivedData/**',
+        '**/ios/Pods/**',
+        '**/ios/build/**',
+        '**/android/build/**',
+        '**/android/.gradle/**',
+        '**/android/app/build/**',
+      ],
+      dot: true,
+    });
+  } catch (error) {
+    const code = getCodeFromUnknownError(error);
+    if (code === 'EACCES' || code === 'EPERM') {
+      throw createUnreadableFolderError(getPathFromUnknownError(error) ?? sourceFolder);
+    }
+    throw error;
+  }
+};
+
+const createUnreadableFolderError = (folderPath: string): UserError =>
+  new UserError(
+    `The folder could not be read: ${folderPath}. Make sure that you have permission to read the folder. ` +
+      `On macOS, grant your terminal Full Disk Access or move the project out of protected folders such as Desktop or Documents.`,
+  );
 
 // adm-zip lists all files first and reads them afterwards. A file that was
 // deleted in between is reported with this message and without an error code.

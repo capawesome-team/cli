@@ -15,6 +15,13 @@ export const getCodeFromUnknownError = (error: unknown): string | undefined => {
   return undefined;
 };
 
+export const getPathFromUnknownError = (error: unknown): string | undefined => {
+  if (error instanceof Error && 'path' in error && typeof error.path === 'string') {
+    return error.path;
+  }
+  return undefined;
+};
+
 export const getMessageFromUnknownError = (error: unknown): string => {
   let message = 'An unknown error has occurred.';
   if (error instanceof AxiosError) {
