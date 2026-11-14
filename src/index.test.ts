@@ -1,6 +1,6 @@
 import { createRequire } from 'module';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { defineConfig, processConfig } from 'zodline';
+import { defineCommand, defineConfig, processConfig } from 'zodline';
 const require = createRequire(import.meta.url);
 const pkg = require('../package.json');
 
@@ -36,5 +36,15 @@ describe('CLI', () => {
 
     expect(consoleSpy).toHaveBeenCalledWith(pkg.version);
     expect(processExitSpy).toHaveBeenCalledWith(0);
+  });
+
+  it('should reject a positional argument that the command does not take', () => {
+    const configWithCommand = defineConfig({
+      commands: {
+        whoami: defineCommand({ action: () => {} }),
+      },
+    });
+
+    expect(() => processConfig(configWithCommand, ['whoami', 'extra'])).toThrow('Unexpected argument');
   });
 });
