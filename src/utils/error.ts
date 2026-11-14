@@ -36,6 +36,7 @@ export const getMessageFromUnknownError = (error: unknown): string => {
 
 const getErrorMessageFromAxiosError = (error: AxiosError): string => {
   let message: string = 'An unknown network error has occurred.';
+  const data: any = decodeResponseData(error.response?.data);
   if (
     !error.response &&
     (error.code === 'ENOTFOUND' ||
@@ -50,16 +51,29 @@ const getErrorMessageFromAxiosError = (error: AxiosError): string => {
     message = 'An internal server error has occurred. Please try again later.';
   } else if (error.response?.status === 503) {
     message = 'The service is currently unavailable. Please try again later.';
-  } else if ((error.response?.data as any)?.message) {
-    message = (error.response?.data as any)?.message;
-  } else if (Array.isArray((error.response?.data as any)?.error) && (error.response?.data as any).error[0]?.message) {
-    message = (error.response?.data as any).error[0].message;
-  } else if ((error.response?.data as any)?.error?.issues?.[0]?.message) {
-    message = (error.response?.data as any).error.issues[0].message;
-  } else if (error.response?.data && typeof error.response?.data === 'string') {
-    message = error.response.data;
+  } else if (data?.message) {
+    message = data.message;
+  } else if (Array.isArray(data?.error) && data.error[0]?.message) {
+    message = data.error[0].message;
+  } else if (data?.error?.issues?.[0]?.message) {
+    message = data.error.issues[0].message;
+  } else if (data && typeof data === 'string') {
+    message = data;
   }
   return message;
+};
+
+// A request that asks for bytes, such as the one of the `api` command, gets its error body as bytes too.
+const decodeResponseData = (data: unknown): unknown => {
+  if (!Buffer.isBuffer(data) && !(data instanceof ArrayBuffer)) {
+    return data;
+  }
+  const text = new TextDecoder().decode(data);
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
 };
 
 const getErrorMessageFromZodError = (error: ZodError): string => {

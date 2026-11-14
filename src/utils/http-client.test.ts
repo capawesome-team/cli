@@ -156,6 +156,29 @@ describe('http-client', () => {
     expect(response.data).toEqual({ success: true });
   });
 
+  it('should send a request of the given method to the base URL with the base headers and the given headers', async () => {
+    vi.mocked(configService.getValueForKey).mockResolvedValue('https://api.example.com');
+
+    nock('https://api.example.com')
+      .patch('/request', { name: 'staging' })
+      .matchHeader('User-Agent', /^Capawesome CLI v/)
+      .matchHeader('Authorization', 'Bearer test-token')
+      .reply(200, { success: true });
+
+    const { default: httpClient } = await import('./http-client.js');
+
+    const response = await httpClient.request({
+      data: { name: 'staging' },
+      headers: { Authorization: 'Bearer test-token' },
+      method: 'PATCH',
+      url: '/request',
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.data).toEqual({ success: true });
+    expect(nock.isDone()).toBe(true);
+  });
+
   // Note: Testing actual proxy behavior with nock is not reliable as nock intercepts
   // requests at a different level than proxy agents. The proxy functionality is handled
   // by the http-proxy-agent and https-proxy-agent libraries which are well-tested.

@@ -58,6 +58,7 @@ This project is structured as follows:
 - **`--json` Output**: Commands that return data take a `json` option (`z.boolean().optional().describe('Output in JSON format.')`) and print `console.log(JSON.stringify(data, null, 2))` with the resource's own field names (`{ id }`). Commands with progress output (spinners, step logs) keep that output and just append the JSON, since progress is useful in CI/CD. Commands without progress output use `if (json) { ...JSON... } else { ...consola... }` so `--json` stays clean.
 - **Form Data Bodies**: Pass `formData.getBuffer()`, never the `FormData` stream, as the request body. A stream is empty after the first attempt, so retried requests hang.
 - **URL Field Naming**: JSON output fields that point to a page in a web UI (e.g. the Capawesome Cloud Console) are named `webUrl` — never `url` or `consoleUrl`. Nested resources use the full entity name as the key (e.g. `appBuildShare`, not `share`).
+- **`api` Is the API as Typed**: `commands/api.ts` sends one request and prints the response body, JSON as `--json` output prints it and anything else as the bytes received. It adds a missing leading slash, since Git Bash on Windows rewrites an argument that has one. It confirms nothing. A new option joins it only when a caller asks for it.
 
 ## Philosophy
 

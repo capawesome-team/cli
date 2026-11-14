@@ -55,6 +55,7 @@ export interface HttpClient {
   patch<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>>;
   post<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>>;
   put<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>>;
+  request<T>(config: AxiosRequestConfig & { url: string }): Promise<AxiosResponse<T>>;
 }
 
 class HttpClientImpl implements HttpClient {
@@ -63,68 +64,37 @@ class HttpClientImpl implements HttpClient {
   };
 
   async delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
-    const baseUrl = await configService.getValueForKey('API_BASE_URL');
-    const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
-    const proxyAgent = getProxyAgent(urlWithHost);
-    const axiosConfig: AxiosRequestConfig = {
-      ...config,
-      headers: { ...this.baseHeaders, ...config?.headers },
-      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
-      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
-    };
-    return axios.delete<T>(urlWithHost, axiosConfig);
+    return this.request<T>({ ...config, method: 'DELETE', url });
   }
 
   async get<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
-    const baseUrl = await configService.getValueForKey('API_BASE_URL');
-    const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
-    const proxyAgent = getProxyAgent(urlWithHost);
-    const axiosConfig: AxiosRequestConfig = {
-      ...config,
-      headers: { ...this.baseHeaders, ...config?.headers },
-      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
-      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
-    };
-    return axios.get<T>(urlWithHost, axiosConfig);
+    return this.request<T>({ ...config, method: 'GET', url });
   }
 
   async patch<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
-    const baseUrl = await configService.getValueForKey('API_BASE_URL');
-    const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
-    const proxyAgent = getProxyAgent(urlWithHost);
-    const axiosConfig: AxiosRequestConfig = {
-      ...config,
-      headers: { ...this.baseHeaders, ...config?.headers },
-      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
-      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
-    };
-    return axios.patch<T>(urlWithHost, data, axiosConfig);
+    return this.request<T>({ ...config, data, method: 'PATCH', url });
   }
 
   async post<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
-    const baseUrl = await configService.getValueForKey('API_BASE_URL');
-    const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
-    const proxyAgent = getProxyAgent(urlWithHost);
-    const axiosConfig: AxiosRequestConfig = {
-      ...config,
-      headers: { ...this.baseHeaders, ...config?.headers },
-      ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
-      ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
-    };
-    return axios.post<T>(urlWithHost, data, axiosConfig);
+    return this.request<T>({ ...config, data, method: 'POST', url });
   }
 
   async put<T>(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
+    return this.request<T>({ ...config, data, method: 'PUT', url });
+  }
+
+  async request<T>(config: AxiosRequestConfig & { url: string }): Promise<AxiosResponse<T>> {
     const baseUrl = await configService.getValueForKey('API_BASE_URL');
-    const urlWithHost = url.startsWith('http') ? url : baseUrl + url;
+    const urlWithHost = config.url.startsWith('http') ? config.url : baseUrl + config.url;
     const proxyAgent = getProxyAgent(urlWithHost);
     const axiosConfig: AxiosRequestConfig = {
       ...config,
-      headers: { ...this.baseHeaders, ...config?.headers },
+      url: urlWithHost,
+      headers: { ...this.baseHeaders, ...config.headers },
       ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
       ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
     };
-    return axios.put<T>(urlWithHost, data, axiosConfig);
+    return axios.request<T>(axiosConfig);
   }
 }
 

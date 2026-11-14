@@ -24,6 +24,7 @@ const config = defineConfig({
     login: await import('@/commands/login.js').then((mod) => mod.default),
     logout: await import('@/commands/logout.js').then((mod) => mod.default),
     doctor: await import('@/commands/doctor.js').then((mod) => mod.default),
+    api: await import('@/commands/api.js').then((mod) => mod.default),
     'apps:create': await import('@/commands/apps/create.js').then((mod) => mod.default),
     'apps:delete': await import('@/commands/apps/delete.js').then((mod) => mod.default),
     'apps:get': await import('@/commands/apps/get.js').then((mod) => mod.default),
