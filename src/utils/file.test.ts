@@ -3,7 +3,7 @@ import os from 'os';
 import pathModule from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { UserError } from './error.js';
-import { readFileFromDirectory, writeFile } from './file.js';
+import { isDirectory, readFileFromDirectory, writeFile } from './file.js';
 
 const { mockCreateBufferFromPath } = vi.hoisted(() => ({ mockCreateBufferFromPath: vi.fn() }));
 
@@ -14,6 +14,33 @@ vi.mock('./buffer.js', async (importOriginal) => {
 });
 
 const createErrorWithCode = (code: string): Error => Object.assign(new Error(code), { code });
+
+describe('isDirectory', () => {
+  let directory: string;
+
+  beforeEach(() => {
+    directory = fs.mkdtempSync(pathModule.join(os.tmpdir(), 'file-'));
+  });
+
+  afterEach(() => {
+    fs.rmSync(directory, { force: true, recursive: true });
+  });
+
+  it('should return true for a directory', async () => {
+    await expect(isDirectory(directory)).resolves.toBe(true);
+  });
+
+  it('should return false for a file', async () => {
+    const path = pathModule.join(directory, 'index.html');
+    fs.writeFileSync(path, '<html></html>');
+
+    await expect(isDirectory(path)).resolves.toBe(false);
+  });
+
+  it('should return false if the path does not exist', async () => {
+    await expect(isDirectory(pathModule.join(directory, 'missing'))).resolves.toBe(false);
+  });
+});
 
 describe('readFileFromDirectory', () => {
   let directory: string;
