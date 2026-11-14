@@ -23,7 +23,12 @@ export default defineCommand({
   description: 'Create a new live update by building and deploying web assets using Capawesome Cloud Runners.',
   options: defineOptions(
     z.object({
-      androidEq: z.string().optional().describe('The exact Android versionCode for the live update.'),
+      androidEq: z
+        .string()
+        .optional()
+        .describe(
+          'The exact Android version code (`versionCode`) of the native binary that already includes this live update. Devices on that version do not download it while they run their built-in bundle.',
+        ),
       androidMax: z.string().optional().describe('The maximum Android versionCode for the live update.'),
       androidMin: z.string().optional().describe('The minimum Android versionCode for the live update.'),
       appId: z
@@ -46,7 +51,12 @@ export default defineCommand({
         ),
       environment: stringOption.describe('The name of the environment to use for the build.'),
       gitRef: z.string().optional().describe('The Git reference (branch, tag, or commit SHA) to build.'),
-      iosEq: z.string().optional().describe('The exact iOS CFBundleVersion for the live update.'),
+      iosEq: z
+        .string()
+        .optional()
+        .describe(
+          'The exact iOS bundle version (`CFBundleVersion`) of the native binary that already includes this live update. Devices on that version do not download it while they run their built-in bundle.',
+        ),
       iosMax: z.string().optional().describe('The maximum iOS CFBundleVersion for the live update.'),
       iosMin: z.string().optional().describe('The minimum iOS CFBundleVersion for the live update.'),
       json: z.boolean().optional().describe('Output in JSON format.'),
