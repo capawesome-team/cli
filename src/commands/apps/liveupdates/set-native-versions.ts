@@ -30,7 +30,9 @@ export default defineCommand({
       androidEq: z.coerce
         .string()
         .optional()
-        .describe('The exact Android version code (`versionCode`) that the build supports.'),
+        .describe(
+          'The exact Android version code (`versionCode`) of the native binary that already includes this build. Devices on that version do not download it while they run their built-in bundle.',
+        ),
       androidMax: z.coerce
         .string()
         .optional()
@@ -42,7 +44,9 @@ export default defineCommand({
       iosEq: z
         .string()
         .optional()
-        .describe('The exact iOS bundle version (`CFBundleVersion`) that the build supports.'),
+        .describe(
+          'The exact iOS bundle version (`CFBundleVersion`) of the native binary that already includes this build. Devices on that version do not download it while they run their built-in bundle.',
+        ),
       iosMax: z
         .string()
         .optional()

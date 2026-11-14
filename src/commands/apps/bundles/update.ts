@@ -17,7 +17,9 @@ export default defineCommand({
       androidEq: z
         .string()
         .optional()
-        .describe('The exact Android version code (`versionCode`) that the bundle should not support.'),
+        .describe(
+          'The exact Android version code (`versionCode`) of the native binary that already includes this bundle. Devices on that version do not download it while they run their built-in bundle.',
+        ),
       appId: z.string().optional().describe('ID of the app.'),
       bundleId: z.string().optional().describe('ID of the bundle.'),
       rollout: z.coerce
@@ -39,7 +41,9 @@ export default defineCommand({
       iosEq: z
         .string()
         .optional()
-        .describe('The exact iOS bundle version (`CFBundleVersion`) that the bundle should not support.'),
+        .describe(
+          'The exact iOS bundle version (`CFBundleVersion`) of the native binary that already includes this bundle. Devices on that version do not download it while they run their built-in bundle.',
+        ),
     }),
   ),
   action: async (options, args) => {

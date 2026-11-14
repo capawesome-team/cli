@@ -17,7 +17,9 @@ export default defineCommand({
       androidEq: z.coerce
         .string()
         .optional()
-        .describe('The exact Android version code (`versionCode`) that the bundle does not support.'),
+        .describe(
+          'The exact Android version code (`versionCode`) of the native binary that already includes this bundle. Devices on that version do not download it while they run their built-in bundle.',
+        ),
       appId: z
         .string({
           message: 'App ID must be a UUID.',
@@ -65,7 +67,9 @@ export default defineCommand({
       iosEq: z
         .string()
         .optional()
-        .describe('The exact iOS bundle version (`CFBundleVersion`) that the bundle does not support.'),
+        .describe(
+          'The exact iOS bundle version (`CFBundleVersion`) of the native binary that already includes this bundle. Devices on that version do not download it while they run their built-in bundle.',
+        ),
       path: z
         .string()
         .optional()

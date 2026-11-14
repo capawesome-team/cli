@@ -31,7 +31,9 @@ export default defineCommand({
       androidEq: z.coerce
         .string()
         .optional()
-        .describe('The exact Android version code (`versionCode`) that the bundle does not support.'),
+        .describe(
+          'The exact Android version code (`versionCode`) of the native binary that already includes this bundle. Devices on that version do not download it while they run their built-in bundle.',
+        ),
       appId: z
         .string({
           message: 'App ID must be a UUID.',
@@ -77,7 +79,7 @@ export default defineCommand({
         .string()
         .optional()
         .describe(
-          'The exact Electron app version (`app.getVersion()`, from `electron/package.json`) that the bundle does not support. Must be in the format `major[.minor[.patch]]`. Prerelease suffixes are not supported.',
+          'The exact Electron app version (`app.getVersion()`, from `electron/package.json`) of the native binary that already includes this bundle. Devices on that version do not download it while they run their built-in bundle. The value must be in the format `major[.minor[.patch]]`. Prerelease suffixes are not supported.',
         ),
       expiresInDays: z.coerce
         .number({
@@ -103,7 +105,9 @@ export default defineCommand({
       iosEq: z
         .string()
         .optional()
-        .describe('The exact iOS bundle version (`CFBundleVersion`) that the bundle does not support.'),
+        .describe(
+          'The exact iOS bundle version (`CFBundleVersion`) of the native binary that already includes this bundle. Devices on that version do not download it while they run their built-in bundle.',
+        ),
       json: z.boolean().optional().describe('Output in JSON format.'),
       path: z.string().optional().describe('Path to zip file for code signing only.'),
       privateKey: z
