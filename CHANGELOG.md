@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.28.0](https://github.com/capawesome-team/cli/compare/v4.27.4...v4.28.0) (2026-11-14)
+
+
+### Features
+
+* add `api` command ([#269](https://github.com/capawesome-team/cli/issues/269)) ([f2ebc05](https://github.com/capawesome-team/cli/commit/f2ebc0538534e882afd0204fbd5e2f8b09d1c751))
+
+
+### Bug Fixes
+
+* correct the descriptions of the `eq` options ([#270](https://github.com/capawesome-team/cli/issues/270)) ([0ee4cf4](https://github.com/capawesome-team/cli/commit/0ee4cf49e4546967655fdb1b6aaae3fca8e52c45))
+* reject unexpected positional arguments ([#268](https://github.com/capawesome-team/cli/issues/268)) ([6949029](https://github.com/capawesome-team/cli/commit/6949029a80396c8321a10e76e35a25aa1c690581))
+* return `false` from `isDirectory` for a missing path ([#271](https://github.com/capawesome-team/cli/issues/271)) ([d8e76f6](https://github.com/capawesome-team/cli/commit/d8e76f6532c0aced1924ad13333de3c17f93ee47))
+
 ## [4.27.4](https://github.com/capawesome-team/cli/compare/v4.27.3...v4.27.4) (2026-11-06)
 
 
