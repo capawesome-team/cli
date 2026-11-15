@@ -29,18 +29,7 @@ export const getFilesInDirectoryAndSubdirectories = async (
       } else if (dirEntry.isDirectory()) {
         await walk(fullPath);
       } else {
-        let pathToReplace = pathModule.normalize(path);
-        // Remove the leading './' from the path
-        if (pathToReplace.startsWith('./')) {
-          pathToReplace = pathToReplace.replace('./', '');
-        }
-        let href = fullPath.replace(pathToReplace, '');
-        // Replace the backslashes with forward slashes (Windows only)
-        href = href.replace(/\\/g, '/');
-        // Remove the leading '/' from the href
-        if (href.startsWith('/')) {
-          href = href.replace('/', '');
-        }
+        const href = pathModule.relative(path, fullPath).replace(/\\/g, '/');
         files.push({
           href,
           mimeType: mime.getType(dirEntry.name) || 'application/octet-stream',
