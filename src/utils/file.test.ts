@@ -3,7 +3,7 @@ import os from 'os';
 import pathModule from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { UserError } from './error.js';
-import { isDirectory, readFileFromDirectory, writeFile } from './file.js';
+import { getFilesInDirectoryAndSubdirectories, isDirectory, readFileFromDirectory, writeFile } from './file.js';
 
 const { mockCreateBufferFromPath } = vi.hoisted(() => ({ mockCreateBufferFromPath: vi.fn() }));
 
@@ -39,6 +39,36 @@ describe('isDirectory', () => {
 
   it('should return false if the path does not exist', async () => {
     await expect(isDirectory(pathModule.join(directory, 'missing'))).resolves.toBe(false);
+  });
+});
+
+describe('getFilesInDirectoryAndSubdirectories', () => {
+  const originalWorkingDirectory = process.cwd();
+  let directory: string;
+
+  beforeEach(() => {
+    directory = fs.mkdtempSync(pathModule.join(os.tmpdir(), 'file-'));
+    fs.mkdirSync(pathModule.join(directory, 'assets'));
+    fs.writeFileSync(pathModule.join(directory, 'index.html'), '<html></html>');
+    fs.writeFileSync(pathModule.join(directory, 'assets', 'app.js'), '');
+    process.chdir(directory);
+  });
+
+  afterEach(() => {
+    process.chdir(originalWorkingDirectory);
+    fs.rmSync(directory, { force: true, recursive: true });
+  });
+
+  it('should return hrefs relative to the current directory', async () => {
+    const files = await getFilesInDirectoryAndSubdirectories('.');
+
+    expect(files.map((file) => file.href).sort()).toEqual(['assets/app.js', 'index.html']);
+  });
+
+  it('should return hrefs relative to a subdirectory', async () => {
+    const files = await getFilesInDirectoryAndSubdirectories('./assets/');
+
+    expect(files.map((file) => file.href)).toEqual(['app.js']);
   });
 });
 
