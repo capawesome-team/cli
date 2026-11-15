@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.28.1](https://github.com/capawesome-team/cli/compare/v4.28.0...v4.28.1) (2026-11-15)
+
+
+### Bug Fixes
+
+* build correct file paths when the path is the current directory ([#273](https://github.com/capawesome-team/cli/issues/273)) ([5d0f110](https://github.com/capawesome-team/cli/commit/5d0f1100700a4be746807d701fa8eb55da5eee28))
+* name the right command in the deprecation note of manifests:generate ([#275](https://github.com/capawesome-team/cli/issues/275)) ([e18a151](https://github.com/capawesome-team/cli/commit/e18a151c544a5bc215637fc643488f398f02c825))
+
 ## [4.28.0](https://github.com/capawesome-team/cli/compare/v4.27.4...v4.28.0) (2026-11-14)
 
 
