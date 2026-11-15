@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { defineCommand, defineOptions } from 'zodline';
 
 export default defineCommand({
-  description: 'Generate a manifest file. Deprecated, use `apps:liveupdates:generate-manifest` instead.',
+  description: 'Generate a manifest file. Deprecated, use `apps:liveupdates:generatemanifest` instead.',
   options: defineOptions(
     z.object({
       path: z.string().optional().describe('Path to the web assets folder (e.g. `www` or `dist`).'),
