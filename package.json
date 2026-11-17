@@ -61,6 +61,7 @@
     "adm-zip": "0.6.1",
     "axios": "1.20.0",
     "axios-retry": "4.5.0",
+    "ci-info": "4.4.0",
     "consola": "3.3.0",
     "form-data": "4.0.6",
     "globby": "16.1.1",
