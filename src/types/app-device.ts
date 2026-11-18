@@ -1,7 +1,9 @@
+import { AppType } from './app.js';
 import { AppChannelDto } from './app-channel.js';
 
 export interface AppDeviceDto {
   id: string;
+  appBuildArtifactId: string | null;
   appChannel?: AppChannelDto | null;
   appChannelId: string | null;
   appDeploymentId: string | null;
@@ -33,12 +35,14 @@ export interface ProbeAppDeviceDto {
   appId: string;
   appVersionCode: string;
   appVersionName: string;
+  bundleId?: string;
   channelName?: string;
   customId?: string;
   deviceId?: string;
   osVersion: string;
   platform: number;
   pluginVersion: string;
+  runtime: AppType;
 }
 
 export interface ProbeAppDeviceResponseDto {

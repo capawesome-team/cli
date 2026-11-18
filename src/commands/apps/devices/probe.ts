@@ -1,4 +1,5 @@
 import appDevicesService from '@/services/app-devices.js';
+import appsService from '@/services/apps.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
@@ -38,6 +39,7 @@ export default defineCommand({
       });
     }
 
+    const app = await appsService.findOne({ appId });
     const device = await appDevicesService.findOneById({ appId, deviceId });
 
     try {
@@ -45,16 +47,20 @@ export default defineCommand({
         appId,
         appVersionCode: device.appVersionCode,
         appVersionName: device.appVersionName,
+        bundleId: device.appBuildArtifactId ?? undefined,
         channelName: device.appChannel?.name,
         customId: device.customId ?? undefined,
         deviceId: device.id,
         osVersion: device.osVersion,
         platform: device.platform,
         pluginVersion: device.pluginVersion,
+        runtime: app.type,
       });
 
       if (json) {
         console.log(JSON.stringify(result, null, 2));
+      } else if (result.bundleId === device.appBuildArtifactId) {
+        consola.info('This device is up to date.');
       } else {
         console.table(result);
         consola.success('Update available for this device.');
