@@ -2,11 +2,14 @@ import { createRequire } from 'module';
 import configService from '@/services/config.js';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axiosRetry from 'axios-retry';
+import * as ciInfo from 'ci-info';
 import consola from 'consola';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 const require = createRequire(import.meta.url);
 const pkg = require('../../package.json');
+
+const CLIENT_HEADER_NAME = 'X-Capawesome-Client';
 
 const isRateLimitError = (error: AxiosError): boolean => error.response?.status === 429;
 
@@ -49,6 +52,17 @@ function getProxyAgent(targetUrl: string): HttpProxyAgent<string> | HttpsProxyAg
   return isHttps ? new HttpsProxyAgent(proxyUrl) : new HttpProxyAgent(proxyUrl);
 }
 
+// A product-token list, as npm's User-Agent is: the CLI's token, then ` ci/<provider>` in CI.
+function resolveClientHeader(): string {
+  const clientToken = `cli/${pkg.version}`;
+  return ciInfo.isCI ? `${clientToken} ci/${resolveCiProvider()}` : clientToken;
+}
+
+// The API takes the provider as lowercase letters, digits and dashes: `GitHub Actions` is `github-actions`.
+function resolveCiProvider(): string {
+  return ciInfo.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') ?? 'unknown';
+}
+
 export interface HttpClient {
   delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>>;
   get<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>>;
@@ -60,7 +74,7 @@ export interface HttpClient {
 
 class HttpClientImpl implements HttpClient {
   private readonly baseHeaders = {
-    'User-Agent': `Capawesome CLI v${pkg.version}`,
+    'User-Agent': `capawesome-cli/${pkg.version}`,
   };
 
   async delete<T>(url: string, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<T>> {
@@ -85,12 +99,14 @@ class HttpClientImpl implements HttpClient {
 
   async request<T>(config: AxiosRequestConfig & { url: string }): Promise<AxiosResponse<T>> {
     const baseUrl = await configService.getValueForKey('API_BASE_URL');
-    const urlWithHost = config.url.startsWith('http') ? config.url : baseUrl + config.url;
+    const isApiRequest = !config.url.startsWith('http');
+    const urlWithHost = isApiRequest ? baseUrl + config.url : config.url;
+    const apiHeaders = isApiRequest ? { [CLIENT_HEADER_NAME]: resolveClientHeader() } : {};
     const proxyAgent = getProxyAgent(urlWithHost);
     const axiosConfig: AxiosRequestConfig = {
       ...config,
       url: urlWithHost,
-      headers: { ...this.baseHeaders, ...config.headers },
+      headers: { ...this.baseHeaders, ...apiHeaders, ...config.headers },
       ...(proxyAgent && urlWithHost.startsWith('https://') ? { httpsAgent: proxyAgent, proxy: false } : {}),
       ...(proxyAgent && urlWithHost.startsWith('http://') ? { httpAgent: proxyAgent, proxy: false } : {}),
     };

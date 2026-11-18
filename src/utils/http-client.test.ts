@@ -1,7 +1,12 @@
 import configService from '@/services/config.js';
 import consola from 'consola';
+import { createRequire } from 'module';
 import nock from 'nock';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+const require = createRequire(import.meta.url);
+const pkg = require('../../package.json');
+
+const ciInfo = vi.hoisted(() => ({ isCI: false, name: null as string | null }));
 
 // Mock the config service
 vi.mock('@/services/config.js', () => ({
@@ -10,6 +15,7 @@ vi.mock('@/services/config.js', () => ({
   },
 }));
 vi.mock('consola');
+vi.mock('ci-info', () => ciInfo);
 
 describe('http-client', () => {
   let originalEnv: NodeJS.ProcessEnv;
@@ -19,6 +25,8 @@ describe('http-client', () => {
     originalEnv = { ...process.env };
     nock.cleanAll();
     vi.clearAllMocks();
+    ciInfo.isCI = false;
+    ciInfo.name = null;
     // Clear proxy environment variables
     delete process.env.HTTP_PROXY;
     delete process.env.http_proxy;
@@ -161,7 +169,7 @@ describe('http-client', () => {
 
     nock('https://api.example.com')
       .patch('/request', { name: 'staging' })
-      .matchHeader('User-Agent', /^Capawesome CLI v/)
+      .matchHeader('User-Agent', `capawesome-cli/${pkg.version}`)
       .matchHeader('Authorization', 'Bearer test-token')
       .reply(200, { success: true });
 
@@ -176,6 +184,39 @@ describe('http-client', () => {
 
     expect(response.status).toBe(200);
     expect(response.data).toEqual({ success: true });
+    expect(nock.isDone()).toBe(true);
+  });
+
+  it('should send the client header to the API but not to other hosts', async () => {
+    vi.mocked(configService.getValueForKey).mockResolvedValue('https://api.example.com');
+
+    nock('https://api.example.com').get('/api').matchHeader('X-Capawesome-Client', `cli/${pkg.version}`).reply(200);
+    nock('https://registry.example.com', { badheaders: ['X-Capawesome-Client'] })
+      .get('/package')
+      .reply(200);
+
+    const { default: httpClient } = await import('./http-client.js');
+
+    await httpClient.get('/api');
+    await httpClient.get('https://registry.example.com/package');
+
+    expect(nock.isDone()).toBe(true);
+  });
+
+  it('should append the CI provider to the client header in CI', async () => {
+    vi.mocked(configService.getValueForKey).mockResolvedValue('https://api.example.com');
+    ciInfo.isCI = true;
+    ciInfo.name = 'GitHub Actions';
+
+    nock('https://api.example.com')
+      .get('/api')
+      .matchHeader('X-Capawesome-Client', `cli/${pkg.version} ci/github-actions`)
+      .reply(200);
+
+    const { default: httpClient } = await import('./http-client.js');
+
+    await httpClient.get('/api');
+
     expect(nock.isDone()).toBe(true);
   });
 
