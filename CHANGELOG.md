@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.29.0](https://github.com/capawesome-team/cli/compare/v4.28.1...v4.29.0) (2026-11-18)
+
+
+### Features
+
+* identify the CLI in request headers ([#277](https://github.com/capawesome-team/cli/issues/277)) ([deb4042](https://github.com/capawesome-team/cli/commit/deb40422d73e4e86d9d6615229243dd8fcd37041))
+
 ## [4.28.1](https://github.com/capawesome-team/cli/compare/v4.28.0...v4.28.1) (2026-11-15)
 
 
