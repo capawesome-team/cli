@@ -1,4 +1,5 @@
 import appDevicesService from '@/services/app-devices.js';
+import appsService from '@/services/apps.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
@@ -38,6 +39,7 @@ export default defineCommand({
       });
     }
 
+    const app = await appsService.findOne({ appId });
     const device = await appDevicesService.findOneById({ appId, deviceId });
 
     try {
@@ -52,6 +54,7 @@ export default defineCommand({
         osVersion: device.osVersion,
         platform: device.platform,
         pluginVersion: device.pluginVersion,
+        runtime: app.type,
       });
 
       if (json) {

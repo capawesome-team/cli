@@ -52,6 +52,7 @@ class AppDevicesServiceImpl implements AppDevicesService {
       osVersion: data.osVersion,
       platform: data.platform.toString(),
       pluginVersion: data.pluginVersion,
+      runtime: data.runtime,
     };
     if (data.bundleId) {
       params.bundleId = data.bundleId;

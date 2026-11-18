@@ -53,6 +53,14 @@ describe('apps-devices-probe', () => {
     url: 'https://example.com/bundle.zip',
   };
 
+  const app = { id: appId, name: 'Example App', organizationId: 'org-1', type: 'capacitor' };
+
+  const mockAppRequest = () =>
+    nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, app);
+
   const mockDeviceRequest = () =>
     nock(DEFAULT_API_BASE_URL)
       .get(`/v1/apps/${appId}/devices/${deviceId}`)
@@ -71,6 +79,7 @@ describe('apps-devices-probe', () => {
         osVersion: '18.0',
         platform: '1',
         pluginVersion: '7.0.0',
+        runtime: 'capacitor',
       })
       .matchHeader('Authorization', `Bearer ${testToken}`)
       .reply(200, latestBundle);
@@ -93,11 +102,13 @@ describe('apps-devices-probe', () => {
   });
 
   it('should report up to date when the device already runs the latest bundle', async () => {
+    const appScope = mockAppRequest();
     const deviceScope = mockDeviceRequest();
     const probeScope = mockProbeRequest();
 
     await probeDeviceCommand.action({ appId, deviceId }, undefined);
 
+    expect(appScope.isDone()).toBe(true);
     expect(deviceScope.isDone()).toBe(true);
     expect(probeScope.isDone()).toBe(true);
     expect(mockConsola.info).toHaveBeenCalledWith('This device is up to date.');
@@ -106,11 +117,13 @@ describe('apps-devices-probe', () => {
 
   it('should output the latest bundle unchanged when json flag is set', async () => {
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const appScope = mockAppRequest();
     const deviceScope = mockDeviceRequest();
     const probeScope = mockProbeRequest();
 
     await probeDeviceCommand.action({ appId, deviceId, json: true }, undefined);
 
+    expect(appScope.isDone()).toBe(true);
     expect(deviceScope.isDone()).toBe(true);
     expect(probeScope.isDone()).toBe(true);
     expect(logSpy).toHaveBeenCalledWith(JSON.stringify(latestBundle, null, 2));

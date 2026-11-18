@@ -1,3 +1,4 @@
+import { AppType } from './app.js';
 import { AppChannelDto } from './app-channel.js';
 
 export interface AppDeviceDto {
@@ -41,6 +42,7 @@ export interface ProbeAppDeviceDto {
   osVersion: string;
   platform: number;
   pluginVersion: string;
+  runtime: AppType;
 }
 
 export interface ProbeAppDeviceResponseDto {
