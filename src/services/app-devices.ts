@@ -53,6 +53,9 @@ class AppDevicesServiceImpl implements AppDevicesService {
       platform: data.platform.toString(),
       pluginVersion: data.pluginVersion,
     };
+    if (data.bundleId) {
+      params.bundleId = data.bundleId;
+    }
     if (data.channelName) {
       params.channelName = data.channelName;
     }

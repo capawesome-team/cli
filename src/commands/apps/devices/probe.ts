@@ -45,6 +45,7 @@ export default defineCommand({
         appId,
         appVersionCode: device.appVersionCode,
         appVersionName: device.appVersionName,
+        bundleId: device.appBuildArtifactId ?? undefined,
         channelName: device.appChannel?.name,
         customId: device.customId ?? undefined,
         deviceId: device.id,
@@ -55,6 +56,8 @@ export default defineCommand({
 
       if (json) {
         console.log(JSON.stringify(result, null, 2));
+      } else if (result.bundleId === device.appBuildArtifactId) {
+        consola.info('This device is up to date.');
       } else {
         console.table(result);
         consola.success('Update available for this device.');
