@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.29.1](https://github.com/capawesome-team/cli/compare/v4.29.0...v4.29.1) (2026-11-18)
+
+
+### Bug Fixes
+
+* send the bundle and the runtime in `apps:devices:probe` ([#279](https://github.com/capawesome-team/cli/issues/279)) ([5381e0a](https://github.com/capawesome-team/cli/commit/5381e0a922c50c670107b0584670eb6662be089c))
+
 ## [4.29.0](https://github.com/capawesome-team/cli/compare/v4.28.1...v4.29.0) (2026-11-18)
 
 
