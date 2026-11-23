@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.30.0](https://github.com/capawesome-team/cli/compare/v4.29.1...v4.30.0) (2026-11-23)
+
+
+### Features
+
+* **devices:** probe a device without sending an update check ([#282](https://github.com/capawesome-team/cli/issues/282)) ([5d55edc](https://github.com/capawesome-team/cli/commit/5d55edc5abb3deb5d216eda23caf9eb02790fdf9))
+
 ## [4.29.1](https://github.com/capawesome-team/cli/compare/v4.29.0...v4.29.1) (2026-11-18)
 
 
