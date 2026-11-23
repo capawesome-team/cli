@@ -24,65 +24,6 @@ describe('apps-devices-probe', () => {
   const deviceId = 'device-456';
   const bundleId = 'bundle-789';
   const testToken = 'test-token';
-  const device = {
-    id: deviceId,
-    appBuildArtifactId: bundleId,
-    appChannel: null,
-    appChannelId: null,
-    appDeploymentId: null,
-    appId,
-    appVersionCode: '10',
-    appVersionName: '1.0.0',
-    country: null,
-    customId: null,
-    forcedAppChannelId: null,
-    lastSeenAt: '2026-01-01T00:00:00.000Z',
-    osVersion: '18.0',
-    platform: 1,
-    pluginVersion: '7.0.0',
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedAt: '2026-01-01T00:00:00.000Z',
-  };
-  const latestBundle = {
-    artifactType: 'zip',
-    bundleId,
-    channelName: 'production',
-    checksum: null,
-    customProperties: null,
-    signature: null,
-    url: 'https://example.com/bundle.zip',
-  };
-
-  const app = { id: appId, name: 'Example App', organizationId: 'org-1', type: 'capacitor' };
-
-  const mockAppRequest = () =>
-    nock(DEFAULT_API_BASE_URL)
-      .get(`/v1/apps/${appId}`)
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, app);
-
-  const mockDeviceRequest = () =>
-    nock(DEFAULT_API_BASE_URL)
-      .get(`/v1/apps/${appId}/devices/${deviceId}`)
-      .query({ relations: 'appChannel' })
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, device);
-
-  const mockProbeRequest = () =>
-    nock(DEFAULT_API_BASE_URL)
-      .get(`/v1/apps/${appId}/bundles/latest`)
-      .query({
-        appVersionCode: '10',
-        appVersionName: '1.0.0',
-        bundleId,
-        deviceId,
-        osVersion: '18.0',
-        platform: '1',
-        pluginVersion: '7.0.0',
-        runtime: 'capacitor',
-      })
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, latestBundle);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -101,32 +42,18 @@ describe('apps-devices-probe', () => {
     vi.restoreAllMocks();
   });
 
-  it('should report up to date when the device already runs the latest bundle', async () => {
-    const appScope = mockAppRequest();
-    const deviceScope = mockDeviceRequest();
-    const probeScope = mockProbeRequest();
-
-    await probeDeviceCommand.action({ appId, deviceId }, undefined);
-
-    expect(appScope.isDone()).toBe(true);
-    expect(deviceScope.isDone()).toBe(true);
-    expect(probeScope.isDone()).toBe(true);
-    expect(mockConsola.info).toHaveBeenCalledWith('This device is up to date.');
-    expect(mockConsola.success).not.toHaveBeenCalled();
-  });
-
-  it('should output the latest bundle unchanged when json flag is set', async () => {
+  it('should output the probe with bundleId when json flag is set', async () => {
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    const appScope = mockAppRequest();
-    const deviceScope = mockDeviceRequest();
-    const probeScope = mockProbeRequest();
+    const probe = { bundle: { id: bundleId }, channelName: 'production', reason: null, result: 'available' };
+    const probeScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}/devices/${deviceId}/probe`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, probe);
 
     await probeDeviceCommand.action({ appId, deviceId, json: true }, undefined);
 
-    expect(appScope.isDone()).toBe(true);
-    expect(deviceScope.isDone()).toBe(true);
     expect(probeScope.isDone()).toBe(true);
-    expect(logSpy).toHaveBeenCalledWith(JSON.stringify(latestBundle, null, 2));
+    expect(logSpy).toHaveBeenCalledWith(JSON.stringify({ ...probe, bundleId }, null, 2));
     expect(mockConsola.info).not.toHaveBeenCalled();
   });
 });

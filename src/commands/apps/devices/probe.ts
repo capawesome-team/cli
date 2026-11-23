@@ -1,9 +1,7 @@
 import appDevicesService from '@/services/app-devices.js';
-import appsService from '@/services/apps.js';
 import { withAuth } from '@/utils/auth.js';
 import { isInteractive } from '@/utils/environment.js';
 import { prompt, promptAppSelection, promptOrganizationSelection } from '@/utils/prompt.js';
-import { AxiosError } from 'axios';
 import consola from 'consola';
 import { z } from 'zod';
 import { defineCommand, defineOptions } from 'zodline';
@@ -39,42 +37,22 @@ export default defineCommand({
       });
     }
 
-    const app = await appsService.findOne({ appId });
-    const device = await appDevicesService.findOneById({ appId, deviceId });
+    const probe = await appDevicesService.probe({ appId, deviceId });
 
-    try {
-      const result = await appDevicesService.probe({
-        appId,
-        appVersionCode: device.appVersionCode,
-        appVersionName: device.appVersionName,
-        bundleId: device.appBuildArtifactId ?? undefined,
-        channelName: device.appChannel?.name,
-        customId: device.customId ?? undefined,
-        deviceId: device.id,
-        osVersion: device.osVersion,
-        platform: device.platform,
-        pluginVersion: device.pluginVersion,
-        runtime: app.type,
-      });
-
-      if (json) {
-        console.log(JSON.stringify(result, null, 2));
-      } else if (result.bundleId === device.appBuildArtifactId) {
-        consola.info('This device is up to date.');
-      } else {
-        console.table(result);
-        consola.success('Update available for this device.');
-      }
-    } catch (error) {
-      if (error instanceof AxiosError && error.response?.status === 404) {
-        if (json) {
-          console.log(JSON.stringify({ bundleId: null }, null, 2));
-        } else {
-          consola.info('No update available for this device.');
-        }
-      } else {
-        throw error;
-      }
+    if (json) {
+      // TODO: Remove `bundleId` with the next major version. https://github.com/capawesome-team/cli/issues/281
+      console.log(JSON.stringify({ ...probe, bundleId: probe.bundle?.id ?? null }, null, 2));
+    } else if (probe.result === 'available') {
+      console.table({ bundleId: probe.bundle?.id, channelName: probe.channelName });
+      consola.success('Update available for this device.');
+    } else if (probe.result === 'up_to_date') {
+      consola.info('This device is up to date.');
+    } else {
+      consola.info(
+        probe.reason
+          ? `No update available for this device (${probe.reason}).`
+          : 'No update available for this device.',
+      );
     }
   }),
 });
