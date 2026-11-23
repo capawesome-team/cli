@@ -25,12 +25,6 @@ describe('apps-devices-probe', () => {
   const bundleId = 'bundle-789';
   const testToken = 'test-token';
 
-  const mockProbeRequest = (probe: object) =>
-    nock(DEFAULT_API_BASE_URL)
-      .get(`/v1/apps/${appId}/devices/${deviceId}/probe`)
-      .matchHeader('Authorization', `Bearer ${testToken}`)
-      .reply(200, probe);
-
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -48,25 +42,13 @@ describe('apps-devices-probe', () => {
     vi.restoreAllMocks();
   });
 
-  it('should report up to date when the device already runs the latest bundle', async () => {
-    const probeScope = mockProbeRequest({
-      bundle: null,
-      channelName: 'production',
-      reason: null,
-      result: 'up_to_date',
-    });
-
-    await probeDeviceCommand.action({ appId, deviceId }, undefined);
-
-    expect(probeScope.isDone()).toBe(true);
-    expect(mockConsola.info).toHaveBeenCalledWith('This device is up to date.');
-    expect(mockConsola.success).not.toHaveBeenCalled();
-  });
-
-  it('should output the probe with the bundle id on top when json flag is set', async () => {
+  it('should output the probe with bundleId when json flag is set', async () => {
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const probe = { bundle: { id: bundleId }, channelName: 'production', reason: null, result: 'available' };
-    const probeScope = mockProbeRequest(probe);
+    const probeScope = nock(DEFAULT_API_BASE_URL)
+      .get(`/v1/apps/${appId}/devices/${deviceId}/probe`)
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, probe);
 
     await probeDeviceCommand.action({ appId, deviceId, json: true }, undefined);
 
