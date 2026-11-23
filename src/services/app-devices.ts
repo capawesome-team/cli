@@ -46,32 +46,14 @@ class AppDevicesServiceImpl implements AppDevicesService {
   }
 
   async probe(data: ProbeAppDeviceDto): Promise<ProbeAppDeviceResponseDto> {
-    const params: Record<string, string> = {
-      appVersionCode: data.appVersionCode,
-      appVersionName: data.appVersionName,
-      osVersion: data.osVersion,
-      platform: data.platform.toString(),
-      pluginVersion: data.pluginVersion,
-      runtime: data.runtime,
-    };
-    if (data.bundleId) {
-      params.bundleId = data.bundleId;
-    }
-    if (data.channelName) {
-      params.channelName = data.channelName;
-    }
-    if (data.customId) {
-      params.customId = data.customId;
-    }
-    if (data.deviceId) {
-      params.deviceId = data.deviceId;
-    }
-    const response = await this.httpClient.get<ProbeAppDeviceResponseDto>(`/v1/apps/${data.appId}/bundles/latest`, {
-      headers: {
-        Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+    const response = await this.httpClient.get<ProbeAppDeviceResponseDto>(
+      `/v1/apps/${data.appId}/devices/${data.deviceId}/probe`,
+      {
+        headers: {
+          Authorization: `Bearer ${authorizationService.getCurrentAuthorizationToken()}`,
+        },
       },
-      params,
-    });
+    );
     return response.data;
   }
 

@@ -1,4 +1,3 @@
-import { AppType } from './app.js';
 import { AppChannelDto } from './app-channel.js';
 
 export interface AppDeviceDto {
@@ -33,26 +32,14 @@ export interface FindOneAppDeviceDto {
 
 export interface ProbeAppDeviceDto {
   appId: string;
-  appVersionCode: string;
-  appVersionName: string;
-  bundleId?: string;
-  channelName?: string;
-  customId?: string;
-  deviceId?: string;
-  osVersion: string;
-  platform: number;
-  pluginVersion: string;
-  runtime: AppType;
+  deviceId: string;
 }
 
 export interface ProbeAppDeviceResponseDto {
-  artifactType: 'manifest' | 'zip';
-  bundleId: string;
-  channelName: string;
-  checksum: string | null;
-  customProperties: Record<string, string> | null;
-  signature: string | null;
-  url: string;
+  bundle: { id: string } | null;
+  channelName: string | null;
+  reason: string | null;
+  result: 'available' | 'skipped' | 'up_to_date';
 }
 
 export interface UpdateAppDeviceDto {
